@@ -9,9 +9,35 @@
     <meta name="viewport"
         content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@latest/lib/themes/vue.css">
+    <style>
+        /* 语言切换按钮样式 */
+        .lang-switch {
+            position: fixed;
+            top: 20px;
+            right: 80px;
+            z-index: 999;
+        }
+        .lang-switch button {
+            background: #42b983;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .lang-switch button:hover {
+            background: #33a06f;
+        }
+    </style>
 </head>
 
 <body>
+    <!-- 语言切换按钮 -->
+    <div class="lang-switch">
+        <button id="langBtn" onclick="switchLanguage()">English</button>
+    </div>
     <div id="app"></div>
     <script src="//cdn.jsdelivr.net/npm/mermaid@8.0.0-rc.8/dist/mermaid.min.js"></script>
     <script>
@@ -23,7 +49,14 @@
             subMaxLevel: 3,
             relativePath: false,  // 启用相对路径支持
             alias: {
-                '/.*/_sidebar.md': '/_sidebar.md'
+                // 英文路径映射
+                '/en/README.md': '/README_EN.md',
+                '/en/Preface.md': '/Preface.md',
+                '/en/_sidebar.md': '/_sidebar_en.md',
+                '/en/chapter(\\d+)/Chapter(.*)': '/chapter$1/Chapter$2',
+
+                // 默认中文路径保持不变
+                '/_sidebar.md': '/_sidebar.md'
             },
             pagination: {
                 previousText: '上一章节',
@@ -34,6 +67,12 @@
                 fontsize: '0.9em',
                 color: 'rgb(90,90,90)',
                 language: 'chinese'
+            },
+            // 多语言配置
+            fallbackLanguages: ['en'],
+            nameLink: {
+                '/en/': '#/en/',
+                '/': '#/'
             }
         }
     </script>
@@ -52,6 +91,72 @@
     <script src="//cdn.jsdelivr.net/npm/docsify-katex@latest/dist/docsify-katex.js"></script>
     <!-- 字数统计 -->
     <script src="//unpkg.com/docsify-count/dist/countable.js"></script>
+
+    <!-- 语言切换脚本 -->
+    <script>
+        function switchLanguage() {
+            const currentHash = window.location.hash;
+            const langBtn = document.getElementById('langBtn');
+
+            // 检测当前语言
+            if (currentHash.includes('/en/')) {
+                // 从英文切换到中文 (移除 /en/ 前缀)
+                let newHash = currentHash.replace('/en/', '/');
+                // 将英文文件名转换为中文文件名
+                newHash = newHash.replace('/README_EN.md', '/README.md');
+                newHash = newHash.replace('/Preface.md', '/前言.md');
+                // 将 Chapter*.md 转换为 第*章 *.md (需要根据实际文件名映射)
+                // 这里简化处理,直接跳转到首页
+                if (newHash.includes('Chapter')) {
+                    newHash = '#/';
+                }
+                window.location.hash = newHash || '#/';
+                langBtn.textContent = 'English';
+                // 更新分页按钮文本
+                window.$docsify.pagination.previousText = '上一章节';
+                window.$docsify.pagination.nextText = '下一章节';
+            } else {
+                // 从中文切换到英文 (添加 /en/ 前缀)
+                let newHash;
+                if (currentHash === '' || currentHash === '#/' || currentHash === '#') {
+                    // 首页
+                    newHash = '#/en/README.md';
+                } else {
+                    // 其他页面,添加 /en/ 前缀
+                    const path = currentHash.replace('#/', '');
+                    // 将中文文件名转换为英文文件名
+                    let enPath = path.replace('README.md', 'README_EN.md');
+                    enPath = enPath.replace('前言.md', 'Preface.md');
+                    // 将 第*章 *.md 转换为 Chapter*.md (需要根据实际文件名映射)
+                    // 这里简化处理,直接跳转到英文首页
+                    if (enPath.includes('第') && enPath.includes('章')) {
+                        enPath = 'README_EN.md';
+                    }
+                    newHash = '#/en/' + enPath;
+                }
+                window.location.hash = newHash;
+                langBtn.textContent = '中文';
+                // 更新分页按钮文本
+                window.$docsify.pagination.previousText = 'Previous';
+                window.$docsify.pagination.nextText = 'Next';
+            }
+
+            // 重新加载页面以应用新的 sidebar
+            window.location.reload();
+        }
+
+        // 页面加载时设置按钮文本
+        window.addEventListener('load', function() {
+            const currentHash = window.location.hash;
+            const langBtn = document.getElementById('langBtn');
+
+            if (currentHash.includes('/en/')) {
+                langBtn.textContent = '中文';
+            } else {
+                langBtn.textContent = 'English';
+            }
+        });
+    </script>
 </body>
 
 </html>
