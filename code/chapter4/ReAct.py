@@ -9,12 +9,12 @@ REACT_PROMPT_TEMPLATE = """
 可用工具如下：
 {tools}
 
-请严格按照以下格式进行回应：
+请严格按照以下格式进行回应，每次回复只输出一对Thought-Action：
 
 Thought: 你的思考过程，用于分析问题、拆解任务和规划下一步行动。
 Action: 你决定采取的行动，必须是以下格式之一：
-- `{{tool_name}}[{{tool_input}}]`：调用一个可用工具。
-- `Finish[最终答案]`：当你认为已经获得最终答案时。
+- {{tool_name}}[{{tool_input}}]：调用一个可用工具。
+- finish(answer="...")：当你认为已经获得最终答案时。
 - 当你收集到足够的信息，能够回答用户的最终问题时，你必须在`Action:`字段后使用 `finish(answer="...")` 来输出最终答案。
 
 
@@ -51,7 +51,7 @@ class ReActAgent:
             if thought: print(f"🤔 思考: {thought}")
             if not action: print("警告：未能解析出有效的Action，流程终止。"); break
             
-            if action.startswith("Finish"):
+            if action.startswith("finish"):
                 final_answer = self._parse_action_input(action)
                 print(f"🎉 最终答案: {final_answer}")
                 return final_answer
@@ -82,8 +82,8 @@ class ReActAgent:
         match = re.match(r"(\w+)\[(.*)\]", action_text)
         return (match.group(1), match.group(2)) if match else (None, None)
 
-    def _parse_action_input(self, action_text: str):
-        match = re.match(r"\w+\[(.*)\]", action_text)
+    def _parse_action_input(self, action_text: str): 
+        match = re.search(r'finish\(answer="(.*)"\)', action_text)
         return match.group(1) if match else ""
 
 if __name__ == '__main__':

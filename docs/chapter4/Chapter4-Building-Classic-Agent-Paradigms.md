@@ -357,15 +357,15 @@ The prompt is the cornerstone of the entire ReAct mechanism, providing operation
 REACT_PROMPT_TEMPLATE = """
 Please note that you are an intelligent assistant capable of calling external tools.
 
-Available tools are as follows:
+Available tools are as follows, each response should output only one Thought–Action pair:
 {tools}
 
 Please respond strictly in the following format:
 
 Thought: Your thinking process, used to analyze problems, decompose tasks, and plan the next action.
 Action: The action you decide to take, must be in one of the following formats:
-- `{tool_name}[{tool_input}]`: Call an available tool.
-- `Finish[final answer]`: When you believe you have obtained the final answer.
+- {tool_name}[{tool_input}]: Call an available tool.
+- finish(answer="..."): When you believe you have obtained the final answer.
 - When you have collected enough information to answer the user's final question, you must use `finish(answer="...")` after the Action: field to output the final answer.
 
 Now, please start solving the following problem:
@@ -467,7 +467,7 @@ The LLM returns plain text, and we need to precisely extract `Thought` and `Acti
                 break
 
             # 4. Execute Action
-            if action.startswith("Finish"):
+            if action.startswith("finish"):
                 # If it's a Finish instruction, extract the final answer and end
                 final_answer = re.match(r"Finish\[(.*)\]", action).group(1)
                 print(f"🎉 Final Answer: {final_answer}")
@@ -488,7 +488,7 @@ The LLM returns plain text, and we need to precisely extract `Thought` and `Acti
 
 ```
 
-This code is the execution center of `Action`. It first checks whether it's a `Finish` instruction; if so, the process ends. Otherwise, it obtains the corresponding tool function through `tool_executor` and executes it to get the `observation`.
+This code is the execution center of `Action`. It first checks whether it's a `finish` instruction; if so, the process ends. Otherwise, it obtains the corresponding tool function through `tool_executor` and executes it to get the `observation`.
 
 (5) Integration of Observation Results
 
@@ -539,7 +539,7 @@ Choosing Huawei mainly recommends high-end phones, Mate 70 and Pura 70 series ar
 🧠 Calling xxxxxx model...
 ✅ Large language model response successful:
 Thought: Based on the search results, Huawei's latest flagship models include Mate 70 and Pura 80 Pro+. To determine the latest model and its main selling points, I will focus on this information. From the provided links, both Mate 70 series and Pura 80 Pro+ are recently released products, but which one is "latest" needs further confirmation. Meanwhile, I can extract their main selling points from this information.
-Action: Finish[According to the latest information, Huawei's latest phones may be HUAWEI Pura 80 Pro+ or HUAWEI Mate 70. Among them, HUAWEI Mate 70's main selling points include top-level photography configuration, full focal length coverage, suitable for professional photography, excellent workmanship, and good outdoor drop resistance. While HUAWEI Pura 80 Pro+ emphasizes pioneer imaging technology.]
+Action: finish(answer="According to the latest information, Huawei's latest phones may be HUAWEI Pura 80 Pro+ or HUAWEI Mate 70. Among them, HUAWEI Mate 70's main selling points include top-level photography configuration, full focal length coverage, suitable for professional photography, excellent workmanship, and good outdoor drop resistance. While HUAWEI Pura 80 Pro+ emphasizes pioneer imaging technology.")
 🤔 Thought: Based on the search results, Huawei's latest flagship models include Mate 70 and Pura 80 Pro+. To determine the latest model and its main selling points, I will focus on this information. From the provided links, both Mate 70 series and Pura 80 Pro+ are recently released products, but which one is "latest" needs further confirmation. Meanwhile, I can extract their main selling points from this information.
 🎉 Final Answer: According to the latest information, Huawei's latest phones may be HUAWEI Pura 80 Pro+ or HUAWEI Mate 70. Among them, HUAWEI Mate 70's main selling points include top-level photography configuration, full focal length coverage, suitable for professional photography, excellent workmanship, and good outdoor drop resistance. While HUAWEI Pura 80 Pro+ emphasizes pioneer imaging technology.
 ```
