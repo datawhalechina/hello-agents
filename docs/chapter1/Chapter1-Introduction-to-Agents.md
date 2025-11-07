@@ -623,3 +623,20 @@ Through this chapter's learning, we have established a foundational cognitive fr
 
 [2] KAHNEMAN D. Thinking, Fast and Slow[M]. New York: Farrar, Straus and Giroux, 2011.
 
+---
+
+## 💬 Discussion & Communication
+
+Have questions while learning this chapter? Want to share insights with other learners?
+
+**📝 Visit GitHub Discussions:**
+- [💬 Exercises Discussion & Q&A](https://github.com/datawhalechina/Hello-Agents/discussions)
+- Here you can:
+  - ✅ Ask questions about exercises
+  - ✅ Share your solutions and ideas
+  - ✅ Exchange experiences with other learners
+  - ✅ Get help and feedback from the community
+
+**💡 Tip:** There's also a comment section at the bottom of each page for direct discussion!
+
+---

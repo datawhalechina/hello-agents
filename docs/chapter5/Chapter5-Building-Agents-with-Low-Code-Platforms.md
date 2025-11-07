@@ -333,6 +333,7 @@ Currently, Dify Marketplace has over 8,677 plugins covering various functions an
 Dify provides powerful development support for plugin developers, including remote debugging functionality that seamlessly collaborates with popular IDEs, requiring minimal environment setup. Developers can connect to Dify's SaaS service while forwarding all plugin operations to the local environment for testing. This developer-friendly approach aims to empower plugin creators and accelerate innovation in the Dify ecosystem. This is also why Dify can become one of the most successful agent platforms currently, because models can all be integrated, prompts and orchestration can be copied, but the presence and richness of tool plugins directly determine whether your agent can achieve better results or unexpectedly powerful functions.
 
 ### 5.3.2 Building a Super Agent Personal Assistant
+> **✨✨ Detailed Operation Guide**: Please refer to **[Dify Agent Creation Step-by-Step Tutorial](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra03-Dify智能体创建保姆级操作流程.md)**
 
 In the previous Coze case, we built a daily AI brief agent. Although its function is clear, its single brief generation capability is somewhat limited. This section will use Dify to build a fully functional super agent personal assistant, covering multiple scenarios such as daily Q&A, copywriting optimization, multimodal generation, and data analysis. Before starting, let's briefly understand Dify's main interface and functional modules.
 

@@ -22,6 +22,7 @@ loguru>=0.7.0
 
 # MCP相关
 fastmcp>=2.0.0
+uv>=0.8.0
 
 # 其他工具
 python-dateutil>=2.8.2

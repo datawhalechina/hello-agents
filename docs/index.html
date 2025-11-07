@@ -30,6 +30,71 @@
         .lang-switch button:hover {
             background: #33a06f;
         }
+
+        /* Giscus 评论区样式 */
+        .giscus-container {
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid #eee;
+        }
+
+        /* 可折叠评论区标题 */
+        .giscus-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+
+        .giscus-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .giscus-toggle-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: white;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .giscus-toggle-icon {
+            font-size: 1.2em;
+            transition: transform 0.3s ease;
+            color: white;
+        }
+
+        .giscus-toggle-icon.expanded {
+            transform: rotate(180deg);
+        }
+
+        .giscus-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .giscus-content.expanded {
+            max-height: 2000px;
+            opacity: 1;
+            transition: max-height 0.5s ease-in, opacity 0.4s ease;
+        }
+
+        .giscus-hint {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.9);
+            margin: 0;
+        }
     </style>
 </head>
 
@@ -92,6 +157,107 @@
                         }
 
                         return content;
+                    });
+
+                    // 在页面渲染后添加 Giscus 评论区
+                    hook.doneEach(function() {
+                        // 检查是否是章节页面(排除首页和前言)
+                        const currentPath = vm.route.path;
+                        const isChapterPage = currentPath.includes('chapter') ||
+                                             currentPath.includes('Chapter') ||
+                                             currentPath.includes('第') && currentPath.includes('章');
+
+                        if (!isChapterPage) {
+                            return; // 非章节页面不显示评论区
+                        }
+
+                        // 移除旧的评论区
+                        const oldGiscus = document.querySelector('.giscus-container');
+                        if (oldGiscus) {
+                            oldGiscus.remove();
+                        }
+
+                        // 创建评论区容器
+                        const giscusContainer = document.createElement('div');
+                        giscusContainer.className = 'giscus-container';
+
+                        // 获取语言设置
+                        const preferredLang = localStorage.getItem('preferredLanguage');
+                        const isEnglish = currentPath.includes('/en/') || preferredLang === 'en';
+
+                        // 创建可折叠的标题栏
+                        const toggleButton = document.createElement('div');
+                        toggleButton.className = 'giscus-toggle';
+
+                        const titleDiv = document.createElement('div');
+                        titleDiv.className = 'giscus-toggle-title';
+                        titleDiv.innerHTML = isEnglish
+                            ? '💬 Discussion & Questions'
+                            : '💬 讨论与提问';
+
+                        const hintText = document.createElement('p');
+                        hintText.className = 'giscus-hint';
+                        hintText.textContent = isEnglish
+                            ? 'Click to expand/collapse'
+                            : '点击展开/收起';
+
+                        const iconSpan = document.createElement('span');
+                        iconSpan.className = 'giscus-toggle-icon';
+                        iconSpan.textContent = '▼';
+
+                        const titleWrapper = document.createElement('div');
+                        titleWrapper.appendChild(titleDiv);
+                        titleWrapper.appendChild(hintText);
+
+                        toggleButton.appendChild(titleWrapper);
+                        toggleButton.appendChild(iconSpan);
+
+                        // 创建评论内容容器
+                        const contentDiv = document.createElement('div');
+                        contentDiv.className = 'giscus-content';
+
+                        // 创建 Giscus 脚本
+                        const giscusScript = document.createElement('script');
+                        giscusScript.src = 'https://giscus.app/client.js';
+                        giscusScript.setAttribute('data-repo', 'datawhalechina/hello-agents');
+                        giscusScript.setAttribute('data-repo-id', 'R_kgDOPrUECg');
+                        giscusScript.setAttribute('data-category', '💬 Exercises & Q&A');
+                        giscusScript.setAttribute('data-category-id', 'DIC_kwDOPrUECs4Cxfyu');
+                        giscusScript.setAttribute('data-mapping', 'pathname');
+                        giscusScript.setAttribute('data-strict', '0');
+                        giscusScript.setAttribute('data-reactions-enabled', '1');
+                        giscusScript.setAttribute('data-emit-metadata', '0');
+                        giscusScript.setAttribute('data-input-position', 'top');
+                        giscusScript.setAttribute('data-theme', 'preferred_color_scheme');
+                        giscusScript.setAttribute('data-lang', isEnglish ? 'en' : 'zh-CN');
+                        giscusScript.setAttribute('data-loading', 'lazy');
+                        giscusScript.crossOrigin = 'anonymous';
+                        giscusScript.async = true;
+
+                        contentDiv.appendChild(giscusScript);
+
+                        // 组装评论区
+                        giscusContainer.appendChild(toggleButton);
+                        giscusContainer.appendChild(contentDiv);
+
+                        // 添加折叠/展开功能
+                        let isExpanded = false;
+                        toggleButton.addEventListener('click', function() {
+                            isExpanded = !isExpanded;
+                            if (isExpanded) {
+                                contentDiv.classList.add('expanded');
+                                iconSpan.classList.add('expanded');
+                            } else {
+                                contentDiv.classList.remove('expanded');
+                                iconSpan.classList.remove('expanded');
+                            }
+                        });
+
+                        // 将评论区添加到内容区域
+                        const article = document.querySelector('article.markdown-section');
+                        if (article) {
+                            article.appendChild(giscusContainer);
+                        }
                     });
                 }
             ]

@@ -706,6 +706,8 @@ mcp_tool = MCPTool(
 
 What does this code do? First, `command` and `args` specify how to start the MCP server. `npx -y @sugarforever/amap-mcp-server` will download and run the `amap-mcp-server` package from the npm repository. The `env` parameter passes environment variables, here we pass the Amap API key.
 
+**Note:** Some examples in this document use `npx` to launch MCP (Model Context Protocol) services. However,in the code repository corresponding to this section of content, we actually use `uvx`. It’s important to note that `npx` and `uvx` share nearly identical design principles—the only difference lies in their ecosystems: `npx` targets JavaScript/Node.js (packages from npm), while `uvx` targets Python (packages from PyPI).There is no superiority or inferiority between the two methods. Please choose according to your needs when using them.
+
 When we create the `MCPTool` object, it will start the MCP server process in the background and communicate with the server through standard input/output (stdin/stdout). This is a feature of the MCP protocol: using inter-process communication instead of HTTP, which is more efficient and easier to manage.
 
 The most critical parameter is `auto_expand=True`. When set to True, `MCPTool` will automatically query what tools the MCP server provides, and then create an independent Tool object for each tool. This is why we only created one `MCPTool`, but the Agent got 16 tools. Let's see this process:
