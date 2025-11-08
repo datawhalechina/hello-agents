@@ -1,6 +1,6 @@
 # AutoGen 软件开发团队案例依赖 (v0.7.4)
-"autogen-agentchat"
-"autogen-ext[openai,azure]"
+autogen-agentchat
+autogen-ext[openai,azure]
 openai>=1.0.0
 streamlit>=1.28.0
 requests>=2.31.0
