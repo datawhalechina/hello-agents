@@ -48,7 +48,7 @@ def test_react_agent():
     
     # 测试1：数学计算问题
     print("\n📊 测试1：数学计算问题")
-    math_question = "请帮我计算：(25 + 15) × 3 - 8 的结果是多少？"
+    math_question = "请帮我计算：(25 + 15) * 3 - 8 的结果是多少？"
     
     try:
         result1 = agent.run(math_question)
@@ -80,9 +80,9 @@ def test_react_agent():
     print(f"\n📝 对话历史记录: {len(agent.get_history())} 条消息")
     
     # 显示工具使用统计
-    print(f"\n🛠️ 可用工具数量: {len(tool_registry.tools)}")
+    print(f"\n🛠️ 可用工具数量: {len(tool_registry._tools)}")
     print("已注册的工具:")
-    for tool_name in tool_registry.tools.keys():
+    for tool_name in tool_registry._tools.keys():
         print(f"  - {tool_name}")
     
     print("\n🎉 测试完成！")
@@ -101,7 +101,7 @@ def test_custom_prompt():
     # 注册计算器工具
     try:
         from hello_agents import calculate
-        tool_registry.register_tool("calculate", calculate, "数学计算工具")
+        tool_registry.register_function("calculate", calculate, "数学计算工具")
     except ImportError:
         pass
     
