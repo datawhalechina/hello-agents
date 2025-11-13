@@ -1068,7 +1068,8 @@ def run(self, input_text: str, **kwargs) -> str:
         # 4. 检查完成条件
         if action and action.startswith("Finish"):
             final_answer = self._parse_action_input(action)
-            self._save_to_history(input_text, final_answer)
+            self.add_message(Message(input_text, "user"))
+            self.add_message(Message(final_answer, "assistant"))
             return final_answer
 
         # 5. 执行工具调用
@@ -1080,7 +1081,8 @@ def run(self, input_text: str, **kwargs) -> str:
 
     # 达到最大步数
     final_answer = "抱歉，我无法在限定步数内完成这个任务。"
-    self._save_to_history(input_text, final_answer)
+    self.add_message(Message(input_text, "user"))
+    self.add_message(Message(final_answer, "assistant"))
     return final_answer
 ```
 

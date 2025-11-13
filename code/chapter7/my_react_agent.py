@@ -6,8 +6,8 @@ MY_REACT_PROMPT = """你是一个具备推理和行动能力的AI助手。你可
 ## 工作流程
 请严格按照以下格式进行回应，每次只能执行一个步骤：
 
-**Thought:** 分析当前问题，思考需要什么信息或采取什么行动。
-**Action:** 选择一个行动，格式必须是以下之一：
+Thought: 你的思考过程，用于分析问题、拆解任务和规划下一步行动。
+Action: 你决定采取的行动，必须是以下格式之一：
 - `{{tool_name}}[{{tool_input}}]` - 调用指定工具
 - `Finish[最终答案]` - 当你有足够信息给出最终答案时
 
@@ -82,7 +82,8 @@ class MyReActAgent(ReActAgent):
             # 4. 检查完成条件
             if action and action.startswith("Finish"):
                 final_answer = self._parse_action_input(action)
-                self._save_to_history(input_text, final_answer)
+                self.add_message(Message(input_text, "user"))
+                self.add_message(Message(final_answer, "assistant"))
                 return final_answer
 
             # 5. 执行工具调用
@@ -94,5 +95,6 @@ class MyReActAgent(ReActAgent):
 
         # 达到最大步数
         final_answer = "抱歉，我无法在限定步数内完成这个任务。"
-        self._save_to_history(input_text, final_answer)
+        self.add_message(Message(input_text, "user"))
+        self.add_message(Message(final_answer, "assistant"))
         return final_answer
