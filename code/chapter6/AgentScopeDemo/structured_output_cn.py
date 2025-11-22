@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """三国狼人杀游戏的结构化输出模型"""
 from typing import Literal, Optional, List
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from agentscope.agent import AgentBase
 
 
@@ -27,7 +27,7 @@ def get_vote_model_cn(agents: list[AgentBase]) -> type[BaseModel]:
     class VoteModelCN(BaseModel):
         """中文版投票输出格式"""
         
-        vote: Literal[tuple(_.name for _ in agents)] = Field(
+        vote: str = Field(
             description="你要投票淘汰的玩家姓名",
         )
         reason: str = Field(
@@ -37,6 +37,23 @@ def get_vote_model_cn(agents: list[AgentBase]) -> type[BaseModel]:
             description="对被投票者的怀疑程度(1-10)",
             ge=1, le=10
         )
+        # 自定义校验器：确保 vote 是 agents 中的合法玩家姓名
+        @field_validator("vote")
+        def vote_must_be_valid_agent_name(cls, value: str) -> str:
+            # 提取所有合法玩家姓名
+            valid_player_names = [agent.name for agent in agents]
+            
+            # 处理 agents 为空的情况（避免无合法值）
+            if not valid_player_names:
+                raise ValueError("当前无可用玩家，无法投票")
+            
+            # 校验投票姓名是否在合法列表中
+            if value not in valid_player_names:
+                raise ValueError(
+                    f"投票无效！合法玩家姓名：{valid_player_names}（请选择其中一个）"
+                )
+            
+            return value
     
     return VoteModelCN
 
@@ -68,7 +85,7 @@ def get_seer_model_cn(agents: list[AgentBase]) -> type[BaseModel]:
     class SeerModelCN(BaseModel):
         """中文版预言家查验格式"""
         
-        target: Literal[tuple(_.name for _ in agents)] = Field(
+        target: str = Field(
             description="要查验的玩家姓名",
         )
         check_reason: str = Field(
@@ -78,6 +95,23 @@ def get_seer_model_cn(agents: list[AgentBase]) -> type[BaseModel]:
             description="查验优先级(1-10)",
             ge=1, le=10
         )
+
+        @field_validator("target")
+        def target_must_be_valid_agent_name(cls, value: str) -> str:
+            # 提取所有合法玩家姓名
+            valid_player_names = [agent.name for agent in agents]
+            
+            # 处理 agents 为空的情况（避免无合法值）
+            if not valid_player_names:
+                raise ValueError("当前无可用玩家，无法查验")
+            
+            # 校验投票姓名是否在合法列表中
+            if value not in valid_player_names:
+                raise ValueError(
+                    f"查验无效！合法玩家姓名：{valid_player_names}（请选择其中一个）"
+                )
+            
+            return value
     
     return SeerModelCN
 
@@ -91,7 +125,7 @@ def get_hunter_model_cn(agents: list[AgentBase]) -> type[BaseModel]:
         shoot: bool = Field(
             description="是否使用开枪技能",
         )
-        target: Optional[Literal[tuple(_.name for _ in agents)]] = Field(
+        target: str = Field(
             description="开枪目标玩家姓名",
             default=None
         )
@@ -99,6 +133,23 @@ def get_hunter_model_cn(agents: list[AgentBase]) -> type[BaseModel]:
             description="开枪理由",
             default=None
         )
+        
+        @field_validator("shoot")
+        def shoot_must_be_valid_agent_name(cls, value: str) -> str:
+            # 提取所有合法玩家姓名
+            valid_player_names = [agent.name for agent in agents]
+            
+            # 处理 agents 为空的情况（避免无合法值）
+            if not valid_player_names:
+                raise ValueError("当前无可用玩家，无法开枪")
+            
+            # 校验投票姓名是否在合法列表中
+            if value not in valid_player_names:
+                raise ValueError(
+                    f"开枪无效！合法玩家姓名：{valid_player_names}（请选择其中一个）"
+                )
+            
+            return value
     
     return HunterModelCN
 
