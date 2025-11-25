@@ -1,0 +1,20 @@
+input: ${news_content}
+info:
+  column requirement: ${column_requirement}
+  news title: ${news_title}
+instruct:
+  output language: ${language}
+  summary rule:
+    - find and summarize the main content part of the news content which is collected from webpage
+    - summary focus on relative content to {column requirement} and {news title}
+    - summary in one paragraph without linebreak
+output:
+  can_summarize:
+    $type: bool
+    $desc: judge if {input} has enough relative content to be summarized
+  translated_title:
+    $type: str
+    $desc: translate {input.news title} into ${language}
+  summary:
+    $type: str
+    $desc: summarize {input} according {info} and {instruct} if {can_summarize} == true, or output null

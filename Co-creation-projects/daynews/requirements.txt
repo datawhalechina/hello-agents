@@ -1,0 +1,4 @@
+Agently==3.3.4.7
+PyYAML==6.0.1
+duckduckgo_search>=5.3.0
+beautifulsoup4>=4.12.3
