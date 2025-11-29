@@ -8,7 +8,7 @@ IS_DEBUG: false
 MODEL_PROVIDER: OAIClient
 MODEL_URL: https://ai-proxy.bhznjns.qzz.io/v1
 MODEL_AUTH:
-  api_key: "sk-C37lZRIJdOnhpziB0CGtjiTOmV3SvDAMrYVMxRkk07Ldzpzw"
+  api_key: "sk-"
 MODEL_OPTIONS:
   model: gpt-4.1
   stream: false
