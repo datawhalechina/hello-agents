@@ -1234,7 +1234,7 @@ print(f"对话历史: {len(agent.get_history())} 条消息")
 
 在最后可以补充一款新的提示词，可以尝试实现`custom_prompt`载入自定义提示词。
 
-```python
+````python
 # 创建专门用于数学问题的自定义提示词
 math_prompts = {
     "planner": """
@@ -1269,7 +1269,7 @@ math_agent = MyPlanAndSolveAgent(
 # 测试数学问题
 math_result = math_agent.run(question)
 print(f"数学专用Agent结果: {math_result}")
-```
+````
 
 如表7.2所示，通过这种框架化的重构，我们不仅保持了第四章中各种Agent范式的核心功能，还大幅提升了代码的组织性、可维护性和扩展性。所有Agent现在都共享统一的基础架构，同时保持了各自的特色和优势。
 
