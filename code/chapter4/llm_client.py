@@ -42,6 +42,9 @@ class HelloAgentsLLM:
             print("✅ 大语言模型响应成功:")
             collected_content = []
             for chunk in response:
+                if not chunk.choices:
+                    # 如果 choices 列表为空，说明是流结束或不包含内容的特殊chunk，跳过
+                    continue
                 content = chunk.choices[0].delta.content or ""
                 print(content, end="", flush=True)
                 collected_content.append(content)
