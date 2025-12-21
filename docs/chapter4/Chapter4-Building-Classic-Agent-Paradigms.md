@@ -642,7 +642,7 @@ Question: {question}
 
 Please strictly output your plan in the following format, with ```python and ``` as prefix and suffix being necessary:
 ```python
-["Step 1", "Step 2", "Step 3", ...]
+["Step 1: Description of specific step 1", "Step 2: Description of specific step 2", "Step 3: Description of specific step 3", ...]
 ```
 """
 ````
