@@ -1308,8 +1308,8 @@ def _invoke_with_tools(self, messages: list[dict[str, Any]], tools: list[dict[st
             **client_kwargs,
         )
 
-#内部逻辑是对Openai 原生的functioncall作再封装
-#OpenAI 原生functioncall示例
+#内部逻辑是对OpenAI 原生的function calling作再封装
+#OpenAI 原生function calling示例
 from openai import OpenAI
 client = OpenAI()
 
