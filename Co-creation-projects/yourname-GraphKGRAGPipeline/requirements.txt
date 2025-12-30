@@ -1,0 +1,22 @@
+pydantic>=2.6
+networkx>=3.2
+python-dotenv>=1.0
+rich>=13.7
+tqdm>=4.66
+numpy>=1.26
+scikit-learn>=1.5
+pillow>=10.4
+requests>=2.32
+opencv-python>=4.10
+
+# Optional (choose one OCR backend)
+# pytesseract>=0.3.10   # requires installing Tesseract binary separately
+# paddleocr>=2.7.3      # heavier; includes box-level OCR
+# paddlepaddle>=2.6.2
+
+# Optional (choose one LLM backend)
+# openai>=1.40.0
+# ollama>=0.3.0
+
+# Optional (better "beyond text matching" embeddings)
+# sentence-transformers>=3.0.1

@@ -1,0 +1,22 @@
+{
+  "test_cases": [
+    {
+      "id": 1,
+      "name": "Basic Entity Extraction",
+      "input": "John works at Google in New York",
+      "expected_entities": ["John", "Google", "New York"]
+    },
+    {
+      "id": 2,
+      "name": "Relationship Detection",
+      "input": "Apple is owned by Tim Cook",
+      "expected_relations": [
+        {
+          "subject": "Apple",
+          "relation": "owned by",
+          "object": "Tim Cook"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints
+
+# Data and models (大文件)
+*.zip
+*.tar.gz
+*.rar
+data/raw/
+data/processed/
+models/
+checkpoints/
+*.model
+*.pkl
+*.h5
+
+# Large files
+*.mp4
+*.avi
+*.mov
+*.wav
+*.flac
+*.psd
+*.ai
+
+# Logs
+*.log
+logs/
+
+# Output files (已有demo文件即可)
+outputs/*
+!outputs/demo_result.png
+!outputs/.gitkeep
+
+# Environment files
+.env
+.env.local
