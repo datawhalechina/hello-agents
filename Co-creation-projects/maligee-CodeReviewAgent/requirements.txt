@@ -1,0 +1,13 @@
+# HelloAgents框架
+hello-agents[all]>=0.1.0
+
+# Jupyter环境
+jupyter>=1.0.0
+notebook>=7.0.0
+
+# 环境变量管理
+python-dotenv>=1.0.0
+
+# 代码分析工具
+ast-comments>=1.0.0
+
