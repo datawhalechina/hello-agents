@@ -83,7 +83,7 @@ Please output in the following JSON format, avoid using special escape character
                 # 尝试不同的split
                 try:
                     dataset = load_dataset(reference_dataset, split="train")
-                except:
+                except Exception:
                     dataset = load_dataset(reference_dataset, split="test")
 
                 # 加载所有题目作为参考

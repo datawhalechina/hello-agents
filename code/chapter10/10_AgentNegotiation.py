@@ -38,7 +38,7 @@ def handle_proposal(text: str) -> str:
                 "counter_proposal": {"deadline": 7}
             }
         return str(result)
-    except:
+    except Exception:
         return str({"accepted": False, "message": "无效的提案格式"})
 
 agent2 = A2AServer(

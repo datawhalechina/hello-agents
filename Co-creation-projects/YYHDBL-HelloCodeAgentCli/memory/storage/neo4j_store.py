@@ -451,5 +451,5 @@ class Neo4jGraphStore:
         if hasattr(self, 'driver') and self.driver:
             try:
                 self.driver.close()
-            except:
+            except Exception:
                 pass

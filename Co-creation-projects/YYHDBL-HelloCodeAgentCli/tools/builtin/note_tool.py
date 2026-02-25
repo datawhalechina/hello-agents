@@ -168,7 +168,7 @@ class NoteTool(Tool):
                 if key == 'tags':
                     try:
                         note[key] = json.loads(value)
-                    except:
+                    except Exception:
                         note[key] = []
                 else:
                     note[key] = value

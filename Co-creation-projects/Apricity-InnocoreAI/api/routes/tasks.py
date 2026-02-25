@@ -51,7 +51,7 @@ class ConnectionManager:
         for connection in self.active_connections:
             try:
                 await connection.send_text(message)
-            except:
+            except Exception:
                 # 连接已断开，移除
                 self.active_connections.remove(connection)
 

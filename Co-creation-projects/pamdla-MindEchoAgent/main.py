@@ -34,7 +34,7 @@ def extract_music_info(response_text):
                     "mood": data.get("mood", ""),
                     "full_data": data
                 }
-    except:
+    except Exception:
         pass
 
     # 如果没有找到音乐数据，返回默认信息

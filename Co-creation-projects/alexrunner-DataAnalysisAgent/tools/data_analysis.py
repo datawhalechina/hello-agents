@@ -867,7 +867,7 @@ def analyze_review_rating_impact(input: str) -> dict:
                     'significant': p_value_prev < 0.05
                 }
             }
-        except:
+        except Exception:
             correlation_results = {'error': '相关性计算失败'}
 
     # 4. 核心结果：关键指标对比

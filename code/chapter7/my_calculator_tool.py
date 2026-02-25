@@ -27,7 +27,7 @@ def my_calculate(expression: str) -> str:
         node = ast.parse(expression, mode='eval')
         result = _eval_node(node.body, operators, functions)
         return str(result)
-    except:
+    except Exception:
         return "计算失败，请检查表达式格式"
 
 def _eval_node(node, operators, functions):

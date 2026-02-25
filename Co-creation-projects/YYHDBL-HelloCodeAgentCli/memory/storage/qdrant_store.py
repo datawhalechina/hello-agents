@@ -538,5 +538,5 @@ class QdrantVectorStore:
         if hasattr(self, 'client') and self.client:
             try:
                 self.client.close()
-            except:
+            except Exception:
                 pass
