@@ -1,0 +1,6 @@
+hello-agents[all]==0.2.7
+openai>=1.0.0
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+textual>=7.4.0
+tiktoken>=0.5.0
