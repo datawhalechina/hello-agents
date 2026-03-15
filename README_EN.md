@@ -48,6 +48,21 @@ If you wish to read locally or contribute content, please refer to the learning 
 - 🚀 **Drive Real Cases** - Practical development of intelligent travel assistants, cyber towns, and other comprehensive projects
 - 📖 **Job Interviews** - Learn agent-related interview questions for job hunting
 
+## 🔌 Supported LLM Providers
+
+HelloAgents is built on the OpenAI-compatible API standard and supports the following major LLM providers:
+
+| Provider | Model Examples | Base URL |
+|----------|---------------|----------|
+| [OpenAI](https://platform.openai.com/) | `gpt-4`, `gpt-4o` | `https://api.openai.com/v1` |
+| [DeepSeek](https://platform.deepseek.com/) | `deepseek-chat` | `https://api.deepseek.com/v1` |
+| [MiniMax](https://platform.minimax.io/) | `MiniMax-M2.5`, `MiniMax-M2.5-highspeed` | `https://api.minimax.io/v1` |
+| [Qwen](https://dashscope.aliyuncs.com/) | `qwen-plus` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| [Zhipu AI](https://open.bigmodel.cn/) | `glm-4` | `https://open.bigmodel.cn/api/paas/v4` |
+| [ModelScope](https://modelscope.cn/) | `Qwen2.5-72B-Instruct` | `https://api-inference.modelscope.cn/v1/` |
+
+> Any service compatible with the OpenAI Chat Completions API can be used. Simply configure `LLM_BASE_URL`, `LLM_API_KEY`, and `LLM_MODEL_ID`.
+
 ## 📖 Content Navigation
 
 | Chapter                                                                                                               | Key Content                                                                | Status |

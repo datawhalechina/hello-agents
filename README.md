@@ -48,6 +48,21 @@
 - 🚀 <strong>驱动真实案例</strong> 实战开发智能旅行助手、赛博小镇等综合项目
 - 📖 <strong>求职面试</strong> 学习智能体求职相关面试问题
 
+## 🔌 支持的 LLM 提供商
+
+HelloAgents 基于 OpenAI 兼容 API 标准构建，支持以下主流大语言模型提供商：
+
+| 提供商 | 模型示例 | Base URL |
+|--------|---------|----------|
+| [OpenAI](https://platform.openai.com/) | `gpt-4`, `gpt-4o` | `https://api.openai.com/v1` |
+| [DeepSeek](https://platform.deepseek.com/) | `deepseek-chat` | `https://api.deepseek.com/v1` |
+| [MiniMax](https://platform.minimax.io/) | `MiniMax-M2.5`, `MiniMax-M2.5-highspeed` | `https://api.minimax.io/v1` |
+| [Qwen (通义千问)](https://dashscope.aliyuncs.com/) | `qwen-plus` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| [Zhipu AI (智谱)](https://open.bigmodel.cn/) | `glm-4` | `https://open.bigmodel.cn/api/paas/v4` |
+| [ModelScope](https://modelscope.cn/) | `Qwen2.5-72B-Instruct` | `https://api-inference.modelscope.cn/v1/` |
+
+> 任何兼容 OpenAI Chat Completions API 的服务均可使用，只需配置对应的 `LLM_BASE_URL`、`LLM_API_KEY` 和 `LLM_MODEL_ID` 即可。
+
 ## 📖 内容导航
 
 | 章节                                                                                        | 关键内容                                      | 状态 |

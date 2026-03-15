@@ -14,11 +14,17 @@ class HelloAgentsLLM:
     def __init__(self, model: str = None, apiKey: str = None, baseUrl: str = None, timeout: int = None):
         """
         初始化客户端。优先使用传入参数，如果未提供，则从环境变量加载。
+        支持任何兼容OpenAI接口的服务，包括 OpenAI、DeepSeek、Qwen、MiniMax 等。
         """
         self.model = model or os.getenv("LLM_MODEL_ID")
         apiKey = apiKey or os.getenv("LLM_API_KEY")
         baseUrl = baseUrl or os.getenv("LLM_BASE_URL")
         timeout = timeout or int(os.getenv("LLM_TIMEOUT", 60))
+
+        # Auto-detect MiniMax: resolve dedicated env var and default base URL
+        if self.model and self.model.lower().startswith("minimax"):
+            apiKey = apiKey or os.getenv("MINIMAX_API_KEY")
+            baseUrl = baseUrl or "https://api.minimax.io/v1"
         
         if not all([self.model, apiKey, baseUrl]):
             raise ValueError("模型ID、API密钥和服务地址必须被提供或在.env文件中定义。")
@@ -29,6 +35,10 @@ class HelloAgentsLLM:
         """
         调用大语言模型进行思考，并返回其响应。
         """
+        # MiniMax requires temperature in (0.0, 1.0], clamp if needed
+        if self.model and self.model.lower().startswith("minimax") and temperature <= 0:
+            temperature = 0.01
+
         print(f"🧠 正在调用 {self.model} 模型...")
         try:
             response = self.client.chat.completions.create(
