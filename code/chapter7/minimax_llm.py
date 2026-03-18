@@ -6,7 +6,9 @@ MiniMax provides high-performance cloud LLM models with 204K context window
 via an OpenAI-compatible API endpoint.
 
 Supported models:
-  - MiniMax-M2.5        : Peak performance, ultimate value (default)
+  - MiniMax-M2.7        : Latest flagship model with enhanced reasoning and coding (default)
+  - MiniMax-M2.7-highspeed : High-speed version of M2.7 for low-latency scenarios
+  - MiniMax-M2.5        : Peak performance, ultimate value
   - MiniMax-M2.5-highspeed : Same performance, faster and more agile
 
 API docs: https://platform.minimax.io/docs/api-reference/text-openai-api
@@ -25,12 +27,14 @@ from hello_agents import HelloAgentsLLM
 
 # MiniMax available models
 MINIMAX_MODELS = {
+    "MiniMax-M2.7": "Latest flagship model with enhanced reasoning and coding.",
+    "MiniMax-M2.7-highspeed": "High-speed version of M2.7 for low-latency scenarios.",
     "MiniMax-M2.5": "Peak Performance. Ultimate Value. Master the Complex.",
     "MiniMax-M2.5-highspeed": "Same performance, faster and more agile.",
 }
 
 # Default configuration
-MINIMAX_DEFAULT_MODEL = "MiniMax-M2.5"
+MINIMAX_DEFAULT_MODEL = "MiniMax-M2.7"
 MINIMAX_DEFAULT_BASE_URL = "https://api.minimax.io/v1"
 MINIMAX_CN_BASE_URL = "https://api.minimaxi.com/v1"  # China mainland endpoint
 
@@ -48,7 +52,7 @@ class MiniMaxLLM(HelloAgentsLLM):
         llm = MiniMaxLLM()
 
         # Or pass parameters directly
-        llm = MiniMaxLLM(api_key="your-key", model="MiniMax-M2.5-highspeed")
+        llm = MiniMaxLLM(api_key="your-key", model="MiniMax-M2.7-highspeed")
     """
 
     def __init__(

@@ -56,7 +56,7 @@ HelloAgents 基于 OpenAI 兼容 API 标准构建，支持以下主流大语言�
 |--------|---------|----------|
 | [OpenAI](https://platform.openai.com/) | `gpt-4`, `gpt-4o` | `https://api.openai.com/v1` |
 | [DeepSeek](https://platform.deepseek.com/) | `deepseek-chat` | `https://api.deepseek.com/v1` |
-| [MiniMax](https://platform.minimax.io/) | `MiniMax-M2.5`, `MiniMax-M2.5-highspeed` | `https://api.minimax.io/v1` |
+| [MiniMax](https://platform.minimax.io/) | `MiniMax-M2.7`, `MiniMax-M2.7-highspeed` | `https://api.minimax.io/v1` |
 | [Qwen (通义千问)](https://dashscope.aliyuncs.com/) | `qwen-plus` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
 | [Zhipu AI (智谱)](https://open.bigmodel.cn/) | `glm-4` | `https://open.bigmodel.cn/api/paas/v4` |
 | [ModelScope](https://modelscope.cn/) | `Qwen2.5-72B-Instruct` | `https://api-inference.modelscope.cn/v1/` |

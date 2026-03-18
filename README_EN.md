@@ -56,7 +56,7 @@ HelloAgents is built on the OpenAI-compatible API standard and supports the foll
 |----------|---------------|----------|
 | [OpenAI](https://platform.openai.com/) | `gpt-4`, `gpt-4o` | `https://api.openai.com/v1` |
 | [DeepSeek](https://platform.deepseek.com/) | `deepseek-chat` | `https://api.deepseek.com/v1` |
-| [MiniMax](https://platform.minimax.io/) | `MiniMax-M2.5`, `MiniMax-M2.5-highspeed` | `https://api.minimax.io/v1` |
+| [MiniMax](https://platform.minimax.io/) | `MiniMax-M2.7`, `MiniMax-M2.7-highspeed` | `https://api.minimax.io/v1` |
 | [Qwen](https://dashscope.aliyuncs.com/) | `qwen-plus` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
 | [Zhipu AI](https://open.bigmodel.cn/) | `glm-4` | `https://open.bigmodel.cn/api/paas/v4` |
 | [ModelScope](https://modelscope.cn/) | `Qwen2.5-72B-Instruct` | `https://api-inference.modelscope.cn/v1/` |
