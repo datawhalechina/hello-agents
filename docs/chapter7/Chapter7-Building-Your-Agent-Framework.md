@@ -2126,7 +2126,7 @@ Next, we will explore together how to add RAG systems and Memory mechanisms to t
 3. In Section 7.3, we implemented the `Message` class, `Config` class, and `Agent` base class. Please analyze:
 
    - The `Message` class uses `Pydantic`'s `BaseModel` for data validation. What are the advantages of this design in practical applications?
-   - The `Agent` base class defines two methods: `run` and `_execute`, where `run` is the public interface and `_execute` is an abstract method. What is this design pattern called? What are its benefits?
+   - The `Agent` base class is defined as an abstract base class, and the `run` method is declared with `@abstractmethod` to enforce a unified execution interface for all subclasses. What object-oriented design principles or patterns does this reflect? What are its benefits?
    - In the `Config` class, we used the singleton pattern. Please explain what the singleton pattern is, why configuration management needs to use the singleton pattern, and what problems would arise if the singleton pattern is not used.
 
 4. In Section 7.4, we implemented four `Agent` paradigms in a framework manner.
