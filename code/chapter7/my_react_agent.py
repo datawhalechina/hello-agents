@@ -52,6 +52,12 @@ class MyReActAgent(ReActAgent):
         self.prompt_template = custom_prompt if custom_prompt else MY_REACT_PROMPT
         print(f"✅ {name} 初始化完成，最大步数: {max_steps}")
 
+
+## 这里分短期记忆和长期记忆
+## 短期记忆存储当下任务的上下文 -- 包含当前任务多次对话的上下文信息
+## 长期记忆存储过往任务的上下文 -- 但只存用户最初提出的问题和最终的答案 -- 不存中间的对话信息
+
+
     def run(self, input_text: str, **kwargs) -> str:
         """运行ReAct Agent"""
         self.current_history = []

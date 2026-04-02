@@ -30,12 +30,13 @@ class SearchState(TypedDict):
 
 # 初始化模型和Tavily客户端
 llm = ChatOpenAI(
-    model=os.getenv("LLM_MODEL_ID", "gpt-4o-mini"),
+    model=os.getenv("LLM_MODEL_ID", "glm-5-turbo"),
     api_key=os.getenv("LLM_API_KEY"),
-    base_url=os.getenv("LLM_BASE_URL", "https://api.openai.com/v1"),
+    base_url=os.getenv("LLM_BASE_URL", "https://api.z.ai/api/coding/paas/v4"),
     temperature=0.7
 )
 
+## 下面这个是搜索的api
 # 初始化Tavily客户端
 tavily_client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
 
@@ -59,7 +60,11 @@ def understand_query_node(state: SearchState) -> SearchState:
 理解：[用户需求总结]
 搜索词：[最佳搜索关键词]"""
 
-    response = llm.invoke([SystemMessage(content=understand_prompt)])
+    # ⭐ 修改点 1：必须 System + Human
+    response = llm.invoke([
+        SystemMessage(content="你是一个搜索助手，擅长理解用户问题并生成搜索关键词"),
+        HumanMessage(content=understand_prompt)
+    ])
     
     # 提取搜索关键词
     response_text = response.content
@@ -71,7 +76,7 @@ def understand_query_node(state: SearchState) -> SearchState:
         search_query = response_text.split("搜索关键词：")[1].strip()
     
     return {
-        "user_query": response.content,
+        "user_query": user_message,  # ⭐ 修改点 2：不能用 response.content
         "search_query": search_query,
         "step": "understood",
         "messages": [AIMessage(content=f"我理解您的需求：{response.content}")]
@@ -141,7 +146,11 @@ def generate_answer_node(state: SearchState) -> SearchState:
 
 请提供一个有用的回答，并说明这是基于已有知识的回答。"""
         
-        response = llm.invoke([SystemMessage(content=fallback_prompt)])
+        # ⭐ 修改点 3
+        response = llm.invoke([
+            SystemMessage(content="你是一个专业问答助手"),
+            HumanMessage(content=fallback_prompt)
+        ])
         
         return {
             "final_answer": response.content,
@@ -164,7 +173,11 @@ def generate_answer_node(state: SearchState) -> SearchState:
 4. 回答要结构清晰、易于理解
 5. 如果搜索结果不够完整，请说明并提供补充建议"""
 
-    response = llm.invoke([SystemMessage(content=answer_prompt)])
+    # ⭐ 修改点 4
+    response = llm.invoke([
+        SystemMessage(content="你是一个基于搜索结果生成答案的助手"),
+        HumanMessage(content=answer_prompt)
+    ])
     
     return {
         "final_answer": response.content,

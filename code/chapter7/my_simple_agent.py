@@ -23,6 +23,12 @@ class MySimpleAgent(SimpleAgent):
         self.enable_tool_calling = enable_tool_calling and tool_registry is not None
         print(f"✅ {name} 初始化完成，工具调用: {'启用' if self.enable_tool_calling else '禁用'}")
     
+
+## 这里分短期记忆和长期记忆
+## 短期记忆存储当下任务的上下文 -- 包含当前任务多次对话的上下文信息，同时也包含历史对话的上下文信息(长期记忆)
+## 长期记忆存储过往任务的上下文 -- 但只存用户最初提出的问题和最终的答案 -- 不存中间的对话信息
+
+
     def run(self, input_text: str, max_tool_iterations: int = 3, **kwargs) -> str:
         """
         重写的运行方法 - 实现简单对话逻辑，支持可选工具调用
