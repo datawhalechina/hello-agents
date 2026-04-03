@@ -163,3 +163,9 @@ cython_debug/
 
 # 忽略各种文件夹下codex AGENRS.md
 AGENTS.md
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+memory_data/
+code/chapter8/memory_data/
