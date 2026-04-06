@@ -5,12 +5,14 @@
 展示Any格式→Markdown→分块→向量化的完整流程
 """
 
+
 import os
 import time
 import tempfile
 from hello_agents.tools import RAGTool
 from dotenv import load_dotenv
-load_dotenv()
+env_path = os.path.join(os.path.dirname(__file__), '.env')
+load_dotenv(env_path)
 
 class MarkItDownPipelineDemo:
     """MarkItDown处理管道演示类"""

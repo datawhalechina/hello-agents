@@ -34,5 +34,5 @@ tool_registry.register_tool(rag_tool)
 agent.tool_registry = tool_registry
 
 # 开始对话
-response = agent.run("你好！请记住我叫张三，我是一名Python开发者")
+response = agent.run("你好！请记住我叫张三，我是一名Python开发者")  
 print(response)
