@@ -84,6 +84,7 @@ class ProjectAssistant(SimpleAgent):
                 "note_type": "blocker",
                 "limit": 2
             })
+
             actions_raw = self.note_tool.run({
                 "action": "list",
                 "note_type": "action",
