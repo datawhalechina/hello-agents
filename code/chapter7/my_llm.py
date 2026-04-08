@@ -17,11 +17,11 @@ class MyLLM(HelloAgentsLLM):
         if provider == "modelscope":
             print("正在使用自定义的 ModelScope Provider")
             self.provider = "modelscope"
-            
+
             # 解析 ModelScope 的凭证
             self.api_key = api_key or os.getenv("MODELSCOPE_API_KEY")
             self.base_url = base_url or "https://api-inference.modelscope.cn/v1/"
-            
+
             # 验证凭证是否存在
             if not self.api_key:
                 raise ValueError("ModelScope API key not found. Please set MODELSCOPE_API_KEY environment variable.")
@@ -31,10 +31,38 @@ class MyLLM(HelloAgentsLLM):
             self.temperature = kwargs.get('temperature', 0.7)
             self.max_tokens = kwargs.get('max_tokens')
             self.timeout = kwargs.get('timeout', 60)
-            
+
             # 使用获取的参数创建OpenAI客户端实例
             self._client = OpenAI(api_key=self.api_key, base_url=self.base_url, timeout=self.timeout)
 
+        elif provider == "minimax":
+            # MiniMax 提供 OpenAI 兼容接口，可直接使用 OpenAI SDK 调用
+            # 支持的模型：MiniMax-M2.7（旗舰版）、MiniMax-M2.7-highspeed（快速版）
+            # 获取 API Key：https://platform.minimax.io/
+            print("正在使用自定义的 MiniMax Provider")
+            self.provider = "minimax"
+
+            # 解析 MiniMax 的凭证
+            self.api_key = api_key or os.getenv("MINIMAX_API_KEY")
+            self.base_url = base_url or os.getenv("MINIMAX_BASE_URL", "https://api.minimax.io/v1")
+
+            # 验证凭证是否存在
+            if not self.api_key:
+                raise ValueError(
+                    "MiniMax API key not found. Please set MINIMAX_API_KEY environment variable."
+                )
+
+            # 设置默认模型和其他参数
+            # MiniMax-M2.7 是旗舰模型，MiniMax-M2.7-highspeed 是高速版本
+            self.model = model or os.getenv("LLM_MODEL_ID") or "MiniMax-M2.7"
+            # MiniMax temperature 范围为 (0.0, 1.0]，不支持 0，默认使用 1.0
+            self.temperature = kwargs.get('temperature', 1.0)
+            self.max_tokens = kwargs.get('max_tokens')
+            self.timeout = kwargs.get('timeout', 60)
+
+            # 使用 OpenAI SDK 创建客户端（MiniMax 兼容 OpenAI 接口规范）
+            self._client = OpenAI(api_key=self.api_key, base_url=self.base_url, timeout=self.timeout)
+
         else:
-            # 如果不是 modelscope, 则完全使用父类的原始逻辑来处理
+            # 如果不是 modelscope 或 minimax, 则完全使用父类的原始逻辑来处理
             super().__init__(model=model, api_key=api_key, base_url=base_url, provider=provider, **kwargs)
