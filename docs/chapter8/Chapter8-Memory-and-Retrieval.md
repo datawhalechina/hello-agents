@@ -686,16 +686,16 @@ class MemoryManager:
         self.memory_types = {}
 
         if enable_working:
-            self.memory_types['working'] = WorkingMemory(self.config, self.store)
+            self.memory_types['working'] = WorkingMemory(self.config)
 
         if enable_episodic:
-            self.memory_types['episodic'] = EpisodicMemory(self.config, self.store)
+            self.memory_types['episodic'] = EpisodicMemory(self.config)
 
         if enable_semantic:
-            self.memory_types['semantic'] = SemanticMemory(self.config, self.store)
+            self.memory_types['semantic'] = SemanticMemory(self.config)
 
         if enable_perceptual:
-            self.memory_types['perceptual'] = PerceptualMemory(self.config, self.store)
+            self.memory_types['perceptual'] = PerceptualMemory(self.config)
 ````
 
 ### 8.2.5 Four Types of Memory
