@@ -30,9 +30,7 @@
 ## 📚 快速开始
 
 ### 在线阅读
-**[🌐 点击这里开始在线阅读](https://datawhalechina.github.io/hello-agents/)** - 无需下载，随时随地学习
-
-**[📖 Cookbook](https://book.heterocat.com.cn/)**
+**[🌐 国外访问](https://datawhalechina.github.io/hello-agents/)** | **[🚀 国内加速](https://hello-agents.datawhale.cc)** - 无需下载，随时随地学习
 
 ### 本地阅读
 如果您希望在本地阅读或贡献内容，请参考下方的学习指南。
@@ -97,7 +95,7 @@
 
 &emsp;&emsp;*<strong>本 Hello-Agents PDF 教程完全开源免费。为防止各类营销号加水印后贩卖给多智能体系统初学者，我们特地在 PDF 文件中预先添加了不影响阅读的 Datawhale 开源标志水印，敬请谅解～</strong>*
 
-> *Hello-Agents PDF : https://github.com/datawhalechina/hello-agents/releases/tag/V1.0.0*  
+> *Hello-Agents PDF : https://github.com/datawhalechina/hello-agents/releases/latest/*  
 > *Hello-Agents PDF 国内下载地址 : https://www.datawhale.cn/learn/summary/239* 
 
 ## 💡 如何学习
@@ -126,8 +124,8 @@
 ## 下一步规划
 
 - 视频课程陆续放出（将会更加细致，实践课带领大家从设计思路到实施，授人以鱼也授人以渔）
-- 完善HelloAgents框架，开展Dev分支继续维护，兼容学习版本。
-- 感谢大家助力2W Star! 达到3W Star将会更新续作，《从零开始训练智能体》，帮助每一个学习者掌握从零到一训练自定义场景智能体模型的能力。
+- HelloAgents框架已经更新V1.0.0版本，将会继续完善，增加更多好用，轻量化的工具和特性，兼容学习版本。
+- 感谢大家助力3W Star! 之后将会提供调查问卷，供大家填写自己需要学习的智能体训练内容。后续作品《从零开始训练智能体》，帮助每一个学习者掌握从零到一训练自定义场景智能体模型的能力。
 
 ## 🤝 如何贡献
 
@@ -168,7 +166,7 @@
 ## Star History
 
 <div align='center'>
-    <img src="./docs/images/star-history-2026210.png" alt="Datawhale" width="90%">
+    <img src="./docs/images/star-history-2026324.png" alt="Datawhale" width="90%">
 </div>
 
 <div align="center">

@@ -96,6 +96,7 @@ Before starting to write specific code, we need to first establish a clear archi
 To allow readers to quickly experience the complete functionality of this chapter, we provide a directly installable Python package. You can install the version corresponding to this chapter with the following command:
 
 ```bash
+# hello-agents framework code visible link: https://github.com/jjyaoao/HelloAgents
 # Python version needs to be >= 3.10
 pip install "hello-agents==0.1.1"
 ```

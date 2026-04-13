@@ -1,0 +1,74 @@
+[project]
+name = "deepcast"
+version = "0.0.1"
+description = "Automated podcast generation agent with deep research capabilities, powered by HelloAgents."
+authors = [
+    { name = "JJason" }
+]
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.115.0",
+    "hello-agents>=0.2.8",
+    "tavily-python>=0.5.0",
+    "python-dotenv==1.0.1",
+    "requests>=2.31.0",
+    "openai>=1.12.0",
+    "uvicorn[standard]>=0.32.0",
+    "ddgs>=9.6.1",
+    "loguru>=0.7.3",
+    "huggingface-hub>=1.3.3",
+    "pydub>=0.25.1",
+    "google-search-results>=2.4.2",
+]
+
+[project.optional-dependencies]
+dev = ["mypy>=1.11.1", "ruff>=0.6.1"]
+
+[build-system]
+requires = ["setuptools>=73.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["py.typed"]
+
+[tool.ruff]
+lint.select = [
+    "E",    # pycodestyle
+    "F",    # pyflakes
+    "I",    # isort
+    "UP",   # pyupgrade
+    "D",    # pydocstyle
+    "T20",  # flake8-print
+]
+lint.ignore = [
+    "D100",  # Missing docstring in public module
+    "D101",  # Missing docstring in public class
+    "D102",  # Missing docstring in public method
+    "D103",  # Missing docstring in public function
+    "D104",  # Missing docstring in public package
+    "D105",  # Missing docstring in magic method
+    "D106",  # Missing docstring in public nested class
+    "D107",  # Missing docstring in __init__
+    "D400",  # 中文 docstring 句号检测误报
+    "D415",  # 中文 docstring 句号检测误报
+    "D212",  # 多行 docstring 首行格式
+    "E501",  # 行过长
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D", "UP"]
+"scripts/*" = ["T201"]
+"backend/scripts/test_agent_workflow.py" = ["E402"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12.7",
+]

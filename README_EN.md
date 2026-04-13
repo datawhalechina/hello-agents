@@ -30,9 +30,7 @@
 ## 📚 Quick Start
 
 ### Online Reading
-**[🌐 Click here to start reading online](https://datawhalechina.github.io/hello-agents/)** - No download required, learn anytime, anywhere
-
-**[📖 Cookbook](https://book.heterocat.com.cn/)**
+**[🌐 International Access](https://datawhalechina.github.io/hello-agents/)** | **[🚀 Domestic Acceleration](https://hello-agents.datawhale.cc)** - No download required, learn anytime, anywhere
 
 ### Local Reading
 If you wish to read locally or contribute content, please refer to the learning guide below.
@@ -97,7 +95,7 @@ If you wish to read locally or contribute content, please refer to the learning 
 
 &emsp;&emsp;*<strong>This Hello-Agents PDF tutorial is completely open source and free. To prevent various marketing accounts from adding watermarks and selling it to multi-agent system beginners, we have pre-added a Datawhale open source logo watermark that does not affect reading in the PDF file. Please understand~</strong>*
 
-> *Hello-Agents PDF: https://github.com/datawhalechina/hello-agents/releases/tag/V1.0.0*  
+> *Hello-Agents PDF: https://github.com/datawhalechina/hello-agents/releases/latest/*  
 > *Hello-Agents PDF Domestic Download: https://www.datawhale.cn/learn/summary/239* 
 
 ## 💡 How to Learn
@@ -162,7 +160,7 @@ We are an open-source community and welcome any form of contribution!
 ## Star History
 
 <div align='center'>
-    <img src="./docs/images/star-history-2026210.png" alt="Datawhale" width="90%">
+    <img src="./docs/images/star-history-2026324.png" alt="Datawhale" width="90%">
 </div>
 
 <div align="center">

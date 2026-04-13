@@ -129,8 +129,8 @@ However, this powerful intuitive capability also comes with opacity. Sub-symboli
 
 For a long time, the two camps of symbolism and sub-symbolism developed like two parallel lines. To overcome the limitations of the above two paradigms, a "grand reconciliation" idea began to emerge, which is neuro-symbolic AI, also called neuro-symbolic hybrid. Its goal is to merge the advantages of both paradigms, creating a hybrid agent that can both learn from data like neural networks and perform logical reasoning like symbolic systems. It attempts to bridge the gap between perception and cognition, intuition and rationality. Nobel Prize-winning economist Daniel Kahneman's dual-system theory proposed in his book "Thinking, Fast and Slow" provides an excellent analogy for understanding neuro-symbolism<sup>[2]</sup>, as shown in Figure 1.4:
 
-- **System 1** is slow, methodical, logic-based deliberative thinking, just like the reasoning process of symbolic AI.
-- **System 2** is a fast, intuitive, parallel thinking mode, similar to the powerful pattern recognition capability of sub-symbolic AI.
+- **System 1** is a fast, intuitive, parallel thinking mode, similar to the powerful pattern recognition capability of sub-symbolic AI.
+- **System 2** is slow, methodical, logic-based deliberative thinking, just like the reasoning process of symbolic AI.
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/1-figures/1757242319667-4.png" alt="Figure description" width="90%"/>
