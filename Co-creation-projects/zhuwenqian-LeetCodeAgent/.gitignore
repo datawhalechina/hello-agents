@@ -1,0 +1,24 @@
+# 环境变量（含 API Key，绝对不能上传！）
+.env
+
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Jupyter 检查点
+.ipynb_checkpoints/
+
+# 系统文件
+.DS_Store
+
+# Jupyter Lab 运行时产生的目录
+anaconda_projects/
+memory/
+tool-output/
+skills/
