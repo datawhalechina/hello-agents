@@ -13,7 +13,10 @@ async def connect_to_server():
     # 使用async with确保连接正确关闭
     async with client:
         # 在这里使用client
-        tools = await client.list_tools()
+        tools = await client.list_tools()   # 客户端组装一个“请把你有哪些工具告诉我”的请求
+  # - 发给 MCP server
+  # - await 挂起当前协程，等结果回来
+  # - 收到结果后恢复执行
         print(f"可用工具: {[t['name'] for t in tools]}")
 
     # 方式2：连接到自定义的Python MCP服务器

@@ -156,7 +156,7 @@ class CodebaseMaintainer:
 
 你的核心能力:
 1. 使用 TerminalTool 探索代码库
-   - 你可以执行任何 shell 命令: ls, cat, grep, find, git 等
+   - 你可以执行任何 shell 命令: ls, cat, grep, find, git 等,执行不通可以试试windows平替命令
    - 工作目录: {self.codebase_path}
    
 2. 使用 NoteTool 记录发现和任务
@@ -414,7 +414,8 @@ class CodebaseMaintainer:
                 "notes_created": self.stats["notes_created"],
                 "issues_found": self.stats["issues_found"]
             },
-            "notes": note_summary
+            "notes": note_summary,
+            "tool_calls":self.stats["tool_calls"]
         }
 
     def generate_report(self, save_to_file: bool = True) -> Dict[str, Any]:

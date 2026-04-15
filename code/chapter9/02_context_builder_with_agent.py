@@ -1,5 +1,5 @@
 """
-ContextBuilder 与 Agent 集成示例 ,
+ContextBuilder 与 Agent 集成示例
 
 展示如何将 ContextBuilder 集成到 Agent 中，实现：
 1. 上下文感知的 Agent
