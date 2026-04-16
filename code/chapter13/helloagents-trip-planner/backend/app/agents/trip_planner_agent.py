@@ -172,6 +172,7 @@ class MultiAgentTripPlanner:
                 env={"AMAP_MAPS_API_KEY": settings.amap_api_key},
                 auto_expand=True
             )
+            self.amap_tool.expandable=True
 
             # 创建景点搜索Agent
             print("  - 创建景点搜索Agent...")
