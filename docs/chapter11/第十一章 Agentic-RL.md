@@ -45,7 +45,7 @@ duck egg. How much in dollars does she make every day at the farmers' market?
 给定一个文本序列 $x_1, x_2, ..., x_t$，模型需要预测下一个词 $x_{t+1}$:
 
 $$
-\mathcal{L}_{\text{pretrain}} = -\sum_{t=1}^{T} \log P(x_t | x_1, x_2, ..., x_{t-1}; \theta)
+\mathcal{L}_{\text{pretrain}} = -\sum\_{t=1}^{T} \log P(x_t | x_1, x_2, ..., x_{t-1}; \theta)
 $$
 
 其中 $\theta$ 是模型参数，$P(x_t | x_1, ..., x_{t-1}; \theta)$ 是模型预测的下一个词的概率分布，目标是最小化负对数似然，即最大化预测正确词的概率。例如，给定文本"The cat sat on the"，模型需要预测下一个词最可能是"mat"。通过在海量文本上进行这样的训练，模型逐渐学会语法规则(什么样的词序是合法的)、语义知识(词与词之间的关系)、世界知识(关于世界的事实性信息)以及基础的推理能力。
@@ -57,7 +57,7 @@ $$
 后训练通常包含三个步骤。第一步是<strong>监督微调(SFT)</strong><sup>[15]</sup>，目标是让模型学会遵循指令和对话格式。训练数据是(prompt， completion)对，训练目标与预训练类似，仍然是最大化正确输出的概率:
 
 $$
-\mathcal{L}_{\text{SFT}} = -\sum_{i=1}^{N} \log P(y_i | x_i; \theta)
+\mathcal{L}_{\text{SFT}} = -\sum\_{i=1}^{N} \log P(y_i | x_i; \theta)
 $$
 
 其中 $x_i$ 是输入提示(prompt)，$y_i$ 是期望的输出，$N$ 是训练样本数量。SFT 的特点是数据量较小、需要人工标注、快速见效、主要学习任务格式和基本能力。
@@ -73,10 +73,10 @@ $$
 第三步是<strong>强化学习微调</strong>。有了奖励模型后，我们就可以用强化学习来优化语言模型，让它生成更高质量的回答。最经典的算法是 PPO(Proximal Policy Optimization)<sup>[1]</sup>，训练目标是:
 
 $$
-J_{\text{PPO}} = \mathbb{E}_{x, y \sim \pi_\theta} [r_\phi(x, y)] - \beta \cdot D_{KL}(\pi_\theta || \pi_{\text{ref}})
+J_{\text{PPO}} = \mathbb{E}_{x, y \sim \pi_\theta} [r_\phi(x, y)] - \beta \cdot D_{KL}(\pi_\theta || \pi\_{\text{ref}})
 $$
 
-其中 $\pi_\theta$ 是当前策略，即语言模型，$\pi_{\text{ref}}$ 是参考策略，这个场景下可以是 SFT 模型，$r_\phi(x, y)$ 是奖励模型的评分，$D_{KL}$ 是 KL 散度，目的是为了防止模型偏离太远，$\beta$ 是平衡系数。这个目标函数的含义是:最大化奖励，同时不要偏离原始模型太远。
+其中 $\pi_\theta$ 是当前策略，即语言模型，$\pi\_{\text{ref}}$ 是参考策略，这个场景下可以是 SFT 模型，$r_\phi(x, y)$ 是奖励模型的评分，$D_{KL}$ 是 KL 散度，目的是为了防止模型偏离太远，$\beta$ 是平衡系数。这个目标函数的含义是:最大化奖励，同时不要偏离原始模型太远。
 
 传统的 RLHF(Reinforcement Learning from Human Feedback)<sup>[5]</sup>需要大量人工标注偏好数据，成本高昂。为了降低成本，研究者提出了 RLAIF(Reinforcement Learning from AI Feedback)<sup>[7]</sup>，用强大的 AI 模型(如 GPT-4)来替代人类标注员。RLAIF 的工作流程是:用 SFT 模型生成多个候选回答，用强大的 AI 模型对回答进行评分和排序，用 AI 的评分训练奖励模型，用奖励模型进行强化学习。实验表明，RLAIF 的效果接近甚至超过 RLHF，同时成本大幅降低<sup>[11]</sup>。
 
@@ -106,7 +106,7 @@ $$
 在奖励方面，PBRFT 只有单步奖励 $r(s_0, a)$，仅在任务结束时给予，表示为 $R_{\text{PBRFT}} = r(s_0, y)$，通常由奖励模型给出: $r(s_0, y) = r_\phi(s_0, y)$。而 Agentic RL 有多步奖励 $r(s_t, a_t)$，可以在中间步骤给予部分奖励，表示为:
 
 $$
-R_{\text{Agentic}} = \sum_{t=0}^{T} \gamma^t r(s_t, a_t)
+R_{\text{Agentic}} = \sum\_{t=0}^{T} \gamma^t r(s_t, a_t)
 $$
 
 其中 $\gamma \in [0,1]$ 是折扣因子，$r(s_t, a_t)$ 可以是稀疏奖励(只在任务完成时给予,如答案正确 +1)、密集奖励(每步都给予，如工具调用成功 +0.1)或结合两者的混合奖励。
@@ -120,7 +120,7 @@ $$
 而 Agentic RL 最大化累积折扣奖励:
 
 $$
-J_{\text{Agentic}}(\theta) = \mathbb{E}_{\tau \sim \pi_\theta} \left[\sum_{t=0}^{T} \gamma^t r(s_t, a_t)\right]
+J_{\text{Agentic}}(\theta) = \mathbb{E}_{\tau \sim \pi_\theta} \left[\sum\_{t=0}^{T} \gamma^t r(s_t, a_t)\right]
 $$
 
 其中 $\tau = (s_0, a_0, s_1, a_1, ..., s_T)$ 是完整的轨迹(trajectory)。
@@ -134,7 +134,7 @@ Agentic RL 的目标是赋予 LLM 智能体六大核心能力，如图 11.2 所�
   <p>图 11.2 Agentic RL 的六大核心能力</p>
 </div>
 
-<strong>推理(Reasoning)</strong>是指从给定信息中逻辑地得出结论的过程，是智能体的核心能力。传统的 CoT 提示方法依赖少样本示例，泛化能力有限;SFT 只能模仿训练数据中的推理模式，难以创新。强化学习的优势在于通过试错学习有效的推理策略，发现训练数据中没有的推理路径，学会何时需要深度思考、何时可以快速回答。推理任务可以建模为序列决策问题，给定问题 $q$，智能体需要生成推理链 $c = (c_1, c_2, ..., c_n)$ 和最终答案 $a$。奖励函数通常设计为 $r(q, c, a) = 1$ if $a = a^*$ else $0$，训练目标是 $\max_\theta \mathbb{E}_{q, (c,a) \sim \pi_\theta} [r(q, c, a)]$。通过这种方式，模型学会生成高质量的推理链，而不仅仅是记忆答案。
+<strong>推理(Reasoning)</strong>是指从给定信息中逻辑地得出结论的过程，是智能体的核心能力。传统的 CoT 提示方法依赖少样本示例，泛化能力有限;SFT 只能模仿训练数据中的推理模式，难以创新。强化学习的优势在于通过试错学习有效的推理策略，发现训练数据中没有的推理路径，学会何时需要深度思考、何时可以快速回答。推理任务可以建模为序列决策问题，给定问题 $q$，智能体需要生成推理链 $c = (c_1, c_2, ..., c_n)$ 和最终答案 $a$。奖励函数通常设计为 $r(q, c, a) = 1$ if $a = a^\*$ else $0$，训练目标是 $\max\_\theta \mathbb{E}\_{q, (c,a) \sim \pi\_\theta} \big[ r(q, c, a) \big]$。通过这种方式，模型学会生成高质量的推理链，而不仅仅是记忆答案。
 
 <strong>工具使用(Tool Use)</strong>是指智能体调用外部工来完成任务的能力。在工具使用任务中，行动空间扩展为 $a_t \in \{a_t^{\text{think}}, a_t^{\text{tool}}\}$,其中 $a_t^{\text{think}}$ 是生成思考过程,$a_t^{\text{tool}} = (\text{tool\_name}， \text{arguments})$ 是调用工具。强化学习让智能体学会何时需要使用工具、选择哪个工具、如何组合多个工具。例如，在解决数学问题时，智能体需要学会何时使用计算器、何时使用代码解释器、何时直接推理。
 
@@ -348,16 +348,16 @@ print(f"样本字段: {rl_data['sample_keys']}")
 在强化学习中，奖励函数 $r(s, a)$ 或 $r(s, a, s')$ 为智能体的每个行动分配一个数值奖励。智能体的目标是最大化累积奖励:
 
 $$
-J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta} \left[\sum_{t=0}^{T} \gamma^t r(s_t, a_t)\right]
+J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta} \left[\sum\_{t=0}^{T} \gamma^t r(s_t, a_t)\right]
 $$
 
 对于数学推理任务，我们可以简化为:
 
 $$
-r(q, a) = f(a, a^*)
+r(q, a) = f(a, a^\*)
 $$
 
-其中 $q$ 是问题，$a$ 是模型生成的答案，$a^*$ 是正确答案，$f$ 是评估函数。
+其中 $q$ 是问题，$a$ 是模型生成的答案，$a^\*$ 是正确答案，$f$ 是评估函数。
 
 奖励函数的设计直接影响训练效果。好的奖励函数应该能清楚地定义什么是成功、能够提供梯度信号、不会产生过大的方差、容易调整和组合。糟糕的奖励函数可能只在任务结束时给奖励，中间步骤无反馈、存在奖励欺骗，使得智能体找到"作弊"方式获得高奖励、多个目标相互矛盾、方差过大，训练不收敛。
 
@@ -372,13 +372,13 @@ HelloAgents 提供了三种内置奖励函数，可以单独使用或组合使�
 准确率奖励(AccuracyReward)是最基础的奖励函数，它只关心答案是否正确。数学定义为:
 
 $$
-r_{\text{acc}}(a, a^*) = \begin{cases}
-1 & \text{if } a = a^* \\
+r_{\text{acc}}(a, a^\*) = \begin{cases}
+1 & \text{if } a = a^\* \\
 0 & \text{otherwise}
 \end{cases}
 $$
 
-其中 $a$ 是模型生成的答案，$a^*$ 是正确答案。这是一个二值奖励函数，答案正确得 1 分，错误得 0 分。
+其中 $a$ 是模型生成的答案，$a^\*$ 是正确答案。这是一个二值奖励函数，答案正确得 1 分，错误得 0 分。
 
 实现时需要处理答案提取和比较。模型的输出可能包含大量文本，我们需要提取最终答案。常见的提取方法包括:查找"Final Answer:"后的数字、查找"####"标记后的数字、使用正则表达式提取最后一个数字。答案比较时需要处理数值精度(如 72.0 和 72 应该视为相同)、单位转换(如 1000 和 1k)、格式差异(如"72"和"seventy-two")。
 
@@ -418,7 +418,7 @@ print(f"描述: {reward_data['description']}")
 长度惩罚(LengthPenaltyReward)鼓励模型生成简洁的回答，避免冗长啰嗦。数学定义为:
 
 $$
-r_{\text{length}}(a, a^*, l) = r_{\text{acc}}(a, a^*) - \alpha \cdot \max(0, l - l_{\text{target}})
+r_{\text{length}}(a, a^\*, l) = r_{\text{acc}}(a, a^\*) - \alpha \cdot \max(0, l - l_{\text{target}})
 $$
 
 其中 $l$ 是生成文本的长度(字符数或 token 数)，$l_{\text{target}}$ 是目标长度，$\alpha$ 是惩罚系数(默认 0.001)。只有在答案正确的情况下才应用长度惩罚，避免模型为了减少惩罚而生成错误的短答案。
@@ -459,7 +459,7 @@ print(f"惩罚权重: {reward_data['penalty_weight']}")
 步骤奖励(StepReward)鼓励模型生成清晰的推理步骤，提高可解释性。数学定义为:
 
 $$
-r_{\text{step}}(a, a^*, s) = r_{\text{acc}}(a, a^*) + \beta \cdot s
+r_{\text{step}}(a, a^\*, s) = r_{\text{acc}}(a, a^\*) + \beta \cdot s
 $$
 
 其中 $s$ 是检测到的推理步骤数量，$\beta$ 是步骤奖励系数(默认 0.1)。同样，只有在答案正确的情况下才给予步骤奖励。
@@ -1155,7 +1155,7 @@ GRPO(Group Relative Policy Optimization)<sup>[2]</sup>是一种简化的 PPO 变
 让我们通过数学公式来理解 GRPO 的原理。PPO 的目标函数为:
 
 $$
-J_{\text{PPO}}(\theta) = \mathbb{E}_{s,a \sim \pi_\theta} \left[ \min\left( \frac{\pi_\theta(a|s)}{\pi_{\text{old}}(a|s)} A(s,a), \text{clip}\left(\frac{\pi_\theta(a|s)}{\pi_{\text{old}}(a|s)}, 1-\epsilon, 1+\epsilon\right) A(s,a) \right) \right]
+J_{\text{PPO}}(\theta) = \mathbb{E}_{s,a \sim \pi_\theta} \left[ \min\left( \frac{\pi_\theta(a|s)}{\pi\_{\text{old}}(a|s)} A(s,a), \text{clip}\left(\frac{\pi_\theta(a|s)}{\pi\_{\text{old}}(a|s)}, 1-\epsilon, 1+\epsilon\right) A(s,a) \right) \right]
 $$
 
 其中 $A(s,a)$ 是优势函数(Advantage)，需要 Value Model 来估计:
@@ -1167,7 +1167,7 @@ $$
 GRPO 的目标函数简化为:
 
 $$
-J_{\text{GRPO}}(\theta) = \mathbb{E}_{s,a \sim \pi_\theta} \left[ \frac{\pi_\theta(a|s)}{\pi_{\text{ref}}(a|s)} \cdot (r(s,a) - \bar{r}_{\text{group}}) \right] - \beta \cdot D_{KL}(\pi_\theta || \pi_{\text{ref}})
+J_{\text{GRPO}}(\theta) = \mathbb{E}_{s,a \sim \pi_\theta} \left[ \frac{\pi_\theta(a|s)}{\pi\_{\text{ref}}(a|s)} \cdot (r(s,a) - \bar{r}_{\text{group}}) \right] - \beta \cdot D_{KL}(\pi_\theta || \pi\_{\text{ref}})
 $$
 
 其中 $\bar{r}_{\text{group}}$ 是组内平均奖励，$\beta$ 是 KL 散度惩罚系数。关键区别在于:GRPO 使用 $r(s,a) - \bar{r}_{\text{group}}$ 代替优势函数 $A(s,a)$，不需要 Value Model;GRPO 使用组内相对奖励，减少奖励方差;GRPO 添加 KL 散度惩罚，防止策略偏离太远。
@@ -1330,7 +1330,7 @@ GRPO 的训练循环包括以下步骤:
 
 2. <strong>奖励计算</strong>:对每个生成的答案计算奖励 $r_i$。奖励可以是准确率、长度惩罚、步骤奖励或它们的组合。
 
-3. <strong>相对奖励</strong>:计算组内平均奖励 $\bar{r} = \frac{1}{N}\sum_{i=1}^{N} r_i$，然后计算相对奖励 $\hat{r}_i = r_i - \bar{r}$。这样做的好处是减少奖励方差，使训练更稳定。
+3. <strong>相对奖励</strong>:计算组内平均奖励 $\bar{r} = \frac{1}{N}\sum\_{i=1}^{N} r_i$，然后计算相对奖励 $\hat{r}_i = r_i - \bar{r}$。这样做的好处是减少奖励方差，使训练更稳定。
 
 4. <strong>策略更新</strong>:使用相对奖励更新策略，同时添加 KL 散度惩罚，防止策略偏离参考模型太远。
 
@@ -1374,13 +1374,13 @@ relative_rewards = [
 KL 散度惩罚是 GRPO 的关键组成部分，它防止策略偏离参考模型太远。KL 散度定义为:
 
 $$
-D_{KL}(\pi_\theta || \pi_{\text{ref}}) = \mathbb{E}_{s,a \sim \pi_\theta} \left[ \log \frac{\pi_\theta(a|s)}{\pi_{\text{ref}}(a|s)} \right]
+D_{KL}(\pi_\theta || \pi\_{\text{ref}}) = \mathbb{E}_{s,a \sim \pi_\theta} \left[ \log \frac{\pi_\theta(a|s)}{\pi\_{\text{ref}}(a|s)} \right]
 $$
 
 在实践中，我们计算每个 token 的 KL 散度，然后求和:
 
 $$
-D_{KL} = \sum_{t=1}^{T} \log \frac{\pi_\theta(a_t|s, a_{<t})}{\pi_{\text{ref}}(a_t|s, a_{<t})}
+D_{KL} = \sum\_{t=1}^{T} \log \frac{\pi_\theta(a_t|s, a_{<t})}{\pi\_{\text{ref}}(a_t|s, a_{<t})}
 $$
 
 KL 散度越大，说明当前策略与参考模型差异越大。通过添加 KL 散度惩罚项 $-\beta \cdot D_{KL}$，我们限制策略更新的幅度，避免"遗忘"SFT 阶段学到的知识。
@@ -1519,7 +1519,7 @@ $$
 <strong>数值误差(Numerical Error)</strong>:对于数学问题，可以计算预测值与真实值的误差。计算公式为:
 
 $$
-\text{Error} = \frac{1}{N} \sum_{i=1}^{N} |y_i - \hat{y}_i|
+\text{Error} = \frac{1}{N} \sum\_{i=1}^{N} |y_i - \hat{y}_i|
 $$
 
 这个指标可以区分"接近正确"(如预测 72.5，真实 72)和"完全错误"(如预测 100，真实 72)。
@@ -1531,7 +1531,7 @@ $$
 <strong>平均长度(Average Length)</strong>:生成答案的平均 token 数。计算公式为:
 
 $$
-\text{Avg Length} = \frac{1}{N} \sum_{i=1}^{N} |y_i|
+\text{Avg Length} = \frac{1}{N} \sum\_{i=1}^{N} |y_i|
 $$
 
 更短的答案意味着更低的推理成本和更快的响应速度。
@@ -1539,7 +1539,7 @@ $$
 <strong>推理步骤数(Reasoning Steps)</strong>:答案中包含的推理步骤数量。计算公式为:
 
 $$
-\text{Avg Steps} = \frac{1}{N} \sum_{i=1}^{N} s_i
+\text{Avg Steps} = \frac{1}{N} \sum\_{i=1}^{N} s_i
 $$
 
 适当的步骤数(2-5 步)说明模型能够系统地分解问题，过多的步骤可能说明推理冗余。
