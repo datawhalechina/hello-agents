@@ -1,6 +1,6 @@
 """
 10.3.4 在智能体中使用A2A工具
-（1）使用A2ATool包装器
+（1）  使用A2ATool包装器
 """
 
 from hello_agents import SimpleAgent, HelloAgentsLLM

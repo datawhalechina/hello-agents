@@ -87,6 +87,6 @@ def create_content(topic):
 
 # 使用
 if __name__ == "__main__":
-    result = create_content("AI在医疗领域的应用")
+    result = create_content("介绍一下mcp")
     print(f"\n最终结果：\n{result}")
 
