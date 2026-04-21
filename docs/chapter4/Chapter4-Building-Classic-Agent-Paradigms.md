@@ -92,9 +92,12 @@ class HelloAgentsLLM:
             print("✅ Large language model response successful:")
             collected_content = []
             for chunk in response:
-                content = chunk.choices[0].delta.content or ""
-                print(content, end="", flush=True)
-                collected_content.append(content)
+                if not chunk.choices:
+                    continue
+                delta = chunk.choices[0].delta
+                if delta.content:
+                    print(delta.content, end="", flush=True)
+                    collected_content.append(delta.content)
             print()  # Newline after streaming output ends
             return "".join(collected_content)
 
