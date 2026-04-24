@@ -62,23 +62,11 @@ func _input(event: InputEvent):
 			print("[DEBUG] 回车键发送消息")
 			return
 
-		# 屏蔽移动键和交互键,防止触发游戏操作 ⭐ WASD键
+		# 屏蔽移动键和交互键，防止触发游戏操作
+		# 但输入框有焦点时放行，让玩家能正常输入文字
 		if event.keycode in [KEY_E, KEY_SPACE, KEY_W, KEY_A, KEY_S, KEY_D]:
-			get_viewport().set_input_as_handled()
-			# 只在第一次屏蔽时打印,避免刷屏
-			match event.keycode:
-				KEY_E:
-					print("[DEBUG] 对话框中屏蔽了E键输入")
-				KEY_SPACE:
-					print("[DEBUG] 对话框中屏蔽了空格键输入")
-				KEY_W:
-					print("[DEBUG] 对话框中屏蔽了W键输入")
-				KEY_A:
-					print("[DEBUG] 对话框中屏蔽了A键输入")
-				KEY_S:
-					print("[DEBUG] 对话框中屏蔽了S键输入")
-				KEY_D:
-					print("[DEBUG] 对话框中屏蔽了D键输入")
+			if not player_input.has_focus():
+				get_viewport().set_input_as_handled()
 
 func start_dialogue(npc_name: String):
 	"""开始与NPC对话"""
