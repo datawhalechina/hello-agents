@@ -60,10 +60,17 @@ async def analyze_paper(request: PaperAnalysisRequest):
             
             # 构建完整的文件路径
             if paper_url.startswith('/uploads/'):
-                # 假设上传的文件在 downloads 目录
-                file_path = os.path.join('downloads', paper_url.replace('/uploads/', ''))
+                # Sanitize filename to prevent path traversal
+                safe_name = os.path.basename(paper_url)
+                if not safe_name or not safe_name.endswith('.pdf'):
+                    raise HTTPException(status_code=400, detail="无效的文件名")
+                file_path = os.path.join('downloads', safe_name)
             else:
-                file_path = paper_url
+                # For non-upload paths, also sanitize to prevent arbitrary file access
+                safe_name = os.path.basename(paper_url)
+                if not safe_name or not safe_name.endswith('.pdf'):
+                    raise HTTPException(status_code=400, detail="无效的文件名")
+                file_path = os.path.join('downloads', safe_name)
             
             # 检查文件是否存在
             if not os.path.exists(file_path):
@@ -541,7 +548,10 @@ async def upload_pdf_for_analysis(file: UploadFile = File(...)):
         
         # 保存文件到 downloads 目录
         os.makedirs("downloads", exist_ok=True)
-        file_path = os.path.join("downloads", file.filename)
+        safe_filename = os.path.basename(file.filename)
+        if not safe_filename:
+            raise HTTPException(status_code=400, detail="无效的文件名")
+        file_path = os.path.join("downloads", safe_filename)
         
         with open(file_path, "wb") as f:
             f.write(pdf_bytes)
@@ -550,8 +560,8 @@ async def upload_pdf_for_analysis(file: UploadFile = File(...)):
         
         return {
             "success": True,
-            "filename": file.filename,
-            "file_path": f"/uploads/{file.filename}",
+            "filename": safe_filename,
+            "file_path": f"/uploads/{safe_filename}",
             "title": pdf_result.get("title", "未知标题"),
             "authors": pdf_result.get("authors", ["未知作者"]),
             "abstract": pdf_result.get("abstract", "")[:500],  # 限制摘要长度
