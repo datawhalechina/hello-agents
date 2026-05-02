@@ -446,7 +446,7 @@ for i in range(5): # Set maximum number of loops
     action_str = action_match.group(1).strip()
 
     if action_str.startswith("Finish"):
-        final_answer = re.match(r"Finish\[(.*)\]", action_str).group(1)
+        final_answer = re.match(r"Finish\[(.*)\]", action_str, re.DOTALL).group(1)
         print(f"Task completed, final answer: {final_answer}")
         break
 
