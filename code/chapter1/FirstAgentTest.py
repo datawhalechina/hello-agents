@@ -141,11 +141,13 @@ class OpenAICompatibleClient:
 import re
 
 # --- 1. 配置LLM客户端 ---
-# 请根据您使用的服务，将这里替换成对应的凭证和地址
-API_KEY = "sk-sWA5GEE6HCGGIEULB1B6CbAd1873470aAe545b262bDa8165"
-BASE_URL = "https://aihubmix.com/v1"
-MODEL_ID = "gemini-3-flash-preview-free"
-os.environ['TAVILY_API_KEY'] = "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"
+# API Key 请通过环境变量提供，勿写入代码：LLM_API_KEY 或 OPENAI_API_KEY；Tavily 使用 TAVILY_API_KEY
+API_KEY = os.environ.get("LLM_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""
+BASE_URL = os.environ.get("LLM_BASE_URL", "https://aihubmix.com/v1")
+MODEL_ID = os.environ.get("LLM_MODEL_ID", "gemini-3-flash-preview-free")
+
+if not API_KEY:
+    raise SystemExit("错误：请配置环境变量 LLM_API_KEY 或 OPENAI_API_KEY。")
 
 llm = OpenAICompatibleClient(
     model=MODEL_ID,
