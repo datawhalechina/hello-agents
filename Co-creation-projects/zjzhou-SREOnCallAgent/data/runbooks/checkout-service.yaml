@@ -1,0 +1,29 @@
+service: checkout-service
+runbook_version: "1.2"
+procedures:
+  - pattern: "DB pool exhausted"
+    severity: P1
+    steps:
+      - "Identify slow queries: run SHOW PROCESSLIST on the primary DB; look for queries >5s"
+      - "Run EXPLAIN on the slowest query to identify full table scans or missing indexes"
+      - "Temporary mitigation: increase pool_size from 10 to 20 via config hot-reload"
+      - "Permanent fix: add the missing index. Example: CREATE INDEX idx_orders_user_id ON orders(user_id)"
+      - "Validate index creation: run EXPLAIN again to confirm index is used"
+      - "Restart pods once index is verified: kubectl rollout restart deployment/checkout-service"
+      - "Monitor db_pool_active_connections and http_request_duration_p99 to confirm recovery"
+
+  - pattern: "high_p99_latency"
+    severity: P1
+    steps:
+      - "Check downstream dependencies: DB query time, Redis cache hit rate, external API latency"
+      - "Review request_queue_depth metric — if >100, consider pod autoscaling"
+      - "Enable slow query logging if not active: SET GLOBAL slow_query_log = 'ON'"
+      - "Consider circuit breaker activation to shed load and protect downstream services"
+      - "Check recent deployments: git log --since='2 hours ago' on checkout-service"
+
+  - pattern: "connection timeout"
+    severity: P2
+    steps:
+      - "Check network connectivity between checkout-service pods and DB"
+      - "Verify DB security group rules allow connections from checkout-service subnet"
+      - "Check for DB maintenance windows or failover events in RDS console"

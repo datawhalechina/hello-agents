@@ -154,6 +154,7 @@ hello-agents/
 To allow readers to quickly experience the complete functionality of this chapter, we provide a directly installable Python package. You can install the version corresponding to this chapter with the following commands:
 
 ```bash
+# If you encounter model unavailability in version 0.2.0, please refer to issue#320 or switch to version 0.2.9 for testing.
 pip install "hello-agents[all]==0.2.0"
 python -m spacy download zh_core_web_sm
 python -m spacy download en_core_web_sm

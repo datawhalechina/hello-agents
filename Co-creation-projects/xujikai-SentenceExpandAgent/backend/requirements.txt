@@ -1,0 +1,11 @@
+# HelloAgents框架
+hello-agents[protocols]>=0.2.4,<=0.2.9
+
+# FastAPI和相关依赖
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+
+# 其他工具
+huggingface_hub>=0.25.0

@@ -178,6 +178,20 @@
     <p>扫描二维码关注 Datawhale 公众号，获取更多优质开源内容</p>
 </div>
 
+## 🎓 引用
+
+如果 Hello-Agents 对您的研究或工作有所帮助，欢迎引用：
+
+```bibtex
+@misc{hello_agents2025,
+  title  = {Hello-Agents: Building an AI Agent from Scratch},
+  author = {Sizhou Chen and Tao Sun and Shufan Jiang and Peilin Huang and Xinmin Zeng and Xinzhong Zhu and all Hello-Agents contributors},
+  year   = {2025},
+  url    = {https://github.com/datawhalechina/Hello-Agents},
+  note   = {GitHub repository}
+}
+```
+
 ---
 
 ## 📜 开源协议

@@ -57,6 +57,11 @@ class HelloAgentsLLM:
                 if content:
                     print(content, end="", flush=True)
                     collected_content.append(content)
+                if not chunk.choices:
+                    continue
+                content = chunk.choices[0].delta.content or ""
+                print(content, end="", flush=True)
+                collected_content.append(content)
             print()  # 在流式输出结束后换行
             return "".join(collected_content)
 

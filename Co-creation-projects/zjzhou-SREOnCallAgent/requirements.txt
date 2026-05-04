@@ -1,0 +1,12 @@
+# LLM — pick one or keep both; the client auto-selects based on env vars
+openai>=1.0.0          # for AIHubmix / ModelScope / OpenAI
+anthropic>=0.40.0      # for Anthropic API (claude-opus-4-7, etc.)
+
+# Web framework (API server)
+fastapi>=0.109.0
+uvicorn>=0.27.0
+
+# Data / config
+pyyaml>=6.0.0
+pydantic>=2.0.0
+python-dotenv>=1.0.0
