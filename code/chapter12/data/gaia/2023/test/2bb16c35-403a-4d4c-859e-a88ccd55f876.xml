@@ -1,0 +1,2290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Publishing DTD v1.3 20210610//EN" "JATS-journalpublishing1-3.dtd">
+<article xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" article-type="research-article" dtd-version="1.3" xml:lang="en">
+  <front>
+    <journal-meta>
+      <journal-id journal-id-type="publisher-id">applsci</journal-id>
+      <journal-title-group>
+        <journal-title>Applied Sciences</journal-title>
+        <abbrev-journal-title abbrev-type="publisher">Appl. Sci.</abbrev-journal-title>
+        <abbrev-journal-title abbrev-type="pubmed">Applied Sciences</abbrev-journal-title>
+      </journal-title-group>
+      <issn pub-type="epub">2076-3417</issn>
+      <publisher>
+        <publisher-name>MDPI</publisher-name>
+      </publisher>
+    </journal-meta>
+    <article-meta>
+      <article-id pub-id-type="doi">10.3390/app13031274</article-id>
+      <article-id pub-id-type="publisher-id">applsci-13-01274</article-id>
+      <article-categories>
+        <subj-group>
+          <subject>Article</subject>
+        </subj-group>
+      </article-categories>
+      <title-group>
+        <article-title>Evaluating the Quality of Raw Chocolate as an Alternative to Commercial Products</article-title>
+      </title-group>
+      <contrib-group>
+        <contrib contrib-type="author">
+          <contrib-id contrib-id-type="orcid" authenticated="true">https://orcid.org/0000-0003-3063-8710</contrib-id>
+          <name>
+            <surname>Kowalski</surname>
+            <given-names>Rados&#x142;aw</given-names>
+          </name>
+          <xref rid="af1-applsci-13-01274" ref-type="aff">1</xref>
+          <xref rid="c1-applsci-13-01274" ref-type="corresp">*</xref>
+        </contrib>
+        <contrib contrib-type="author">
+          <name>
+            <surname>Rosochacki</surname>
+            <given-names>Marek</given-names>
+          </name>
+          <xref rid="af1-applsci-13-01274" ref-type="aff">1</xref>
+          <xref rid="af2-applsci-13-01274" ref-type="aff">2</xref>
+        </contrib>
+        <contrib contrib-type="author">
+          <contrib-id contrib-id-type="orcid" authenticated="true">https://orcid.org/0000-0002-0504-2862</contrib-id>
+          <name>
+            <surname>Wyrostek</surname>
+            <given-names>Jakub</given-names>
+          </name>
+          <xref rid="af1-applsci-13-01274" ref-type="aff">1</xref>
+        </contrib>
+        <contrib contrib-type="author">
+          <contrib-id contrib-id-type="orcid" authenticated="true">https://orcid.org/0000-0003-0034-8202</contrib-id>
+          <name>
+            <surname>Islam</surname>
+            <given-names>Muhammad Torequl</given-names>
+          </name>
+          <xref rid="af3-applsci-13-01274" ref-type="aff">3</xref>
+        </contrib>
+      </contrib-group>
+      <contrib-group>
+        <contrib contrib-type="editor">
+          <name>
+            <surname>Gallo</surname>
+            <given-names>Monica</given-names>
+          </name>
+          <role>Academic Editor</role>
+        </contrib>
+      </contrib-group>
+      <aff id="af1-applsci-13-01274"><label>1</label>Department of Analysis and Evaluation of Food Quality, University of Life Sciences in Lublin, 8 Skromna Street, 20-704 Lublin, Poland</aff>
+      <aff id="af2-applsci-13-01274"><label>2</label>Arco by Paco P&#xE9;rez &amp; Treinta u Tres, 472C Grunwaldzka Avenue, 80-309 Gda&#x144;sk, Poland</aff>
+      <aff id="af3-applsci-13-01274"><label>3</label>Poland Department of Pharmacy, Life Science Faculty, Bangabandhu Sheikh Mujibur Rahman Science and Technology University, Gopalganj 8100, Bangladesh</aff>
+      <author-notes>
+        <corresp id="c1-applsci-13-01274"><label>*</label>Correspondence: <email>radoslaw.kowalski@up.lublin.pl</email></corresp>
+      </author-notes>
+      <pub-date pub-type="epub">
+        <day>18</day>
+        <month>01</month>
+        <year>2023</year>
+      </pub-date>
+      <pub-date pub-type="collection">
+        <month>02</month>
+        <year>2023</year>
+      </pub-date>
+      <volume>13</volume>
+      <issue>3</issue>
+      <elocation-id>1274</elocation-id>
+      <history>
+        <date date-type="received">
+          <day>28</day>
+          <month>12</month>
+          <year>2022</year>
+        </date>
+        <date date-type="rev-recd">
+          <day>13</day>
+          <month>01</month>
+          <year>2023</year>
+        </date>
+        <date date-type="accepted">
+          <day>16</day>
+          <month>01</month>
+          <year>2023</year>
+        </date>
+      </history>
+      <permissions>
+        <copyright-statement>&#xA9; 2023 by the authors.</copyright-statement>
+        <copyright-year>2023</copyright-year>
+        <license license-type="open-access">
+          <license-p>Licensee MDPI, Basel, Switzerland. This article is an open access article distributed under the terms and conditions of the Creative Commons Attribution (CC BY) license (<ext-link ext-link-type="uri" xlink:href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</ext-link>).</license-p>
+        </license>
+      </permissions>
+      <abstract>
+        <p>The aim of this presented study was the sensory evaluation, the analysis of the nutritional composition, and the analysis of the content of health-promoting ingredients, i.e., the total phenolic compounds and the total flavonoids, in raw chocolate (made exclusively from unroasted cocoa beans, cane sugar, and cocoa butter) in comparison to classic commercial chocolates available in the consumer market. The research showed that raw chocolate, compared to commercial chocolates, contained less carbohydrates (39.6% in raw chocolate and 42.7% and 53.7% in commercial chocolate, respectively), was characterized by a higher content of total phenolic compounds (22.08 mg GAE/g in raw chocolate and 9.25 and 7.87 mg GAE/g in commercial chocolates, respectively), had a a higher content of total flavonoids (8.75 mg ECE/g in raw chocolate and 4.43 mg/g and 3.83 mg ECE/g in commercial chocolates, respectively), and also had a higher total antioxidant activity (172.16 &#x3BC;M TE/g in raw chocolate and 132.60 and 63.76 &#x3BC;M TE/g in commercial chocolates, respectively). In the sensory assessment, raw chocolate received lower ranks than commercial chocolates, especially in the case of the most important discriminant in the entire evaluation, i.e., taste, which was unquestionably related to the lower content of carbohydrates. However, currently, it is necessary to reduce the consumption of sugar, which, when excessively present in the diet, is the cause of many diseases. However, in the sensory evaluation for the criteria &#x201C;external appearance&#x2014;shape&#x201D; and &#x201C;external appearance&#x2014;surface condition,&#x201D; the raw chocolate received the highest marks.</p>
+      </abstract>
+      <kwd-group>
+        <kwd>raw chocolate</kwd>
+        <kwd>chemical composition</kwd>
+        <kwd>antioxidant activity</kwd>
+        <kwd>sensory evaluation</kwd>
+      </kwd-group>
+      <funding-group>
+        <award-group>
+          <funding-source>a statutory activity subsidy from the Polish Ministry of Science and Higher Education for the Faculty of Food Science and Biotechnology of the University of Life Sciences in Lublin</funding-source>
+        </award-group>
+        <funding-statement>This work was financed by a statutory activity subsidy from the Polish Ministry of Science and Higher Education for the Faculty of Food Science and Biotechnology of the University of Life Sciences in Lublin.</funding-statement>
+      </funding-group>
+    </article-meta>
+  </front>
+  <body>
+    <sec id="sec1-applsci-13-01274" sec-type="intro">
+      <title>1. Introduction</title>
+      <p>Confectionery is a category of snacks that is among the most popular, both among adults and children. In 2014, 91% of Poles declared that they purchased confectionery, and for the majority of them, confections were an indispensable element of the diet. Among all the respondents, 40% declared consuming something sweet at least five times a week [<xref ref-type="bibr" rid="B1-applsci-13-01274">1</xref>]. Chocolate is a product that is commonly consumed by all generations and age groups [<xref ref-type="bibr" rid="B2-applsci-13-01274">2</xref>]. Data from the year 2020 confirms consumer interest in confectionery, with 21% of the respondents indicating that they choose products of the highest quality [<xref ref-type="bibr" rid="B3-applsci-13-01274">3</xref>]. 33% of the consumers of confectionery choose chocolate products, with the dominant preferences being focused on milk chocolate (52%), followed by dark chocolate (33%), and white chocolate (13%). The volume of the Polish confectionery market is estimated at close to 3000 million EUR [<xref ref-type="bibr" rid="B3-applsci-13-01274">3</xref>].</p>
+      <p>The consumption of confectionery in large amounts can be harmful, due to the presence of simple sugars, purified wheat flour, fat, unsaturated fatty acids, and trans isomers of fatty acids in their composition, which, in consequence, may lead to disturbances in the functioning of the organism and the development of diet-related diseases, such as diabetes, obesity, or disorders of the circulatory system [<xref ref-type="bibr" rid="B4-applsci-13-01274">4</xref>].</p>
+      <p>Chocolate is rich in fats, proteins, carbohydrates, polyphenols, and other bioactive compounds [<xref ref-type="bibr" rid="B2-applsci-13-01274">2</xref>]. Chocolate products with a high calorific value are increasingly being replaced by chocolate with a lower calorific value that retains taste quality and visual appeal. The trend in modern chocolate products is to eliminate unnecessary components with a negative effect on one&#x2019;s health, such as sugar, preservatives, synthetic flavours, and emulsifiers. This is inseparably related to the current demand for products of the types described as &#x201C;fit&#x201D; and &#x201C;eco&#x201D; and for products with the least possible degree of processing. This situation is due to the growing awareness of consumers as to the current fashion and trends driven by celebrities from the worlds of sports and social media [<xref ref-type="bibr" rid="B5-applsci-13-01274">5</xref>].</p>
+      <p>Chocolate is a unique food product, as it is characterised by a solid consistency at room temperature, but it melts easily in the mouth [<xref ref-type="bibr" rid="B6-applsci-13-01274">6</xref>]. These properties of chocolate are a result of the properties of cocoa butter, which is a solid at temperatures below 25 &#xB0;C and holds the particles of sugar and cocoa mass together. At the temperature of the human body, cocoa butter, however, is almost completely liquid, thus allowing the movement of particles due to which chocolate becomes a smooth liquid. Chocolate also has a specific sweetness that is attractive to a majority of people, so it appears strange that the history of chocolate started from a liquid, greasy, and bitter liquor with no resemblance to the product as we know it as today [<xref ref-type="bibr" rid="B7-applsci-13-01274">7</xref>]. Its flavour is undoubtedly the most important attribute of chocolate in terms of consumer perceptions. In this respect, the quality of the initial raw material used in chocolate production is of immense importance. The successive stages of chocolate production also have a significant effect on the quality of the end product [<xref ref-type="bibr" rid="B8-applsci-13-01274">8</xref>]. The production process of classic chocolate comprises fermentation, drying, roasting, grinding of the cocoa seed, the mixing of all ingredients (cocoa mass, sugar, cocoa butter, emulsifiers, flavours and, if required, milk components), conching, and tempering. The main chemical reactions take place during the fermentation, drying, cocoa seed roasting, and conching of the chocolate mass. These reactions are of the greatest importance for the final taste and flavour [<xref ref-type="bibr" rid="B2-applsci-13-01274">2</xref>]. However, those stages also cause certain chemical modifications, which result in changes in the composition and biological properties of the cocoa seeds [<xref ref-type="bibr" rid="B9-applsci-13-01274">9</xref>].</p>
+      <p>Cocoa tree seeds (beans) and chocolate itself contain over 200 substances that can improve health and well-being. Not all of those substances, however, are contained in amounts sufficient to produce a health-promoting effect, e.g., acylethanolamines, phenylethylamine, and serotonin [<xref ref-type="bibr" rid="B10-applsci-13-01274">10</xref>]. Other substances, in turn, may have low bioavailability in the human organism or may undergo rapid degradation [<xref ref-type="bibr" rid="B11-applsci-13-01274">11</xref>].</p>
+      <p>Cocoa and chocolate operate like functional foods, as they contain a number of substances that have a beneficial effect on human health. Chocolate combines certain sensory features with aphrodisiac and antidepressant properties, which expands its effects beyond the cardiovascular system, metabolic diseases, neurological disorders, and psychological profiles [<xref ref-type="bibr" rid="B12-applsci-13-01274">12</xref>]. Over the last 15 years, there has been an increase in interest in the potential health benefits of antioxidants and other compounds included in the phytochemical composition of dark chocolate and cocoa [<xref ref-type="bibr" rid="B13-applsci-13-01274">13</xref>]. Over 200 studies concerning the bioactive components, chemical composition, and health benefits of cocoa trees and cocoa products have been reported [<xref ref-type="bibr" rid="B2-applsci-13-01274">2</xref>].</p>
+      <p>Cocoa tree seeds (beans) have an extremely rich history of medicinal and ritual applications. It started with cocoa seeds being used initially by the Olmecs and then by the Mayas and the Aztecs [<xref ref-type="bibr" rid="B14-applsci-13-01274">14</xref>]. Chocolate&#x2019;s history began with the Mayas, who were most likely the first people in South America to cultivate the cocoa tree. For the Mayas, chocolate was a cocoa drink prepared with hot water and often aromatised with cinnamon and pepper. It was called the food of the Gods, and it was served on the table of Emperor Montezuma II by the Aztecs [<xref ref-type="bibr" rid="B6-applsci-13-01274">6</xref>,<xref ref-type="bibr" rid="B12-applsci-13-01274">12</xref>]. The term &#x201C;chocolate&#x201D; was coined by the early Olmecs, was adopted by the Mayas, and was later adopted by the Mexica (Aztecs) [<xref ref-type="bibr" rid="B15-applsci-13-01274">15</xref>]. The word &#x201C;chocolate&#x201D; probably originates from the word &#x201C;Xococalit&#x201D; from the Aztec &#x201C;xocolatl&#x201D; denoting bitter water, and was a drink prepared by the Pre-Olmecs from cocoa seeds as far back as about 2000 BC [<xref ref-type="bibr" rid="B16-applsci-13-01274">16</xref>].</p>
+      <p>According to EU Directive 2000/36/EC of the European Parliament, &#x201C;chocolate designates the product obtained from cocoa products and sugars that, subject to (b), contains not less than 35% total dry cocoa solids, including not less than 18% cocoa butter and not less than 14% of dry non-fat cocoa solids&#x201D; (excluding certain kinds of chocolate such as &#x201C;vermicelli&#x201D;, &#x201C;gianduja&#x201D;, or &#x201C;couverture&#x201D;) [<xref ref-type="bibr" rid="B17-applsci-13-01274">17</xref>].</p>
+      <p>The concept of raw chocolate is still not defined, but it assumes that raw chocolate retains the traits, parameters, and standards of chocolate, but at every stage of the production of such chocolate, the temperature cannot exceed 42 &#xB0;C [<xref ref-type="bibr" rid="B18-applsci-13-01274">18</xref>], the cocoa beans cannot be subjected to roasting, and the chocolate should be composed solely of three components: cocoa mass, cocoa butter, and sugar (of all kinds of chocolate, raw chocolate is the best for human health; therefore, in its production, alternative sugars are most frequently used, such as, e.g., coconut palm sugar, sugar from coconut palm flowers, xylitol, or stevia). There are concerns that not blasting them with heat of up to about 150 &#xB0;C could mean an increase in bacteria such as salmonella. However, producers insist that, as no animal products are involved, there is no greater risk than when dealing with vegetables, such as carrots or lettuce [<xref ref-type="bibr" rid="B19-applsci-13-01274">19</xref>].</p>
+      <p>In view of the present interest of consumers in products with the lowest degree of processing and that are characterised by a chemical composition rich in health-promoting components, we undertook a study aimed at the estimation of the quality of raw chocolate obtained with a simple craftsman method. The following research hypothesis was put forward: raw chocolate may constitute a more favourable alternative (in terms of chemical composition) to the highly processed commercial products. In order to prove the hypothesis, an analysis was conducted of the nutritional composition of the chocolate and the estimation of its content of health-promoting components, e.g., total phenolic content and total flavonoid content, as compared to classic commercial chocolates available in the consumer market. In addition, a sensory analysis was performed to determine the preferences of the members of the sensory assessment panel in comparison to the commercial products.</p>
+    </sec>
+    <sec id="sec2-applsci-13-01274">
+      <title>2. Materials and Methods</title>
+      <sec id="sec2dot1-applsci-13-01274">
+        <title>2.1. Experimental Material</title>
+        <p>The following ingredients were used for the production of the raw chocolate (MAN), and they all originated from organic production:<list list-type="bullet"><list-item><p>raw beans of the cocoa tree cv. Nacional Arriba from the Zoilita plantation in the Los R&#xED;os region of Ecuador (&#x201C;Eko gram&#x201D;, Poland);</p></list-item><list-item><p>unrefined cane sugar (&#x201C;Sweet garden&#x201D;, India);</p></list-item><list-item><p>cocoa butter (&#x201C;Eko gram&#x201D;, Poland).</p></list-item></list></p>
+        <p>The reference material for the comparisons in the experiment consisted of two samples of commercial chocolate (64% and 50% cocoa mass) available on the market:<list list-type="bullet"><list-item><p>classic bitter chocolate 64% (COM 64%) ingredients: cocoa mass, sugar, cocoa with reduced fat content, cocoa butter, emulsifiers (soy lecithin, polyglycerol polyricinoleate), flavour, coca mass minimum of 64%;</p></list-item><list-item><p>light bitter chocolate 50% (COM 50%) ingredients: sugar, cocoa mass, cocoa with reduced fat content, cocoa butter, milk fat, emulsifiers (soy lecithin, polyglycerol polyricinoleate), salt, flavour, cocoa mass minimum of 50%.</p></list-item></list></p>
+        <p>The choice of reference chocolates with a cocoa mass content of 50% and 64% resulted from the popularity of these chocolates among consumers and corresponded, in terms of the cocoa mass content, to raw chocolate.</p>
+      </sec>
+      <sec id="sec2dot2-applsci-13-01274">
+        <title>2.2. Recipe of the Raw Chocolate</title>
+        <p>Ingredients: raw cocoa tree beans, hulled&#x2014;570 g; unrefined cane sugar&#x2014;300 g; cocoa butter&#x2014;50 g.</p>
+        <p>The percentage value of the chocolate is the total content of cocoa mass, including cocoa butter, in the chocolate; in the chocolate produced in this experiment, it was &#x2248; 65.26%.</p>
+        <p>A schematic diagram of the process of production is presented in <xref ref-type="fig" rid="applsci-13-01274-f001">Figure 1</xref>.</p>
+        <p>Cocoa beans were sorted, and those that did not meet the quality requirements were rejected. The accepted beans were ground to the point where the hulls cracked; excessive fragmentation may have resulted in excessive losses at the next stage of processing. The lighter hulls were separated using compressed air. After the melanger was started, when the rollers reached their maximum speed, 15 g of cocoa butter were added to reduce friction and wear on the machine, and then 570 g of cleaned cocoa beans (nibs) were added in batches. The fragmented beans, under the effect of grinding by the rollers, were gradually reduced in size. After 2 h of grinding, unrefined cane sugar was added in portions (300 g). After 24 h from the time of starting the operation of the melanger, the remaining portion of 35 g of cocoa butter was added. The entire mass was left for 48 h for conching. After 72 h of continuous operation of the machine, the smooth and aromatic mass was poured into a container and closed tightly. The chocolate was then left for 21 days in a dry room with a temperature of 16&#x2013;18 &#xB0;C in order to mature. The process of chocolate maturation was the final stage of chocolate production, in which taste and flavour were formed and attain full depth. Next, the chocolate was tempered on a marble tabletop. After the process of tempering, the liquid mass was poured into special polycarbonate forms, in which air bubbles were removed from the chocolate mass through the shaking of the forms, and then the whole quantity was left at a temperature of 16&#x2013;18 &#xB0;C for full crystallisation.</p>
+      </sec>
+      <sec id="sec2dot3-applsci-13-01274">
+        <title>2.3. Determination of Nutritional Composition</title>
+        <p>Moisture in tested samples was determined according to the method AOAC 931.04 [<xref ref-type="bibr" rid="B20-applsci-13-01274">20</xref>]. Ash contents were determined after dry digestion at 550 &#xB0;C [<xref ref-type="bibr" rid="B21-applsci-13-01274">21</xref>]. The content of lipids was determined according to the AOAC 963.15 official method [<xref ref-type="bibr" rid="B22-applsci-13-01274">22</xref>], as modified by Roda and Lambri [<xref ref-type="bibr" rid="B23-applsci-13-01274">23</xref>]. The samples were then subjected to acid hydrolysis and extraction by means of a Soxhlet apparatus. Portions of 3&#x2013;4 g of chocolate/cocoa beans were weighed out. Those amounts were mixed with 45 mL of distilled water at boiling temperature, and then 55 mL of HCl (25% <italic>w</italic>/<italic>v</italic>) were added. The solutions were boiled for about 30 min in a reflux condenser, and then filtered using a Whatman n&#xB0; 595 &#xBD; filter. The filter containing the hydrolysed samples was rinsed thoroughly with distilled water until all chlorides were washed out, and then dried at 100 &#xB0;C for 6 h. Ultimately, the fat material with the filter was extracted by means of a Soxhlet apparatus with the use of 50 mL of n-hexane for 4 h.</p>
+        <p>Protein determination was carried out following the AOAC 939.02-1939 method [<xref ref-type="bibr" rid="B24-applsci-13-01274">24</xref>]. Dietary fibres were analyzed using the AOAC 985.29 methodology [<xref ref-type="bibr" rid="B25-applsci-13-01274">25</xref>]. Total non-fibre carbohydrate contents were determined by percent differences (100%&#x2014;% moisture, % protein, % fat, % ash, and % fibre content) [<xref ref-type="bibr" rid="B26-applsci-13-01274">26</xref>].</p>
+        <p>The energetic value was calculated by applying the mean recalculation coefficients for protein, fat, and carbohydrates according to Kunachowicz et al. [<xref ref-type="bibr" rid="B27-applsci-13-01274">27</xref>]. These factors were as follows: 1 g of protein&#x2014;17 kJ, 1 g of fat&#x2014;37 kJ, and 1 g of carbohydrates&#x2014;17 kJ.</p>
+      </sec>
+      <sec id="sec2dot4-applsci-13-01274">
+        <title>2.4. Extraction of Bioactive Components</title>
+        <p>The extraction of bioactive components from samples of the chocolate was conducted according to the procedure described by Bari&#x161;i&#x107; et al. [<xref ref-type="bibr" rid="B28-applsci-13-01274">28</xref>]. The obtained extracts were stored in a freezer, and prior to analysis, they were filtered through a nylon membrane filter.</p>
+      </sec>
+      <sec id="sec2dot5-applsci-13-01274">
+        <title>2.5. Total Phenolic Content</title>
+        <p>Determinations of the phenolic compounds in the tested samples were made by spectrophotometric means (&#x3BB; = 725 nm) according to a modified Singleton and Rossi method [<xref ref-type="bibr" rid="B28-applsci-13-01274">28</xref>,<xref ref-type="bibr" rid="B29-applsci-13-01274">29</xref>]. A portion (0.1 mL) of chocolate or cocoa bean extract was mixed with 6 mL of water and 0.5 mL of the Folin&#x2013;Ciocalteu reagent in a calibrated flask. After 6 min, 1.5 mL of 20% Na<sub>2</sub>CO<sub>3</sub> was added, and the flask was topped up with distilled water to the target volume (10 mL). The mixture prepared in this manner was left for 2 h at room temperature in a dark place, and the absorbance of the final solution was measured at 725 nm relative to a blank sample. The results of the phenol content were expressed in gallic acid equivalents (GAE) (Sigma-Aldrich, St. Louis, MO, USA, ACS reagent &#x2265; 98.00%). The results were calculated from the equation of the calibration curve prepared for gallic acid (GA) standards in the concentration range of 10&#x2013;60 mg/L (10, 20, 30, 40, 50, and 60 mg/L). Each sample was diluted appropriately to fit the range of the standard curve. All analyses were performed in triplicate.</p>
+      </sec>
+      <sec id="sec2dot6-applsci-13-01274">
+        <title>2.6. Total Flavonoid Content</title>
+        <p>The determination of flavonoid content in the tested samples was performed by means of spectrophotometry (&#x3BB; = 510 nm) according to a modified procedure described by Karadeniz et al. [<xref ref-type="bibr" rid="B30-applsci-13-01274">30</xref>]. An aliquot of methanolic chocolate extract (1 mL) was mixed with 5 mL of redistilled water and 0.3 mL of 5% NaNO<sub>2</sub>. After 5 min of incubation at room temperature, 0.6 mL of 10% AlCl<sub>3</sub>&#xB7;6H<sub>2</sub>O was added. After 5 min of incubation, 2 mL of 1 M of NaOH was added, and the mixture was filled with redistilled water up to the final volume of 10 mL. The absorbance of the samples prepared in this manner was measured at 510 nm against the blank. The results of the flavonoid content were expressed in epicatechin equivalents (ECE) (Sigma-Aldrich, St. Louis, MO, USA, ACS reagent &#x2265; 98.00%). The results were calculated from the equation of the calibration curve prepared for epicatechin (EC) standards in the concentration range of 10&#x2013;400 mg/L (10; 50; 100; 150; 200; 250; 300; 400 mg/L). Each sample was diluted appropriately to fit the range of the standard curve. All analyses were performed in triplicate.</p>
+      </sec>
+      <sec id="sec2dot7-applsci-13-01274">
+        <title>2.7. Free Radical-Scavenging Ability by the Use of a Stable DPPH&#x2022; Radical</title>
+        <p>The antioxidant activity was determined according to a modified Brand&#x2013;Williams et al. method with the use of the synthetic radical DPPH (2,2-diphenyl-1-picrylhydrazyl, Sigma) dissolved in ethanol [<xref ref-type="bibr" rid="B31-applsci-13-01274">31</xref>,<xref ref-type="bibr" rid="B32-applsci-13-01274">32</xref>]. A total of 0.5mM of alcoholic DPPH solution was prepared by dissolving 19.72 mg of DPPH in ethanol. The obtained solution was diluted to final 0.08 mM working solution, so that its absorbance at 517 nm was approximately 0.9. The solution was stored in the dark.</p>
+        <p>The test sample contained 1.5 mL of the DPPH solution and 20 &#xB5;L of the extracts; the absorbance (A) was measured 30 min after the initiation of the reaction. Each measurement was performed in triplicate, and the mean absorbance value (A<sub>1</sub>) for the solution was calculated.</p>
+        <p>The inhibition of the DPPH radical by the sample was calculated according to the following formula: inhibition % = 100 (A<sub>0</sub> &#x2212; A<sub>1</sub>)/A<sub>0</sub>, where A<sub>0</sub> is the absorbance of the control, and A<sub>1</sub> is the absorbance of the sample. Each sample, depending on the material of the chocolate, was diluted appropriately to the range of the standard curve prepared for Trolox (6-hydroxy-2,5,7,8-tetramethylchroman-2-carboxylic acid) standards. All analyses were performed in triplicate; the concentration values were based on a Trolox standard curve (40&#x2013;600 &#x3BC;M) and expressed as micromoles of Trolox equivalents (TE) per gram of chocolate.</p>
+      </sec>
+      <sec id="sec2dot8-applsci-13-01274">
+        <title>2.8. Sensory Analysis</title>
+        <p>The sensory evaluation was performed for the raw chocolate (MAN) and, as a reference, for two samples of commercial chocolates (COM 50% and COM 64%). Sensory analysis of the chocolates was conducted with regard to general preferences (the indication by the assessor that a single sample of chocolate was preferred in terms of sensory traits) and with the use of a hedonic scale, which determined the degree to which a given sample was &#x201C;desirable&#x201D; or &#x201C;undesirable&#x201D; to the consumer. A 5-point scale was used: like very much (+2 pts), like (+1 pt), neither like nor dislike (0 pts), dislike (&#x2212;1 pt), dislike very much (&#x2212;2 pts) [<xref ref-type="bibr" rid="B33-applsci-13-01274">33</xref>,<xref ref-type="bibr" rid="B34-applsci-13-01274">34</xref>,<xref ref-type="bibr" rid="B35-applsci-13-01274">35</xref>,<xref ref-type="bibr" rid="B36-applsci-13-01274">36</xref>]. In addition, sensory evaluation in terms of fragrance and flavour was conducted with the use of the ranking test, in which every sample was given a suitable rank, from the least intense fragrance/flavour (rank 1) to the most intense fragrance/flavour (rank 3) [<xref ref-type="bibr" rid="B33-applsci-13-01274">33</xref>,<xref ref-type="bibr" rid="B35-applsci-13-01274">35</xref>]. The results obtained for an individual trait were expressed as an average characteristic for a given testing group.</p>
+        <p>In addition, a five-point sensory assessment of the chocolates was conducted with regard to the visual appearance of the products: colour, form, and surface quality; and to the fracture, flavour, and taste. The assessors, using a five-point rating scale, were to assign a rank to the given quality trait from 5 to 1 (<xref ref-type="table" rid="applsci-13-01274-t001">Table 1</xref>). The rank of 5 meant the highest result, and 1 meant the lowest. A definition of the quality of the tested product was assigned to every rank. In view of the fact that not all quality traits affect the overall quality to the same degree, weight coefficients were applied to determine the importance of the quality factors relative to the others (<xref ref-type="table" rid="applsci-13-01274-t001">Table 1</xref>). The results obtained for a particular trait were summed up and expressed on a percentage scale, where the highest rating of a given trait corresponded to 100%.</p>
+      </sec>
+      <sec id="sec2dot9-applsci-13-01274">
+        <title>2.9. Statistical Analysis</title>
+        <p>Data were analysed using one-way analysis of variance (ANOVA) followed by Duncan&#x2019;s test using the SAS statistical system (SAS Version 9.1, SAS Inst., Cary, NC, USA). The significance of all tests was set at <italic>p</italic> &#x2264; 0.05.</p>
+      </sec>
+    </sec>
+    <sec id="sec3-applsci-13-01274" sec-type="results">
+      <title>3. Results and Discussion</title>
+      <sec id="sec3dot1-applsci-13-01274">
+        <title>3.1. Chemical Composition and Visual Assessment</title>
+        <p>A bar of raw chocolate obtained in the experiment was characterised by a dark brown colour and a perfectly smooth surface (<xref ref-type="fig" rid="applsci-13-01274-f002">Figure 2</xref>).</p>
+        <p><xref ref-type="table" rid="applsci-13-01274-t002">Table 2</xref> presents the nutritional composition of the raw chocolate produced in the experiment (MAN) compared to the composition of the commercial products (COM 50% and COM 64%) and to the composition of the cocoa beans from which the experimental product was derived.</p>
+        <p>The raw chocolate was characterised by the highest fat content (33.4%), compared to the commercial chocolates COM 50% and COM 64% (28.0 and 32.0%, respectively). In the case of the content of carbohydrates, the lowest level of those components was noted in the experimental product, at 39.6%, while in the case of the commercial products, the corresponding values were 53.7% and 42.7%, respectively. The nutritional composition determined the energy value of the products, and the raw chocolate was characterised by a calorific value (495 kcal) that was similar to those of the commercial chocolates (491 kcal and 494 kcal, respectively). Chocolate and chocolate products are characterised by a high nutritional and calorific value (above 3000 kcal/kg). A notable part of that high energy value results from the content of fat and carbohydrates. The literature data indicate that dark chocolate and milk chocolate are characterised by the following nutritional compositions: carbohydrate amounts of 49.7 and 50.5%, fat amounts of 33.6 and 36.3%, protein amounts of 6.6 and 7.3%, crude fibre amounts of 8 and 3.2%, and calorific values of 515 and 545 kcal, respectively [<xref ref-type="bibr" rid="B12-applsci-13-01274">12</xref>]. Similar values of the nutritional composition of chocolate were described by G&#xFC;rsoy and Heperkan [<xref ref-type="bibr" rid="B37-applsci-13-01274">37</xref>], i.e., the compositions for dark and milk chocolate were, respectively: carbohydrate amounts of 55 and 57%, fat amounts of 32 and 33%, protein amounts of 5 and 7%, and calorific values 530 and 518 kcal. Caponio et al. [<xref ref-type="bibr" rid="B38-applsci-13-01274">38</xref>] demonstrated that 70% dark chocolate % had the following composition: carbohydrate amounts of 45%, fat amounts of 41%, protein amounts of 8&#x2013;9%, and soluble dietary fibre amounts of 5%. Cocoa butter is the component of chocolate that has the highest calorific value. It contains approximately 34% (33.3&#x2013;40.2%) stearic acid (saturated acid), 34% (26.3&#x2013;35.2%) oleic acid (monounsaturated acid), and 27% (25.2&#x2013;33.7%) palmitic acid (saturated acid) [<xref ref-type="bibr" rid="B37-applsci-13-01274">37</xref>,<xref ref-type="bibr" rid="B39-applsci-13-01274">39</xref>]. Stearic acid has only a small effect on the level of cholesterol. Oleic acid may have a reducing effect on cholesterol levels, or it can be neutral in this respect. Palmitic acid, in turn, displays a moderate tendency towards elevating the level of cholesterol. The remaining part of cocoa butter is composed of unsaturated fatty acids [<xref ref-type="bibr" rid="B7-applsci-13-01274">7</xref>]. Chocolate also contains minerals in its composition, especially potassium, magnesium, copper, and iron [<xref ref-type="bibr" rid="B13-applsci-13-01274">13</xref>,<xref ref-type="bibr" rid="B40-applsci-13-01274">40</xref>,<xref ref-type="bibr" rid="B41-applsci-13-01274">41</xref>]. While the majority of carbohydrates in chocolate originate from saccharose, there are also small amounts of various carbohydrates in the dietary fibre contained in cocoa. Carbohydrate types and amounts are important because they affect the glycaemic index. Because the presence of lipids in food slows carbohydrate absorption, a high fat content in chocolate causes a slower rise in blood sugar levels, resulting in a lower glycaemic index [<xref ref-type="bibr" rid="B7-applsci-13-01274">7</xref>].</p>
+        <p><xref ref-type="table" rid="applsci-13-01274-t003">Table 3</xref> presents the total content of polyphenolics and the total content of flavonoids in the produced raw chocolate and in the commercial chocolates as compared to the content of those components in the non-roasted beans of the cocoa tree. The highest total phenolic content and total flavonoid content were noted in cocoa beans (27.82 mg GAE/g and 12.22 mg ECE/g, respectively). The raw chocolate produced in the experiment was characterised by significantly higher total phenolic and flavonoid contents (22.08 mg GAE/g and 8.75 mg ECE/g, respectively) in comparison to the commercial chocolates, which were characterised by a ca. 2.8-fold lower (COM 50%) and 2.4-fold lower (COM 64%) content of polyphenols and an ca. 2.3-fold lower (COM 50%) and ca. 2-fold lower (COM 64%) content of flavonoids.</p>
+        <p>The literature data indicate that non-roasted cocoa beans from Ecuador had a total phenolic content of 25.42 mg GAE/g, while the corresponding value for roasted cocoa beans was 22.92 mg GAE/g. The total phenolic content in various cocoa beans varied in the range from 9.96 mg GAE/g to 37.81 mg GAE/g and depended on the cultivar, place of origin, and method of treatment or processing (roasting). The cited authors indicated that a majority of the chocolates tested in the described experiment were characterised by a higher level of polyphenols in the chocolates (within the range of 9.10 mg GAE/g to 40.55 mg GAE/g) relative to the phenolic content in the respective cocoa beans from which the chocolates were produced [<xref ref-type="bibr" rid="B18-applsci-13-01274">18</xref>]. Urba&#x144;ska et al. [<xref ref-type="bibr" rid="B42-applsci-13-01274">42</xref>], in a study on the mass of milk chocolates based on cocoa mass obtained from non-roasted cocoa beans from Peru, noted a total phenolic content ranging from about 15.25 mg GAE/g to approximately 16.85 mg GAE/g. In another study, chocolates from Peru had phenolic contents ranging from 1.69 mg GAE/g to 5.39 mg GAE/g [<xref ref-type="bibr" rid="B43-applsci-13-01274">43</xref>]. Todorovic et al. [<xref ref-type="bibr" rid="B44-applsci-13-01274">44</xref>] obtained polyphenol contents in chocolates in the range of 7.21 mg GAE/g to 12.65 mg GAE/g. Ja&#x107;imovi&#x107; et al. [<xref ref-type="bibr" rid="B13-applsci-13-01274">13</xref>] showed that the content of total polyphenols in dark chocolate ranged from 10.55 to 39.82 mg GAE/g. In addition, it was found that the chocolate samples with the highest cocoa content were characterized by the highest content of polyphenols. It is known that the total polyphenol content varies depending on the variety of cocoa beans and the conditions during fermentation, drying, roasting, processing, and storage. In some cases, the results obtained cannot be directly compared due to different extraction solvents. In addition, some literature results are reported as mg of GAE per gram of cocoa product, while other results are reported as mg of GAE per gram of chocolate defatted sample, which contributes to some variation between the results [<xref ref-type="bibr" rid="B45-applsci-13-01274">45</xref>].</p>
+        <p>The content of flavonoids in a study on cocoa beans from China, Indonesia, and Papua New Guinea ranged from 3.50 mg ECE/g to 12.62 mg ECE/g [<xref ref-type="bibr" rid="B46-applsci-13-01274">46</xref>], and the highest of those values corresponded to the value obtained in the experiment presented herein. The content of flavonoids in chocolates from Peru varied from 0.28 mg CE/g (catechin equivalents) to 1.99 mg CE/g [<xref ref-type="bibr" rid="B43-applsci-13-01274">43</xref>]. In another study, the level of flavonoids in lipid-free chocolate masses fell within the range of 0.02 mg ECE/g to 6.01 mg ECE/g [<xref ref-type="bibr" rid="B47-applsci-13-01274">47</xref>]. Ja&#x107;imovi&#x107; et al. [<xref ref-type="bibr" rid="B13-applsci-13-01274">13</xref>] showed that the total flavonoid content in dark chocolate samples ranged from 10.04 to 37.85 mg CE/g. The chocolate samples with the highest levels of total polyphenols also contained the highest contents of flavonoids [<xref ref-type="bibr" rid="B13-applsci-13-01274">13</xref>], which was also confirmed in our study. Samples with the highest content of cocoa showed the highest content of flavonoids. According to Lee et al. [<xref ref-type="bibr" rid="B48-applsci-13-01274">48</xref>], cocoa has a higher content of flavonoids per portion than tea or red wine. Powdered cocoa is one of the richest identified dietary sources of flavonoids so far, next to buckwheat hulls, sorghum, and cinnamon [<xref ref-type="bibr" rid="B49-applsci-13-01274">49</xref>].</p>
+        <p>The highest value of antioxidant activity, a 36.95% DPPH radical inhibition, was noted for non-roasted cocoa beans, which corresponded to 216.61 &#x3BC;M TE/g (<xref ref-type="table" rid="applsci-13-01274-t003">Table 3</xref>). Higher antioxidant activity results for cocoa beans were obtained by Elodie et al. [<xref ref-type="bibr" rid="B9-applsci-13-01274">9</xref>], i.e., between 295 and 329 &#x3BC;M TE/g (unfermented cocoa beans) and from 221 to 351 &#x3BC;M TE/g (fermented cocoa beans). The second-ranking sample in terms of antioxidant activity was the raw chocolate MAN obtained from non-roasted cocoa beans, which had an inhibition at a level of 29.91% (172.16 &#x3BC;M TE/g). The sample of commercial chocolate (COM 64%) was characterised by antioxidant activity at a level of 23.63% inhibition (132.60 &#x3BC;M TE/g). The lowest value of antioxidant activity was noted in the case of the commercial chocolate COM 50%&#x2013;at a 12.72% inhibition (63.76 &#x3BC;M TE/g). Caponio et al. [<xref ref-type="bibr" rid="B38-applsci-13-01274">38</xref>] showed that two types of dark chocolate, i.e., artisanal and industrial, had antioxidant activities of 79.81 and 68.65 &#x3BC;M TE/g, respectively, which were lower than in our study. The results obtained in the range of the contents of polyphenols, flavonoids, and antioxidant activity supported the correlation between the content of cocoa mass and the oxidative capacity of the products. Roasting cocoa beans generally results in a lowering of antioxidant activity. Arlorio et al. [<xref ref-type="bibr" rid="B50-applsci-13-01274">50</xref>] noted a decrease in the antioxidant activity of cocoa ranging between 37 and 48% after preliminary roasting at 100 &#xB0;C and proper roasting of various cocoa cultivars at 130 &#xB0;C. In addition, Hu et al. [<xref ref-type="bibr" rid="B51-applsci-13-01274">51</xref>] observed a decrease in the antioxidant activity of cocoa, ranging between 44 and 50%, during roasting at a high temperature (190 &#xB0;C) for a short time (15 min).</p>
+        <p>With regard to the commercial production of chocolate, one should take into account that the numerous parameters of the complex technological process affect the nutritional as well as the health-promoting values of the obtained product [<xref ref-type="bibr" rid="B18-applsci-13-01274">18</xref>]. Cocoa beans are the primary raw material for the production of chocolate and the most important source of phenolic compounds [<xref ref-type="bibr" rid="B52-applsci-13-01274">52</xref>]. In the technological process, which is characterised by the use of high temperatures, a majority of polyphenols undergo degradation, which can be observed in the form of lower levels of those health-promoting components relative to the unprocessed raw material. It should be emphasised that certain polyphenols, e.g., (-)-epicatechin, can form highly complex, insoluble complexes that are very hard to determine analytically. Such complex procyanidins, under the effect of high temperatures, may undergo degradation into easily extractable monomeric forms, which affect the total phenolic content in the product [<xref ref-type="bibr" rid="B18-applsci-13-01274">18</xref>]. The roasting of cocoa beans results in the appearance of the characteristic colour, flavour, taste, and texture of roasted cocoa beans [<xref ref-type="bibr" rid="B53-applsci-13-01274">53</xref>], which has an effect on the sensory parameters of the final product, i.e., chocolate. As a result of the application of high temperatures during roasting, in the range of 120&#x2013;150 &#xB0;Cover 5&#x2013;120&#x2009;min, a reduction is observed in the total phenolic content and the total flavonoid content [<xref ref-type="bibr" rid="B53-applsci-13-01274">53</xref>,<xref ref-type="bibr" rid="B54-applsci-13-01274">54</xref>]. Chocolate processing has an effect on the total phenolic content and also on the antioxidant activity of chocolate, and suitable technology can &#x201C;optimise&#x201D; the retention of polyphenols and the antioxidant activity of chocolate [<xref ref-type="bibr" rid="B55-applsci-13-01274">55</xref>]. &#x17B;y&#x17C;elewicz et al. [<xref ref-type="bibr" rid="B56-applsci-13-01274">56</xref>] indicated that, in the case of the total content of polyphenols in chocolate, the conching process did not contribute to a significant degradation of these compounds, unlike the roasting process. The progressive decrease in the content of polyphenols during the production of chocolate was also described by Di Mattia et al. [<xref ref-type="bibr" rid="B57-applsci-13-01274">57</xref>]. These authors indicated that roasting played the most important role in this case, although differences in the concentration of polyphenols can also be observed between conched and un-tempered chocolate, as well as finished dark chocolate.</p>
+      </sec>
+      <sec id="sec3dot2-applsci-13-01274">
+        <title>3.2. Sensory Evaluation</title>
+        <p>In the sensory analysis performed with the method of preference assessment by a group of assessors, the commercial chocolate COM 50% obtained the highest rank of 9 in total, while the experimental raw chocolate and the commercial chocolate COM 64% obtained the ranks of 2 and 1, respectively (<xref ref-type="fig" rid="applsci-13-01274-f003">Figure 3</xref>).</p>
+        <p>In the sensory analysis of the tested samples of chocolate according to the hedonic scale, the commercial chocolates obtained the highest summary values of ratings, i.e., 18 (COM 50%) and 13 (COM 64%), while the experimental raw chocolate (MAN) obtained the lowest rating of 2 (<xref ref-type="fig" rid="applsci-13-01274-f004">Figure 4</xref>).</p>
+        <p>In the analysis conducted with the method of sequencing the discriminants of the two traits of flavour and taste, the commercial chocolates were indicated as the preferred ones in terms of flavour, with average ranks of 2.33 (COM 50%) and 2 (COM 64%), respectively, while the raw chocolate (MAN) obtained the lowest rank of 1.83. When the criterion in the evaluation was the taste, all of the tested chocolates were given similar ranks (2 and 1.95), with the commercial chocolates having a minimal advantage (<xref ref-type="fig" rid="applsci-13-01274-f005">Figure 5</xref>).</p>
+        <p>In the next stage of the conducted sensory analysis of the chocolates, five evaluated traits were distinguished, i.e., external appearance&#x2014;colour, external appearance&#x2014;shape, external appearance&#x2014;surface condition, fragrance, and flavour (<xref ref-type="fig" rid="applsci-13-01274-f006">Figure 6</xref>).</p>
+        <p>In the evaluation of the trait &#x201C;external appearance&#x2014;colour&#x201D;, the commercial chocolates obtained the highest ranks in the percentage scale, i.e., 91.67% (COM 64%) and 90% (COM 50%), while the raw chocolate (MAN) obtained the rank of 86.67%. With regard to the criteria of &#x201C;external appearance&#x2014;shape&#x201D; and &#x201C;external appearance&#x2014;surface condition&#x201D;, the panel members gave the highest ranks to the raw chocolate (MAN), at 98.33 and 93.33%, respectively, while the ranks given to the commercial chocolates were 95 and 88.33% (COM 50%) and 93.33 and 88.33% (COM 64%), respectively. The commercial chocolates were characterised by the highest-ranked parameters, i.e., flavour and taste, and obtained the values of 81.67 and 75%, and 83.33 and 80%, for the chocolates COM 50% and COM 64%, respectively, while the rank given to the raw chocolate MAN for its flavour and taste was low at 65%. Taking into account the weight of the individual evaluated parameters, in this analysis, as can be seen in <xref ref-type="table" rid="applsci-13-01274-t001">Table 1</xref>, the highest summary rank for all five of the evaluated discriminants was granted to the chocolate COM 50%, at 86.58%, followed by the chocolate COM 64% at84%, and the lowest rank was given to the raw chocolate MAN at 77.83%.</p>
+        <p>In summary of the results of the sensory evaluation, the commercial chocolate scored 50%. The most important discriminant in the evaluation was taste (weight factor 0.3), which is affected by sweetness, which is determined by the content of carbohydrates. The commercial chocolate COM 50% had the highest content of carbohydrates at 53.7% (<xref ref-type="table" rid="applsci-13-01274-t002">Table 2</xref>). This was reflected in the highest level of sweetness in that chocolate. The chocolate COM 64% was the next-ranked chocolate in terms of taste, with 42.7% carbohydrate content, which was 11% less than the chocolate COM 50%. The experimental raw chocolate MAN had the lowest content of carbohydrates, 39.6%, and its rank for taste was also the lowest. The taste preferences of consumers are shaped by their being accustomed to products offered by commercial producers in the consumer market. Popov-Ralji&#x107; et al. [<xref ref-type="bibr" rid="B58-applsci-13-01274">58</xref>] analysed the sensory parameters of nine milk chocolate products that differed in their content of saccharose (400, 475, or 550 g/kg) and cocoa butter (280, 320 or 360 g/kg). The cited authors demonstrated that samples with a low content of sugar had a more bitter taste, while samples with a higher sugar content were characterised by a more intense milky/vanilla/caramel taste and a harder consistency, and they obtained higher ranks in the sensory evaluation. According to Urba&#x144;ska et al. [<xref ref-type="bibr" rid="B59-applsci-13-01274">59</xref>], a high sugar addition results in higher consumer acceptance of chocolates. However, in recent years, efforts have been made to reduce the content of sugar in various food products, including chocolate. The excessive intake of free sugars increases the total consumption of energy and may reduce the consumption of foods richer in nutrients, which involves numerous unfavourable health effects [<xref ref-type="bibr" rid="B60-applsci-13-01274">60</xref>]. The excessive intake of sugar is related to an increased risk of the development of non-contagious diseases, such as excessive body mass, cardiometabolic diseases, elevated blood pressure, certain kinds of cancer, and tooth decay [<xref ref-type="bibr" rid="B61-applsci-13-01274">61</xref>]. On the basis of evidence linking sugar intake with unfavourable health effects, the WHO [<xref ref-type="bibr" rid="B62-applsci-13-01274">62</xref>] recommended a limitation of free sugar intake to less than 10% (at best, below 5%) of the daily total consumption of energy, which corresponds to 50 g a day per average adult. Although a number of countries have implemented a set of strategies and means aimed at reducing sugar intake [<xref ref-type="bibr" rid="B63-applsci-13-01274">63</xref>], the available data show that the objective has not yet been attained [<xref ref-type="bibr" rid="B61-applsci-13-01274">61</xref>]. In view of the above, the raw chocolate presented in this report can be an alternative to commercial products that are characterised by a higher content of carbohydrates. In spite of the lower ranks in the sensory analysis, it is worth promoting such a product that complies with WHO recommendations concerning the reduction of sugar intake.</p>
+        <p>Fat is another component that should be mentioned among the basic nutritional components of chocolate. The raw chocolate MAN had the highest content of fat (33.4%), while the commercial chocolate COM 50% was characterised by the lowest level of that component (28%). Guinard et al. [<xref ref-type="bibr" rid="B64-applsci-13-01274">64</xref>] demonstrated that various levels of fat and sugar in chocolate resulted in very big differences in the sensory properties of milk chocolate. The cited authors demonstrated that samples with a high fat content were ranked lower than samples with a low content of fat.</p>
+        <p>The raw chocolate MAN was obtained from non-roasted cocoa beans, as opposed to the commercial chocolates, which were produced from roasted cocoa beans. In addition, the composition of the raw chocolate was limited solely to three basic components: non-roasted cocoa beans, cane sugar, and cocoa butter. According to the producer&#x2019;s statement, the commercial chocolates contained additional components, such as emulsifiers (soy lecithin, polyglycerol polyricinoleate), flavour additives, and milk fat (in the case of the chocolate COM 50%). The raw chocolate had a higher content of total phenolic compounds and a higher total flavonoid content. As those components produce a more intense bitter taste, this resulted in reduced ranks in the evaluation of the trait &#x201C;taste&#x201D;. Oberrauter et al. [<xref ref-type="bibr" rid="B65-applsci-13-01274">65</xref>] demonstrated that phenolic compounds are the key inducers of bitterness and sourness, which potentially reduces the acceptance of such chocolates by consumers.</p>
+      </sec>
+    </sec>
+    <sec id="sec4-applsci-13-01274" sec-type="conclusions">
+      <title>4. Conclusions</title>
+      <p>This presented study indicated that the craft raw chocolate produced solely with the use of three recipe ingredients (non-roasted cocoa beans, cane sugar, and cocoa butter) was characterised by a lower content of carbohydrates (39.6% in raw chocolate and 42.7% and 53.7% in commercial chocolates, respectively), higher total phenolic and total flavonoid contents (22.08 mg GAE/g and 8.75 mg ECE/g in raw chocolate; 9.25 and 7.87 mg GAE/g; and 4.43 and 3.83 mg ECE/g in commercial chocolates, respectively), and a higher antioxidant activity compared to commercial chocolates (172.16 &#x3BC;M TE/g in raw chocolate and 132.60 and 63.76 &#x3BC;M TE/g in commercial chocolates, respectively). In the sensory evaluation, the raw chocolate obtained lower rankings than the commercial chocolates, especially in the case of the most important discriminant in the entire evaluation, i.e., taste, which was unquestionably related to the lower content of carbohydrates. On the other hand, in the sensory evaluation for the criteria &#x201C;external appearance&#x2014;shape&#x201D; and &#x201C;external appearance&#x2014;surface condition&#x201D;, the panel members gave the highest ranks to the raw chocolate.</p>
+    </sec>
+  </body>
+  <back>
+    <notes>
+      <title>Author Contributions</title>
+      <p>Conceptualisation, R.K. and M.R.; methodology R.K. and M.R.; software, J.W.; validation, R.K.; formal analysis, R.K.; investigation, R.K. and M.T.I.; resources, R.K. and M.T.I.; data curation, R.K., M.R. and J.W.; writing&#x2014;original draft preparation, R.K.; writing&#x2014;review and editing, R.K. and M.T.I.; visualization, R.K. and J.W.; supervision, R.K. and M.T.I.; project administration, R.K.; funding acquisition, R.K. All authors have read and agreed to the published version of the manuscript.</p>
+    </notes>
+    <notes>
+      <title>Institutional Review Board Statement</title>
+      <p>Not applicable.</p>
+    </notes>
+    <notes>
+      <title>Informed Consent Statement</title>
+      <p>Not applicable.</p>
+    </notes>
+    <notes>
+      <title>Data Availability Statement</title>
+      <p>Not applicable.</p>
+    </notes>
+    <notes notes-type="COI-statement">
+      <title>Conflicts of Interest</title>
+      <p>The authors declare no conflict of interest.</p>
+    </notes>
+    <ref-list>
+      <title>References</title>
+      <ref id="B1-applsci-13-01274">
+        <label>1.</label>
+        <element-citation publication-type="web">
+          <person-group person-group-type="author">
+            <collab>KPMG</collab>
+          </person-group>
+          <article-title>Rynek S&#x142;odyczy w Polsce</article-title>
+          <comment>Available online: <ext-link xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="https://assets.kpmg/content/dam/kpmg/pl/pdf/2016/12/pl-Rynek-slodyczy-w-Polsce-2014-online-secured.pdf" ext-link-type="uri">https://assets.kpmg/content/dam/kpmg/pl/pdf/2016/12/pl-Rynek-slodyczy-w-Polsce-2014-online-secured.pdf</ext-link></comment>
+          <date-in-citation content-type="access-date" iso-8601-date="2022-12-22">(accessed on 22 December 2022)</date-in-citation>
+        </element-citation>
+      </ref>
+      <ref id="B2-applsci-13-01274">
+        <label>2.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Bari&#x161;i&#x107;</surname>
+              <given-names>V.</given-names>
+            </name>
+            <name>
+              <surname>Kopjar</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>Jozinovi&#x107;</surname>
+              <given-names>A.</given-names>
+            </name>
+            <name>
+              <surname>Flanjak</surname>
+              <given-names>I.</given-names>
+            </name>
+            <name>
+              <surname>A&#x10D;kar</surname>
+              <given-names>&#x110;.</given-names>
+            </name>
+            <name>
+              <surname>Mili&#x10D;evi&#x107;</surname>
+              <given-names>B.</given-names>
+            </name>
+            <name>
+              <surname>&#x160;ubari&#x107;</surname>
+              <given-names>D.</given-names>
+            </name>
+            <name>
+              <surname>Joki&#x107;</surname>
+              <given-names>S.</given-names>
+            </name>
+            <name>
+              <surname>Babi&#x107;</surname>
+              <given-names>J.</given-names>
+            </name>
+          </person-group>
+          <article-title>The Chemistry behind Chocolate Production</article-title>
+          <source>Molecules</source>
+          <year>2019</year>
+          <volume>24</volume>
+          <elocation-id>3163</elocation-id>
+          <pub-id pub-id-type="doi">10.3390/molecules24173163</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B3-applsci-13-01274">
+        <label>3.</label>
+        <element-citation publication-type="web">
+          <person-group person-group-type="author">
+            <name>
+              <surname>BioStat</surname>
+              <given-names>C.B.-R.</given-names>
+            </name>
+          </person-group>
+          <article-title>Badanie Rynku S&#x142;odyczy</article-title>
+          <comment>Available online: <ext-link xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="https://www.statystyka.az.pl/zastosowania/badania-ankietowe-statystyka/badanie-rynku-slodyczy.php" ext-link-type="uri">https://www.statystyka.az.pl/zastosowania/badania-ankietowe-statystyka/badanie-rynku-slodyczy.php</ext-link></comment>
+          <date-in-citation content-type="access-date" iso-8601-date="2022-12-22">(accessed on 22 December 2022)</date-in-citation>
+        </element-citation>
+      </ref>
+      <ref id="B4-applsci-13-01274">
+        <label>4.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Gronowska-Senger</surname>
+              <given-names>A.</given-names>
+            </name>
+          </person-group>
+          <article-title>Nutrition, life style and health of the Poles</article-title>
+          <source>Zyw. Cz&#x142;owieka Metab.</source>
+          <year>2007</year>
+          <volume>34</volume>
+          <fpage>12</fpage>
+          <lpage>21</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B5-applsci-13-01274">
+        <label>5.</label>
+        <element-citation publication-type="book">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Hartel</surname>
+              <given-names>R.W.</given-names>
+            </name>
+            <name>
+              <surname>von Elbe</surname>
+              <given-names>J.H.</given-names>
+            </name>
+            <name>
+              <surname>Hofberger</surname>
+              <given-names>R.</given-names>
+            </name>
+          </person-group>
+          <source>Confectionery Science and Technology</source>
+          <publisher-name>Springer International Publishing</publisher-name>
+          <publisher-loc>Cham, Switzerland</publisher-loc>
+          <year>2018</year>
+          <isbn>978-3-319-61740-4</isbn>
+        </element-citation>
+      </ref>
+      <ref id="B6-applsci-13-01274">
+        <label>6.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Patel</surname>
+              <given-names>N.</given-names>
+            </name>
+            <name>
+              <surname>Jayswal</surname>
+              <given-names>S.</given-names>
+            </name>
+            <name>
+              <surname>Maitreya</surname>
+              <given-names>B.B.</given-names>
+            </name>
+            <name>
+              <surname>Nirali Patel</surname>
+              <given-names>C.</given-names>
+            </name>
+          </person-group>
+          <article-title>Dark chocolate: Consumption for human health</article-title>
+          <source>J. Pharmacogn. Phytochem.</source>
+          <year>2019</year>
+          <volume>8</volume>
+          <fpage>2887</fpage>
+          <lpage>2890</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B7-applsci-13-01274">
+        <label>7.</label>
+        <element-citation publication-type="book">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Beckett</surname>
+              <given-names>S.</given-names>
+            </name>
+          </person-group>
+          <source>The Science of Chocolate</source>
+          <publisher-name>Royal Society of Chemistry</publisher-name>
+          <publisher-loc>Cambridge, UK</publisher-loc>
+          <year>2008</year>
+          <isbn>978-0-85404-970-7</isbn>
+        </element-citation>
+      </ref>
+      <ref id="B8-applsci-13-01274">
+        <label>8.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Pieracci</surname>
+              <given-names>Y.</given-names>
+            </name>
+            <name>
+              <surname>Ascrizzi</surname>
+              <given-names>R.</given-names>
+            </name>
+            <name>
+              <surname>Pistelli</surname>
+              <given-names>L.</given-names>
+            </name>
+            <name>
+              <surname>Flamini</surname>
+              <given-names>G.</given-names>
+            </name>
+          </person-group>
+          <article-title>Comparison of the Chemical and Sensorial Evaluation of Dark Chocolate Bars</article-title>
+          <source>Appl. Sci.</source>
+          <year>2021</year>
+          <volume>11</volume>
+          <elocation-id>9964</elocation-id>
+          <pub-id pub-id-type="doi">10.3390/app11219964</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B9-applsci-13-01274">
+        <label>9.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Elodie</surname>
+              <given-names>J.M.</given-names>
+            </name>
+            <name>
+              <surname>Bereau</surname>
+              <given-names>D.</given-names>
+            </name>
+            <name>
+              <surname>Poucheret</surname>
+              <given-names>P.</given-names>
+            </name>
+            <name>
+              <surname>Guzman</surname>
+              <given-names>C.</given-names>
+            </name>
+            <name>
+              <surname>Boudard</surname>
+              <given-names>F.</given-names>
+            </name>
+            <name>
+              <surname>Robinson</surname>
+              <given-names>J.C.</given-names>
+            </name>
+          </person-group>
+          <article-title>Antioxidative and Immunomodulatory Potential of the Endemic French Guiana Wild Cocoa &#x201C;Guiana&#x201D;</article-title>
+          <source>Foods</source>
+          <year>2021</year>
+          <volume>10</volume>
+          <fpage>522</fpage>
+        </element-citation>
+      </ref>
+      <ref id="B10-applsci-13-01274">
+        <label>10.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Nehlig</surname>
+              <given-names>A.</given-names>
+            </name>
+          </person-group>
+          <article-title>The neuroprotective effects of cocoa flavanol and its influence on cognitive performance</article-title>
+          <source>Br. J. Clin. Pharmacol.</source>
+          <year>2013</year>
+          <volume>75</volume>
+          <fpage>716</fpage>
+          <lpage>727</lpage>
+          <pub-id pub-id-type="doi">10.1111/j.1365-2125.2012.04378.x</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B11-applsci-13-01274">
+        <label>11.</label>
+        <element-citation publication-type="book">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Ramsey</surname>
+              <given-names>D.</given-names>
+            </name>
+          </person-group>
+          <source>Chocolate: Indulge Your Inner Chocoholic</source>
+          <publisher-name>Dorling Kindersley</publisher-name>
+          <publisher-loc>London, UK</publisher-loc>
+          <year>2016</year>
+        </element-citation>
+      </ref>
+      <ref id="B12-applsci-13-01274">
+        <label>12.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Montagna</surname>
+              <given-names>M.T.</given-names>
+            </name>
+            <name>
+              <surname>Diella</surname>
+              <given-names>G.</given-names>
+            </name>
+            <name>
+              <surname>Triggiano</surname>
+              <given-names>F.</given-names>
+            </name>
+            <name>
+              <surname>Caponio</surname>
+              <given-names>G.R.</given-names>
+            </name>
+            <name>
+              <surname>De Giglio</surname>
+              <given-names>O.</given-names>
+            </name>
+            <name>
+              <surname>Caggiano</surname>
+              <given-names>G.</given-names>
+            </name>
+            <name>
+              <surname>Di Ciaula</surname>
+              <given-names>A.</given-names>
+            </name>
+            <name>
+              <surname>Portincasa</surname>
+              <given-names>P.</given-names>
+            </name>
+          </person-group>
+          <article-title>Chocolate, &#x201C;Food of the Gods&#x201D;: History, Science, and Human Health</article-title>
+          <source>Int. J. Environ. Res. Public Health</source>
+          <year>2019</year>
+          <volume>16</volume>
+          <elocation-id>4960</elocation-id>
+          <pub-id pub-id-type="doi">10.3390/ijerph16244960</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B13-applsci-13-01274">
+        <label>13.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Ja&#x107;imovi&#x107;</surname>
+              <given-names>S.</given-names>
+            </name>
+            <name>
+              <surname>Popovi&#x107;-Djordjevi&#x107;</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>Sari&#x107;</surname>
+              <given-names>B.</given-names>
+            </name>
+            <name>
+              <surname>Krsti&#x107;</surname>
+              <given-names>A.</given-names>
+            </name>
+            <name>
+              <surname>Mickovski-Stefanovi&#x107;</surname>
+              <given-names>V.</given-names>
+            </name>
+            <name>
+              <surname>Panteli&#x107;</surname>
+              <given-names>N.&#x110;.</given-names>
+            </name>
+          </person-group>
+          <article-title>Antioxidant Activity and Multi-Elemental Analysis of Dark Chocolate</article-title>
+          <source>Foods</source>
+          <year>2022</year>
+          <volume>11</volume>
+          <elocation-id>1445</elocation-id>
+          <pub-id pub-id-type="doi">10.3390/foods11101445</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B14-applsci-13-01274">
+        <label>14.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Jalil</surname>
+              <given-names>A.</given-names>
+            </name>
+            <name>
+              <surname>Ismail</surname>
+              <given-names>A.</given-names>
+            </name>
+          </person-group>
+          <article-title>Polyphenols in Cocoa and Cocoa Products: Is There a Link between Antioxidant Properties and Health?</article-title>
+          <source>Molecules</source>
+          <year>2008</year>
+          <volume>13</volume>
+          <fpage>2190</fpage>
+          <lpage>2219</lpage>
+          <pub-id pub-id-type="doi">10.3390/molecules13092190</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B15-applsci-13-01274">
+        <label>15.</label>
+        <element-citation publication-type="book">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Macri</surname>
+              <given-names>M.J.</given-names>
+            </name>
+            <name>
+              <surname>Looper</surname>
+              <given-names>M.G.</given-names>
+            </name>
+          </person-group>
+          <source>New Catalog of Maya Hieroglyphs: The Classic Period Inscriptions</source>
+          <publisher-name>Iniversity of Oklahoma Press</publisher-name>
+          <publisher-loc>Oklahoma City, OK, USA</publisher-loc>
+          <year>2013</year>
+          <isbn>9780806143712</isbn>
+        </element-citation>
+      </ref>
+      <ref id="B16-applsci-13-01274">
+        <label>16.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Nowak</surname>
+              <given-names>P.</given-names>
+            </name>
+          </person-group>
+          <article-title>Historia zapisana w tabliczce</article-title>
+          <source>Przegl&#x105;d Piekarniczy Cukier.</source>
+          <year>2010</year>
+          <volume>9</volume>
+          <fpage>74</fpage>
+          <lpage>75</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B17-applsci-13-01274">
+        <label>17.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <collab>EU</collab>
+          </person-group>
+          <article-title>EU Directive 2000/36/EC of the European Parliament and of the Council of 23 June 2000 relating to cocoa and chocolate products intended for human consumption</article-title>
+          <source>Off. J. Eur. Commun.</source>
+          <year>2000</year>
+          <volume>L197</volume>
+          <fpage>19</fpage>
+          <lpage>25</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B18-applsci-13-01274">
+        <label>18.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Urba&#x144;ska</surname>
+              <given-names>B.</given-names>
+            </name>
+            <name>
+              <surname>Kowalska</surname>
+              <given-names>J.</given-names>
+            </name>
+          </person-group>
+          <article-title>Comparison of the Total Polyphenol Content and Antioxidant Activity of Chocolate Obtained from Roasted and Unroasted Cocoa Beans from Different Regions of the World</article-title>
+          <source>Antioxidants</source>
+          <year>2019</year>
+          <volume>8</volume>
+          <elocation-id>283</elocation-id>
+          <pub-id pub-id-type="doi">10.3390/antiox8080283</pub-id>
+          <pub-id pub-id-type="pmid">31390779</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B19-applsci-13-01274">
+        <label>19.</label>
+        <element-citation publication-type="web">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Nieburg</surname>
+              <given-names>O.</given-names>
+            </name>
+          </person-group>
+          <article-title>Is the Rise of Raw Chocolate a Safety Concern?</article-title>
+          <comment>Available online: <ext-link xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="https://www.confectionerynews.com/Article/2014/07/16/Raw-chocolate-a-Salmonella-health-risk-says-NCA?utm_source=copyright&amp;utm_medium=OnSite&amp;utm_campaign=copyright" ext-link-type="uri">https://www.confectionerynews.com/Article/2014/07/16/Raw-chocolate-a-Salmonella-health-risk-says-NCA?utm_source=copyright&amp;utm_medium=OnSite&amp;utm_campaign=copyright</ext-link></comment>
+          <date-in-citation content-type="access-date" iso-8601-date="2022-12-22">(accessed on 22 December 2022)</date-in-citation>
+        </element-citation>
+      </ref>
+      <ref id="B20-applsci-13-01274">
+        <label>20.</label>
+        <element-citation publication-type="standard">
+          <std>AOAC 931.04</std>
+          <source>Moisture in Cocoa Products</source>
+          <publisher-name>AOAC International</publisher-name>
+          <publisher-loc>Gaithersburg, MD, USA</publisher-loc>
+          <year>2013</year>
+        </element-citation>
+      </ref>
+      <ref id="B21-applsci-13-01274">
+        <label>21.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Kowalski</surname>
+              <given-names>R.</given-names>
+            </name>
+            <name>
+              <surname>Wierci&#x144;ski</surname>
+              <given-names>J.</given-names>
+            </name>
+          </person-group>
+          <article-title>Evaluation of chemical composition of some <italic>Silphium</italic> L. species seeds as alternative foodstuff raw materials</article-title>
+          <source>Polish J. Food Nutr. Sci.</source>
+          <year>2004</year>
+          <volume>13</volume>
+          <fpage>349</fpage>
+          <lpage>354</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B22-applsci-13-01274">
+        <label>22.</label>
+        <element-citation publication-type="standard">
+          <std>AOAC 963.15</std>
+          <source>Official Methods of Analysis. Fat in Cacao Products, Soxhlet Extraction Method</source>
+          <publisher-name>AOAC International</publisher-name>
+          <publisher-loc>Gaithersburg, MD, USA</publisher-loc>
+          <year>2010</year>
+        </element-citation>
+      </ref>
+      <ref id="B23-applsci-13-01274">
+        <label>23.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Roda</surname>
+              <given-names>A.</given-names>
+            </name>
+            <name>
+              <surname>Lambri</surname>
+              <given-names>M.</given-names>
+            </name>
+          </person-group>
+          <article-title>Changes in Antioxidants and Sensory Properties of Italian Chocolates and Related Ingredients Under Controlled Conditions During an Eighteen-Month Storage Period</article-title>
+          <source>Nutrients</source>
+          <year>2019</year>
+          <volume>11</volume>
+          <elocation-id>2719</elocation-id>
+          <pub-id pub-id-type="doi">10.3390/nu11112719</pub-id>
+          <pub-id pub-id-type="pmid">31717543</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B24-applsci-13-01274">
+        <label>24.</label>
+        <element-citation publication-type="standard">
+          <std>AOAC 939.02-1939</std>
+          <source>Protein (Milk) in Milk Chocolate. Kjeldahl Method</source>
+          <publisher-name>AOAC International</publisher-name>
+          <publisher-loc>Gaithersburg, MD, USA</publisher-loc>
+          <year>2000</year>
+        </element-citation>
+      </ref>
+      <ref id="B25-applsci-13-01274">
+        <label>25.</label>
+        <element-citation publication-type="standard">
+          <std>AOAC 985.29</std>
+          <source>Total Dietary Fiber in Foods, Enzymatic-Gravimetric Method</source>
+          <publisher-name>AOAC International</publisher-name>
+          <publisher-loc>Gaithersburg, MD, USA</publisher-loc>
+          <year>2003</year>
+        </element-citation>
+      </ref>
+      <ref id="B26-applsci-13-01274">
+        <label>26.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Lon&#x10D;arevi&#x107;</surname>
+              <given-names>I.</given-names>
+            </name>
+            <name>
+              <surname>Pajin</surname>
+              <given-names>B.</given-names>
+            </name>
+            <name>
+              <surname>Petrovi&#x107;</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>Nikoli&#x107;</surname>
+              <given-names>I.</given-names>
+            </name>
+            <name>
+              <surname>Maravi&#x107;</surname>
+              <given-names>N.</given-names>
+            </name>
+            <name>
+              <surname>A&#x10D;kar</surname>
+              <given-names>&#x110;.</given-names>
+            </name>
+            <name>
+              <surname>&#x160;ubari&#x107;</surname>
+              <given-names>D.</given-names>
+            </name>
+            <name>
+              <surname>Zari&#x107;</surname>
+              <given-names>D.</given-names>
+            </name>
+            <name>
+              <surname>Mili&#x10D;evi&#x107;</surname>
+              <given-names>B.</given-names>
+            </name>
+          </person-group>
+          <article-title>White Chocolate with Resistant Starch: Impact on Physical Properties, Dietary Fiber Content and Sensory Characteristics</article-title>
+          <source>Molecules</source>
+          <year>2021</year>
+          <volume>26</volume>
+          <elocation-id>5908</elocation-id>
+          <pub-id pub-id-type="doi">10.3390/molecules26195908</pub-id>
+          <pub-id pub-id-type="pmid">34641451</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B27-applsci-13-01274">
+        <label>27.</label>
+        <element-citation publication-type="book">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Kunachowicz</surname>
+              <given-names>H.</given-names>
+            </name>
+            <name>
+              <surname>Nadolna</surname>
+              <given-names>I.</given-names>
+            </name>
+            <name>
+              <surname>Przygoda</surname>
+              <given-names>B.</given-names>
+            </name>
+            <name>
+              <surname>Iwanow</surname>
+              <given-names>K.</given-names>
+            </name>
+          </person-group>
+          <source>Food Composition Tables</source>
+          <publisher-name>Instytut &#x17B;ywno&#x15B;ci i &#x17B;ywienia</publisher-name>
+          <publisher-loc>Warszawa, Poland</publisher-loc>
+          <year>1998</year>
+        </element-citation>
+      </ref>
+      <ref id="B28-applsci-13-01274">
+        <label>28.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Bari&#x161;i&#x107;</surname>
+              <given-names>V.</given-names>
+            </name>
+            <name>
+              <surname>Stokanovi&#x107;</surname>
+              <given-names>M.C.</given-names>
+            </name>
+            <name>
+              <surname>Flanjak</surname>
+              <given-names>I.</given-names>
+            </name>
+            <name>
+              <surname>Doko</surname>
+              <given-names>K.</given-names>
+            </name>
+            <name>
+              <surname>Jozinovi&#x107;</surname>
+              <given-names>A.</given-names>
+            </name>
+            <name>
+              <surname>Babi&#x107;</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>&#x160;ubari&#x107;</surname>
+              <given-names>D.</given-names>
+            </name>
+            <name>
+              <surname>Mili&#x10D;evi&#x107;</surname>
+              <given-names>B.</given-names>
+            </name>
+            <name>
+              <surname>Cindri&#x107;</surname>
+              <given-names>I.</given-names>
+            </name>
+            <name>
+              <surname>A&#x10D;kar</surname>
+              <given-names>&#x110;.</given-names>
+            </name>
+          </person-group>
+          <article-title>Cocoa Shell as a Step Forward to Functional Chocolates&#x2014;Bioactive Components in Chocolates with Different Composition</article-title>
+          <source>Molecules</source>
+          <year>2020</year>
+          <volume>25</volume>
+          <elocation-id>5470</elocation-id>
+          <pub-id pub-id-type="doi">10.3390/molecules25225470</pub-id>
+          <pub-id pub-id-type="pmid">33238393</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B29-applsci-13-01274">
+        <label>29.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Singleton</surname>
+              <given-names>V.L.</given-names>
+            </name>
+            <name>
+              <surname>Rossi</surname>
+              <given-names>J.A.</given-names>
+            </name>
+          </person-group>
+          <article-title>Colorimetry of total phenolics with phosphomolybdic-phosphotungstic acid reagents</article-title>
+          <source>Am. J. Enol. Vitic.</source>
+          <year>1965</year>
+          <volume>16</volume>
+          <fpage>144</fpage>
+          <lpage>158</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B30-applsci-13-01274">
+        <label>30.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Karadeniz</surname>
+              <given-names>F.</given-names>
+            </name>
+            <name>
+              <surname>Burdurlu</surname>
+              <given-names>H.</given-names>
+            </name>
+            <name>
+              <surname>Koca</surname>
+              <given-names>N.</given-names>
+            </name>
+            <name>
+              <surname>Soyer</surname>
+              <given-names>Y.</given-names>
+            </name>
+          </person-group>
+          <article-title>Antioxidant activity of selected fruits and vegetables grown in Turkey</article-title>
+          <source>Turkish J. Agric. For.</source>
+          <year>2005</year>
+          <volume>29</volume>
+          <fpage>297</fpage>
+          <lpage>303</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B31-applsci-13-01274">
+        <label>31.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Brand-Williams</surname>
+              <given-names>W.</given-names>
+            </name>
+            <name>
+              <surname>Cuvelier</surname>
+              <given-names>M.E.</given-names>
+            </name>
+            <name>
+              <surname>Berset</surname>
+              <given-names>C.</given-names>
+            </name>
+          </person-group>
+          <article-title>Use of a free radical method to evaluate antioxidant activity</article-title>
+          <source>LWT Food Sci. Technol.</source>
+          <year>1995</year>
+          <volume>28</volume>
+          <fpage>25</fpage>
+          <lpage>30</lpage>
+          <pub-id pub-id-type="doi">10.1016/S0023-6438(95)80008-5</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B32-applsci-13-01274">
+        <label>32.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Wyrostek</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>Kowalski</surname>
+              <given-names>R.</given-names>
+            </name>
+          </person-group>
+          <article-title>The Effect of Water Mineralization on the Extraction of Active Compounds from Selected Herbs and on the Antioxidant Properties of the Obtained Brews</article-title>
+          <source>Foods</source>
+          <year>2021</year>
+          <volume>10</volume>
+          <elocation-id>1227</elocation-id>
+          <pub-id pub-id-type="doi">10.3390/foods10061227</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B33-applsci-13-01274">
+        <label>33.</label>
+        <element-citation publication-type="book">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Bary&#x142;ko-Pikielna</surname>
+              <given-names>N.</given-names>
+            </name>
+            <name>
+              <surname>Matuszewska</surname>
+              <given-names>I.</given-names>
+            </name>
+          </person-group>
+          <source>Sensoryczne Badania &#x17B;ywno&#x15B;ci</source>
+          <publisher-name>Wydawnictwo Naukowe PTT&#x17B;</publisher-name>
+          <publisher-loc>Krak&#xF3;w, Poland</publisher-loc>
+          <year>2014</year>
+          <isbn>978-83-935421-3-0</isbn>
+        </element-citation>
+      </ref>
+      <ref id="B34-applsci-13-01274">
+        <label>34.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Szcz&#x119;sna</surname>
+              <given-names>T.</given-names>
+            </name>
+            <name>
+              <surname>Wojtala</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>Waszkowiak</surname>
+              <given-names>K.</given-names>
+            </name>
+          </person-group>
+          <article-title>The effect of nutritional knowledge, education and financial situation on food preferences and nutritional habits of agricultural university students living in students house</article-title>
+          <source>Probl. Hig. Epidemiol.</source>
+          <year>2005</year>
+          <volume>86</volume>
+          <fpage>30</fpage>
+          <lpage>35</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B35-applsci-13-01274">
+        <label>35.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Kowalski</surname>
+              <given-names>R.</given-names>
+            </name>
+            <name>
+              <surname>Wyrostek</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>Ka&#x142;wa</surname>
+              <given-names>K.</given-names>
+            </name>
+            <name>
+              <surname>Kowalska</surname>
+              <given-names>G.</given-names>
+            </name>
+            <name>
+              <surname>Pankiewicz</surname>
+              <given-names>U.</given-names>
+            </name>
+            <name>
+              <surname>Sujka</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>W&#x142;odarczyk-Stasiak</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>Mazurek</surname>
+              <given-names>A.</given-names>
+            </name>
+          </person-group>
+          <article-title>Sensory and chemical evaluation of tea brews prepared with the assistance of ultrasound</article-title>
+          <source>Cienc. Rural.</source>
+          <year>2019</year>
+          <volume>49</volume>
+          <fpage>e20190056</fpage>
+          <pub-id pub-id-type="doi">10.1590/0103-8478cr20190056</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B36-applsci-13-01274">
+        <label>36.</label>
+        <element-citation publication-type="book">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Obiedzi&#x144;ski</surname>
+              <given-names>M.</given-names>
+            </name>
+          </person-group>
+          <source>Wybrane Zagadnienia Analizy &#x17B;ywno&#x15B;ci</source>
+          <publisher-name>SGGW</publisher-name>
+          <publisher-loc>Warszawa, Poland</publisher-loc>
+          <year>2009</year>
+          <isbn>9788375831644</isbn>
+        </element-citation>
+      </ref>
+      <ref id="B37-applsci-13-01274">
+        <label>37.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>G&#xFC;rsoy</surname>
+              <given-names>B.</given-names>
+            </name>
+            <name>
+              <surname>Heperkan</surname>
+              <given-names>Z.D.</given-names>
+            </name>
+          </person-group>
+          <article-title>Chocolate production, nutrients and health benefits</article-title>
+          <source>Int. J. Food Eng. Res.</source>
+          <year>2020</year>
+          <volume>6</volume>
+          <fpage>121</fpage>
+          <lpage>134</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B38-applsci-13-01274">
+        <label>38.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Caponio</surname>
+              <given-names>G.R.</given-names>
+            </name>
+            <name>
+              <surname>Lorusso</surname>
+              <given-names>M.P.</given-names>
+            </name>
+            <name>
+              <surname>Sorrenti</surname>
+              <given-names>G.T.</given-names>
+            </name>
+            <name>
+              <surname>Marcotrigiano</surname>
+              <given-names>V.</given-names>
+            </name>
+            <name>
+              <surname>Difonzo</surname>
+              <given-names>G.</given-names>
+            </name>
+            <name>
+              <surname>De Angelis</surname>
+              <given-names>E.</given-names>
+            </name>
+            <name>
+              <surname>Guagnano</surname>
+              <given-names>R.</given-names>
+            </name>
+            <name>
+              <surname>Monaci</surname>
+              <given-names>L.</given-names>
+            </name>
+            <name>
+              <surname>De Angelis</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>Portincasa</surname>
+              <given-names>P.</given-names>
+            </name>
+          </person-group>
+          <article-title>Sensory Evaluation of Dark Chocolate: A Nutraceutical Boosting Consumers&#x2019; Health</article-title>
+          <source>Nutrients</source>
+          <year>2020</year>
+          <volume>12</volume>
+          <elocation-id>939</elocation-id>
+          <pub-id pub-id-type="doi">10.3390/nu12040939</pub-id>
+          <pub-id pub-id-type="pmid">32231009</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B39-applsci-13-01274">
+        <label>39.</label>
+        <element-citation publication-type="book">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Gunstone</surname>
+              <given-names>F.D.</given-names>
+            </name>
+          </person-group>
+          <source>Vegetable Oils in Food Technology</source>
+          <person-group person-group-type="editor">
+            <name>
+              <surname>Gunstone</surname>
+              <given-names>F.D.</given-names>
+            </name>
+          </person-group>
+          <publisher-name>Wiley</publisher-name>
+          <publisher-loc>Hoboken, NJ, USA</publisher-loc>
+          <year>2011</year>
+          <isbn>9781444332681</isbn>
+        </element-citation>
+      </ref>
+      <ref id="B40-applsci-13-01274">
+        <label>40.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Torres-Moreno</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>Torrescasana</surname>
+              <given-names>E.</given-names>
+            </name>
+            <name>
+              <surname>Salas-Salvad&#xF3;</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>Blanch</surname>
+              <given-names>C.</given-names>
+            </name>
+          </person-group>
+          <article-title>Nutritional composition and fatty acids profile in cocoa beans and chocolates with different geographical origin and processing conditions</article-title>
+          <source>Food Chem.</source>
+          <year>2015</year>
+          <volume>166</volume>
+          <fpage>125</fpage>
+          <lpage>132</lpage>
+          <pub-id pub-id-type="doi">10.1016/j.foodchem.2014.05.141</pub-id>
+          <pub-id pub-id-type="pmid">25053037</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B41-applsci-13-01274">
+        <label>41.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Oliveira</surname>
+              <given-names>L.B.</given-names>
+            </name>
+            <name>
+              <surname>de Melo</surname>
+              <given-names>J.C.</given-names>
+            </name>
+            <name>
+              <surname>da Boa Morte</surname>
+              <given-names>E.S.</given-names>
+            </name>
+            <name>
+              <surname>de Jesus</surname>
+              <given-names>R.M.</given-names>
+            </name>
+            <name>
+              <surname>Teixeira</surname>
+              <given-names>L.S.G.</given-names>
+            </name>
+            <name>
+              <surname>Korn</surname>
+              <given-names>M.G.A.</given-names>
+            </name>
+          </person-group>
+          <article-title>Multi-element determination in chocolate bars by microwave-induced plasma optical emission spectrometry</article-title>
+          <source>Food Chem.</source>
+          <year>2021</year>
+          <volume>351</volume>
+          <fpage>129285</fpage>
+        </element-citation>
+      </ref>
+      <ref id="B42-applsci-13-01274">
+        <label>42.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Urba&#x144;ska</surname>
+              <given-names>B.</given-names>
+            </name>
+            <name>
+              <surname>Szafra&#x144;ski</surname>
+              <given-names>T.</given-names>
+            </name>
+            <name>
+              <surname>Kowalska</surname>
+              <given-names>H.</given-names>
+            </name>
+            <name>
+              <surname>Kowalska</surname>
+              <given-names>J.</given-names>
+            </name>
+          </person-group>
+          <article-title>Study of Polyphenol Content and Antioxidant Properties of Various Mix of Chocolate Milk Masses with Different Protein Content</article-title>
+          <source>Antioxidants</source>
+          <year>2020</year>
+          <volume>9</volume>
+          <fpage>299</fpage>
+        </element-citation>
+      </ref>
+      <ref id="B43-applsci-13-01274">
+        <label>43.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Calixto-Cotos</surname>
+              <given-names>M.R.</given-names>
+            </name>
+            <name>
+              <surname>Chire-Fajardo</surname>
+              <given-names>G.C.</given-names>
+            </name>
+            <name>
+              <surname>Orihuela-Rivera</surname>
+              <given-names>C.A.</given-names>
+            </name>
+          </person-group>
+          <article-title>Antioxidants properties of chocolates sold in Peru Propiedades antioxidantes de chocolates comercializados en Per&#xFA;</article-title>
+          <source>Acta Agron&#xF3;mica</source>
+          <year>2019</year>
+          <volume>67</volume>
+          <fpage>479</fpage>
+          <lpage>485</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B44-applsci-13-01274">
+        <label>44.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Todorovic</surname>
+              <given-names>V.</given-names>
+            </name>
+            <name>
+              <surname>Redovnikovic</surname>
+              <given-names>I.R.</given-names>
+            </name>
+            <name>
+              <surname>Todorovic</surname>
+              <given-names>Z.</given-names>
+            </name>
+            <name>
+              <surname>Jankovic</surname>
+              <given-names>G.</given-names>
+            </name>
+            <name>
+              <surname>Dodevska</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>Sobajic</surname>
+              <given-names>S.</given-names>
+            </name>
+          </person-group>
+          <article-title>Polyphenols, methylxanthines, and antioxidant capacity of chocolates produced in Serbia</article-title>
+          <source>J. Food Compos. Anal.</source>
+          <year>2015</year>
+          <volume>41</volume>
+          <fpage>137</fpage>
+          <lpage>143</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B45-applsci-13-01274">
+        <label>45.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Bel&#x161;&#x10D;ak</surname>
+              <given-names>A.</given-names>
+            </name>
+            <name>
+              <surname>Komes</surname>
+              <given-names>D.</given-names>
+            </name>
+            <name>
+              <surname>Hor&#x17E;i&#x107;</surname>
+              <given-names>D.</given-names>
+            </name>
+            <name>
+              <surname>Gani&#x107;</surname>
+              <given-names>K.K.</given-names>
+            </name>
+            <name>
+              <surname>Karlovi&#x107;</surname>
+              <given-names>D.</given-names>
+            </name>
+          </person-group>
+          <article-title>Comparative study of commercially available cocoa products in terms of their bioactive composition</article-title>
+          <source>Food Res. Int.</source>
+          <year>2009</year>
+          <volume>42</volume>
+          <fpage>707</fpage>
+          <lpage>716</lpage>
+          <pub-id pub-id-type="doi">10.1016/j.foodres.2009.02.018</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B46-applsci-13-01274">
+        <label>46.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Gu</surname>
+              <given-names>F.</given-names>
+            </name>
+            <name>
+              <surname>Tan</surname>
+              <given-names>L.</given-names>
+            </name>
+            <name>
+              <surname>Wu</surname>
+              <given-names>H.</given-names>
+            </name>
+            <name>
+              <surname>Fang</surname>
+              <given-names>Y.</given-names>
+            </name>
+            <name>
+              <surname>Xu</surname>
+              <given-names>F.</given-names>
+            </name>
+            <name>
+              <surname>Chu</surname>
+              <given-names>Z.</given-names>
+            </name>
+            <name>
+              <surname>Wang</surname>
+              <given-names>Q.</given-names>
+            </name>
+          </person-group>
+          <article-title>Comparison of Cocoa Beans from China, Indonesia and Papua New Guinea</article-title>
+          <source>Foods</source>
+          <year>2013</year>
+          <volume>2</volume>
+          <fpage>183</fpage>
+          <lpage>197</lpage>
+          <pub-id pub-id-type="doi">10.3390/foods2020183</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B47-applsci-13-01274">
+        <label>47.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Hu</surname>
+              <given-names>Y.</given-names>
+            </name>
+            <name>
+              <surname>Pan</surname>
+              <given-names>Z.J.</given-names>
+            </name>
+            <name>
+              <surname>Liao</surname>
+              <given-names>W.</given-names>
+            </name>
+            <name>
+              <surname>Li</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>Gruget</surname>
+              <given-names>P.</given-names>
+            </name>
+            <name>
+              <surname>Kitts</surname>
+              <given-names>D.D.</given-names>
+            </name>
+            <name>
+              <surname>Lu</surname>
+              <given-names>X.</given-names>
+            </name>
+          </person-group>
+          <article-title>Determination of antioxidant capacity and phenolic content of chocolate by attenuated total reflectance-Fourier transformed-infrared spectroscopy</article-title>
+          <source>Food Chem.</source>
+          <year>2016</year>
+          <volume>202</volume>
+          <fpage>254</fpage>
+          <lpage>261</lpage>
+          <pub-id pub-id-type="doi">10.1016/j.foodchem.2016.01.130</pub-id>
+          <pub-id pub-id-type="pmid">26920292</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B48-applsci-13-01274">
+        <label>48.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Lee</surname>
+              <given-names>K.W.</given-names>
+            </name>
+            <name>
+              <surname>Kim</surname>
+              <given-names>Y.J.</given-names>
+            </name>
+            <name>
+              <surname>Lee</surname>
+              <given-names>H.J.</given-names>
+            </name>
+            <name>
+              <surname>Lee</surname>
+              <given-names>C.Y.</given-names>
+            </name>
+          </person-group>
+          <article-title>Cocoa Has More Phenolic Phytochemicals and a Higher Antioxidant Capacity than Teas and Red Wine</article-title>
+          <source>J. Agric. Food Chem.</source>
+          <year>2003</year>
+          <volume>51</volume>
+          <fpage>7292</fpage>
+          <lpage>7295</lpage>
+          <pub-id pub-id-type="doi">10.1021/jf0344385</pub-id>
+          <pub-id pub-id-type="pmid">14640573</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B49-applsci-13-01274">
+        <label>49.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Miller</surname>
+              <given-names>K.B.</given-names>
+            </name>
+            <name>
+              <surname>Hurst</surname>
+              <given-names>W.J.</given-names>
+            </name>
+            <name>
+              <surname>Payne</surname>
+              <given-names>M.J.</given-names>
+            </name>
+            <name>
+              <surname>Stuart</surname>
+              <given-names>D.A.</given-names>
+            </name>
+            <name>
+              <surname>Apgar</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>Sweigart</surname>
+              <given-names>D.S.</given-names>
+            </name>
+            <name>
+              <surname>Ou</surname>
+              <given-names>B.</given-names>
+            </name>
+          </person-group>
+          <article-title>Impact of Alkalization on the Antioxidant and Flavanol Content of Commercial Cocoa Powders</article-title>
+          <source>J. Agric. Food Chem.</source>
+          <year>2008</year>
+          <volume>56</volume>
+          <fpage>8527</fpage>
+          <lpage>8533</lpage>
+          <pub-id pub-id-type="doi">10.1021/jf801670p</pub-id>
+          <pub-id pub-id-type="pmid">18710243</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B50-applsci-13-01274">
+        <label>50.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Arlorio</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>Locatelli</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>Travaglia</surname>
+              <given-names>F.</given-names>
+            </name>
+            <name>
+              <surname>Co&#xEF;sson</surname>
+              <given-names>J.-D.</given-names>
+            </name>
+            <name>
+              <surname>Del Grosso</surname>
+              <given-names>E.</given-names>
+            </name>
+            <name>
+              <surname>Minassi</surname>
+              <given-names>A.</given-names>
+            </name>
+            <name>
+              <surname>Appendino</surname>
+              <given-names>G.</given-names>
+            </name>
+            <name>
+              <surname>Martelli</surname>
+              <given-names>A.</given-names>
+            </name>
+          </person-group>
+          <article-title>Roasting impact on the contents of clovamide (N-caffeoyl-L-DOPA) and the antioxidant activity of cocoa beans (<italic>Theobroma cacao</italic> L.)</article-title>
+          <source>Food Chem.</source>
+          <year>2008</year>
+          <volume>106</volume>
+          <fpage>967</fpage>
+          <lpage>975</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B51-applsci-13-01274">
+        <label>51.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Hu</surname>
+              <given-names>S.</given-names>
+            </name>
+            <name>
+              <surname>Kim</surname>
+              <given-names>B.-Y.</given-names>
+            </name>
+            <name>
+              <surname>Baik</surname>
+              <given-names>M.-Y.</given-names>
+            </name>
+          </person-group>
+          <article-title>Physicochemical properties and antioxidant capacity of raw, roasted and puffed cacao beans</article-title>
+          <source>Food Chem.</source>
+          <year>2016</year>
+          <volume>194</volume>
+          <fpage>1089</fpage>
+          <lpage>1094</lpage>
+          <pub-id pub-id-type="doi">10.1016/j.foodchem.2015.08.126</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B52-applsci-13-01274">
+        <label>52.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Penido</surname>
+              <given-names>F.C.L.</given-names>
+            </name>
+            <name>
+              <surname>Louren&#xE7;o</surname>
+              <given-names>I.C.R.</given-names>
+            </name>
+            <name>
+              <surname>da Silva</surname>
+              <given-names>L.M.</given-names>
+            </name>
+            <name>
+              <surname>Garcia</surname>
+              <given-names>C.F.</given-names>
+            </name>
+            <name>
+              <surname>Rezende</surname>
+              <given-names>F.A.G.G.</given-names>
+            </name>
+          </person-group>
+          <article-title>Chemical composition, antioxidant activity, and fatty acid profile of cocoa nibs</article-title>
+          <source>Int. J. Res. Granthaalayah</source>
+          <year>2021</year>
+          <volume>9</volume>
+          <fpage>168</fpage>
+          <lpage>176</lpage>
+          <pub-id pub-id-type="doi">10.29121/granthaalayah.v9.i6.2021.4024</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B53-applsci-13-01274">
+        <label>53.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Krysiak</surname>
+              <given-names>W.</given-names>
+            </name>
+          </person-group>
+          <article-title>Influence of roasting conditions on coloration of roasted cocoa beans</article-title>
+          <source>J. Food Eng.</source>
+          <year>2006</year>
+          <volume>77</volume>
+          <fpage>449</fpage>
+          <lpage>453</lpage>
+        </element-citation>
+      </ref>
+      <ref id="B54-applsci-13-01274">
+        <label>54.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Krysiak</surname>
+              <given-names>W.</given-names>
+            </name>
+          </person-group>
+          <article-title>Effects of convective and microwave roasting on the physicochemical properties of cocoa beans and cocoa butter extracted from this material</article-title>
+          <source>Grasas Aceites</source>
+          <year>2011</year>
+          <volume>62</volume>
+          <fpage>467</fpage>
+          <lpage>478</lpage>
+          <pub-id pub-id-type="doi">10.3989/gya.114910</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B55-applsci-13-01274">
+        <label>55.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Di Mattia</surname>
+              <given-names>C.D.</given-names>
+            </name>
+            <name>
+              <surname>Sacchetti</surname>
+              <given-names>G.</given-names>
+            </name>
+            <name>
+              <surname>Mastrocola</surname>
+              <given-names>D.</given-names>
+            </name>
+            <name>
+              <surname>Serafini</surname>
+              <given-names>M.</given-names>
+            </name>
+          </person-group>
+          <article-title>From Cocoa to Chocolate: The Impact of Processing on In Vitro Antioxidant Activity and the Effects of Chocolate on Antioxidant Markers In Vivo</article-title>
+          <source>Front. Immunol.</source>
+          <year>2017</year>
+          <volume>8</volume>
+          <fpage>1207</fpage>
+          <pub-id pub-id-type="doi">10.3389/fimmu.2017.01207</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B56-applsci-13-01274">
+        <label>56.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>&#x17B;y&#x17C;elewicz</surname>
+              <given-names>D.</given-names>
+            </name>
+            <name>
+              <surname>Budryn</surname>
+              <given-names>G.</given-names>
+            </name>
+            <name>
+              <surname>Oracz</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>Antolak</surname>
+              <given-names>H.</given-names>
+            </name>
+            <name>
+              <surname>Kr&#x119;giel</surname>
+              <given-names>D.</given-names>
+            </name>
+            <name>
+              <surname>Kaczmarska</surname>
+              <given-names>M.</given-names>
+            </name>
+          </person-group>
+          <article-title>The effect on bioactive components and characteristics of chocolate by functionalization with raw cocoa beans</article-title>
+          <source>Food Res. Int.</source>
+          <year>2018</year>
+          <volume>113</volume>
+          <fpage>234</fpage>
+          <lpage>244</lpage>
+          <pub-id pub-id-type="doi">10.1016/j.foodres.2018.07.017</pub-id>
+          <pub-id pub-id-type="pmid">30195517</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B57-applsci-13-01274">
+        <label>57.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Di Mattia</surname>
+              <given-names>C.</given-names>
+            </name>
+            <name>
+              <surname>Martuscelli</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>Sacchetti</surname>
+              <given-names>G.</given-names>
+            </name>
+            <name>
+              <surname>Scheirlinck</surname>
+              <given-names>I.</given-names>
+            </name>
+            <name>
+              <surname>Beheydt</surname>
+              <given-names>B.</given-names>
+            </name>
+            <name>
+              <surname>Mastrocola</surname>
+              <given-names>D.</given-names>
+            </name>
+            <name>
+              <surname>Pittia</surname>
+              <given-names>P.</given-names>
+            </name>
+          </person-group>
+          <article-title>Effect of Fermentation and Drying on Procyanidins, Antiradical Activity and Reducing Properties of Cocoa Beans</article-title>
+          <source>Food Bioprocess. Technol.</source>
+          <year>2013</year>
+          <volume>6</volume>
+          <fpage>3420</fpage>
+          <lpage>3432</lpage>
+          <pub-id pub-id-type="doi">10.1007/s11947-012-1028-x</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B58-applsci-13-01274">
+        <label>58.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Popov-Ralji&#x107;</surname>
+              <given-names>J.</given-names>
+            </name>
+            <name>
+              <surname>Lali&#x10D;i&#x107;-Petronijevi&#x107;</surname>
+              <given-names>J.</given-names>
+            </name>
+          </person-group>
+          <article-title>Sensory Properties and Color Measurements of Dietary Chocolates with Different Compositions During Storage for Up to 360 Days</article-title>
+          <source>Sensors</source>
+          <year>2009</year>
+          <volume>9</volume>
+          <fpage>1996</fpage>
+          <lpage>2016</lpage>
+          <pub-id pub-id-type="doi">10.3390/s90301996</pub-id>
+          <pub-id pub-id-type="pmid">22573997</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B59-applsci-13-01274">
+        <label>59.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Urba&#x144;ska</surname>
+              <given-names>B.</given-names>
+            </name>
+            <name>
+              <surname>Kowalska</surname>
+              <given-names>H.</given-names>
+            </name>
+            <name>
+              <surname>Szulc</surname>
+              <given-names>K.</given-names>
+            </name>
+            <name>
+              <surname>Ziarno</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>Pochitskaya</surname>
+              <given-names>I.</given-names>
+            </name>
+            <name>
+              <surname>Kowalska</surname>
+              <given-names>J.</given-names>
+            </name>
+          </person-group>
+          <article-title>Comparison of the Effects of Conching Parameters on the Contents of Three Dominant Flavan3-ols, Rheological Properties and Sensory Quality in Chocolate Milk Mass Based on Liquor from Unroasted Cocoa Beans</article-title>
+          <source>Molecules</source>
+          <year>2021</year>
+          <volume>26</volume>
+          <elocation-id>2502</elocation-id>
+          <pub-id pub-id-type="doi">10.3390/molecules26092502</pub-id>
+          <pub-id pub-id-type="pmid">33922933</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B60-applsci-13-01274">
+        <label>60.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Mela</surname>
+              <given-names>D.J.</given-names>
+            </name>
+            <name>
+              <surname>Woolner</surname>
+              <given-names>E.M.</given-names>
+            </name>
+          </person-group>
+          <article-title>Perspective: Total, Added, or Free? What Kind of Sugars Should We Be Talking About?</article-title>
+          <source>Adv. Nutr.</source>
+          <year>2018</year>
+          <volume>9</volume>
+          <fpage>63</fpage>
+          <lpage>69</lpage>
+          <pub-id pub-id-type="doi">10.1093/advances/nmx020</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B61-applsci-13-01274">
+        <label>61.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Prada</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>Saraiva</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>Garrido</surname>
+              <given-names>M.V.</given-names>
+            </name>
+            <name>
+              <surname>S&#xE9;rio</surname>
+              <given-names>A.</given-names>
+            </name>
+            <name>
+              <surname>Teixeira</surname>
+              <given-names>A.</given-names>
+            </name>
+            <name>
+              <surname>Lopes</surname>
+              <given-names>D.</given-names>
+            </name>
+            <name>
+              <surname>Silva</surname>
+              <given-names>D.A.</given-names>
+            </name>
+            <name>
+              <surname>Rodrigues</surname>
+              <given-names>D.L.</given-names>
+            </name>
+          </person-group>
+          <article-title>Perceived Associations between Excessive Sugar Intake and Health Conditions</article-title>
+          <source>Nutrients</source>
+          <year>2022</year>
+          <volume>14</volume>
+          <elocation-id>640</elocation-id>
+          <pub-id pub-id-type="doi">10.3390/nu14030640</pub-id>
+          <pub-id pub-id-type="pmid">35276998</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B62-applsci-13-01274">
+        <label>62.</label>
+        <element-citation publication-type="book">
+          <person-group person-group-type="author">
+            <collab>WHO</collab>
+          </person-group>
+          <source>Guideline: Sugars Intake for Adults and Children</source>
+          <publisher-name>World Health Organization</publisher-name>
+          <publisher-loc>Geneva, Switzerland</publisher-loc>
+          <year>2015</year>
+          <isbn>978-92-4-069422-4</isbn>
+        </element-citation>
+      </ref>
+      <ref id="B63-applsci-13-01274">
+        <label>63.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Prada</surname>
+              <given-names>M.</given-names>
+            </name>
+            <name>
+              <surname>Rodrigues</surname>
+              <given-names>D.L.</given-names>
+            </name>
+            <name>
+              <surname>Godinho</surname>
+              <given-names>C.A.</given-names>
+            </name>
+            <name>
+              <surname>Lopes</surname>
+              <given-names>D.</given-names>
+            </name>
+            <name>
+              <surname>Garrido</surname>
+              <given-names>M.</given-names>
+            </name>
+          </person-group>
+          <article-title>V Knowledge and acceptance of interventions aimed at reducing sugar intake in Portugal</article-title>
+          <source>Public Health Nutr.</source>
+          <year>2020</year>
+          <volume>23</volume>
+          <fpage>3423</fpage>
+          <lpage>3434</lpage>
+          <pub-id pub-id-type="doi">10.1017/S1368980020002165</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B64-applsci-13-01274">
+        <label>64.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Guinard</surname>
+              <given-names>J.-X.</given-names>
+            </name>
+            <name>
+              <surname>Mazzucchelli</surname>
+              <given-names>R.</given-names>
+            </name>
+          </person-group>
+          <article-title>Effects of sugar and fat on the sensory properties of milk chocolate: Descriptive analysis and instrumental measurements</article-title>
+          <source>J. Sci. Food Agric.</source>
+          <year>1999</year>
+          <volume>79</volume>
+          <fpage>1331</fpage>
+          <lpage>1339</lpage>
+          <pub-id pub-id-type="doi">10.1002/(SICI)1097-0010(199908)79:11&lt;1331::AID-JSFA365&gt;3.0.CO;2-4</pub-id>
+        </element-citation>
+      </ref>
+      <ref id="B65-applsci-13-01274">
+        <label>65.</label>
+        <element-citation publication-type="journal">
+          <person-group person-group-type="author">
+            <name>
+              <surname>Oberrauter</surname>
+              <given-names>L.-M.</given-names>
+            </name>
+            <name>
+              <surname>Januszewska</surname>
+              <given-names>R.</given-names>
+            </name>
+            <name>
+              <surname>Schlich</surname>
+              <given-names>P.</given-names>
+            </name>
+            <name>
+              <surname>Majchrzak</surname>
+              <given-names>D.</given-names>
+            </name>
+          </person-group>
+          <article-title>Sensory evaluation of dark origin and non-origin chocolates applying Temporal Dominance of Sensations (TDS)</article-title>
+          <source>Food Res. Int.</source>
+          <year>2018</year>
+          <volume>111</volume>
+          <fpage>39</fpage>
+          <lpage>49</lpage>
+          <pub-id pub-id-type="doi">10.1016/j.foodres.2018.05.007</pub-id>
+        </element-citation>
+      </ref>
+    </ref-list>
+    <sec sec-type="display-objects">
+      <title>Figures and Tables</title>
+      <fig id="applsci-13-01274-f001" position="float">
+        <label>Figure 1</label>
+        <caption>
+          <p>Block diagram of the process of raw chocolate production.</p>
+        </caption>
+        <graphic xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="applsci-13-01274-g001.tif"/>
+      </fig>
+      <fig id="applsci-13-01274-f002" position="float">
+        <label>Figure 2</label>
+        <caption>
+          <p>Bar of raw chocolate: (<bold>A</bold>)&#x2014;view from above, (<bold>B</bold>)&#x2014;view from the front.</p>
+        </caption>
+        <graphic xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="applsci-13-01274-g002.tif"/>
+      </fig>
+      <fig id="applsci-13-01274-f003" position="float">
+        <label>Figure 3</label>
+        <caption>
+          <p>Results of sensory analysis&#x2014;method of preference evaluation. MAN&#x2014;raw chocolate, COM 64%&#x2014;classic bitter chocolate 64%, COM 50%&#x2014;light bitter chocolate 50% (COM 50%).</p>
+        </caption>
+        <graphic xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="applsci-13-01274-g003.tif"/>
+      </fig>
+      <fig id="applsci-13-01274-f004" position="float">
+        <label>Figure 4</label>
+        <caption>
+          <p>Results of sensory analysis&#x2014;hedonic method, assessor perception of the samples. MAN&#x2014;raw chocolate, COM 64%&#x2014;classic bitter chocolate 64%, COM 50%&#x2014;light bitter chocolate 50% (COM 50%).</p>
+        </caption>
+        <graphic xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="applsci-13-01274-g004.tif"/>
+      </fig>
+      <fig id="applsci-13-01274-f005" position="float">
+        <label>Figure 5</label>
+        <caption>
+          <p>Evaluation of the taste of the samples, results of sensory analysis through the sequencing method. MAN&#x2013;raw chocolate, COM 64%&#x2013;classic bitter chocolate 64%, COM 50%&#x2013;light bitter chocolate 50% (COM 50%).</p>
+        </caption>
+        <graphic xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="applsci-13-01274-g005.tif"/>
+      </fig>
+      <fig id="applsci-13-01274-f006" position="float">
+        <label>Figure 6</label>
+        <caption>
+          <p>Results of five-point evaluation of the chocolates. MAN&#x2014;raw chocolate, COM 64%&#x2014;classic bitter chocolate 64%, COM 50%&#x2014;light bitter chocolate 50% (COM 50%).</p>
+        </caption>
+        <graphic xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="applsci-13-01274-g006.tif"/>
+      </fig>
+      <table-wrap id="applsci-13-01274-t001" position="float">
+        <object-id pub-id-type="pii">applsci-13-01274-t001_Table 1</object-id>
+        <label>Table 1</label>
+        <caption>
+          <p>Definitions of product quality for the five-point sensory assessment.</p>
+        </caption>
+        <table>
+          <thead>
+            <tr>
+              <th rowspan="2" align="center" valign="middle" style="border-top:solid thin;border-bottom:solid thin">Quality</th>
+              <th rowspan="2" align="center" valign="middle" style="border-top:solid thin;border-bottom:solid thin">Importance Coefficient</th>
+              <th colspan="5" align="center" valign="middle" style="border-top:solid thin;border-bottom:solid thin">Point Values</th>
+            </tr>
+            <tr>
+              <th align="center" valign="middle" style="border-bottom:solid thin">5</th>
+              <th align="center" valign="middle" style="border-bottom:solid thin">4</th>
+              <th align="center" valign="middle" style="border-bottom:solid thin">3</th>
+              <th align="center" valign="middle" style="border-bottom:solid thin">2</th>
+              <th align="center" valign="middle" style="border-bottom:solid thin">1</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">External appearance&#x2014;colour</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">0.15</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">dark brown to light brown, clear, very uniform</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">dark brown to light brown, clean, uniform</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Brown, slightly unharmonized</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">too light or too dark, uneven</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">wrong with a grey tint with spots</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">External appearance&#x2014;shape</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">0.10</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">correct for a given form, no signs of damage</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">normal</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">slightly distorted at the edges</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">distorted</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">clearly distorted</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">External appearance&#x2014;surface condition</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">0.15</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">the upper one&#x2014;perfectly smooth, with a clear form compression and gloss, the lower one&#x2014;perfectly smooth matte</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">the upper one&#x2014;smooth, with a clear imprint of the form and gloss, the lower one&#x2014;smooth matte with slight cracks</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">upper&#x2014;smooth with an imprint of the form, slightly matte, small cracks, lower&#x2014;slightly uneven, matte</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">upper&#x2014;irregularities, indistinct form pattern, no gloss, few matte spots, lower&#x2014;uneven, with spots</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">upper&#x2014;deformations, significant cracks, dull, lower&#x2014;very uneven, cracked with a grey coating</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Fracture</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">0.10</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">fine-grained, very uniform</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">fine-grained, uniform</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">fine-grained with individual air bubbles</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">coarse with air bubbles</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">wrong, uneven, with numerous air bubbles</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Fragrance</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">0.20</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">intense, very pleasant, chocolatey, harmonized</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">intense, pleasant</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">quite pleasant, but too weak, not very harmonized</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">weak or unclean</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">stale or foreign</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Flavour</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">0.30</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">very pleasant, clear chocolate flavour with a clean filling, perfectly harmonized</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">pleasant, clear chocolate flavour with a clean filling, harmonized</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">quite pleasant, clear, harmonized</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">not very clear, not harmonized</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">stale, foreign, sour ranch</td>
+            </tr>
+          </tbody>
+        </table>
+      </table-wrap>
+      <table-wrap id="applsci-13-01274-t002" position="float">
+        <object-id pub-id-type="pii">applsci-13-01274-t002_Table 2</object-id>
+        <label>Table 2</label>
+        <caption>
+          <p>Nutritional composition of raw chocolate, commercial chocolates and cocoa beans.</p>
+        </caption>
+        <table>
+          <thead>
+            <tr>
+              <th align="center" valign="middle" style="border-top:solid thin;border-bottom:solid thin">Sample</th>
+              <th align="center" valign="middle" style="border-top:solid thin;border-bottom:solid thin">Moisture<break/>(%)</th>
+              <th align="center" valign="middle" style="border-top:solid thin;border-bottom:solid thin">Ash<break/>(%)</th>
+              <th align="center" valign="middle" style="border-top:solid thin;border-bottom:solid thin">Fat<break/>(%)</th>
+              <th align="center" valign="middle" style="border-top:solid thin;border-bottom:solid thin">Carbohydrates<break/>(%)</th>
+              <th align="center" valign="middle" style="border-top:solid thin;border-bottom:solid thin">Dietary Fibre<break/>(%)</th>
+              <th align="center" valign="middle" style="border-top:solid thin;border-bottom:solid thin">Proteins<break/>(%)</th>
+              <th align="center" valign="middle" style="border-top:solid thin;border-bottom:solid thin">Energy Value<break/>(kJ/kcal)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">COM 50%</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">0.6 <sup>b</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">1.7 <sup>b</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">28.0 <sup>d</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">53.7 <sup>a</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">9.8 <sup>d</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">6.2 <sup>c</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">2054/491</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">COM 64%</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">0.5 <sup>b</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">1.6 <sup>b</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">32.0 <sup>c</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">42.7 <sup>b</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">14.0 <sup>c</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">9.1 <sup>b</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">2065/494</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">MAN</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">0.3 <sup>b</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">1.6 <sup>b</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">33.4 <sup>b</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">39.6 <sup>c</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">15.8 <sup>b</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">9.3 <sup>b</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">2067/495</td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Cocoa beans</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">4.3 <sup>a</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">2.6 <sup>a</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">45.1 <sup>a</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">6.8 <sup>d</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">26.3 <sup>a</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">15 <sup>a</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">2038/488</td>
+            </tr>
+          </tbody>
+        </table>
+        <table-wrap-foot>
+          <fn>
+            <p>MAN&#x2014;raw chocolate, COM 64%&#x2014;classic bitter chocolate 64%, COM 50%&#x2014;light bitter chocolate 50% (COM 50%). Values designated with the same letters (<sup>a</sup>, <sup>b</sup>, <sup>c</sup>, <sup>d</sup>) within column do not significantly differ at 5% error (Duncan&#x2019;s test).</p>
+          </fn>
+        </table-wrap-foot>
+      </table-wrap>
+      <table-wrap id="applsci-13-01274-t003" position="float">
+        <object-id pub-id-type="pii">applsci-13-01274-t003_Table 3</object-id>
+        <label>Table 3</label>
+        <caption>
+          <p>Total phenolic content, total flavonoid content, and antioxidant activity of the analysed samples of raw chocolate, commercial chocolates, and cocoa beans.</p>
+        </caption>
+        <table>
+          <thead>
+            <tr>
+              <th align="center" valign="middle" style="border-top:solid thin;border-bottom:solid thin">Sample</th>
+              <th align="center" valign="middle" style="border-top:solid thin;border-bottom:solid thin">Total Phenolic Content<break/>(mg GAE/g)</th>
+              <th align="center" valign="middle" style="border-top:solid thin;border-bottom:solid thin">Total Flavonoid Content<break/>(mg ECE/g)</th>
+              <th align="center" valign="middle" style="border-top:solid thin;border-bottom:solid thin">% DPPH Radical Inhibition</th>
+              <th align="center" valign="middle" style="border-top:solid thin;border-bottom:solid thin">Antioxidant Activity<break/>(&#x3BC;M TE/g)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">COM 50%</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">7.87 <sup>a</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">3.83 <sup>a</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">12.72 <sup>a</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">63.76 <sup>a</sup></td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">COM 64%</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">9.25 <sup>b</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">4.43 <sup>b</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">23.63 <sup>b</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">132.60 <sup>b</sup></td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">MAN</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">22.08 <sup>c</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">8.75 <sup>c</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">29.91 <sup>c</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">172.16 <sup>c</sup></td>
+            </tr>
+            <tr>
+              <td align="center" valign="middle" style="border-bottom:solid thin">Cocoa beans</td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">27.82 <sup>d</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">12.22 <sup>d</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">36.95 <sup>d</sup></td>
+              <td align="center" valign="middle" style="border-bottom:solid thin">216.61 <sup>d</sup></td>
+            </tr>
+          </tbody>
+        </table>
+        <table-wrap-foot>
+          <fn>
+            <p>MAN&#x2014;raw chocolate, COM 64%&#x2014;classic bitter chocolate 64%, COM 50%&#x2014;light bitter chocolate 50% (COM 50%), GAE&#x2014;gallic acid equivalents, ECE&#x2014;epicatechin equivalents, TE&#x2014;Trolox equivalents. Values designated with the same letters (<sup>a</sup>, <sup>b</sup>, <sup>c</sup>, <sup>d</sup>) within column do not significantly differ at 5% error (Duncan&#x2019;s test).</p>
+          </fn>
+        </table-wrap-foot>
+      </table-wrap>
+    </sec>
+    <fn-group>
+      <fn>
+        <p><bold>Disclaimer/Publisher&#x2019;s Note:</bold> The statements, opinions and data contained in all publications are solely those of the individual author(s) and contributor(s) and not of MDPI and/or the editor(s). MDPI and/or the editor(s) disclaim responsibility for any injury to people or property resulting from any ideas, methods, instructions or products referred to in the content.</p>
+      </fn>
+    </fn-group>
+  </back>
+</article>

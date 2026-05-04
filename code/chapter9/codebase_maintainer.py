@@ -9,6 +9,12 @@ CodebaseMaintainer - 代码库维护助手
 
 关键改进：使用 Agentic 方式，让 agent 自主决定使用哪些工具
 """
+from dotenv import load_dotenv
+load_dotenv()
+
+import hello_agents_local_patches
+
+hello_agents_local_patches.apply()
 
 from typing import Dict, Any, List, Optional
 from datetime import datetime

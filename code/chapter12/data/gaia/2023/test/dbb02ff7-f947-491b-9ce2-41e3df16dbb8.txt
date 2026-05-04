@@ -1,0 +1,4 @@
+import numpy as np
+arr = np.array([15, 68, 44, 34])
+arr1 = np.std(arr)
+print(arr1)

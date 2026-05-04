@@ -12,15 +12,14 @@ LLM Judge从4个维度评估题目质量：
 4. 完整性（Completeness）：题目是否完整
 """
 
-import sys
+from dotenv import load_dotenv
+load_dotenv()
+
 import os
 import json
 
-# 添加HelloAgents路径
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "HelloAgents"))
-
 from hello_agents import HelloAgentsLLM
-from hello_agents.evaluation import LLMJudge
+from hello_agents.evaluation import LLMJudgeEvaluator
 
 # 1. 准备生成的题目数据
 generated_problems = [
@@ -38,9 +37,9 @@ generated_problems = [
     }
 ]
 
-# 2. 创建LLM Judge评估器
-llm = HelloAgentsLLM(model_name="gpt-4o")
-judge = LLMJudge(llm=llm)
+# 2. 创建LLM Judge评估器（模型名与 .env 中 LLM_MODEL_ID / 网关一致，勿硬编码 gpt-4o）
+llm = HelloAgentsLLM()
+judge = LLMJudgeEvaluator(llm=llm)
 
 # 3. 评估每道题目
 print("="*60)
@@ -58,13 +57,14 @@ for i, problem in enumerate(generated_problems, 1):
     
     # 显示评估结果
     print(f"\n评估结果:")
-    print(f"  正确性: {result['correctness']}/5")
-    print(f"  清晰度: {result['clarity']}/5")
-    print(f"  难度匹配: {result['difficulty_match']}/5")
-    print(f"  完整性: {result['completeness']}/5")
-    print(f"  平均分: {result['average_score']:.2f}/5")
-    print(f"\n评语:")
-    print(f"  {result['feedback']}")
+    scores = result.get("scores", {})
+    print(f"  正确性: {scores.get('correctness', 0)}/5")
+    print(f"  清晰度: {scores.get('clarity', 0)}/5")
+    print(f"  难度匹配: {scores.get('difficulty_match', 0)}/5")
+    print(f"  完整性: {scores.get('completeness', 0)}/5")
+    print(f"  平均分: {result.get('total_score', 0):.2f}/5")
+    print(f"\n评估原文:")
+    print(result.get("evaluation_text", ""))
     
     all_scores.append(result)
 
@@ -73,11 +73,11 @@ print("\n" + "="*60)
 print("总体统计")
 print("="*60)
 
-avg_correctness = sum(s['correctness'] for s in all_scores) / len(all_scores)
-avg_clarity = sum(s['clarity'] for s in all_scores) / len(all_scores)
-avg_difficulty = sum(s['difficulty_match'] for s in all_scores) / len(all_scores)
-avg_completeness = sum(s['completeness'] for s in all_scores) / len(all_scores)
-avg_overall = sum(s['average_score'] for s in all_scores) / len(all_scores)
+avg_correctness = sum(s.get("scores", {}).get("correctness", 0) for s in all_scores) / len(all_scores)
+avg_clarity = sum(s.get("scores", {}).get("clarity", 0) for s in all_scores) / len(all_scores)
+avg_difficulty = sum(s.get("scores", {}).get("difficulty_match", 0) for s in all_scores) / len(all_scores)
+avg_completeness = sum(s.get("scores", {}).get("completeness", 0) for s in all_scores) / len(all_scores)
+avg_overall = sum(s.get("total_score", 0) for s in all_scores) / len(all_scores)
 
 print(f"\n平均分:")
 print(f"  正确性: {avg_correctness:.2f}/5")

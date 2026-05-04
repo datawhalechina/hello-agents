@@ -1,0 +1,6 @@
+Worker A: 6:45 pm - 8 pm
+Worker B: 10 am - 11:45 am 
+Worker C: 12:30 pm - 5 pm
+Worker D: 8 am - 4:30 pm
+Worker E: 5:30 pm - 8 pm
+Worker F: 1 pm - 3:15 pm

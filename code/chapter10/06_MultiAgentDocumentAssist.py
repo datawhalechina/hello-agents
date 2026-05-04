@@ -5,12 +5,12 @@
 - Agent1：GitHub搜索专家
 - Agent2：文档生成专家
 """
-from hello_agents import SimpleAgent, HelloAgentsLLM
-from hello_agents.tools import MCPTool
 from dotenv import load_dotenv
 
 # 加载.env文件中的环境变量
-load_dotenv(dotenv_path="../HelloAgents/.env")
+load_dotenv()
+from hello_agents import SimpleAgent, HelloAgentsLLM
+from hello_agents.tools import MCPTool
 
 print("="*70)
 print("多Agent协作的智能文档助手")

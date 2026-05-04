@@ -1,0 +1,98 @@
+{
+  "@context": "http://schema.org",
+  "@type": "Collection",
+  "@id": "https://doi.org/10.5447/ipk/2022/29",
+  "url": "https://doi.ipk-gatersleben.de:443/DOI/64fb788c-7495-4800-8568-fd562b07017e/fbda7260-8307-485e-a9b7-d84292e3eb04/2",
+  "additionalType": "directory",
+  "name": "GLOBAL STRATEGY FOR THE CONSERVATION OF POTATO",
+  "author": {
+    "name": "Manuela Nagel",
+    "givenName": "Manuela",
+    "familyName": "Nagel",
+    "affiliation": {
+      "@type": "Organization",
+      "name": "Leibniz Institute of Plant Genetics and Crop Plant Research (IPK), Seeland OT Gatersleben, Corrensstraße 3, 06466, Germany"
+    },
+    "@id": "https://orcid.org/0000-0003-0396-0333"
+  },
+  "editor": [
+    {
+      "name": "Ehsan Dulloo",
+      "givenName": "Ehsan",
+      "familyName": "Dulloo",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "International Consultant, ,"
+      },
+      "contributorType": "Researcher"
+    },
+    {
+      "name": "Prishnee Bissessur",
+      "givenName": "Prishnee",
+      "familyName": "Bissessur",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "International Consultant, ,"
+      },
+      "contributorType": "Researcher"
+    },
+    {
+      "name": "Tatjana Gavrilenko",
+      "givenName": "Tatjana",
+      "familyName": "Gavrilenko",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "N.I. Vavilov All-Russian Institute of Plant Genetic Resources, , Russia"
+      },
+      "contributorType": "Researcher",
+      "@id": "https://orcid.org/0000-0002-2605-6569"
+    },
+    {
+      "name": "John Bamberg",
+      "givenName": "John",
+      "familyName": "Bamberg",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "U. S. Potato Genebank, , USA"
+      },
+      "contributorType": "Researcher",
+      "@id": "https://orcid.org/0000-0001-6102-7846"
+    },
+    {
+      "name": "David Ellis",
+      "givenName": "David",
+      "familyName": "Ellis",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "International Potato Center (CIP), , Peru"
+      },
+      "contributorType": "Researcher",
+      "@id": "https://orcid.org/0000-0002-0209-2784"
+    },
+    {
+      "name": "Peter Giovannini",
+      "givenName": "Peter",
+      "familyName": "Giovannini",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "Global Crop Diversity Trust, ,"
+      },
+      "contributorType": "Researcher",
+      "@id": "https://orcid.org/0000-0002-1053-2030"
+    }
+  ],
+  "description": "Cultivated potato, Solanum tuberosum ssp. tuberosum, is the third most consumed crop globally and important not only for food but also for for the animal feed, pharmaceutical, textile and paper industries. To gain an overview on the current state of the conservation and use of potato genetic resources, the Global Crop Diversity Trust (Crop Trust), commissioned an update of the ‘Global conservation strategy for potato genetic resources’. This updated strategy aims to support the efficiency and effectiveness of potato diversity conservation at national, regional and international levels, and to identify priorities for strengthening the conservation and use of potato genetic resources.",
+  "keywords": "ex situ conservation, plant genetic resources, potato, Solanum tuberosum, global strategy, conservation strategy, wild potato, Andigenum group, Chilotanum group, native potato variety, genebank, accession, true potato seed, potato tuber, late blight",
+  "inLanguage": "en",
+  "contentSize": "0 B",
+  "datePublished": "2022",
+  "schemaVersion": "http://datacite.org/schema/kernel-4",
+  "publisher": {
+    "@type": "Organization",
+    "name": "e!DAL - Plant Genomics and Phenomics Research Data Repository (PGP), IPK Gatersleben, Seeland OT Gatersleben, Corrensstraße 3, 06466, Germany"
+  },
+  "provider": {
+    "@type": "Organization",
+    "name": "datacite"
+  }
+}

@@ -40,11 +40,23 @@ class HelloAgentsLLM:
             
             # 处理流式响应
             print("✅ 大语言模型响应成功:")
+            # collected_content = []
+            # for chunk in response:
+            #     content = chunk.choices[0].delta.content or ""
+            #     print(content, end="", flush=True)
+            #     collected_content.append(content)
             collected_content = []
             for chunk in response:
-                content = chunk.choices[0].delta.content or ""
-                print(content, end="", flush=True)
-                collected_content.append(content)
+                choices = getattr(chunk, "choices", None) or []
+                if not choices:
+                    continue
+                delta = getattr(choices[0], "delta", None)
+                if not delta:
+                    continue
+                content = getattr(delta, "content", None) or ""
+                if content:
+                    print(content, end="", flush=True)
+                    collected_content.append(content)
             print()  # 在流式输出结束后换行
             return "".join(collected_content)
 

@@ -1,0 +1,56 @@
+Magmortar @ Choice Specs  
+Ability: Flame Body  
+EVs: 252 SpA / 4 SpD / 252 Spe  
+Timid Nature  
+IVs: 0 Atk  
+- Fire Blast  
+- Focus Blast  
+- Psychic  
+- Taunt  
+
+Torkoal @ Focus Sash  
+Ability: White Smoke  
+EVs: 248 HP / 252 Def / 8 SpA  
+Bold Nature  
+IVs: 0 Atk  
+- Lava Plume  
+- Earth Power  
+- Curse  
+- Protect  
+
+Rapidash @ Lum Berry  
+Ability: Flash Fire  
+EVs: 252 Atk / 4 SpD / 252 Spe  
+Jolly Nature  
+- Flare Blitz  
+- Megahorn  
+- Poison Jab  
+- Quick Attack  
+
+Flareon @ Salac Berry  
+Ability: Flash Fire  
+EVs: 252 Atk / 4 SpD / 252 Spe  
+Jolly Nature  
+- Fire Fang  
+- Superpower  
+- Last Resort  
+- Wish  
+
+Infernape @ Sitrus Berry  
+Ability: Blaze  
+EVs: 252 Atk / 4 SpD / 252 Spe  
+Jolly Nature  
+- Blaze Kick  
+- Brick Break  
+- Earthquake  
+- Gunk Shot  
+
+Houndoom @ Apicot Berry  
+Ability: Early Bird  
+EVs: 252 SpA / 4 SpD / 252 Spe  
+Timid Nature  
+IVs: 0 Atk  
+- Dark Pulse  
+- Flamethrower  
+- Shadow Ball  
+- Sludge Bomb

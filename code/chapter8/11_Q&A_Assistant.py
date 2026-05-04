@@ -19,6 +19,20 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any, Tuple
 from hello_agents.tools import MemoryTool, RAGTool
 import gradio as gr
+import gradio_client.utils as _gr_client_utils
+
+# Gradio 5 + gradio_client：Chatbot 等组件的 schema 里 additionalProperties 可能为 bool True，
+# 递归时会把 True 传给 get_type()，触发 TypeError: argument of type 'bool' is not iterable
+_orig_json_schema_to_python = _gr_client_utils._json_schema_to_python_type
+
+
+def _json_schema_to_python_type_guard(schema: Any, defs: Any = None) -> str:
+    if isinstance(schema, bool):
+        return "Any"
+    return _orig_json_schema_to_python(schema, defs)
+
+
+_gr_client_utils._json_schema_to_python_type = _json_schema_to_python_type_guard
 
 class PDFLearningAssistant:
     """智能文档问答助手"""
@@ -34,7 +48,11 @@ class PDFLearningAssistant:
 
         # 初始化工具
         self.memory_tool = MemoryTool(user_id=user_id)
-        self.rag_tool = RAGTool(rag_namespace=f"pdf_{user_id}")
+        # RAG 使用独立 Qdrant 集合（默认 rag_knowledge_base_1024），避免与旧 384 维 rag_knowledge_base 冲突
+        self.rag_tool = RAGTool(
+            rag_namespace=f"pdf_{user_id}",
+            collection_name=os.environ.get("RAG_QDRANT_COLLECTION", "rag_knowledge_base_1024"),
+        )
 
         # 学习统计
         self.stats = {
@@ -272,7 +290,7 @@ def create_gradio_ui():
         else:
             return f"❌ {result['message']}"
 
-    def chat(message: str, history: List) -> Tuple[str, List]:
+    def chat(message: str, history: List[List[str | None]]) -> Tuple[str, List[List[str | None]]]:
         """聊天功能"""
         if assistant_state["assistant"] is None:
             return "", history + [[message, "❌ 请先初始化助手并加载文档"]]
@@ -435,11 +453,19 @@ def main():
     print("正在启动Web界面...\n")
 
     demo = create_gradio_ui()
+    # 默认 127.0.0.1 便于 Gradio 启动后对本机 URL 做 url_ok 自检；局域网或 WSL 对外访问可设环境变量：
+    #   GRADIO_SERVER_NAME=0.0.0.0
+    # 若仍报 localhost 不可达，可设 GRADIO_SHARE=true 生成公网隧道链接
+    _host = os.environ.get("GRADIO_SERVER_NAME", "127.0.0.1")
+    _port = int(os.environ.get("GRADIO_SERVER_PORT", "7860"))
+    _share = os.environ.get("GRADIO_SHARE", "").lower() in ("1", "true", "yes")
+
     demo.launch(
-        server_name="0.0.0.0",
-        server_port=7860,
-        share=False,
-        show_error=True
+        server_name=_host,
+        server_port=_port,
+        share=_share,
+        show_error=True,
+        show_api=False,
     )
 
 

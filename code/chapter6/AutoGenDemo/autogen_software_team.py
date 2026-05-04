@@ -22,12 +22,18 @@ def create_openai_model_client():
     return OpenAIChatCompletionClient(
         model=os.getenv("LLM_MODEL_ID", "gpt-4o"),
         api_key=os.getenv("LLM_API_KEY"),
-        base_url=os.getenv("LLM_BASE_URL", "https://api.openai.com/v1")
+        base_url=os.getenv("LLM_BASE_URL", "https://api.openai.com/v1"),
+        model_info={
+        "vision": False,
+        "function_calling": True,
+        "json_output": True,
+        "family": "unknown",  # 不确定就先不填/或按文档填可用值
+    },
     )
 
 def create_product_manager(model_client):
     """创建产品经理智能体"""
-    system_message = """你是一位经验丰富的产品经理，专门负责软件产品的需求分析和项目规划。
+    system_message = """用中文 你是一位经验丰富的产品经理，专门负责软件产品的需求分析和项目规划。
 
 你的核心职责包括：
 1. **需求分析**：深入理解用户需求，识别核心功能和边界条件
@@ -52,7 +58,7 @@ def create_product_manager(model_client):
 
 def create_engineer(model_client):
     """创建软件工程师智能体"""
-    system_message = """你是一位资深的软件工程师，擅长 Python 开发和 Web 应用构建。
+    system_message = """用中文 你是一位资深的软件工程师，擅长 Python 开发和 Web 应用构建。
 
 你的技术专长包括：
 1. **Python 编程**：熟练掌握 Python 语法和最佳实践
@@ -77,7 +83,7 @@ def create_engineer(model_client):
 
 def create_code_reviewer(model_client):
     """创建代码审查员智能体"""
-    system_message = """你是一位经验丰富的代码审查专家，专注于代码质量和最佳实践。
+    system_message = """用中文 你是一位经验丰富的代码审查专家，专注于代码质量和最佳实践。
 
 你的审查重点包括：
 1. **代码质量**：检查代码的可读性、可维护性和性能
@@ -145,7 +151,7 @@ async def run_software_development_team():
     )
     
     # 定义开发任务
-    task = """我们需要开发一个比特币价格显示应用，具体要求如下：
+    task = """用中文 我们需要开发一个比特币价格显示应用，具体要求如下：
 
 核心功能：
 - 实时显示比特币当前价格（USD）

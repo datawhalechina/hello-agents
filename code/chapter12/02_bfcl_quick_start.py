@@ -5,7 +5,8 @@
 
 这是最简单的BFCL评估方式，一行代码完成评估、报告生成和官方评估。
 """
-
+from dotenv import load_dotenv
+load_dotenv()
 from hello_agents import SimpleAgent, HelloAgentsLLM
 from hello_agents.tools import BFCLEvaluationTool
 

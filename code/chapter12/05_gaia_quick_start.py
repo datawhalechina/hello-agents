@@ -10,11 +10,11 @@
 2. 需要设置HF_TOKEN环境变量
 3. 必须使用GAIA官方系统提示词
 """
-
+from dotenv import load_dotenv
+load_dotenv()
 import os
 from hello_agents import SimpleAgent, HelloAgentsLLM
 from hello_agents.tools import GAIAEvaluationTool
-
 # GAIA官方系统提示词（必须使用）
 GAIA_SYSTEM_PROMPT = """You are a general AI assistant. I will ask you a question. Report your thoughts, and finish your answer with the following template: FINAL ANSWER: [YOUR FINAL ANSWER].
 YOUR FINAL ANSWER should be a number OR as few words as possible OR a comma separated list of numbers and/or strings.
@@ -47,9 +47,12 @@ results = gaia_tool.run(
 
 # 5. 查看结果
 print(f"\n评估结果:")
-print(f"精确匹配率: {results['exact_match_rate']:.2%}")
-print(f"部分匹配率: {results['partial_match_rate']:.2%}")
-print(f"正确数: {results['correct_samples']}/{results['total_samples']}")
+if "error" in results:
+    print(f"❌ 评估失败: {results['error']}")
+else:
+    print(f"精确匹配率: {results['exact_match_rate']:.2%}")
+    print(f"部分匹配率: {results['partial_match_rate']:.2%}")
+    print(f"正确数: {results.get('correct_samples', results.get('exact_matches', 0))}/{results['total_samples']}")
 
 # 运行输出示例：
 # ============================================================

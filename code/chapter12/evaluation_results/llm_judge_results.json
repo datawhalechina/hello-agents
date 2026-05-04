@@ -1,0 +1,49 @@
+{
+  "problems": [
+    {
+      "problem_id": "generated_001",
+      "problem": "Find the number of positive integers $n$ such that $n^2 + 19n + 92$ is a perfect square.",
+      "answer": "4",
+      "solution": "Let $n^2 + 19n + 92 = m^2$ for some positive integer $m$..."
+    },
+    {
+      "problem_id": "generated_002",
+      "problem": "In triangle $ABC$, $AB = 13$, $BC = 14$, and $CA = 15$. Find the area of the triangle.",
+      "answer": "84",
+      "solution": "Using Heron's formula, $s = (13+14+15)/2 = 21$..."
+    }
+  ],
+  "scores": [
+    {
+      "problem_id": "generated_001",
+      "scores": {
+        "correctness": 1.0,
+        "clarity": 5.0,
+        "difficulty_match": 4.0,
+        "completeness": 1.0
+      },
+      "total_score": 2.75,
+      "evaluation_text": "```json\n{\n    \"correctness\": 1,\n    \"clarity\": 5,\n    \"difficulty_match\": 4,\n    \"completeness\": 1,\n    \"comments\": \"题目存在根本的数学错误。将方程 n^2 + 19n + 92 = m^2 配方后得到 (2m)^2 - (2n+19)^2 = 7，两个平方数差为7的唯一非负整数解是 4^2 - 3^2 = 7，对应 n = -8 或 n = -11，没有任何正整数解，正确答案应为 0，而非给出的 4。问题表述本身清晰，题型和结构符合 AIME 风格，难度若正确则适中。但解答仅给出开头一句话，完全缺少推理步骤，且答案错误，严重影响了整体质量。\"\n}\n```",
+      "execution_time": 157.1320059299469
+    },
+    {
+      "problem_id": "generated_002",
+      "scores": {
+        "correctness": 5.0,
+        "clarity": 4.0,
+        "difficulty_match": 1.0,
+        "completeness": 2.0
+      },
+      "total_score": 3.0,
+      "evaluation_text": "```json\n{\n    \"correctness\": 5,\n    \"clarity\": 4,\n    \"difficulty_match\": 1,\n    \"completeness\": 2,\n    \"comments\": \"数学上完全正确，13-14-15三角形面积确为84。问题表述清晰无歧义。但难度严重偏低于AIME标准（约AIME #1-#3可能出现，但此题更接近AMC 8/10基础题），仅需直接套用海伦公式，缺乏AIME所需的技巧或多步推理。提供的解答不完整，只写到s的计算便中断，未展示完整面积计算，无法体现完整推理过程。\"\n}\n```",
+      "execution_time": 17.261316299438477
+    }
+  ],
+  "statistics": {
+    "avg_correctness": 3.0,
+    "avg_clarity": 4.5,
+    "avg_difficulty": 2.5,
+    "avg_completeness": 1.5,
+    "avg_overall": 2.875
+  }
+}
