@@ -41,7 +41,7 @@ class MultiHeadAttention(nn.Module):
         # 将输入 x 的形状从 (batch_size, seq_length, d_model)
         # 变换为 (batch_size, num_heads, seq_length, d_k)
         batch_size, seq_length, d_model = x.size()
-        return x.view(batch_size, seq_length, self.num_heads, self.d_k).transpose(1, 2)
+        return x.view(batch_size, seq_length, self.num_heads, self.d_k).transpose(1, 2) #调换第二维和第三维
         
     def combine_heads(self, x):
         # 将输入 x 的形状从 (batch_size, num_heads, seq_length, d_k)
@@ -51,6 +51,7 @@ class MultiHeadAttention(nn.Module):
         
     def forward(self, Q, K, V, mask=None):
         # 1. 对 Q, K, V 进行线性变换
+        # Q, K, V 的形状: (batch_size, seq_len, d_model)
         Q = self.split_heads(self.W_q(Q))
         K = self.split_heads(self.W_k(K))
         V = self.split_heads(self.W_v(V))
