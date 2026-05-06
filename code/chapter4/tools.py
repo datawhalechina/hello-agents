@@ -3,8 +3,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import os
-from serpapi import SerpApiClient
+#from serpapi import SerpApiClient
 from typing import Dict, Any
+import serpapi
 
 def search(query: str) -> str:
     """
@@ -25,9 +26,10 @@ def search(query: str) -> str:
             "hl": "zh-cn", # 语言代码
         }
         
-        client = SerpApiClient(params)
-        results = client.get_dict()
-        
+        #client = SerpApiClient(params)
+        #results = client.get_dict()
+        results = serpapi.search(params)
+
         # 智能解析：优先寻找最直接的答案
         if "answer_box_list" in results:
             return "\n".join(results["answer_box_list"])
