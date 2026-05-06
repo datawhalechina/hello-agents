@@ -4,6 +4,7 @@
 """
 
 import os
+import shlex
 import asyncio
 from typing import Optional
 
@@ -119,7 +120,8 @@ def config(key: Optional[str], value: Optional[str], workspace: Optional[str], l
     if edit:
         # 用编辑器打开配置文件
         editor = os.getenv("EDITOR", "nano")
-        os.system(f"{editor} {config_path}")
+        _sp = __import__("subprocess")
+        _sp.run([shlex.quote(editor), shlex.quote(config_path)], check=False)
         return
 
     # 读取配置
