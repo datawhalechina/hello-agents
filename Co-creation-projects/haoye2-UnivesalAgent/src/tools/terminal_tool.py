@@ -139,12 +139,14 @@ class TerminalTool:
             if not validation_result[0]:  # 验证失败
                 return validation_result[1]
         
-        # 执行命令（使用 shell=False 提高安全性）
+        # 执行命令（使用 shell=False 防止命令注入）
         try:
-            # 使用 shlex.split 可以正确处理带引号的参数
+            # 传递已经通过 shlex.split 解析的参数列表，避免 shell 解释
+            # 注意: 使用 shell=False 可防止 ;、&&、|、$()、反引号 等元字符
+            # 被 shell 解释执行（CWE-78）。
             result = subprocess.run(
-                cmd,
-                shell=True,  # 保持向后兼容，但需要更严格的白名单
+                [command_name, *args],
+                shell=False,
                 capture_output=True,
                 text=True,
                 timeout=15,
