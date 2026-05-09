@@ -203,17 +203,33 @@ class ContextFetchTool(Tool):
     def _fetch_files_fallback(self, query: str, paths: str, budget: int) -> str:
         """ripgrep 不可用时的降级方案"""
         try:
-            cmd = f"grep -rn '{query}' {self.workspace}"
             if paths:
-                cmd = f"find {self.workspace} -path '{paths}' -type f | xargs grep -n '{query}'"
-            
-            result = subprocess.run(
-                cmd,
-                shell=True,
-                capture_output=True,
-                text=True,
-                timeout=10,
-            )
+                # 使用 find 列出匹配路径模式的文件，再用 grep 搜索
+                # 使用参数列表（shell=False）避免命令注入（CWE-78）
+                find_result = subprocess.run(
+                    ["find", self.workspace, "-path", paths, "-type", "f"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+                files = [f for f in find_result.stdout.strip().splitlines() if f]
+                if not files:
+                    return f"[files] 未找到匹配 '{query}' 的内容"
+                # 使用 "--" 防止 query 被解释为选项
+                result = subprocess.run(
+                    ["grep", "-n", "--", query, *files],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+            else:
+                # 使用 "--" 防止 query 被解释为选项
+                result = subprocess.run(
+                    ["grep", "-rn", "--", query, self.workspace],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
             output = result.stdout.strip()
             if output:
                 return f"[files] grep 结果:\n{self._truncate(output, budget)}"
