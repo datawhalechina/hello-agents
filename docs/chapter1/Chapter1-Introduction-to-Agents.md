@@ -296,7 +296,7 @@ def get_weather(city: str) -> str:
 
 (3) Tool 2: Search and Recommend Tourist Attractions
 
-We will define a new tool `search_attraction` that searches the internet for suitable attractions based on city and weather conditions:
+We will define a new tool `get_attraction` that searches the internet for suitable attractions based on city and weather conditions:
 
 ```python
 import os
