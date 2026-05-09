@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hello-agents"
+dynamic = ["version"]
+requires-python = ">=3.10"
+
+[tool.setuptools.dynamic]
+version = {attr = "version.__version__"}
+
+[tool.pytest.ini_options]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+testpaths = ["tests"]
+ignore = ["__init__.py"]
+asyncio_mode = "auto"
+addopts = "-v --tb=short"
