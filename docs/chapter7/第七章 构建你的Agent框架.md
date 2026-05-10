@@ -439,8 +439,9 @@ llm = HelloAgentsLLM()
 # 后续调用方式完全不变
 messages = [{"role": "user", "content": "你好！"}]
 for chunk in llm.think(messages):
-    print(chunk, end="")
-
+    # think() 已在内部打印每个片段，此处不要再 print(chunk)，否则会重复输出。
+    # print(chunk, end="")
+    pass
 ```
 
 在这个过程中，`_auto_detect_provider` 方法通过解析 `LLM_BASE_URL` 中的 `"localhost"` 和 `:11434`，成功地将 `provider` 推断为 `"ollama"`。随后，`_resolve_credentials` 方法会为 Ollama 设置正确的默认参数。
