@@ -1,0 +1,11 @@
+# 核心依赖
+hello-agents>=1.0.0
+
+# 网络搜索
+duckduckgo-search>=7.0.0
+
+# 环境变量管理
+python-dotenv>=1.0.0
+
+# Jupyter Notebook（可选，用于交互式开发）
+jupyter>=1.0.0
