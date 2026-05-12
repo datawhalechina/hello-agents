@@ -12,7 +12,7 @@ import time
 import hashlib
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
-from hello_agents.tools import MemoryTool
+from memory_tool import MemoryTool
 
 class MemoryTypesDeepDive:
     """四种记忆类型深度解析演示类"""

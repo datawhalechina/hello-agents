@@ -32,7 +32,8 @@ from utils_cn import (
     MAX_GAME_ROUND,
     MAX_DISCUSSION_ROUND,
 )
-
+from dotenv import load_dotenv
+load_dotenv()  # 默认会在当前工作目录查找 .env
 
 class ThreeKingdomsWerewolfGame:
     """三国狼人杀游戏主类"""

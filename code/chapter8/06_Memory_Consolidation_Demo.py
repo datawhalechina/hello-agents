@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 import time
 from datetime import datetime, timedelta
-from hello_agents.tools import MemoryTool
+from memory_tool import MemoryTool
 
 
 class MemoryConsolidationDemo:

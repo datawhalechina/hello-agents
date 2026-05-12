@@ -8,8 +8,8 @@
 import time
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
-from hello_agents.tools import MemoryTool
-from hello_agents.memory import MemoryItem
+from memory_tool import MemoryTool
+from memory import MemoryItem
 from dotenv import load_dotenv
 load_dotenv()
 

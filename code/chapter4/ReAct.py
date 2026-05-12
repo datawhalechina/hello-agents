@@ -9,7 +9,7 @@ REACT_PROMPT_TEMPLATE = """
 可用工具如下：
 {tools}
 
-请严格按照以下格式进行回应：
+请严格按照以下格式进行回应（严格）：
 
 Thought: 你的思考过程，用于分析问题、拆解任务和规划下一步行动。
 Action: 你决定采取的行动，必须是以下格式之一：
@@ -24,7 +24,7 @@ History: {history}
 """
 
 class ReActAgent:
-    def __init__(self, llm_client: HelloAgentsLLM, tool_executor: ToolExecutor, max_steps: int = 5):
+    def __init__(self, llm_client: HelloAgentsLLM, tool_executor: ToolExecutor, max_steps: int = 10):
         self.llm_client = llm_client
         self.tool_executor = tool_executor
         self.max_steps = max_steps
@@ -95,5 +95,5 @@ if __name__ == '__main__':
     search_desc = "一个网页搜索引擎。当你需要回答关于时事、事实以及在你的知识库中找不到的信息时，应使用此工具。"
     tool_executor.registerTool("Search", search_desc, search)
     agent = ReActAgent(llm_client=llm, tool_executor=tool_executor)
-    question = "华为最新的手机是哪一款？它的主要卖点是什么？"
+    question = "小米最新的汽车是哪一款？它的主要卖点是什么？"
     agent.run(question)

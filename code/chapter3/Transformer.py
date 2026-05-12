@@ -2,7 +2,10 @@ import torch
 import torch.nn as nn
 import math
 import copy
-
+import os
+# 强制让这个 Python 脚本里的所有网络请求都走你的本地代理
+# os.environ['HTTP_PROXY'] = 'http://127.0.0.1:7890'
+# os.environ['HTTPS_PROXY'] = 'http://127.0.0.1:7890'
 class MultiHeadAttention(nn.Module):
     """
     多头注意力机制模块

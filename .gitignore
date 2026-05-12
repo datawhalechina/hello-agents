@@ -167,3 +167,7 @@ test_*.py
 !test_tools.py
 .workbuddy/
 memory/
+chapter4.md
+01学习清单.md
+Agent转码求职全面规划.md
+.claude

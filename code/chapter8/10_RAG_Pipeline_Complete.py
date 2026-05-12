@@ -10,7 +10,7 @@ import time
 import json
 from datetime import datetime
 from typing import List, Dict, Any, Optional
-from hello_agents.tools import RAGTool
+from rag_tool import RAGTool
 from dotenv import load_dotenv
 load_dotenv()
 
