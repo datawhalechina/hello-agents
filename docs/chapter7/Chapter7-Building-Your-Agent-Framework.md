@@ -217,7 +217,7 @@ class MyLLM(HelloAgentsLLM):
             self.timeout = kwargs.get('timeout', 60)
 
             # Create OpenAI client instance with obtained parameters
-            self._client = OpenAI(api_key=self.api_key, base_url=self.base_url, timeout=self.timeout)
+            self.client = OpenAI(api_key=self.api_key, base_url=self.base_url, timeout=self.timeout)
 
         else:
             # If not modelscope, use parent class's original logic to handle
