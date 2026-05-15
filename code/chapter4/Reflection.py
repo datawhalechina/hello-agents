@@ -107,6 +107,7 @@ class ReflectionAgent:
         print("\n--- 正在进行初始尝试 ---")
         initial_prompt = INITIAL_PROMPT_TEMPLATE.format(task=task)
         initial_code = self._get_llm_response(initial_prompt)
+        print(f"✅ 初始尝试完成，生成的代码:\n{initial_code}")
         self.memory.add_record("execution", initial_code)
 
         # --- 2. 迭代循环：反思与优化 ---
@@ -118,6 +119,7 @@ class ReflectionAgent:
             last_code = self.memory.get_last_execution()
             reflect_prompt = REFLECT_PROMPT_TEMPLATE.format(task=task, code=last_code)
             feedback = self._get_llm_response(reflect_prompt)
+            print(f"✅ 反思完成，反馈: {feedback}")
             self.memory.add_record("reflection", feedback)
 
             # b. 检查是否需要停止
@@ -133,6 +135,7 @@ class ReflectionAgent:
                 feedback=feedback
             )
             refined_code = self._get_llm_response(refine_prompt)
+            print(f"✅ 优化完成，生成的代码:\n{refined_code}")
             self.memory.add_record("execution", refined_code)
         
         final_code = self.memory.get_last_execution()

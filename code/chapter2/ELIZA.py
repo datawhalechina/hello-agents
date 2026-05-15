@@ -42,7 +42,7 @@ rules = {
 
 # 定义代词转换规则
 pronoun_swap = {
-    "i": "you", "you": "i", "me": "you", "my": "your",
+    "i": "you", "you": "i", "me": "you", "my": "your", "your": "my",
     "am": "are", "are": "am", "was": "were", "i'd": "you would",
     "i've": "you have", "i'll": "you will", "yours": "mine",
     "mine": "yours"

@@ -31,13 +31,13 @@ class SearchState(TypedDict):
 # 初始化模型和Tavily客户端
 llm = ChatOpenAI(
     model=os.getenv("LLM_MODEL_ID", "gpt-4o-mini"),
-    api_key=os.getenv("LLM_API_KEY"),
+    api_key=os.getenv("LLM_API_KEY", ""),
     base_url=os.getenv("LLM_BASE_URL", "https://api.openai.com/v1"),
     temperature=0.7
 )
 
 # 初始化Tavily客户端
-tavily_client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
+tavily_client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY", "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"))
 
 def understand_query_node(state: SearchState) -> SearchState:
     """步骤1：理解用户查询并生成搜索关键词"""
@@ -195,11 +195,7 @@ def create_search_assistant():
 
 async def main():
     """主函数：运行智能搜索助手"""
-    
-    # 检查API密钥
-    if not os.getenv("TAVILY_API_KEY"):
-        print("❌ 错误：请在.env文件中配置TAVILY_API_KEY")
-        return
+
     
     app = create_search_assistant()
     

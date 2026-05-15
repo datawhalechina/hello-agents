@@ -28,10 +28,11 @@ import requests
 
 def get_weather(city: str) -> str:
     """
-    通过调用 wttr.in API 查询真实的天气信息。
+    通过调用 WeatherAPI 查询真实的天气信息。
     """
+    weather_api_key='YOUR_API_KEY'
     # API端点，我们请求JSON格式的数据
-    url = f"https://wttr.in/{city}?format=j1"
+    url = f"https://api.weatherapi.com/v1/current.json?key={weather_api_key}&q={city}&aqi=no"
     
     try:
         # 发起网络请求
@@ -42,9 +43,9 @@ def get_weather(city: str) -> str:
         data = response.json()
         
         # 提取当前天气状况
-        current_condition = data['current_condition'][0]
-        weather_desc = current_condition['weatherDesc'][0]['value']
-        temp_c = current_condition['temp_C']
+        current_condition = data['current']
+        weather_desc = current_condition['condition']['text']
+        temp_c = current_condition['temp_c']
         
         # 格式化成自然语言返回
         return f"{city}当前天气：{weather_desc}，气温{temp_c}摄氏度"

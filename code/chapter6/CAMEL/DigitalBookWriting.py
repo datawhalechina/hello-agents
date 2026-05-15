@@ -6,22 +6,21 @@ from camel.types import ModelPlatformType
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
-LLM_API_KEY = os.getenv("LLM_API_KEY")
-LLM_BASE_URL = os.getenv("LLM_BASE_URL")
-LLM_MODEL = os.getenv("LLM_MODEL")
+LLM_MODEL_ID="coding-glm-4.7-free"
+LLM_API_KEY="sk-Yfh9jNQSWoNgoZAC23Cb8d1a924d43E286Cd81Dc17Fa0b89"
+LLM_BASE_URL="https://aihubmix.com/v1"
 
 #创建模型,在这里以Qwen为例,调用的百炼大模型平台API
 model = ModelFactory.create(
-    model_platform=ModelPlatformType.QWEN,
-    model_type=LLM_MODEL,
+    model_platform=ModelPlatformType.ZHIPU,
+    model_type=LLM_MODEL_ID,
     url=LLM_BASE_URL,
     api_key=LLM_API_KEY
 )
 
 # 定义协作任务
 task_prompt = """
-创作一本关于"拖延症心理学"的短篇电子书，目标读者是对心理学感兴趣的普通大众。
+创作一本关于"人类移民"的短篇电子书，目标读者是对科幻题材感兴趣的普通大众。
 要求：
 1. 内容科学严谨，基于实证研究
 2. 语言通俗易懂，避免过多专业术语
@@ -34,7 +33,7 @@ print(Fore.YELLOW + f"协作任务:\n{task_prompt}\n")
 
 # 初始化角色扮演会话
 role_play_session = RolePlaying(
-    assistant_role_name="心理学家", 
+    assistant_role_name="量子力学学家", 
     user_role_name="作家", 
     task_prompt=task_prompt,
     model=model

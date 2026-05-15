@@ -258,17 +258,18 @@ Let's begin!
 
 (2) Tool 1: Query Real Weather
 
-We will use the free weather query service `wttr.in`, which can return weather data for a specified city in JSON format. Here is the code to implement this tool:
+We will use the free weather query service `weatherapi`(You need to register an account at https://www.weatherapi.com to obtain the weather_api_key), which can return weather data for a specified city in JSON format. Here is the code to implement this tool:
 
 ```python
 import requests
 
 def get_weather(city: str) -> str:
     """
-    Query real weather information by calling the wttr.in API.
+    Query real weather information by calling the WeatherAPI.
     """
+    weather_api_key='YOUR_API_KEY'
     # API endpoint, we request data in JSON format
-    url = f"https://wttr.in/{city}?format=j1"
+    url = f"https://api.weatherapi.com/v1/current.json?key={weather_api_key}&q={city}&aqi=no"
 
     try:
         # Make network request
@@ -279,9 +280,9 @@ def get_weather(city: str) -> str:
         data = response.json()
 
         # Extract current weather conditions
-        current_condition = data['current_condition'][0]
-        weather_desc = current_condition['weatherDesc'][0]['value']
-        temp_c = current_condition['temp_C']
+        current_condition = data['current']
+        weather_desc = current_condition['condition']['text']
+        temp_c = current_condition['temp_c']
 
         # Format as natural language return
         return f"{city} current weather: {weather_desc}, temperature {temp_c} degrees Celsius"
@@ -296,7 +297,7 @@ def get_weather(city: str) -> str:
 
 (3) Tool 2: Search and Recommend Tourist Attractions
 
-We will define a new tool `search_attraction` that searches the internet for suitable attractions based on city and weather conditions:
+We will define a new tool `get_attraction` that searches the internet for suitable attractions based on city and weather conditions:
 
 ```python
 import os

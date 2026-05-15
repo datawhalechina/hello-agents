@@ -33,6 +33,8 @@ from utils_cn import (
     MAX_DISCUSSION_ROUND,
 )
 
+os.environ["DASHSCOPE_API_KEY"] = "sk-fbd837c733ba4ce5a15d4a5555c27f41"
+
 
 class ThreeKingdomsWerewolfGame:
     """三国狼人杀游戏主类"""
