@@ -79,6 +79,13 @@ python main.py "茅台怎么样"   # 命令行快速分析
 
 ## 📖 使用示例
 
+```
+![alt text](image.png)
+运行app.py后，在浏览器打开http://127.0.0.1:7861便可进入交互界面
+![alt text](image-1.png)
+或者运行main.py后，便可直接在终端进行交互
+```
+
 ### 命令行
 
 ```
