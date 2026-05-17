@@ -1,0 +1,92 @@
+[
+  {
+    "content": "本次为 hello-agents 仓库加载了 6 个文件到知识库",
+    "memory_type": "episodic",
+    "importance": 0.9,
+    "timestamp": "2026-05-16T22:05:43.688191"
+  },
+  {
+    "content": "提问: chapter8 里 RAGTool 完整处理管道是怎么组织的，最该看哪些函数？",
+    "memory_type": "working",
+    "importance": 0.6,
+    "timestamp": "2026-05-16T22:05:43.688503"
+  },
+  {
+    "content": "本次为 hello-agents 仓库加载了 6 个文件到知识库",
+    "memory_type": "episodic",
+    "importance": 0.9,
+    "timestamp": "2026-05-16T22:08:13.963948"
+  },
+  {
+    "content": "提问: chapter8 里 RAGTool 完整处理管道是怎么组织的，最该看哪些函数？",
+    "memory_type": "working",
+    "importance": 0.6,
+    "timestamp": "2026-05-16T22:08:13.971017"
+  },
+  {
+    "content": "本次为 hello-agents 仓库加载了 4 个文件到知识库",
+    "memory_type": "episodic",
+    "importance": 0.9,
+    "timestamp": "2026-05-16T22:43:56.204948"
+  },
+  {
+    "content": "提问: chapter8 里 RAGTool 完整处理管道是怎么组织的，最该看哪些函数？",
+    "memory_type": "working",
+    "importance": 0.6,
+    "timestamp": "2026-05-16T22:43:56.206204"
+  },
+  {
+    "content": "本次为 hello-agents 仓库加载了 3 个文件到知识库",
+    "memory_type": "episodic",
+    "importance": 0.9,
+    "timestamp": "2026-05-16T22:45:45.633191"
+  },
+  {
+    "content": "提问: chapter8 里 RAGTool 完整处理管道是怎么组织的，最该看哪些函数？",
+    "memory_type": "working",
+    "importance": 0.6,
+    "timestamp": "2026-05-16T22:45:45.633600"
+  },
+  {
+    "content": "本次为 hello-agents 仓库加载了 3 个文件到知识库",
+    "memory_type": "episodic",
+    "importance": 0.9,
+    "timestamp": "2026-05-16T22:47:20.721752"
+  },
+  {
+    "content": "提问: chapter8 里 RAGTool 完整处理管道是怎么组织的，最该看哪些函数？",
+    "memory_type": "working",
+    "importance": 0.6,
+    "timestamp": "2026-05-16T22:47:20.723641"
+  },
+  {
+    "content": "运行了 local 学习模式",
+    "memory_type": "episodic",
+    "importance": 0.8,
+    "timestamp": "2026-05-17T10:33:27.478839"
+  },
+  {
+    "content": "运行了 local 学习模式",
+    "memory_type": "episodic",
+    "importance": 0.8,
+    "timestamp": "2026-05-17T10:37:04.095615"
+  },
+  {
+    "content": "运行了 local 学习模式",
+    "memory_type": "episodic",
+    "importance": 0.8,
+    "timestamp": "2026-05-17T10:39:25.692729"
+  },
+  {
+    "content": "提问: 第八章里 MemoryTool 和 RAGTool 的关系是什么",
+    "memory_type": "working",
+    "importance": 0.6,
+    "timestamp": "2026-05-17T10:39:54.699490"
+  },
+  {
+    "content": "[chapter8] chapter8 的主线是 ingest -> search -> assistant",
+    "memory_type": "semantic",
+    "importance": 0.8,
+    "timestamp": "2026-05-17T10:40:49.216654"
+  }
+]
