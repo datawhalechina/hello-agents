@@ -1,0 +1,16 @@
+{
+  "session_id": "session_20260516_220543",
+  "user_id": "hello_agents_user",
+  "namespace": "hello_agents_book",
+  "created_at": "2026-05-16T22:05:43.688813",
+  "stats": {
+    "session_start": "2026-05-16T22:05:43.680322",
+    "documents_loaded": 0,
+    "questions_asked": 1,
+    "notes_added": 0,
+    "load_failures": 12
+  },
+  "memory_backend": "fallback_json",
+  "env_file": ".env.ch8",
+  "qdrant_local_dir": "hello_ch8_data/qdrant_local"
+}

@@ -1,0 +1,22 @@
+{
+  "started_at": "2026-05-17T10:39:54.699366",
+  "questions": [
+    {
+      "question": "第八章里 MemoryTool 和 RAGTool 的关系是什么",
+      "at": "2026-05-17T10:39:55.895617",
+      "citations": [
+        "[1] code/chapter8/08_Agent_Tool_Integration.py | 初始化工具",
+        "[2] docs/chapter9/Chapter9-Context-Engineering.md | 1. Initialize tools",
+        "[3] docs/chapter9/第九章 上下文工程.md | 1. 初始化工具",
+        "[4] docs/chapter8/Chapter8-Memory-and-Retrieval.md | Configure the LLM API in .env in the same folder",
+        "[5] docs/chapter8/第八章 记忆与检索.md | 配置好同级文件夹下.env中的大模型API"
+      ]
+    }
+  ],
+  "mode_history": [
+    {
+      "mode": "ask",
+      "at": "2026-05-17T10:39:55.895634"
+    }
+  ]
+}
