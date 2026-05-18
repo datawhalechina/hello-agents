@@ -8,8 +8,29 @@
 from dotenv import load_dotenv
 load_dotenv()
 from datetime import datetime
+import re
 from typing import List
 from hello_agents.tools import MemoryTool
+
+IMPORTANCE_PATTERN = re.compile(r"^\d+\.\s.*\(重要性:\s*([0-9.]+)\)")
+
+
+def filter_search_result_by_importance(result, min_importance, limit):
+    """过滤搜索结果，确保示例输出符合最小重要性阈值。"""
+    if not isinstance(result, str):
+        return result
+
+    memory_lines = []
+    for line in result.splitlines():
+        match = IMPORTANCE_PATTERN.match(line)
+        if match and float(match.group(1)) >= min_importance:
+            memory_lines.append(line)
+
+    memory_lines = memory_lines[:limit]
+    if not memory_lines:
+        return f"🔍 未找到重要性不低于 {min_importance:.2f} 的相关记忆"
+
+    return "\n".join([f"🔍 找到 {len(memory_lines)} 条相关记忆:"] + memory_lines)
 
 def memory_tool_execute_demo():
     """MemoryTool execute方法演示"""
@@ -97,13 +118,15 @@ def search_memory_demo(memory_tool):
     
     # 设置重要性阈值
     print("\n高重要性记忆搜索:")
+    min_importance = 0.7
+    display_limit = 3
     result = memory_tool.run({
         "action":"search", 
         "query":"AI Agent", 
-        "min_importance":0.7, 
-        "limit":3
+        "min_importance":min_importance,
+        "limit":10
     })
-    print(result)
+    print(filter_search_result_by_importance(result, min_importance, display_limit))
 
 def memory_summary_demo(memory_tool):
     """记忆摘要演示 - 提供系统全貌"""
