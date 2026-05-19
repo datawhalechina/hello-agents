@@ -332,44 +332,59 @@
                     function saveBookmarks(bms) {
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(bms));
                     }
-
-                    // 从当前 URL hash 中提取完整路径，包含 ?id=section 锚点
-                    function getFullPath() {
-                        var hash = window.location.hash.replace(/^#/, '') || '/';
-                        return hash;
+                    function isBookmarked(path) {
+                        return getBookmarks().some(function(b) { return b.path === path; });
                     }
 
-                    function isBookmarked(fullPath) {
-                        return getBookmarks().some(function(b) { return b.path === fullPath; });
+                    // 从视口检测当前正在阅读的 heading（滚动位置之上最近的 h1/h2/h3）
+                    function getVisibleHeading() {
+                        var article = document.querySelector('article.markdown-section');
+                        if (!article) return null;
+                        var headings = article.querySelectorAll('h1[id], h2[id], h3[id]');
+                        var result = null;
+                        var scrollTop = window.scrollY || document.documentElement.scrollTop;
+                        // 阈值：滚动位置 + 80px，给顶部工具栏留空间
+                        var threshold = scrollTop + 80;
+                        headings.forEach(function(h) {
+                            var top = h.getBoundingClientRect().top + scrollTop;
+                            if (top <= threshold) result = h;
+                        });
+                        return result;
                     }
 
-                    // 获取当前小节标题：优先读锚点对应的 heading 文本
-                    function getCurrentTitle() {
-                        var sectionId = vm.route.query && vm.route.query.id;
-                        if (sectionId) {
-                            var el = document.getElementById(sectionId);
-                            if (el) return el.textContent.trim();
+                    // 构建书签路径：章节路径 + ?id=小节id
+                    function buildPath() {
+                        var heading = getVisibleHeading();
+                        if (heading && heading.id) {
+                            return vm.route.path + '?id=' + heading.id;
                         }
+                        return vm.route.path;
+                    }
+
+                    // 获取当前小节标题文字
+                    function buildTitle() {
+                        var heading = getVisibleHeading();
+                        if (heading) return heading.textContent.trim();
                         return document.title.replace(/\s*-\s*Hello-Agents$/, '').trim();
                     }
 
                     function updateBookmarkBtn() {
                         var btn = document.getElementById('ha-bookmark-btn');
                         if (!btn) return;
-                        var marked = isBookmarked(getFullPath());
+                        var marked = isBookmarked(buildPath());
                         btn.textContent = marked ? '🔖 已收藏' : '🔖 收藏';
                         btn.classList.toggle('bookmarked', marked);
                     }
 
                     window.toggleCurrentBookmark = function() {
-                        var fullPath = getFullPath();
-                        var title = getCurrentTitle();
+                        var path = buildPath();
+                        var title = buildTitle();
                         var bms = getBookmarks();
-                        var idx = bms.findIndex(function(b) { return b.path === fullPath; });
+                        var idx = bms.findIndex(function(b) { return b.path === path; });
                         if (idx > -1) {
                             bms.splice(idx, 1);
                         } else {
-                            bms.unshift({ path: fullPath, title: title });
+                            bms.unshift({ path: path, title: title });
                         }
                         saveBookmarks(bms);
                         updateBookmarkBtn();
@@ -403,12 +418,7 @@
                     }
 
                     hook.doneEach(function() {
-                        // 页面切换后更新按钮状态
                         updateBookmarkBtn();
-
-                        // 监听页内锚点跳转（?id= 变化），实时更新按钮
-                        window.removeEventListener('hashchange', updateBookmarkBtn);
-                        window.addEventListener('hashchange', updateBookmarkBtn);
 
                         if (!document.getElementById('ha-bookmark-panel')) {
                             var sidebar = document.querySelector('.sidebar-nav');
