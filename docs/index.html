@@ -362,7 +362,7 @@
                             var path = vm.route.path + '?id=' + btn.dataset.id;
                             var marked = isBookmarked(path);
                             btn.classList.toggle('active', marked);
-                            btn.textContent = marked ? '✓ 已收藏' : '加入书签';
+                            btn.textContent = marked ? '✓ 已加入书签' : '加入书签';
                         });
                     }
 
@@ -372,7 +372,7 @@
                         var bms = getBookmarks();
                         var list = panel.querySelector('.bookmark-panel-list');
                         if (bms.length === 0) {
-                            list.innerHTML = '<div class="bookmark-empty">暂无收藏</div>';
+                            list.innerHTML = '<div class="bookmark-empty">暂无书签</div>';
                         } else {
                             list.innerHTML = bms.map(function(b) {
                                 return '<div class="bookmark-item">'
@@ -414,7 +414,7 @@
                             btn.dataset.id = sectionId;
                             var marked = isBookmarked(path);
                             btn.classList.toggle('active', marked);
-                            btn.textContent = marked ? '✓ 已收藏' : '加入书签';
+                            btn.textContent = marked ? '✓ 已加入书签' : '加入书签';
 
                             btn.onclick = function(e) {
                                 e.preventDefault();
@@ -437,13 +437,27 @@
                     hook.doneEach(function() {
                         insertSectionButtons();
 
+                        // 导航到新页面后，滚动侧边栏使当前章节可见
+                        setTimeout(function() {
+                            var sidebar = document.querySelector('.sidebar');
+                            var activeLink = document.querySelector('.sidebar-nav .active > a');
+                            if (sidebar && activeLink) {
+                                var sidebarRect = sidebar.getBoundingClientRect();
+                                var linkRect = activeLink.getBoundingClientRect();
+                                // 如果激活项不在侧边栏可视区内，滚动过去
+                                if (linkRect.top < sidebarRect.top || linkRect.bottom > sidebarRect.bottom) {
+                                    activeLink.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                                }
+                            }
+                        }, 150);
+
                         if (!document.getElementById('ha-bookmark-panel')) {
                             var sidebar = document.querySelector('.sidebar-nav');
                             if (!sidebar) return;
                             var panel = document.createElement('div');
                             panel.id = 'ha-bookmark-panel';
                             panel.className = 'bookmark-panel';
-                            panel.innerHTML = '<div class="bookmark-panel-header">🔖 我的收藏 <span class="bm-icon">▼</span></div>'
+                            panel.innerHTML = '<div class="bookmark-panel-header">🔖 书签 <span class="bm-icon">▼</span></div>'
                                 + '<div class="bookmark-panel-list"></div>';
 
                             var expanded = true;
