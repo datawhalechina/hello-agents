@@ -235,6 +235,127 @@
             color: white;
         }
 
+        /* --- 5. 习题答案按钮与弹窗 --- */
+        .answer-btn {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 1px 8px;
+            font-size: 0.75em;
+            vertical-align: middle;
+            background: #f0f7ff;
+            border: 1px solid #4a9eff;
+            border-radius: 3px;
+            color: #4a9eff;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            user-select: none;
+        }
+        .answer-btn:hover { background: #4a9eff; color: white; }
+        .answer-btn.has-answer {
+            background: #fff7e6;
+            border-color: #e67e22;
+            color: #e67e22;
+        }
+        .answer-btn.has-answer:hover { background: #e67e22; color: white; }
+
+        /* 弹窗 */
+        .answer-popup {
+            position: fixed;
+            z-index: 9999;
+            width: 360px;
+            background: #fffef0;
+            border: 1px solid #d4b84a;
+            border-radius: 6px;
+            box-shadow: 4px 6px 16px rgba(0,0,0,0.18);
+            display: none;
+            font-size: 14px;
+        }
+        .answer-popup.visible { display: block; }
+        .answer-popup-header {
+            background: #ffd966;
+            padding: 7px 12px;
+            border-radius: 5px 5px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            color: #5a4000;
+            cursor: move;
+            user-select: none;
+        }
+        .answer-popup-close {
+            cursor: pointer;
+            font-size: 18px;
+            color: #888;
+            line-height: 1;
+            padding: 0 2px;
+        }
+        .answer-popup-close:hover { color: #e74c3c; }
+        .answer-popup-body { padding: 10px 12px 6px; }
+        .answer-popup textarea {
+            width: 100%;
+            min-height: 130px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 7px;
+            font-size: 13px;
+            font-family: inherit;
+            resize: vertical;
+            box-sizing: border-box;
+            background: white;
+            color: #333;
+            line-height: 1.6;
+        }
+        .answer-popup textarea:focus { outline: none; border-color: #4a9eff; }
+        .answer-popup-footer {
+            padding: 6px 12px 10px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        .answer-popup .ap-save {
+            padding: 4px 14px;
+            background: #42b983;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .answer-popup .ap-save:hover { background: #33a06f; }
+        .answer-popup .ap-clear {
+            padding: 4px 10px;
+            background: transparent;
+            color: #aaa;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .answer-popup .ap-clear:hover { color: #e74c3c; border-color: #e74c3c; }
+
+        body.dark-mode .answer-popup {
+            background: #2a2a2a;
+            border-color: #555;
+        }
+        body.dark-mode .answer-popup-header { background: #5a4800; color: #ffd; }
+        body.dark-mode .answer-popup textarea {
+            background: #1e1e1e;
+            border-color: #444;
+            color: #ccc;
+        }
+        body.dark-mode .answer-btn {
+            background: rgba(74,158,255,0.1);
+            border-color: #4a9eff;
+            color: #4a9eff;
+        }
+        body.dark-mode .answer-btn.has-answer {
+            background: rgba(230,126,34,0.1);
+            border-color: #e67e22;
+            color: #e67e22;
+        }
+
         .bookmark-panel {
             margin: 0 15px 12px 15px;
             border: 1px solid rgba(0,0,0,0.1);
@@ -469,6 +590,167 @@
                             sidebar.insertBefore(panel, sidebar.firstChild);
                         }
                         renderBookmarkPanel();
+                    });
+                },
+
+                // --- 习题答案插件 ---
+                function(hook, vm) {
+                    var popup = null;
+                    var currentKey = null;
+
+                    function answerKey(idx) {
+                        return 'ha-ans-' + vm.route.path + '-q' + idx;
+                    }
+
+                    function getOrCreatePopup() {
+                        if (popup) return popup;
+                        popup = document.createElement('div');
+                        popup.className = 'answer-popup';
+                        popup.innerHTML =
+                            '<div class="answer-popup-header">'
+                            + '<span>✏️ 我的答案</span>'
+                            + '<span class="answer-popup-close" title="关闭">×</span>'
+                            + '</div>'
+                            + '<div class="answer-popup-body">'
+                            + '<textarea placeholder="在此输入你的答案，支持多行文字..."></textarea>'
+                            + '</div>'
+                            + '<div class="answer-popup-footer">'
+                            + '<button class="ap-clear">清除</button>'
+                            + '<button class="ap-save">保存</button>'
+                            + '</div>';
+                        document.body.appendChild(popup);
+
+                        popup.querySelector('.answer-popup-close').onclick = hidePopup;
+
+                        popup.querySelector('.ap-save').onclick = function() {
+                            if (!currentKey) return;
+                            var val = popup.querySelector('textarea').value.trim();
+                            if (val) localStorage.setItem(currentKey, val);
+                            else localStorage.removeItem(currentKey);
+                            refreshButtons();
+                            hidePopup();
+                        };
+
+                        popup.querySelector('.ap-clear').onclick = function() {
+                            popup.querySelector('textarea').value = '';
+                            if (currentKey) localStorage.removeItem(currentKey);
+                            refreshButtons();
+                            hidePopup();
+                        };
+
+                        // 支持拖拽弹窗（像 Excel 注释那样）
+                        var header = popup.querySelector('.answer-popup-header');
+                        var dragging = false, ox = 0, oy = 0;
+                        header.addEventListener('mousedown', function(e) {
+                            dragging = true;
+                            ox = e.clientX - popup.offsetLeft;
+                            oy = e.clientY - popup.offsetTop;
+                        });
+                        document.addEventListener('mousemove', function(e) {
+                            if (!dragging) return;
+                            popup.style.left = (e.clientX - ox) + 'px';
+                            popup.style.top  = (e.clientY - oy) + 'px';
+                        });
+                        document.addEventListener('mouseup', function() { dragging = false; });
+
+                        // 点击弹窗外关闭
+                        document.addEventListener('click', function(e) {
+                            if (!popup.classList.contains('visible')) return;
+                            if (!popup.contains(e.target) && !e.target.classList.contains('answer-btn')) {
+                                hidePopup();
+                            }
+                        });
+
+                        // Esc 关闭
+                        document.addEventListener('keydown', function(e) {
+                            if (e.key === 'Escape') hidePopup();
+                        });
+
+                        return popup;
+                    }
+
+                    function hidePopup() {
+                        if (popup) popup.classList.remove('visible');
+                        currentKey = null;
+                    }
+
+                    function showPopup(btn, key) {
+                        var p = getOrCreatePopup();
+                        currentKey = key;
+                        p.querySelector('textarea').value = localStorage.getItem(key) || '';
+
+                        // 定位到按钮旁边，避免超出视口
+                        var rect = btn.getBoundingClientRect();
+                        var pw = 360, ph = 240;
+                        var left = rect.left;
+                        var top  = rect.bottom + 8;
+                        if (left + pw > window.innerWidth - 16)  left = window.innerWidth - pw - 16;
+                        if (top  + ph > window.innerHeight - 16) top  = rect.top - ph - 8;
+                        if (left < 8) left = 8;
+                        if (top  < 8) top  = 8;
+
+                        p.style.left = left + 'px';
+                        p.style.top  = top  + 'px';
+                        p.classList.add('visible');
+                        p.querySelector('textarea').focus();
+                    }
+
+                    function refreshButtons() {
+                        var article = document.querySelector('article.markdown-section');
+                        if (!article) return;
+                        article.querySelectorAll('.answer-btn').forEach(function(btn) {
+                            var has = !!localStorage.getItem(btn.dataset.key);
+                            btn.classList.toggle('has-answer', has);
+                            btn.textContent = has ? '查看答案' : '答案';
+                        });
+                    }
+
+                    function insertAnswerButtons() {
+                        var article = document.querySelector('article.markdown-section');
+                        if (!article) return;
+                        article.querySelectorAll('.answer-btn').forEach(function(b) { b.remove(); });
+
+                        // 找到所有包含"习题"的 h2/h3 标题
+                        var qIndex = 0;
+                        article.querySelectorAll('h2, h3').forEach(function(h) {
+                            if (!h.textContent.includes('习题')) return;
+
+                            // 遍历其后的兄弟节点，找有序列表
+                            var sibling = h.nextElementSibling;
+                            while (sibling && sibling.tagName !== 'H2') {
+                                if (sibling.tagName === 'OL') {
+                                    // 只处理直接子 li（不递归）
+                                    sibling.querySelectorAll(':scope > li').forEach(function(li) {
+                                        var key = answerKey(qIndex++);
+                                        var btn = document.createElement('span');
+                                        btn.className = 'answer-btn';
+                                        btn.dataset.key = key;
+                                        var has = !!localStorage.getItem(key);
+                                        btn.classList.toggle('has-answer', has);
+                                        btn.textContent = has ? '查看答案' : '答案';
+
+                                        btn.onclick = function(e) {
+                                            e.stopPropagation();
+                                            if (popup && popup.classList.contains('visible') && currentKey === key) {
+                                                hidePopup();
+                                            } else {
+                                                showPopup(btn, key);
+                                            }
+                                        };
+
+                                        // 插到 li 第一个 p 的末尾，让按钮紧跟题目文字
+                                        var firstP = li.querySelector('p');
+                                        if (firstP) firstP.appendChild(btn);
+                                        else li.insertBefore(btn, li.firstChild);
+                                    });
+                                }
+                                sibling = sibling.nextElementSibling;
+                            }
+                        });
+                    }
+
+                    hook.doneEach(function() {
+                        insertAnswerButtons();
                     });
                 },
 
