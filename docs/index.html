@@ -195,25 +195,45 @@
         }
 
         /* --- 4. 书签功能样式 --- */
-        .bookmark-btn {
-            position: fixed;
-            top: 20px;
-            right: 190px;
-            z-index: 999;
-            background: #42b983;
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 4px;
+        /* 标题旁的书签小按钮 */
+        .section-bm-btn {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 1px 7px;
+            font-size: 0.6em;
+            vertical-align: middle;
+            background: transparent;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            color: #bbb;
             cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s;
+            transition: all 0.2s;
+            user-select: none;
+            font-weight: normal;
+            white-space: nowrap;
         }
-        .bookmark-btn:hover { background: #33a06f; }
-        .bookmark-btn.bookmarked {
+        .section-bm-btn:hover {
+            border-color: #42b983;
+            color: #42b983;
+        }
+        .section-bm-btn.active {
             background: #e67e22;
+            border-color: #e67e22;
+            color: white;
         }
-        .bookmark-btn.bookmarked:hover { background: #d35400; }
+        body.dark-mode .section-bm-btn {
+            border-color: #555;
+            color: #666;
+        }
+        body.dark-mode .section-bm-btn:hover {
+            border-color: var(--theme-color);
+            color: var(--theme-color);
+        }
+        body.dark-mode .section-bm-btn.active {
+            background: #e67e22;
+            border-color: #e67e22;
+            color: white;
+        }
 
         .bookmark-panel {
             margin: 0 15px 12px 15px;
@@ -282,8 +302,6 @@
     <div class="lang-switch">
         <button id="langBtn" onclick="switchLanguage()">English</button>
     </div>
-    <!-- 书签按钮 -->
-    <button class="bookmark-btn" id="ha-bookmark-btn" onclick="toggleCurrentBookmark()">🔖 收藏</button>
     <div id="app"></div>
     <script src="//cdn.jsdelivr.net/npm/mermaid@8.0.0-rc.8/dist/mermaid.min.js"></script>
     <script>
@@ -336,60 +354,17 @@
                         return getBookmarks().some(function(b) { return b.path === path; });
                     }
 
-                    // 从视口检测当前正在阅读的 heading（滚动位置之上最近的 h1/h2/h3）
-                    function getVisibleHeading() {
+                    // 刷新当前页所有标题按钮的状态
+                    function updateSectionButtons() {
                         var article = document.querySelector('article.markdown-section');
-                        if (!article) return null;
-                        var headings = article.querySelectorAll('h1[id], h2[id], h3[id]');
-                        var result = null;
-                        var scrollTop = window.scrollY || document.documentElement.scrollTop;
-                        // 阈值：滚动位置 + 80px，给顶部工具栏留空间
-                        var threshold = scrollTop + 80;
-                        headings.forEach(function(h) {
-                            var top = h.getBoundingClientRect().top + scrollTop;
-                            if (top <= threshold) result = h;
+                        if (!article) return;
+                        article.querySelectorAll('.section-bm-btn').forEach(function(btn) {
+                            var path = vm.route.path + '?id=' + btn.dataset.id;
+                            var marked = isBookmarked(path);
+                            btn.classList.toggle('active', marked);
+                            btn.textContent = marked ? '✓ 已收藏' : '加入书签';
                         });
-                        return result;
                     }
-
-                    // 构建书签路径：章节路径 + ?id=小节id
-                    function buildPath() {
-                        var heading = getVisibleHeading();
-                        if (heading && heading.id) {
-                            return vm.route.path + '?id=' + heading.id;
-                        }
-                        return vm.route.path;
-                    }
-
-                    // 获取当前小节标题文字
-                    function buildTitle() {
-                        var heading = getVisibleHeading();
-                        if (heading) return heading.textContent.trim();
-                        return document.title.replace(/\s*-\s*Hello-Agents$/, '').trim();
-                    }
-
-                    function updateBookmarkBtn() {
-                        var btn = document.getElementById('ha-bookmark-btn');
-                        if (!btn) return;
-                        var marked = isBookmarked(buildPath());
-                        btn.textContent = marked ? '🔖 已收藏' : '🔖 收藏';
-                        btn.classList.toggle('bookmarked', marked);
-                    }
-
-                    window.toggleCurrentBookmark = function() {
-                        var path = buildPath();
-                        var title = buildTitle();
-                        var bms = getBookmarks();
-                        var idx = bms.findIndex(function(b) { return b.path === path; });
-                        if (idx > -1) {
-                            bms.splice(idx, 1);
-                        } else {
-                            bms.unshift({ path: path, title: title });
-                        }
-                        saveBookmarks(bms);
-                        updateBookmarkBtn();
-                        renderBookmarkPanel();
-                    };
 
                     function renderBookmarkPanel() {
                         var panel = document.getElementById('ha-bookmark-panel');
@@ -411,14 +386,56 @@
                                     var newBms = getBookmarks().filter(function(b) { return b.path !== el.dataset.path; });
                                     saveBookmarks(newBms);
                                     renderBookmarkPanel();
-                                    updateBookmarkBtn();
+                                    updateSectionButtons();
                                 };
                             });
                         }
                     }
 
+                    // 为每个 h2/h3 标题追加书签按钮
+                    function insertSectionButtons() {
+                        var article = document.querySelector('article.markdown-section');
+                        if (!article) return;
+
+                        // 清除旧按钮，避免重复
+                        article.querySelectorAll('.section-bm-btn').forEach(function(b) { b.remove(); });
+
+                        article.querySelectorAll('h2[id], h3[id]').forEach(function(h) {
+                            var sectionId = h.id;
+                            var path = vm.route.path + '?id=' + sectionId;
+                            // 取标题纯文字（不含任何子元素里的按钮文字）
+                            var titleText = Array.from(h.childNodes)
+                                .filter(function(n) { return n.nodeType === Node.TEXT_NODE || n.nodeName !== 'SPAN'; })
+                                .map(function(n) { return n.textContent; })
+                                .join('').trim();
+
+                            var btn = document.createElement('span');
+                            btn.className = 'section-bm-btn';
+                            btn.dataset.id = sectionId;
+                            var marked = isBookmarked(path);
+                            btn.classList.toggle('active', marked);
+                            btn.textContent = marked ? '✓ 已收藏' : '加入书签';
+
+                            btn.onclick = function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                // 移除此章节已有的所有书签，替换为当前小节
+                                var basePath = vm.route.path;
+                                var newBms = getBookmarks().filter(function(b) {
+                                    return b.path.split('?')[0] !== basePath;
+                                });
+                                newBms.unshift({ path: path, title: titleText });
+                                saveBookmarks(newBms);
+                                updateSectionButtons();
+                                renderBookmarkPanel();
+                            };
+
+                            h.appendChild(btn);
+                        });
+                    }
+
                     hook.doneEach(function() {
-                        updateBookmarkBtn();
+                        insertSectionButtons();
 
                         if (!document.getElementById('ha-bookmark-panel')) {
                             var sidebar = document.querySelector('.sidebar-nav');
