@@ -193,6 +193,87 @@
             background-color: var(--theme-color);
             color: white;
         }
+
+        /* --- 4. 书签功能样式 --- */
+        .bookmark-btn {
+            position: fixed;
+            top: 20px;
+            right: 190px;
+            z-index: 999;
+            background: #42b983;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .bookmark-btn:hover { background: #33a06f; }
+        .bookmark-btn.bookmarked {
+            background: #e67e22;
+        }
+        .bookmark-btn.bookmarked:hover { background: #d35400; }
+
+        .bookmark-panel {
+            margin: 0 15px 12px 15px;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            font-size: 13px;
+        }
+        .bookmark-panel-header {
+            padding: 8px 12px;
+            background: rgba(0,0,0,0.04);
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        .bookmark-panel-list {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        .bookmark-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            gap: 6px;
+        }
+        .bookmark-item a {
+            flex: 1;
+            color: #505d6b;
+            text-decoration: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .bookmark-item a:hover { color: #42b983; }
+        .bookmark-remove {
+            color: #ccc;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .bookmark-remove:hover { color: #e74c3c; }
+        .bookmark-empty {
+            padding: 10px 12px;
+            color: #999;
+            text-align: center;
+        }
+
+        body.dark-mode .bookmark-panel { border-color: var(--dark-border); }
+        body.dark-mode .bookmark-panel-header {
+            background: rgba(255,255,255,0.05);
+            color: #ccc;
+        }
+        body.dark-mode .bookmark-item { border-top-color: var(--dark-border); }
+        body.dark-mode .bookmark-item a { color: #999; }
+        body.dark-mode .bookmark-item a:hover { color: var(--theme-color); }
     </style>
 </head>
 
@@ -201,6 +282,8 @@
     <div class="lang-switch">
         <button id="langBtn" onclick="switchLanguage()">English</button>
     </div>
+    <!-- 书签按钮 -->
+    <button class="bookmark-btn" id="ha-bookmark-btn" onclick="toggleCurrentBookmark()">🔖 收藏</button>
     <div id="app"></div>
     <script src="//cdn.jsdelivr.net/npm/mermaid@8.0.0-rc.8/dist/mermaid.min.js"></script>
     <script>
@@ -238,6 +321,95 @@
             },
             // 使用钩子动态处理侧边栏
             plugins: [
+                // --- 书签插件 ---
+                function(hook, vm) {
+                    var STORAGE_KEY = 'ha-bookmarks';
+
+                    function getBookmarks() {
+                        try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+                        catch(e) { return []; }
+                    }
+                    function saveBookmarks(bms) {
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(bms));
+                    }
+                    function isBookmarked(path) {
+                        return getBookmarks().some(function(b) { return b.path === path; });
+                    }
+
+                    window.toggleCurrentBookmark = function() {
+                        var path = vm.route.path;
+                        var title = document.title.replace(' - Hello-Agents', '').trim();
+                        var bms = getBookmarks();
+                        var idx = bms.findIndex(function(b) { return b.path === path; });
+                        if (idx > -1) {
+                            bms.splice(idx, 1);
+                        } else {
+                            bms.unshift({ path: path, title: title });
+                        }
+                        saveBookmarks(bms);
+                        updateBookmarkBtn(path);
+                        renderBookmarkPanel();
+                    };
+
+                    function updateBookmarkBtn(path) {
+                        var btn = document.getElementById('ha-bookmark-btn');
+                        if (!btn) return;
+                        var marked = isBookmarked(path);
+                        btn.textContent = marked ? '🔖 已收藏' : '🔖 收藏';
+                        btn.classList.toggle('bookmarked', marked);
+                    }
+
+                    function renderBookmarkPanel() {
+                        var panel = document.getElementById('ha-bookmark-panel');
+                        if (!panel) return;
+                        var bms = getBookmarks();
+                        var list = panel.querySelector('.bookmark-panel-list');
+                        if (bms.length === 0) {
+                            list.innerHTML = '<div class="bookmark-empty">暂无收藏</div>';
+                        } else {
+                            list.innerHTML = bms.map(function(b) {
+                                return '<div class="bookmark-item">'
+                                    + '<a href="#' + b.path + '" title="' + b.title + '">' + b.title + '</a>'
+                                    + '<span class="bookmark-remove" data-path="' + b.path + '">×</span>'
+                                    + '</div>';
+                            }).join('');
+                            list.querySelectorAll('.bookmark-remove').forEach(function(el) {
+                                el.onclick = function(e) {
+                                    e.stopPropagation();
+                                    var newBms = getBookmarks().filter(function(b) { return b.path !== el.dataset.path; });
+                                    saveBookmarks(newBms);
+                                    renderBookmarkPanel();
+                                    updateBookmarkBtn(vm.route.path);
+                                };
+                            });
+                        }
+                    }
+
+                    hook.doneEach(function() {
+                        var path = vm.route.path;
+                        updateBookmarkBtn(path);
+
+                        if (!document.getElementById('ha-bookmark-panel')) {
+                            var sidebar = document.querySelector('.sidebar-nav');
+                            if (!sidebar) return;
+                            var panel = document.createElement('div');
+                            panel.id = 'ha-bookmark-panel';
+                            panel.className = 'bookmark-panel';
+                            panel.innerHTML = '<div class="bookmark-panel-header">🔖 我的收藏 <span class="bm-icon">▼</span></div>'
+                                + '<div class="bookmark-panel-list"></div>';
+
+                            var expanded = true;
+                            panel.querySelector('.bookmark-panel-header').onclick = function() {
+                                expanded = !expanded;
+                                panel.querySelector('.bookmark-panel-list').style.display = expanded ? '' : 'none';
+                                panel.querySelector('.bm-icon').textContent = expanded ? '▼' : '▶';
+                            };
+                            sidebar.insertBefore(panel, sidebar.firstChild);
+                        }
+                        renderBookmarkPanel();
+                    });
+                },
+
                 // --- 新增：暗黑模式开关插件 ---
                 function(hook, vm) {
                     hook.doneEach(function() {
