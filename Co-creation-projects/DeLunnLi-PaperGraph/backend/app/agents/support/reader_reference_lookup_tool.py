@@ -1,3 +1,4 @@
+"""参考文献工具 —— 解析论文引用列表并尝试在本库/外部检索被引文献."""
 
 from __future__ import annotations
 

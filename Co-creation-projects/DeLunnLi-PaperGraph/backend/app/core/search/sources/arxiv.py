@@ -1,3 +1,5 @@
+"""arXiv API 适配器 —— 搜索、ID 解析与 PDF URL 构造."""
+
 from __future__ import annotations
 
 import hashlib

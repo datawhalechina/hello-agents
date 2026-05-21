@@ -1,3 +1,4 @@
+"""Pydantic API 模型 —— 请求/响应 schema 定义."""
 
 from __future__ import annotations
 

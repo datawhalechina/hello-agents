@@ -1,3 +1,5 @@
+"""阅读产物管理 —— 导读摘要、术语表等 AI 生成内容的持久化."""
+
 from __future__ import annotations
 
 import json

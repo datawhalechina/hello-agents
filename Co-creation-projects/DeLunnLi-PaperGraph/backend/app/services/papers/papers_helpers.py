@@ -1,3 +1,5 @@
+"""论文辅助函数 —— arXiv ID 标准化与论文元数据提取."""
+
 from typing import Any
 
 from ...utils import normalize_arxiv_id

@@ -1,3 +1,5 @@
+"""论文搜索引擎 —— 多源适配(arXiv/DBLP/OpenAlex/Tavily)的统一调用入口."""
+
 from __future__ import annotations
 
 import asyncio, hashlib, logging, os, re, time

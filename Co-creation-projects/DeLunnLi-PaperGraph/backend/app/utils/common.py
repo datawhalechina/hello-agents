@@ -1,3 +1,4 @@
+"""通用工具函数 —— 文本截断、安全 JSON 解析与环境变量读取."""
 
 from __future__ import annotations
 

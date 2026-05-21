@@ -1,3 +1,4 @@
+"""每日推荐持久化 —— 推荐结果存储、去重与历史查询."""
 
 from __future__ import annotations
 

@@ -1,3 +1,4 @@
+"""PDF 解析工具 —— MuPDF 正文提取、分段清洗与结构化输出."""
 
 from __future__ import annotations
 

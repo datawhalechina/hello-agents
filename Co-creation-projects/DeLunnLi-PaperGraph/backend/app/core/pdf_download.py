@@ -1,3 +1,4 @@
+"""PDF 下载服务 —— 支持 arXiv/DBLP/出版商多源 PDF 获取与本地缓存."""
 
 from __future__ import annotations
 

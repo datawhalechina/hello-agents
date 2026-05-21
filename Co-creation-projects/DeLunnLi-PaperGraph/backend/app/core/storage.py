@@ -1,3 +1,4 @@
+"""本地存储服务 —— JSON/SQLite 文件持久化与数据备份."""
 
 from __future__ import annotations
 
@@ -18,6 +19,7 @@ from ..settings import get_settings
 logger = logging.getLogger(__name__)
 
 class PaperDatabase:
+    """SQLite 论文数据库 —— 论文 CRUD、全文搜索(FTS)、分类与标签管理."""
 
     def __init__(self, db_path: str | None = None) -> None:
         if db_path is None:

@@ -1,3 +1,4 @@
+"""论文领域模型 —— Paper 数据类及其序列化/反序列化."""
 
 from dataclasses import dataclass, field
 from typing import Any

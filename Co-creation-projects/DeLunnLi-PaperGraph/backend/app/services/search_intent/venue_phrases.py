@@ -1,3 +1,4 @@
+"""会议短语识别 —— 从自然语言中提取会议/期刊名称及其别名."""
 
 from __future__ import annotations
 

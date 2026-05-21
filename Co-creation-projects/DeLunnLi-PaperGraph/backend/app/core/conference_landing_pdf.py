@@ -1,3 +1,4 @@
+"""会议官网 PDF 探测 —— 从会议 landing page 提取论文 PDF 链接."""
 
 from __future__ import annotations
 

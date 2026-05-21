@@ -1,3 +1,5 @@
+"""搜索源规划 —— 根据 SearchIntent 生成多源召回策略与优先级."""
+
 from __future__ import annotations
 
 

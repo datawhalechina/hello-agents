@@ -1,3 +1,4 @@
+"""论文阅读服务 —— PDF 正文抽取、AI 导读生成、上下文对话与参考文献辅助."""
 
 from __future__ import annotations
 

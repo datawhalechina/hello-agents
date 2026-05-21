@@ -1,3 +1,4 @@
+"""阅读推荐 —— 基于当前论文内容推荐相关文献."""
 
 from __future__ import annotations
 

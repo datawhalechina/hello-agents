@@ -1,3 +1,5 @@
+"""搜索源公共基类 —— 通用过滤/去重/超时控制与结果标准化."""
+
 from __future__ import annotations
 
 from typing import Any, Callable, TypeVar

@@ -1,3 +1,5 @@
+"""智能体基类 —— LLM 初始化、配置读取与通用工具方法."""
+
 from __future__ import annotations
 
 import logging

@@ -1,3 +1,5 @@
+"""DBLP API 适配器 —— 作者 PID 匹配、论文搜索与会议论文集召回."""
+
 from __future__ import annotations
 
 import logging

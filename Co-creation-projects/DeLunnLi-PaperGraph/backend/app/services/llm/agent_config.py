@@ -1,3 +1,5 @@
+"""HelloAgents 配置适配 —— 生成 PaperGraph 智能体的默认运行配置."""
+
 from __future__ import annotations
 
 from pathlib import Path

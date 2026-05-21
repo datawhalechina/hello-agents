@@ -1,3 +1,4 @@
+"""知识图谱关系管理 —— 节点/边数据模型、图谱指标统计与查询."""
 
 from __future__ import annotations
 

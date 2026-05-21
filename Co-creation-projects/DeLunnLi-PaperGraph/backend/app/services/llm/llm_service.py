@@ -1,3 +1,4 @@
+"""LLM 服务层 —— OpenAI 兼容接口封装与 HelloAgents LLM 适配."""
 
 import logging
 import os

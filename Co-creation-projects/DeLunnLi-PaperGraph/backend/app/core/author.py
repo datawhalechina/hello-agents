@@ -1,3 +1,4 @@
+"""作者领域模型 —— Author 数据类及其序列化/反序列化."""
 
 from dataclasses import dataclass
 from typing import Any

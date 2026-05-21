@@ -1,3 +1,4 @@
+"""论文精排模块 —— LLM 驱动的候选论文排序与理由生成."""
 
 from __future__ import annotations
 

@@ -1,3 +1,5 @@
+"""LLM 精排 Prompt 构建 —— 根据 profile 生成不同排序策略的系统提示与用户提示."""
+
 from __future__ import annotations
 
 from typing import Any

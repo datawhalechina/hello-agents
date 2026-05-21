@@ -1,3 +1,5 @@
+"""检索流水线 —— 多源召回 → 去重过滤 → LLM 精排 → 结果输出."""
+
 from __future__ import annotations
 
 import asyncio
@@ -196,12 +198,14 @@ async def run_search_pipeline_async(
     }
     fallbacks: list[dict[str, Any]] = []
 
+    # 阶段 1: 多源并行召回
     constraint_kwargs = {**ctx.search_kwargs, "sort": plan.sort or ctx.search_kwargs.get("sort") or "relevance"}
     jobs = build_recall_jobs(plan, ctx, runtime=runtime, constraint_kwargs=constraint_kwargs)
     candidates = await execute_recall_jobs(
         searcher, jobs, plan=plan, ctx=ctx, runtime=runtime, meta=meta, fallbacks=fallbacks
     )
 
+    # 阶段 2: 补回用户指定的 arXiv ID（pinned papers）
     pinned_ids = list(ctx.pinned_arxiv_ids or [])
     if pinned_ids and searcher is not None:
         try:
@@ -212,9 +216,11 @@ async def run_search_pipeline_async(
         except TimeoutError:
             pass
 
+    # 阶段 3: 去重、过滤非主会论文、相关性守卫
     candidates = normalize_and_filter_candidates(
         candidates, plan=plan, ctx=ctx, recall_cap=runtime.recall_cap, meta=meta
     )
+    # 阶段 4: LLM 精排（或召回直接截断）
     ranked, ranking_method, ranking_metadata = await rank_candidates(
         candidates, plan=plan, ctx=ctx, runtime=runtime, meta=meta
     )

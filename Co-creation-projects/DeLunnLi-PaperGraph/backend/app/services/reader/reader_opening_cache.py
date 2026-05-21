@@ -1,3 +1,4 @@
+"""论文打开缓存 —— 首次打开论文时的预处理结果缓存."""
 
 from __future__ import annotations
 

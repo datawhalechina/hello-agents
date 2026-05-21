@@ -1,3 +1,5 @@
+"""每日推荐支撑 —— arXiv RSS 解析、候选论文格式化与 API 适配."""
+
 from __future__ import annotations
 
 import json

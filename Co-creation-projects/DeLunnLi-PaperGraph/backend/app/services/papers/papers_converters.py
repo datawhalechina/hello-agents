@@ -1,3 +1,5 @@
+"""论文数据转换器 —— LiteraturePaper ↔ API Paper 格式互转."""
+
 from __future__ import annotations
 
 import logging

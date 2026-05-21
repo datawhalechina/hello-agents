@@ -1,3 +1,4 @@
+"""仓库信息查询 —— 基于仓库地址识别论文元数据的辅助 API."""
 
 from __future__ import annotations
 

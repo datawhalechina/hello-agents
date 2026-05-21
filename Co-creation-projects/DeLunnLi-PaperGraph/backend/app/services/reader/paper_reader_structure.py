@@ -1,3 +1,4 @@
+"""论文结构化解析 —— 章节分段、图表位置检测与结构树构建."""
 
 from __future__ import annotations
 

@@ -1,3 +1,4 @@
+"""异步/同步桥接 —— anyio 线程调度与超时控制工具."""
 
 from __future__ import annotations
 

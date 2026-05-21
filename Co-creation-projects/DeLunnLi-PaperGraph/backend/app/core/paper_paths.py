@@ -1,3 +1,4 @@
+"""论文文件路径管理 —— PDF 存储路径生成与文件名规范化."""
 
 import hashlib
 import re

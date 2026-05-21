@@ -1,3 +1,4 @@
+"""搜索意图解析 —— LLM 意图提取、JSON 修复、重试纠错与意图规范化."""
 
 from __future__ import annotations
 

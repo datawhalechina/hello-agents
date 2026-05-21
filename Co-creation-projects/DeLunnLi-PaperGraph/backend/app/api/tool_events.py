@@ -1,3 +1,4 @@
+"""SSE 事件推送 —— 工具调用追踪器与 SSE 消息编解码."""
 
 from __future__ import annotations
 

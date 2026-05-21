@@ -1,3 +1,5 @@
+"""API 依赖注入 —— SearchAgent、PaperSearcher 等单例的获取与缓存."""
+
 from __future__ import annotations
 
 import os

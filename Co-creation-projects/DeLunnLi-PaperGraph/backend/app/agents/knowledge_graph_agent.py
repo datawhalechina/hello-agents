@@ -1,3 +1,4 @@
+"""知识图谱智能体 —— 从已保存论文中抽取主题/方法/引用关系并构建可视化图谱."""
 
 from __future__ import annotations
 
@@ -15,6 +16,8 @@ from .prompts.knowledge_graph import REL_PROMPT
 logger = logging.getLogger(__name__)
 
 class KnowledgeGraphAgent(BaseAgent):
+    """知识图谱构建智能体 —— 从论文集中抽取关系、生成节点与边数据."""
+
     def __init__(
         self,
         *,

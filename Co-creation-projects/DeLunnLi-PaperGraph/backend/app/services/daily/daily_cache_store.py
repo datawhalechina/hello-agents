@@ -1,3 +1,4 @@
+"""每日缓存存储 —— arXiv 原始数据本地缓存以避免重复拉取."""
 
 from __future__ import annotations
 

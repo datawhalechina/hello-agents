@@ -1,3 +1,4 @@
+"""阅读历史记录 —— 对话会话持久化、恢复与上下文延续."""
 
 from __future__ import annotations
 

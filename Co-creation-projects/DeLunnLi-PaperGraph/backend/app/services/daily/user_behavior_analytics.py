@@ -1,3 +1,4 @@
+"""用户行为分析 —— 基于浏览/保存/搜索行为更新用户偏好画像."""
 
 from __future__ import annotations
 

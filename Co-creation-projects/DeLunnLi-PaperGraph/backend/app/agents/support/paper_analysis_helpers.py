@@ -1,3 +1,4 @@
+"""论文分析辅助函数 —— 方法名提取、缩写识别与文本预处理."""
 
 from __future__ import annotations
 

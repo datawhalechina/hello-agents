@@ -1,3 +1,4 @@
+"""每日论文推荐服务 —— arXiv 新论文拉取、个性化推荐与缓存管理."""
 
 from __future__ import annotations
 

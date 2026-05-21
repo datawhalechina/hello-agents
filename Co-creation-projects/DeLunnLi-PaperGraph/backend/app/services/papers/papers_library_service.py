@@ -1,3 +1,5 @@
+"""文献库管理服务 —— 论文存储、分类、标签、阅读记录与 PDF 下载管理."""
+
 import logging
 import os
 import time

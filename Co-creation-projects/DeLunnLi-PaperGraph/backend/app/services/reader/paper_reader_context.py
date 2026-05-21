@@ -1,3 +1,4 @@
+"""阅读上下文管理 —— 论文正文、对话历史与工具调用结果的上下文组装."""
 
 from __future__ import annotations
 

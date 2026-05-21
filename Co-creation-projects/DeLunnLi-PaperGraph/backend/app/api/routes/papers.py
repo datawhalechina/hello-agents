@@ -1,3 +1,4 @@
+"""论文库管理 API 路由 —— 论文保存、删除、搜索、分类与阅读状态管理."""
 
 import logging
 
@@ -58,6 +59,7 @@ class DailyServices:
         self.db_path = db_path
         self.searcher = searcher
 
+# ── 知识图谱 ──
 @router.get("/graph/library", response_model=LibraryGraphResponse)
 def library_graph(
     limit: int = Query(default=200, ge=1, le=1000),
@@ -82,6 +84,7 @@ def library_graph(
         logger.exception("GET /api/papers/graph/library 失败")
         raise HTTPException(status_code=500, detail=str(e))
 
+# ── 文献库管理 ──
 @router.get("/library/categories", response_model=LibraryCategoriesResponse)
 def list_library_categories(db=Depends(get_database)):
     return list_library_categories_service(db=db)
@@ -111,6 +114,7 @@ def get_library(
         category=category,
     )
 
+# ── 论文保存 ──
 @router.post("/save", response_model=SavePapersResponse)
 async def save_papers(
     request: SavePapersRequest,
@@ -130,6 +134,7 @@ async def save_papers(
     except Exception as e:
         raise safe_http_500("save_papers", e)
 
+# ── 每日推荐 ──
 @router.get("/daily")
 async def daily_papers_get(db_path=Depends(get_db_path)):
     logger.info("HTTP GET /api/papers/daily")
@@ -165,6 +170,7 @@ async def daily_papers(
         else:
             return resp
 
+# ── 阅读日志 ──
 @router.post("/reading/log")
 def log_reading_session(body: ReadingLogRequest, db_path=Depends(get_db_path)):
     from ...services.reading_log.log import append_session

@@ -1,3 +1,4 @@
+"""每日自动刷新 —— 后台定时拉取 arXiv 新论文、智能缓存与用户行为触发."""
 
 from __future__ import annotations
 

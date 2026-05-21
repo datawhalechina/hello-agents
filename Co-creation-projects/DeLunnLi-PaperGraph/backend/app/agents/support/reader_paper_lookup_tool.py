@@ -1,3 +1,4 @@
+"""论文检索工具 —— 在本地文献库中按标题/作者/关键词查找论文."""
 
 from __future__ import annotations
 

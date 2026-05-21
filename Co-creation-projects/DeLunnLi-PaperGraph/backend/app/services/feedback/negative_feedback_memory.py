@@ -1,3 +1,4 @@
+"""负反馈记忆 —— 记录用户不感兴趣的论文/主题，优化后续推荐."""
 
 from __future__ import annotations
 

@@ -1,3 +1,5 @@
+"""智能搜索 API 路由 —— 自然语言论文搜索与 SSE 流式响应."""
+
 from __future__ import annotations
 
 import asyncio
@@ -207,6 +209,7 @@ async def search_agent_chat_stream(
     searcher=Depends(get_searcher),
 ):
     async def gen():
+        # SSE 流式生成器：通过 anyio 内存通道实现事件驱动的流式推送
         send, recv = anyio.create_memory_object_stream(_SSE_QUEUE_SIZE)
         tracker = ToolCallTracker(sink=lambda ev: send.send_nowait(ev))
         tracker.emit("status", {"message": "search-agent 已接入，开始处理"})

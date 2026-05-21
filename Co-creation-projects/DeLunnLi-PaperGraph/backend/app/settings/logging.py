@@ -1,3 +1,4 @@
+"""日志配置 —— 统一日志格式、级别与输出目标."""
 
 from __future__ import annotations
 

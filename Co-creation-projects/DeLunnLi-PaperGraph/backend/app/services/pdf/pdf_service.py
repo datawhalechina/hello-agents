@@ -1,3 +1,4 @@
+"""PDF 处理服务 —— MuPDF 文本提取、元数据解析与文件管理."""
 
 from __future__ import annotations
 

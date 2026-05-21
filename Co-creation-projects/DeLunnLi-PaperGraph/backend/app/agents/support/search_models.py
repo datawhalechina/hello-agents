@@ -1,3 +1,4 @@
+"""搜索意图数据模型 —— SearchIntent 及检索参数的数据结构定义."""
 
 from __future__ import annotations
 

@@ -1,3 +1,4 @@
+"""arXiv 规范化 —— arXiv ID 格式识别、URL 提取与新旧格式转换."""
 
 from __future__ import annotations
 

@@ -1,3 +1,4 @@
+"""知识图谱构建服务 —— 论文关系抽取、图谱数据管理与查询."""
 
 from __future__ import annotations
 

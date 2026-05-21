@@ -1,3 +1,5 @@
+"""搜索结果标准化 —— arxiv ID 规范化、关键词清洗与去重."""
+
 from __future__ import annotations
 
 import functools

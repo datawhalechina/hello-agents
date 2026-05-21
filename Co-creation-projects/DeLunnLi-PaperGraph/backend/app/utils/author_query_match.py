@@ -1,3 +1,4 @@
+"""作者匹配工具 —— 姓名标准化、模糊匹配与作者去重."""
 
 from __future__ import annotations
 

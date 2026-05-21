@@ -1,3 +1,4 @@
+"""应用配置 —— 基于 pydantic-settings 的多源配置管理（环境变量 / .env / 默认值）."""
 
 import logging
 import os
@@ -25,19 +26,23 @@ _DEFAULT_DAILY_ARXIV_CS_CATEGORIES: tuple[str, ...] = (
     "cs.HC",
 )
 class Settings(BaseSettings):
+    """PaperGraph 全局配置，所有字段均可通过环境变量或 .env 文件覆盖."""
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=False, extra="ignore")
 
+    # ── 应用基础 ──
     app_name: str = "PaperGraph"
     app_version: str = "0.1.0"
     description: str = "学术文献管理系统"
     debug: bool = False
 
+    # ── 网络与 CORS ──
     host: str = "0.0.0.0"
     port: int = 8000
 
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
+    # ── 外部 API 密钥 ──
     ncbi_email: str = ""
     ncbi_api_key: str = ""
 
@@ -48,9 +53,11 @@ class Settings(BaseSettings):
         description="httpx 是否信任 HTTP_PROXY/HTTPS_PROXY 环境变量（需代理时设为 True）",
     )
 
+    # ── Tavily Web 搜索 ──
     tavily_api_key: str = Field(default="", description="Tavily API key")
     tavily_presearch_enabled: bool = Field(default=True, description="Tavily 预搜索开关")
 
+    # ── LLM 配置 ──
     openai_api_key: str = ""
     openai_base_url: str = "https://api.deepseek.com/v1"
 
@@ -59,6 +66,7 @@ class Settings(BaseSettings):
         description="兼容 OpenAI 的 chat 模型 ID",
     )
 
+    # ── 存储路径 ──
     data_dir: str = _DEFAULT_DATA_DIR
     downloads_dir: str = Field(
         default=_DEFAULT_DOWNLOADS_DIR,
@@ -67,11 +75,13 @@ class Settings(BaseSettings):
 
     log_level: str = "INFO"
 
+    # ── 每日 arXiv 推荐 ──
     daily_arxiv_cs_categories: str = Field(
         default="",
         description="arXiv 类目前缀，逗号分隔（如 cs.CV,cs.LG）；留空使用内置默认",
     )
 
+    # ── Agent 运行时 ──
     agent_runtime_default_timeout_sec: float = Field(
         default=20.0,
         ge=1.0,

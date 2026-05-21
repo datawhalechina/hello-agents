@@ -1,3 +1,5 @@
+"""搜索路由辅助 —— 工具调用追踪、错误解析与用户友好消息构建."""
+
 from __future__ import annotations
 
 from contextlib import contextmanager

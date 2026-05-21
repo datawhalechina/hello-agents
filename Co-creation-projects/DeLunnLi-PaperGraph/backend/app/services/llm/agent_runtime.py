@@ -1,3 +1,4 @@
+"""Agent 运行时管理 —— 超时控制、重试策略与线程池调度."""
 
 from __future__ import annotations
 

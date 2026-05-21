@@ -1,3 +1,5 @@
+"""Tavily 搜索适配器 —— Web 预搜索与会议官网探测."""
+
 from __future__ import annotations
 
 import asyncio

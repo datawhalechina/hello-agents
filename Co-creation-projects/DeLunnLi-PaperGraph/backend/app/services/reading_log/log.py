@@ -1,3 +1,5 @@
+"""阅读日志服务 —— 论文阅读时间记录、阅读日历数据生成与统计."""
+
 from __future__ import annotations
 import datetime as _dt, sqlite3, time
 from ...utils.common import exec_sql

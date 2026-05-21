@@ -1,3 +1,5 @@
+"""表格提取工具 —— PDF 表格检测、解析与上下文关联查询."""
+
 from __future__ import annotations
 
 import logging

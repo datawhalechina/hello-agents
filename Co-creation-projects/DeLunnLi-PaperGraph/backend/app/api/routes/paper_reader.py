@@ -1,3 +1,4 @@
+"""论文阅读助手 API 路由 —— PDF 打开、AI 导读、对话问答与阅读历史."""
 
 import logging
 
@@ -23,6 +24,7 @@ def get_paper_reader_service() -> PaperReaderService:
     db = get_database()
     return PaperReaderService(db=db)
 
+# 首次打开论文 → 生成 AI 导读和结构化摘要
 @router.post("/paper-reader/opening", response_model=PaperReaderOpeningResponse)
 async def paper_reader_opening(
     body: PaperReaderOpeningRequest,
@@ -37,6 +39,7 @@ async def paper_reader_opening(
     except Exception as e:
         raise safe_http_500("paper_reader_opening", e)
 
+# 论文对话：基于 PDF 全文 + 参考文献上下文的问答
 @router.post("/paper-reader/chat", response_model=PaperReaderChatResponse)
 async def paper_reader_chat(
     body: PaperReaderChatRequest,

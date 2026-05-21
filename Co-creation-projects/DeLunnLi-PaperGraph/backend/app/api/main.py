@@ -1,3 +1,5 @@
+"""PaperGraph 主应用入口 —— FastAPI 实例、中间件、路由挂载与生命周期管理."""
+
 import asyncio
 import logging
 from contextlib import asynccontextmanager

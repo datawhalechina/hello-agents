@@ -1,3 +1,4 @@
+"""论文分析智能体 —— PDF 全文解析、表格提取与深度问答."""
 
 from __future__ import annotations
 
@@ -66,6 +67,8 @@ class TaskSpec:
     max_chars: int = 6000
 
 class PaperAnalysisAgent(BaseAgent):
+    """论文分析核心智能体 —— 管理多个子 Agent 协同完成 PDF 解析、表格提取与问答."""
+
     def __init__(self) -> None:
         super().__init__()
         self._analysis = SimpleAgent(

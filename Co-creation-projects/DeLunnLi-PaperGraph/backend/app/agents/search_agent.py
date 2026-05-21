@@ -1,3 +1,4 @@
+"""搜索智能体 —— 自然语言意图解析 + 多源论文检索编排."""
 
 from __future__ import annotations
 
@@ -98,10 +99,12 @@ class IntentParser:
         self._agent = agent
 
     def parse(self, message: str, profile: str = "accuracy") -> SearchIntent:
+        """解析用户自然语言查询为结构化 SearchIntent，带 LRU 缓存."""
         msg = (message or "").strip()
         if not msg:
             return SearchIntent()
 
+        # 5 分钟内相同查询命中缓存，避免重复调用 LLM
         cache_key = (msg.lower()[:200], (profile or "accuracy").strip().lower())
         now = time.time()
         if cache_key in _INTENT_CACHE:
@@ -111,6 +114,7 @@ class IntentParser:
 
         intent = self._parse_with_retry(msg, profile)
         _INTENT_CACHE[cache_key] = (now, intent)
+        # LRU 淘汰：缓存超过 200 条时删除最旧条目
         if len(_INTENT_CACHE) > 200:
             oldest = min(_INTENT_CACHE, key=lambda k: _INTENT_CACHE[k][0])
             del _INTENT_CACHE[oldest]

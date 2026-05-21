@@ -1,3 +1,4 @@
+"""推荐反馈收集 —— 用户对每日推荐的评分与偏好记录."""
 
 from __future__ import annotations
 
