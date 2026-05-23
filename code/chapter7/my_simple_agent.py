@@ -176,7 +176,9 @@ class MySimpleAgent(SimpleAgent):
                 pairs = parameters.split(',')
                 for pair in pairs:
                     if '=' in pair:
+                        # key=value
                         key, value = pair.split('=', 1)
+                        # 去除多余空格
                         param_dict[key.strip()] = value.strip()
             else:
                 # 单个参数：key=value
