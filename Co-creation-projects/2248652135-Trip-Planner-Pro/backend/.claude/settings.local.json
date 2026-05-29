@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(D:\\\\learn-agent\\\\hello-agents-1.0.2\\\\code\\\\chapter13\\\\helloagents-trip-planner\\\\backend\\\\.venv\\\\Scripts\\\\python *)",
+      "Bash(D:/learn-agent/hello-agents-1.0.2/code/chapter13/helloagents-trip-planner/backend/.venv/Scripts/python *)",
+      "Bash(D:/learn-agent/hello-agents-1.0.2/code/chapter13/helloagents-trip-planner/backend/.venv/Scripts/pip list *)",
+      "Bash(D:/learn-agent/hello-agents-1.0.2/code/chapter13/helloagents-trip-planner/backend/.venv/Scripts/pip install *)",
+      "Bash(uv --version)",
+      "Bash(pip --version)",
+      "Bash(uv pip *)",
+      "Bash(uv venv *)",
+      "WebSearch",
+      "Bash(\".venv/Scripts/python\" run.py)",
+      "Bash(pip install *)",
+      "Bash(\".venv/Scripts/python\" -c \"import fastmcp; print\\(fastmcp.__version__\\)\")",
+      "Bash(\".venv/Scripts/python\" -c \"from mcp import ClientSession, StdioServerParameters; print\\('MCP SDK available'\\)\")",
+      "Bash(.venv/Scripts/python -c ' *)",
+      "Bash(npx vite *)",
+      "Bash(curl -s http://localhost:8000/health)",
+      "Bash(curl -s http://127.0.0.1:8000/health)",
+      "Bash(curl *)",
+      "Bash(uvx amap-mcp-server *)",
+      "Bash(AMAP_MAPS_API_KEY=\"718376d3556c1afd1c874de4c749c379\" uvx amap-mcp-server)",
+      "Bash(kill %1)",
+      "Bash(wait)",
+      "Bash(timeout 15 .venv/Scripts/python -c ' *)",
+      "Bash(timeout 30 .venv/Scripts/python -c ' *)",
+      "Bash(timeout 25 .venv/Scripts/python -c ' *)",
+      "Bash(timeout 45 .venv/Scripts/python -u -c ' *)",
+      "Bash(timeout 30 .venv/Scripts/python -u -c ' *)",
+      "Bash(python -m json.tool)",
+      "Bash(.venv/Scripts/python -u -c ' *)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'成功: {d[\\\\\"success\\\\\"]}, 结果数: {len\\(d[\\\\\"data\\\\\"]\\)}'\\)\")",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'成功: {d[\\\\\"success\\\\\"]}, 天数: {len\\(d[\\\\\"data\\\\\"]\\)}'\\)\")"
+    ]
+  }
+}
