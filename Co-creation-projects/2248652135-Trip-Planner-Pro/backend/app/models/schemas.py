@@ -16,8 +16,9 @@ class TripRequest(BaseModel):
     transportation: str = Field(..., description="交通方式", example="公共交通")
     accommodation: str = Field(..., description="住宿偏好", example="经济型酒店")
     preferences: List[str] = Field(default=[], description="旅行偏好标签", example=["历史文化", "美食"])
+    traveler_group: str = Field(default="", description="出行人群,如:独自旅行/情侣夫妻/朋友结伴/家庭亲子/公司团建/老年旅行/研学旅行", example="家庭亲子")
     free_text_input: Optional[str] = Field(default="", description="额外要求", example="希望多安排一些博物馆")
-    
+
     class Config:
         json_schema_extra = {
             "example": {
@@ -28,6 +29,7 @@ class TripRequest(BaseModel):
                 "transportation": "公共交通",
                 "accommodation": "经济型酒店",
                 "preferences": ["历史文化", "美食"],
+                "traveler_group": "家庭亲子",
                 "free_text_input": "希望多安排一些博物馆"
             }
         }
@@ -94,12 +96,25 @@ class Hotel(BaseModel):
     estimated_cost: int = Field(default=0, description="预估费用(元/晚)")
 
 
+class TransportSegment(BaseModel):
+    """交通段详情"""
+    type: str = Field(..., description="交通方式: 步行/公交/地铁/出租车/自驾")
+    instruction: str = Field(..., description="详细交通说明,如'从天安门东站乘坐1号线到王府井站'")
+    from_name: str = Field(..., description="起点名称,如'酒店'或上一个景点名")
+    to_name: str = Field(..., description="终点名称,如景点名或餐厅名")
+    departure_time: str = Field(default="", description="出发时间,如'09:00'")
+    duration: int = Field(default=0, description="耗时(分钟)")
+    distance: int = Field(default=0, description="距离(米)")
+    route_detail: Optional[str] = Field(default=None, description="路线详情,如'经过5站·步行300米'")
+
+
 class DayPlan(BaseModel):
     """单日行程"""
     date: str = Field(..., description="日期 YYYY-MM-DD")
     day_index: int = Field(..., description="第几天(从0开始)")
     description: str = Field(..., description="当日行程描述")
     transportation: str = Field(..., description="交通方式")
+    transportation_details: List[TransportSegment] = Field(default=[], description="详细交通分段信息,包含每一段的路线、时间、距离")
     accommodation: str = Field(..., description="住宿")
     hotel: Optional[Hotel] = Field(default=None, description="推荐酒店")
     attractions: List[Attraction] = Field(default=[], description="景点列表")

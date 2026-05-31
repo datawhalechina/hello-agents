@@ -42,14 +42,22 @@ class MCPTool(Tool):
         """在同一个子进程中逐个发送 JSON-RPC 请求"""
         from queue import Queue, Empty
         import threading
+        import time
 
         proc = subprocess.Popen(
             self.server_command,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,  # 捕获stderr,防止管道阻塞
             env=self._make_env()
         )
+
+        # 读取stderr避免阻塞
+        def stderr_reader():
+            for _ in iter(proc.stderr.readline, b""):
+                pass
+        st = threading.Thread(target=stderr_reader, daemon=True)
+        st.start()
 
         out_queue = Queue()
         def reader():
@@ -68,12 +76,37 @@ class MCPTool(Tool):
                 proc.stdin.write((json.dumps(req) + "\n").encode())
                 proc.stdin.flush()
 
-                line = out_queue.get(timeout=30)
-                if line is None:
-                    raise RuntimeError("MCP连接提前关闭")
-
-                line_str = line.decode(errors="replace").strip()
-                response = json.loads(line_str)
+                # 累积多行直到可解析(amap-mcp-server 长响应可能跨多行)
+                import ast
+                lines_buf = []
+                response = None
+                for _ in range(15):  # 最多拼15行
+                    try:
+                        line = out_queue.get(timeout=20)
+                    except Empty:
+                        raise RuntimeError("MCP响应超时(20s)")
+                    if line is None:
+                        raise RuntimeError("MCP连接提前关闭")
+                    raw = line.decode(errors="replace")
+                    lines_buf.append(raw)
+                    full_text = "".join(lines_buf).strip()
+                    if not full_text:
+                        continue
+                    # 尝试解析: 先 json, 再 ast.literal_eval
+                    try:
+                        response = json.loads(full_text)
+                        break  # 解析成功
+                    except json.JSONDecodeError:
+                        try:
+                            parsed = ast.literal_eval(full_text)
+                            response = json.loads(json.dumps(parsed))
+                            break  # 解析成功
+                        except (SyntaxError, ValueError):
+                            # 可能是截断了,继续读下一行
+                            continue
+                if response is None:
+                    print(f"  [MCP] 无法解析响应(共{len(lines_buf)}行): {repr(full_text[:200])}")
+                    raise RuntimeError("无法解析MCP响应")
                 if "error" in response:
                     raise RuntimeError(f"MCP错误: {response['error']}")
                 results.append(response.get("result", {}))
@@ -83,6 +116,7 @@ class MCPTool(Tool):
                     notif = {"jsonrpc": "2.0", "method": "notifications/initialized", "params": {}}
                     proc.stdin.write((json.dumps(notif) + "\n").encode())
                     proc.stdin.flush()
+                    time.sleep(0.2)  # 给服务器短暂时间处理通知
         finally:
             try:
                 proc.stdin.close()

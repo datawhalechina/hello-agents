@@ -45,11 +45,23 @@ export interface Budget {
   total: number
 }
 
+export interface TransportSegment {
+  type: string
+  instruction: string
+  from_name: string
+  to_name: string
+  departure_time: string
+  duration: number
+  distance: number
+  route_detail?: string
+}
+
 export interface DayPlan {
   date: string
   day_index: number
   description: string
   transportation: string
+  transportation_details: TransportSegment[]
   accommodation: string
   hotel?: Hotel
   attractions: Attraction[]
@@ -84,6 +96,7 @@ export interface TripFormData {
   transportation: string
   accommodation: string
   preferences: string[]
+  traveler_group: string
   free_text_input: string
 }
 

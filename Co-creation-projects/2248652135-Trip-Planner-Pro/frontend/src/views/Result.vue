@@ -75,6 +75,13 @@
                   <span class="info-value">{{ tripPlan.start_date }} 至 {{ tripPlan.end_date }}</span>
                 </div>
                 <div class="info-item">
+                  <span class="info-label">👥 出行人群:</span>
+                  <span class="info-value">
+                    <a-tag v-if="travelerGroup" color="purple" class="group-tag">{{ travelerGroup }}</a-tag>
+                    <span v-else style="color: #999;">未指定</span>
+                  </span>
+                </div>
+                <div class="info-item">
                   <span class="info-label">💡 建议:</span>
                   <span class="info-value">{{ tripPlan.overall_suggestions }}</span>
                 </div>
@@ -144,6 +151,41 @@
                 <div class="info-row">
                   <span class="label">🏨 住宿:</span>
                   <span class="value">{{ day.accommodation }}</span>
+                </div>
+              </div>
+
+              <!-- 详细交通信息 -->
+              <a-divider v-if="day.transportation_details && day.transportation_details.length > 0" orientation="left">🚗 详细交通指南</a-divider>
+              <div v-if="day.transportation_details && day.transportation_details.length > 0" class="transport-timeline">
+                <div
+                  v-for="(seg, segIndex) in day.transportation_details"
+                  :key="segIndex"
+                  class="transport-item"
+                >
+                  <div class="transport-dot">
+                    <span class="transport-icon">{{ getTransportIcon(seg.type) }}</span>
+                  </div>
+                  <div class="transport-content">
+                    <div class="transport-header">
+                      <a-tag :color="getTransportColor(seg.type)" class="transport-tag">{{ seg.type }}</a-tag>
+                      <span v-if="seg.departure_time" class="transport-time">{{ seg.departure_time }} 出发</span>
+                    </div>
+                    <div class="transport-instruction">{{ seg.instruction }}</div>
+                    <div class="transport-meta">
+                      <span class="transport-route">
+                        <span class="transport-stop">{{ seg.from_name }}</span>
+                        <span class="transport-arrow"> → </span>
+                        <span class="transport-stop">{{ seg.to_name }}</span>
+                      </span>
+                    </div>
+                    <div class="transport-stats">
+                      <span v-if="seg.duration" class="stat-item">⏱ {{ seg.duration }}分钟</span>
+                      <span v-if="seg.distance" class="stat-item">📏 {{ formatDistance(seg.distance) }}</span>
+                      <span v-if="seg.route_detail" class="stat-item route-detail">{{ seg.route_detail }}</span>
+                    </div>
+                  </div>
+                  <!-- 连线 -->
+                  <div v-if="segIndex < day.transportation_details.length - 1" class="transport-line"></div>
                 </div>
               </div>
 
@@ -319,6 +361,7 @@ import type { TripPlan } from '@/types'
 
 const router = useRouter()
 const tripPlan = ref<TripPlan | null>(null)
+const travelerGroup = ref('')
 const editMode = ref(false)
 const originalPlan = ref<TripPlan | null>(null)
 const attractionPhotos = ref<Record<string, string>>({})
@@ -328,6 +371,10 @@ let map: any = null
 
 onMounted(async () => {
   const data = sessionStorage.getItem('tripPlan')
+  const group = sessionStorage.getItem('travelerGroup')
+  if (group) {
+    travelerGroup.value = group
+  }
   if (data) {
     tripPlan.value = JSON.parse(data)
     // 加载景点图片
@@ -340,6 +387,44 @@ onMounted(async () => {
 
 const goBack = () => {
   router.push('/')
+}
+
+// 交通方式图标映射
+const getTransportIcon = (type: string): string => {
+  const icons: Record<string, string> = {
+    '步行': '🚶',
+    '公交': '🚌',
+    '地铁': '🚇',
+    '出租车': '🚕',
+    '自驾': '🚗',
+    '骑行': '🚲',
+    '轮渡': '⛴️',
+    '缆车': '🚡'
+  }
+  return icons[type] || '🚗'
+}
+
+// 交通方式颜色映射
+const getTransportColor = (type: string): string => {
+  const colors: Record<string, string> = {
+    '步行': 'green',
+    '公交': 'blue',
+    '地铁': 'purple',
+    '出租车': 'orange',
+    '自驾': 'cyan',
+    '骑行': 'lime',
+    '轮渡': 'geekblue',
+    '缆车': 'gold'
+  }
+  return colors[type] || 'default'
+}
+
+// 格式化距离
+const formatDistance = (meters: number): string => {
+  if (meters >= 1000) {
+    return `${(meters / 1000).toFixed(1)}公里`
+  }
+  return `${meters}米`
 }
 
 // 滚动到指定区域
@@ -1203,6 +1288,12 @@ const drawRoutes = (AMap: any, attractions: any[]) => {
   line-height: 1.6;
 }
 
+.group-tag {
+  font-size: 14px;
+  padding: 2px 12px;
+  border-radius: 12px;
+}
+
 /* 预算卡片 */
 .budget-card {
   height: fit-content;
@@ -1372,6 +1463,121 @@ const drawRoutes = (AMap: any, attractions: any[]) => {
 
 :deep(.ant-collapse-content-box) {
   padding: 20px;
+}
+
+/* 交通信息时间线 */
+.transport-timeline {
+  padding: 16px 0;
+  position: relative;
+}
+
+.transport-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 12px 16px;
+  margin-bottom: 4px;
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+  border-radius: 12px;
+  border: 1px solid #e8eeff;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.transport-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.transport-dot {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+  z-index: 2;
+}
+
+.transport-icon {
+  font-size: 20px;
+}
+
+.transport-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.transport-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.transport-tag {
+  font-size: 12px;
+  padding: 0 8px;
+  border-radius: 4px;
+}
+
+.transport-time {
+  font-size: 13px;
+  color: #667eea;
+  font-weight: 500;
+}
+
+.transport-instruction {
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.transport-meta {
+  margin-bottom: 4px;
+}
+
+.transport-route {
+  font-size: 13px;
+  color: #666;
+}
+
+.transport-stop {
+  font-weight: 500;
+  color: #555;
+  padding: 2px 6px;
+  background: white;
+  border-radius: 4px;
+}
+
+.transport-arrow {
+  color: #667eea;
+  margin: 0 4px;
+}
+
+.transport-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.stat-item {
+  font-size: 12px;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.route-detail {
+  color: #667eea;
+  font-style: italic;
 }
 
 /* 统计卡片样式 */

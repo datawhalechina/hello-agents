@@ -143,7 +143,51 @@
           </a-row>
         </div>
 
-        <!-- 第三步:额外要求 -->
+        <!-- 第三步:出行人群 -->
+        <div class="form-section">
+          <div class="section-header">
+            <span class="section-icon">👥</span>
+            <span class="section-title">出行人群与场景</span>
+          </div>
+
+          <a-row :gutter="24">
+            <a-col :span="12">
+              <a-form-item name="traveler_group">
+                <template #label>
+                  <span class="form-label">出行人群</span>
+                </template>
+                <a-select v-model:value="formData.traveler_group" size="large" class="custom-select" placeholder="选择出行人群">
+                  <a-select-option value="独自旅行">🧑 独自旅行</a-select-option>
+                  <a-select-option value="情侣夫妻">💑 情侣/夫妻</a-select-option>
+                  <a-select-option value="朋友结伴">👫 朋友结伴</a-select-option>
+                  <a-select-option value="家庭亲子">👨‍👩‍👧‍👦 家庭亲子</a-select-option>
+                  <a-select-option value="公司团建">🏢 公司团建</a-select-option>
+                  <a-select-option value="老年旅行">👴 老年旅行</a-select-option>
+                  <a-select-option value="研学旅行">📚 研学旅行</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :span="12">
+              <a-form-item label="选择后AI将根据该人群特点定制行程">
+                <template #label>
+                  <span class="form-label" style="color: #999; font-weight: normal;">不同人群的行程差异</span>
+                </template>
+                <div class="group-hint">
+                  <span v-if="formData.traveler_group === '独自旅行'">🎒 推荐青旅/经济住宿,安排社交友好的活动</span>
+                  <span v-else-if="formData.traveler_group === '情侣夫妻'">💕 推荐浪漫餐厅、观景台,安排双人体验项目</span>
+                  <span v-else-if="formData.traveler_group === '朋友结伴'">🎉 安排集体活动、娱乐项目,推荐互动体验</span>
+                  <span v-else-if="formData.traveler_group === '家庭亲子'">🧸 推荐亲子景点、儿童友好餐厅,节奏宽松</span>
+                  <span v-else-if="formData.traveler_group === '公司团建'">🤝 推荐团建场地、团队活动,兼顾会议与休闲</span>
+                  <span v-else-if="formData.traveler_group === '老年旅行'">🌿 行程舒缓,景点平坦少爬坡,推荐养生餐饮</span>
+                  <span v-else-if="formData.traveler_group === '研学旅行'">🎓 安排博物馆、科技馆、文化遗址等教育性景点</span>
+                  <span v-else style="color: #bbb;">选择出行人群,获得个性化推荐</span>
+                </div>
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </div>
+
+        <!-- 第四步:额外要求 -->
         <div class="form-section">
           <div class="section-header">
             <span class="section-icon">💬</span>
@@ -224,6 +268,7 @@ const formData = reactive<TripFormData & { start_date: Dayjs | null; end_date: D
   transportation: '公共交通',
   accommodation: '经济型酒店',
   preferences: [],
+  traveler_group: '',
   free_text_input: ''
 })
 
@@ -280,6 +325,7 @@ const handleSubmit = async () => {
       transportation: formData.transportation,
       accommodation: formData.accommodation,
       preferences: formData.preferences,
+      traveler_group: formData.traveler_group,
       free_text_input: formData.free_text_input
     }
 
@@ -292,6 +338,7 @@ const handleSubmit = async () => {
     if (response.success && response.data) {
       // 保存到sessionStorage
       sessionStorage.setItem('tripPlan', JSON.stringify(response.data))
+      sessionStorage.setItem('travelerGroup', formData.traveler_group)
 
       message.success('旅行计划生成成功!')
 
@@ -535,6 +582,19 @@ const handleSubmit = async () => {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+/* 人群选择提示 */
+.group-hint {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%);
+  border-radius: 12px;
+  border: 1px dashed #667eea;
+  color: #555;
+  font-size: 14px;
 }
 
 .custom-checkbox-group {
