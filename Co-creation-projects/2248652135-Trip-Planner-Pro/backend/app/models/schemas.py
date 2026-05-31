@@ -219,3 +219,69 @@ class ErrorResponse(BaseModel):
     message: str = Field(..., description="错误消息")
     error_code: Optional[str] = Field(default=None, description="错误代码")
 
+
+# ============ 认证模型 ============
+
+class RegisterRequest(BaseModel):
+    """注册请求"""
+    username: str = Field(..., min_length=2, max_length=50, description="用户名")
+    password: str = Field(..., min_length=4, max_length=100, description="密码")
+
+
+class LoginRequest(BaseModel):
+    """登录请求"""
+    username: str = Field(..., description="用户名")
+    password: str = Field(..., description="密码")
+
+
+class AuthResponse(BaseModel):
+    """认证响应"""
+    success: bool = Field(..., description="是否成功")
+    message: str = Field(default="", description="消息")
+    token: str = Field(default="", description="认证Token")
+    username: str = Field(default="", description="用户名")
+
+
+class UserProfile(BaseModel):
+    """用户信息"""
+    success: bool = Field(..., description="是否成功")
+    username: str = Field(..., description="用户名")
+
+
+# ============ 历史记录模型 ============
+
+class SaveHistoryRequest(BaseModel):
+    """保存历史记录请求"""
+    city: str = Field(..., description="城市")
+    start_date: str = Field(..., description="开始日期")
+    end_date: str = Field(..., description="结束日期")
+    travel_days: int = Field(..., description="旅行天数")
+    preferences: List[str] = Field(default=[], description="偏好标签")
+    traveler_group: str = Field(default="", description="出行人群")
+    plan_data: dict = Field(..., description="完整行程数据(JSON)")
+
+
+class HistoryItemResponse(BaseModel):
+    """保存历史记录响应"""
+    success: bool = Field(..., description="是否成功")
+    message: str = Field(default="", description="消息")
+    history_id: int = Field(default=0, description="历史记录ID")
+
+
+class HistoryListResponse(BaseModel):
+    """历史记录列表响应"""
+    success: bool = Field(..., description="是否成功")
+    records: list = Field(default=[], description="历史记录列表")
+
+
+class HistoryDetailResponse(BaseModel):
+    """历史记录详情响应"""
+    success: bool = Field(..., description="是否成功")
+    record: Optional[dict] = Field(default=None, description="历史记录详情")
+
+
+class DeleteResponse(BaseModel):
+    """删除响应"""
+    success: bool = Field(..., description="是否成功")
+    message: str = Field(default="", description="消息")
+

@@ -342,6 +342,27 @@ const handleSubmit = async () => {
 
       message.success('旅行计划生成成功!')
 
+      // 如果已登录，自动保存到历史记录
+      const token = localStorage.getItem('auth_token')
+      if (token) {
+        fetch('http://localhost:8000/api/history', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            city: requestData.city,
+            start_date: requestData.start_date,
+            end_date: requestData.end_date,
+            travel_days: requestData.travel_days,
+            preferences: requestData.preferences,
+            traveler_group: requestData.traveler_group,
+            plan_data: response.data,
+          }),
+        }).catch(() => {}) // 静默保存，不阻塞跳转
+      }
+
       // 短暂延迟后跳转
       setTimeout(() => {
         router.push('/result')

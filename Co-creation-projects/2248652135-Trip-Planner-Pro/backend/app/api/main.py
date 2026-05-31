@@ -3,7 +3,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from ..config import get_settings, validate_config, print_config
-from .routes import trip, poi, map as map_routes
+from ..database import init_db
+from .routes import trip, poi, map as map_routes, auth, history
 
 # 获取配置
 settings = get_settings()
@@ -30,6 +31,8 @@ app.add_middleware(
 app.include_router(trip.router, prefix="/api")
 app.include_router(poi.router, prefix="/api")
 app.include_router(map_routes.router, prefix="/api")
+app.include_router(auth.router, prefix="/api")
+app.include_router(history.router, prefix="/api")
 
 
 @app.on_event("startup")
@@ -41,7 +44,14 @@ async def startup_event():
     
     # 打印配置信息
     print_config()
-    
+
+    # 初始化数据库
+    try:
+        init_db()
+        print("✅ 数据库初始化成功")
+    except Exception as e:
+        print(f"⚠️ 数据库初始化失败: {e}")
+
     # 验证配置
     try:
         validate_config()

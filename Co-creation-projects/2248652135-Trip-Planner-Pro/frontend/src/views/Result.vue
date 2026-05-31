@@ -168,7 +168,6 @@
                   <div class="transport-content">
                     <div class="transport-header">
                       <a-tag :color="getTransportColor(seg.type)" class="transport-tag">{{ seg.type }}</a-tag>
-                      <span v-if="seg.departure_time" class="transport-time">{{ seg.departure_time }} 出发</span>
                     </div>
                     <div class="transport-instruction">{{ seg.instruction }}</div>
                     <div class="transport-meta">
