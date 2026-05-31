@@ -234,20 +234,6 @@ class LoginRequest(BaseModel):
     password: str = Field(..., description="密码")
 
 
-class AuthResponse(BaseModel):
-    """认证响应"""
-    success: bool = Field(..., description="是否成功")
-    message: str = Field(default="", description="消息")
-    token: str = Field(default="", description="认证Token")
-    username: str = Field(default="", description="用户名")
-
-
-class UserProfile(BaseModel):
-    """用户信息"""
-    success: bool = Field(..., description="是否成功")
-    username: str = Field(..., description="用户名")
-
-
 # ============ 历史记录模型 ============
 
 class SaveHistoryRequest(BaseModel):

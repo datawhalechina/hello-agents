@@ -49,29 +49,25 @@ const router = useRouter()
 const loading = ref(false)
 const records = ref<any[]>([])
 
-function getAuthHeaders() {
-  const token = localStorage.getItem('auth_token')
-  if (!token) {
-    message.warning('请先登录')
-    router.push('/login')
-    return null
-  }
-  return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+/** Cookie 自动携带 token，无需手动传 header */
+async function api(path: string, options: RequestInit = {}) {
+  return fetch(`http://localhost:8000${path}`, {
+    ...options,
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...options.headers },
+  })
 }
 
 async function fetchHistory() {
-  const headers = getAuthHeaders()
-  if (!headers) return
-
   loading.value = true
   try {
-    const res = await fetch('http://localhost:8000/api/history', { headers })
+    const res = await api('/api/history')
     const data = await res.json()
     if (res.ok) {
       records.value = data.records || []
     } else {
       if (res.status === 401) {
-        localStorage.removeItem('auth_token')
+        // Cookie 过期
         localStorage.removeItem('auth_username')
         router.push('/login')
         return
@@ -86,11 +82,8 @@ async function fetchHistory() {
 }
 
 async function viewDetail(item: any) {
-  const headers = getAuthHeaders()
-  if (!headers) return
-
   try {
-    const res = await fetch(`http://localhost:8000/api/history/${item.id}`, { headers })
+    const res = await api(`/api/history/${item.id}`)
     const data = await res.json()
     if (res.ok && data.record) {
       sessionStorage.setItem('tripPlan', JSON.stringify(data.record.plan_data))
@@ -111,13 +104,8 @@ function deleteRecord(item: any) {
     okText: '删除',
     okType: 'danger',
     async onOk() {
-      const headers = getAuthHeaders()
-      if (!headers) return
       try {
-        const res = await fetch(`http://localhost:8000/api/history/${item.id}`, {
-          method: 'DELETE',
-          headers,
-        })
+        const res = await api(`/api/history/${item.id}`, { method: 'DELETE' })
         if (res.ok) {
           message.success('已删除')
           records.value = records.value.filter((r: any) => r.id !== item.id)

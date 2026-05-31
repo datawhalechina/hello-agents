@@ -66,6 +66,18 @@ def init_db():
 
 # ============ 用户管理 ============
 
+def get_user_by_id(user_id: int) -> dict:
+    """通过ID获取用户信息"""
+    conn = get_db()
+    try:
+        row = conn.execute(
+            "SELECT id, username FROM users WHERE id = ?", (user_id,)
+        ).fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+
 def hash_password(password: str, salt: str = None) -> tuple:
     """密码加盐哈希,返回 (hash, salt)"""
     if salt is None:

@@ -294,6 +294,14 @@ const handleSubmit = async () => {
     return
   }
 
+  // 检查登录（通过cookie）
+  const loggedIn = localStorage.getItem('auth_username')
+  if (!loggedIn) {
+    message.warning('请先登录后再生成旅行计划')
+    router.push('/login')
+    return
+  }
+
   loading.value = true
   loadingProgress.value = 0
   loadingStatus.value = '正在初始化...'
@@ -343,14 +351,12 @@ const handleSubmit = async () => {
       message.success('旅行计划生成成功!')
 
       // 如果已登录，自动保存到历史记录
-      const token = localStorage.getItem('auth_token')
-      if (token) {
+      const loggedIn = localStorage.getItem('auth_username')
+      if (loggedIn) {
         fetch('http://localhost:8000/api/history', {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({
             city: requestData.city,
             start_date: requestData.start_date,

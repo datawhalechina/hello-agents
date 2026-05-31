@@ -33,14 +33,33 @@ const router = useRouter()
 const isLoggedIn = ref(false)
 const username = ref('')
 
-function checkAuth() {
-  const token = localStorage.getItem('auth_token')
-  const user = localStorage.getItem('auth_username')
-  isLoggedIn.value = !!token
-  username.value = user || ''
+async function checkAuth() {
+  // 先读 localStorage 缓存（避免每次路由切换都请求）
+  const cachedUser = localStorage.getItem('auth_username')
+  isLoggedIn.value = !!cachedUser
+  username.value = cachedUser || ''
+
+  // 异步验证：确认 cookie 真的有效
+  try {
+    const res = await fetch('http://localhost:8000/api/auth/profile', {
+      credentials: 'include',
+    })
+    if (res.ok) {
+      const data = await res.json()
+      isLoggedIn.value = true
+      username.value = data.username
+      localStorage.setItem('auth_username', data.username)
+    } else {
+      isLoggedIn.value = false
+      username.value = ''
+      localStorage.removeItem('auth_username')
+    }
+  } catch {
+    // 后端未启动时不改变状态
+  }
 }
 
-// 每次路由切换时重新检查登录状态
+// 每次路由切换时重新检查
 router.afterEach(() => {
   checkAuth()
 })
@@ -62,16 +81,13 @@ function goHistory() {
   router.push('/history')
 }
 
-function handleLogout() {
-  // 尝试调后端登出，不阻塞
-  const token = localStorage.getItem('auth_token')
-  if (token) {
-    fetch('http://localhost:8000/api/auth/logout', {
+async function handleLogout() {
+  try {
+    await fetch('http://localhost:8000/api/auth/logout', {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` }
-    }).catch(() => {})
-  }
-  localStorage.removeItem('auth_token')
+      credentials: 'include',
+    })
+  } catch {}
   localStorage.removeItem('auth_username')
   isLoggedIn.value = false
   username.value = ''
@@ -88,4 +104,3 @@ onMounted(checkAuth)
     'Noto Sans', sans-serif;
 }
 </style>
-

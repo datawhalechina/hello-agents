@@ -3,37 +3,77 @@ import type { TripFormData, TripPlanResponse } from '@/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
+/** 后端通过 HttpOnly Cookie 做认证，axios 需附带 cookie */
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 300000, // 5分钟超时(含MCP路线规划耗时)
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  timeout: 300000,
+  withCredentials: true,
+  headers: { 'Content-Type': 'application/json' },
 })
 
-// 请求拦截器
-apiClient.interceptors.request.use(
-  (config) => {
-    console.log('发送请求:', config.method?.toUpperCase(), config.url)
-    return config
-  },
-  (error) => {
-    console.error('请求错误:', error)
+// 是否正在刷新Token
+let _refreshing = false
+let _refreshQueue: Array<{
+  resolve: () => void
+  reject: (err: any) => void
+}> = []
+
+/** 刷新Token（Cookie自动携带refresh_token） */
+async function tryRefresh(): Promise<boolean> {
+  try {
+    const res = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {}, {
+      withCredentials: true,
+    })
+    return res.status === 200
+  } catch {
+    return false
+  }
+}
+
+/** 跳转到登录页 */
+function redirectLogin() {
+  window.location.href = '/login'
+}
+
+/** 响应拦截器 — 401 自动刷新重试 */
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config
+    if (error.response?.status !== 401 || originalRequest._retry) {
+      return Promise.reject(error)
+    }
+    originalRequest._retry = true
+
+    if (_refreshing) {
+      // 已有刷新在进行中，排队等待
+      return new Promise((resolve, reject) => {
+        _refreshQueue.push({
+          resolve: () => resolve(apiClient(originalRequest)),
+          reject,
+        })
+      })
+    }
+
+    _refreshing = true
+    const success = await tryRefresh()
+    _refreshing = false
+
+    if (success) {
+      const queue = _refreshQueue
+      _refreshQueue = []
+      queue.forEach((q) => q.resolve())
+      return apiClient(originalRequest)
+    }
+
+    // 刷新失败
+    _refreshQueue.forEach((q) => q.reject(error))
+    _refreshQueue = []
+    redirectLogin()
     return Promise.reject(error)
   }
 )
 
-// 响应拦截器
-apiClient.interceptors.response.use(
-  (response) => {
-    console.log('收到响应:', response.status, response.config.url)
-    return response
-  },
-  (error) => {
-    console.error('响应错误:', error.response?.status, error.message)
-    return Promise.reject(error)
-  }
-)
 
 /**
  * 生成旅行计划
@@ -62,4 +102,3 @@ export async function healthCheck(): Promise<any> {
 }
 
 export default apiClient
-

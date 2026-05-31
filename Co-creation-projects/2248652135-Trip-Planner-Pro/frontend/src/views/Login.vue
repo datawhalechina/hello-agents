@@ -79,6 +79,7 @@ async function handleSubmit() {
     const res = await fetch(`http://localhost:8000/api/auth/${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',  // 让 cookie 可被设置
       body: JSON.stringify({ username: form.username, password: form.password }),
     })
     const data = await res.json()
@@ -88,8 +89,7 @@ async function handleSubmit() {
       return
     }
 
-    // 保存 token 和用户名
-    localStorage.setItem('auth_token', data.token)
+    // 保存登录用户名（前端显示用，不影响认证）
     localStorage.setItem('auth_username', data.username)
 
     message.success(isRegister.value ? '注册成功' : '登录成功')
