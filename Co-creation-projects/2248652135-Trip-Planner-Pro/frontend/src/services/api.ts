@@ -11,12 +11,8 @@ const apiClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
-// 是否正在刷新Token
-let _refreshing = false
-let _refreshQueue: Array<{
-  resolve: () => void
-  reject: (err: any) => void
-}> = []
+// 共享 Refresh Promise：多个 401 同时到来时共用一个刷新请求
+let _refreshPromise: Promise<boolean> | null = null
 
 /** 刷新Token（Cookie自动携带refresh_token） */
 async function tryRefresh(): Promise<boolean> {
@@ -30,12 +26,19 @@ async function tryRefresh(): Promise<boolean> {
   }
 }
 
-/** 跳转到登录页 */
-function redirectLogin() {
-  window.location.href = '/login'
+/** 加锁执行刷新，同时段多个调用共享同一个 Promise */
+function acquireRefreshLock(): Promise<boolean> {
+  // 锁已被持有 → 返回同一个 promise，不发起新刷新
+  if (_refreshPromise) return _refreshPromise
+
+  // 加锁：创建新的刷新 promise，完成后自动释放锁
+  _refreshPromise = tryRefresh().finally(() => {
+    _refreshPromise = null
+  })
+  return _refreshPromise
 }
 
-/** 响应拦截器 — 401 自动刷新重试 */
+/** 响应拦截器 — 401 自动刷新重试（刷新过程加锁，无竞态） */
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -45,31 +48,16 @@ apiClient.interceptors.response.use(
     }
     originalRequest._retry = true
 
-    if (_refreshing) {
-      // 已有刷新在进行中，排队等待
-      return new Promise((resolve, reject) => {
-        _refreshQueue.push({
-          resolve: () => resolve(apiClient(originalRequest)),
-          reject,
-        })
-      })
-    }
-
-    _refreshing = true
-    const success = await tryRefresh()
-    _refreshing = false
+    // 获取刷新锁：第一个请求创建并持有锁（发起刷新）
+    // 后续请求共享同一把锁（等刷新完成），不会重复发起
+    const success = await acquireRefreshLock()
 
     if (success) {
-      const queue = _refreshQueue
-      _refreshQueue = []
-      queue.forEach((q) => q.resolve())
       return apiClient(originalRequest)
     }
 
-    // 刷新失败
-    _refreshQueue.forEach((q) => q.reject(error))
-    _refreshQueue = []
-    redirectLogin()
+    // 刷新彻底失败 → 跳登录
+    window.location.href = '/login'
     return Promise.reject(error)
   }
 )
