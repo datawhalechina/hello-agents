@@ -7,6 +7,7 @@ import Home from './views/Home.vue'
 import Result from './views/Result.vue'
 import Login from './views/Login.vue'
 import History from './views/History.vue'
+import Chat from './views/Chat.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -30,6 +31,11 @@ const router = createRouter({
       path: '/history',
       name: 'History',
       component: History
+    },
+    {
+      path: '/chat',
+      name: 'Chat',
+      component: Chat
     }
   ]
 })

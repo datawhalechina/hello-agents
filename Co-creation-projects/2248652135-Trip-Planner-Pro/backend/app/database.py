@@ -55,9 +55,29 @@ def init_db():
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             );
 
+            CREATE TABLE IF NOT EXISTS chat_sessions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                title TEXT NOT NULL DEFAULT '新对话',
+                created_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+                updated_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+
+            CREATE TABLE IF NOT EXISTS chat_messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                session_id INTEGER NOT NULL,
+                role TEXT NOT NULL,
+                content TEXT NOT NULL,
+                created_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+                FOREIGN KEY (session_id) REFERENCES chat_sessions(id) ON DELETE CASCADE
+            );
+
             CREATE INDEX IF NOT EXISTS idx_tokens_user ON auth_tokens(user_id);
             CREATE INDEX IF NOT EXISTS idx_tokens_token ON auth_tokens(token);
             CREATE INDEX IF NOT EXISTS idx_history_user ON trip_history(user_id);
+            CREATE INDEX IF NOT EXISTS idx_chat_sessions_user ON chat_sessions(user_id);
+            CREATE INDEX IF NOT EXISTS idx_chat_messages_session ON chat_messages(session_id);
         """)
         conn.commit()
     finally:
@@ -227,5 +247,145 @@ def delete_trip_history(history_id: int, user_id: int) -> bool:
         )
         conn.commit()
         return cursor.rowcount > 0
+    finally:
+        conn.close()
+
+
+# ============ 聊天会话管理 ============
+
+def init_chat_tables():
+    """初始化聊天相关表（增量迁移）"""
+    conn = get_db()
+    try:
+        conn.executescript("""
+            CREATE TABLE IF NOT EXISTS chat_sessions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                title TEXT NOT NULL DEFAULT '新对话',
+                created_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+                updated_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+
+            CREATE TABLE IF NOT EXISTS chat_messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                session_id INTEGER NOT NULL,
+                role TEXT NOT NULL,
+                content TEXT NOT NULL,
+                created_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+                FOREIGN KEY (session_id) REFERENCES chat_sessions(id) ON DELETE CASCADE
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_chat_sessions_user ON chat_sessions(user_id);
+            CREATE INDEX IF NOT EXISTS idx_chat_messages_session ON chat_messages(session_id);
+        """)
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def create_chat_session(user_id: int, title: str = "新对话") -> dict:
+    """创建聊天会话"""
+    conn = get_db()
+    try:
+        cursor = conn.execute(
+            "INSERT INTO chat_sessions (user_id, title) VALUES (?, ?)",
+            (user_id, title)
+        )
+        conn.commit()
+        return {"id": cursor.lastrowid, "user_id": user_id, "title": title}
+    finally:
+        conn.close()
+
+
+def list_chat_sessions(user_id: int) -> list:
+    """列出用户的所有聊天会话（按更新时间倒序）"""
+    conn = get_db()
+    try:
+        rows = conn.execute(
+            """SELECT id, title, created_at, updated_at
+               FROM chat_sessions
+               WHERE user_id = ?
+               ORDER BY updated_at DESC""",
+            (user_id,)
+        ).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def get_chat_session(session_id: int, user_id: int) -> dict:
+    """获取单个聊天会话"""
+    conn = get_db()
+    try:
+        row = conn.execute(
+            "SELECT id, title, created_at, updated_at FROM chat_sessions WHERE id = ? AND user_id = ?",
+            (session_id, user_id)
+        ).fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+
+def update_chat_session_title(session_id: int, title: str) -> bool:
+    """更新会话标题"""
+    conn = get_db()
+    try:
+        cursor = conn.execute(
+            "UPDATE chat_sessions SET title = ?, updated_at = datetime('now','localtime') WHERE id = ?",
+            (title, session_id)
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+    finally:
+        conn.close()
+
+
+def delete_chat_session(session_id: int, user_id: int) -> bool:
+    """删除聊天会话（级联删除消息）"""
+    conn = get_db()
+    try:
+        cursor = conn.execute(
+            "DELETE FROM chat_sessions WHERE id = ? AND user_id = ?",
+            (session_id, user_id)
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+    finally:
+        conn.close()
+
+
+# ============ 聊天消息管理 ============
+
+def add_chat_message(session_id: int, role: str, content: str) -> dict:
+    """添加聊天消息，并更新会话的 updated_at"""
+    conn = get_db()
+    try:
+        cursor = conn.execute(
+            "INSERT INTO chat_messages (session_id, role, content) VALUES (?, ?, ?)",
+            (session_id, role, content)
+        )
+        conn.execute(
+            "UPDATE chat_sessions SET updated_at = datetime('now','localtime') WHERE id = ?",
+            (session_id,)
+        )
+        conn.commit()
+        return {"id": cursor.lastrowid, "session_id": session_id, "role": role, "content": content}
+    finally:
+        conn.close()
+
+
+def get_chat_messages(session_id: int) -> list:
+    """获取会话的所有消息（按时间正序）"""
+    conn = get_db()
+    try:
+        rows = conn.execute(
+            """SELECT id, role, content, created_at
+               FROM chat_messages
+               WHERE session_id = ?
+               ORDER BY id ASC""",
+            (session_id,)
+        ).fetchall()
+        return [dict(r) for r in rows]
     finally:
         conn.close()

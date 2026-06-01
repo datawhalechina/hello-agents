@@ -271,3 +271,52 @@ class DeleteResponse(BaseModel):
     success: bool = Field(..., description="是否成功")
     message: str = Field(default="", description="消息")
 
+
+# ============ 聊天模型 ============
+
+class ChatMessageSchema(BaseModel):
+    """聊天消息"""
+    id: int = Field(..., description="消息ID")
+    session_id: int = Field(..., description="会话ID")
+    role: str = Field(..., description="角色: user/assistant")
+    content: str = Field(..., description="消息内容")
+    created_at: str = Field(..., description="创建时间")
+
+
+class ChatSessionSchema(BaseModel):
+    """聊天会话"""
+    id: int = Field(..., description="会话ID")
+    user_id: int = Field(..., description="用户ID")
+    title: str = Field(..., description="会话标题")
+    created_at: str = Field(default="", description="创建时间")
+    updated_at: str = Field(default="", description="更新时间")
+
+
+class ChatSessionResponse(BaseModel):
+    """会话响应"""
+    success: bool = Field(..., description="是否成功")
+    session: Optional[ChatSessionSchema] = Field(default=None, description="会话信息")
+
+
+class ChatSessionListResponse(BaseModel):
+    """会话列表响应"""
+    success: bool = Field(..., description="是否成功")
+    sessions: list = Field(default=[], description="会话列表")
+
+
+class ChatMessagesResponse(BaseModel):
+    """消息列表响应"""
+    success: bool = Field(..., description="是否成功")
+    messages: list = Field(default=[], description="消息列表")
+
+
+class ChatSendMessageRequest(BaseModel):
+    """发送消息请求"""
+    content: str = Field(..., description="消息内容", min_length=1)
+
+
+class ChatDeleteResponse(BaseModel):
+    """聊天删除响应"""
+    success: bool = Field(..., description="是否成功")
+    message: str = Field(..., description="消息")
+

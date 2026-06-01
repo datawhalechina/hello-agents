@@ -9,6 +9,9 @@
           <a-button v-if="isLoggedIn" type="text" style="color: white;" @click="goHistory">
             📋 历史记录
           </a-button>
+          <a-button v-if="isLoggedIn" type="text" style="color: white;" @click="goChat">
+            💬 AI对话
+          </a-button>
           <span v-if="isLoggedIn" style="color: rgba(255,255,255,0.65);">👤 {{ username }}</span>
           <a-button v-if="!isLoggedIn" type="primary" ghost @click="goLogin">登录</a-button>
           <a-button v-else type="text" style="color: rgba(255,255,255,0.65);" @click="handleLogout">退出</a-button>
@@ -79,6 +82,15 @@ function goHistory() {
     return
   }
   router.push('/history')
+}
+
+function goChat() {
+  if (!isLoggedIn.value) {
+    message.warning('请先登录')
+    router.push('/login')
+    return
+  }
+  router.push('/chat')
 }
 
 async function handleLogout() {

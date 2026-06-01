@@ -89,4 +89,62 @@ export async function healthCheck(): Promise<any> {
   }
 }
 
+// ============ 旅游AI对话 ============
+
+export interface ChatSession {
+  id: number
+  user_id: number
+  title: string
+  created_at: string
+  updated_at: string
+}
+
+export interface ChatMessage {
+  id: number
+  session_id: number
+  role: 'user' | 'assistant'
+  content: string
+  created_at: string
+}
+
+/**
+ * 获取会话列表
+ */
+export async function getChatSessions(): Promise<{ success: boolean; sessions: ChatSession[] }> {
+  const response = await apiClient.get('/api/chat/sessions')
+  return response.data
+}
+
+/**
+ * 创建新会话
+ */
+export async function createChatSession(): Promise<{ success: boolean; session: ChatSession }> {
+  const response = await apiClient.post('/api/chat/sessions')
+  return response.data
+}
+
+/**
+ * 删除会话
+ */
+export async function deleteChatSession(sessionId: number): Promise<{ success: boolean; message: string }> {
+  const response = await apiClient.delete(`/api/chat/sessions/${sessionId}`)
+  return response.data
+}
+
+/**
+ * 获取会话消息
+ */
+export async function getChatMessages(sessionId: number): Promise<{ success: boolean; messages: ChatMessage[] }> {
+  const response = await apiClient.get(`/api/chat/sessions/${sessionId}/messages`)
+  return response.data
+}
+
+/**
+ * 发送消息
+ */
+export async function sendChatMessage(sessionId: number, content: string): Promise<{ success: boolean; reply: string }> {
+  const response = await apiClient.post(`/api/chat/sessions/${sessionId}/messages`, { content })
+  return response.data
+}
+
 export default apiClient
