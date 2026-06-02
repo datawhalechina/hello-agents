@@ -189,7 +189,8 @@ for i in range(5): # 设置最大循环次数
     action_str = action_match.group(1).strip()
 
     if action_str.startswith("Finish"):
-        final_answer = re.match(r"Finish\[(.*)\]", action_str).group(1)
+        finish_match = re.search(r"Finish\[(.+)\]", action_str, re.DOTALL)
+        final_answer = finish_match.group(1).strip() if finish_match else action_str
         print(f"任务完成，最终答案: {final_answer}")
         break
     
