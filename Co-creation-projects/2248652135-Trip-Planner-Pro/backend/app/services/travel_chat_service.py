@@ -47,9 +47,17 @@ class TravelChatService:
     def __init__(self):
         self.llm = get_llm()
 
-    def _build_messages(self, user_message: str, history: list = None) -> List[dict]:
+    def _build_messages(self, user_message: str, history: list = None, profile_context: str = "") -> List[dict]:
         """构建带上下文的对话消息列表"""
-        messages = [{"role": "system", "content": TRAVEL_AGENT_PROMPT}]
+        # 注入用户画像上下文到系统提示词
+        system_prompt = TRAVEL_AGENT_PROMPT
+        if profile_context:
+            system_prompt = system_prompt.replace(
+                "## 语气风格",
+                f"{profile_context}\n\n## 语气风格"
+            )
+
+        messages = [{"role": "system", "content": system_prompt}]
 
         # 添加历史上下文（取最近20条消息）
         if history:
@@ -63,36 +71,22 @@ class TravelChatService:
         messages.append({"role": "user", "content": user_message})
         return messages
 
-    def chat(self, user_message: str, history: list = None) -> str:
+    def chat(self, user_message: str, history: list = None, profile_context: str = "") -> str:
         """
         非流式调用：发送消息给旅游AI并获取回复
-
-        Args:
-            user_message: 用户消息
-            history: 历史消息列表
-
-        Returns:
-            AI回复文本
         """
-        messages = self._build_messages(user_message, history)
+        messages = self._build_messages(user_message, history, profile_context)
         try:
             response = self.llm.invoke(messages=messages)
             return response.content if hasattr(response, 'content') else str(response)
         except Exception as e:
             raise RuntimeError(f"AI对话服务调用失败: {str(e)}")
 
-    def chat_stream(self, user_message: str, history: list = None) -> Iterator[str]:
+    def chat_stream(self, user_message: str, history: list = None, profile_context: str = "") -> Iterator[str]:
         """
         流式调用：逐块获取AI回复
-
-        Args:
-            user_message: 用户消息
-            history: 历史消息列表
-
-        Yields:
-            str: 文本片段
         """
-        messages = self._build_messages(user_message, history)
+        messages = self._build_messages(user_message, history, profile_context)
         try:
             for chunk in self.llm.think(messages=messages):
                 yield chunk

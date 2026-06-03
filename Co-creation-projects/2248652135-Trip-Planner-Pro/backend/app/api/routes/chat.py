@@ -9,6 +9,7 @@ from ...database import (
     update_chat_session_title
 )
 from ...services.travel_chat_service import get_travel_chat_service
+from ...services.user_profile_service import get_profile_context, extract_and_update_profile
 from .auth import require_auth
 
 router = APIRouter(prefix="/chat", tags=["旅游AI对话"])
@@ -94,9 +95,14 @@ async def send_message(session_id: int, req: ChatSendMessageRequest, request: Re
     # 2. 获取历史消息（作为上下文）
     history = get_chat_messages(session_id)
 
-    # 3. 返回流式响应
+    # 3. 获取用户画像上下文
+    profile_context = get_profile_context(user["id"])
+    if profile_context:
+        print(f"  👤 用户 {user['id']} 已加载画像上下文")
+
+    # 4. 返回流式响应
     return StreamingResponse(
-        _stream_ai_response(session_id, content, history),
+        _stream_ai_response(user["id"], session_id, content, history, profile_context),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
@@ -106,16 +112,17 @@ async def send_message(session_id: int, req: ChatSendMessageRequest, request: Re
     )
 
 
-async def _stream_ai_response(session_id: int, content: str, history: list):
+async def _stream_ai_response(user_id: int, session_id: int, content: str, history: list, profile_context: str = ""):
     """流式生成AI回复的SSE事件"""
     travel_chat = get_travel_chat_service()
     full_response = ""
 
     try:
-        # 获取流式生成器
+        # 获取流式生成器（携带用户画像上下文）
         stream = travel_chat.chat_stream(
             user_message=content,
             history=history[:-1],  # 排除刚保存的最后一条
+            profile_context=profile_context,
         )
 
         for chunk in stream:
@@ -126,6 +133,12 @@ async def _stream_ai_response(session_id: int, content: str, history: list):
 
         # 流式完成 - 保存AI回复到数据库
         add_chat_message(session_id, "assistant", full_response)
+
+        # 从对话中提取用户画像（异步更新）
+        try:
+            extract_and_update_profile(user_id, content, full_response)
+        except Exception:
+            pass  # 画像提取失败不影响主流程
 
         # 如果是第一条消息，自动生成会话标题
         title = None
