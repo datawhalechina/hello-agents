@@ -324,7 +324,7 @@ async function deleteSession(sessionId: number) {
   }
 }
 
-/** 发送消息 */
+/** 发送消息（流式SSE） */
 async function sendMessage() {
   const content = inputMessage.value.trim()
   if (!content || isLoading.value || !currentSessionId.value) return
@@ -344,40 +344,96 @@ async function sendMessage() {
   await nextTick()
   scrollToBottom()
 
+  // 创建占位的AI消息（初始内容为空，流式填充）
+  const aiMsgId = Date.now() + 1
+  const aiMsg = {
+    id: aiMsgId,
+    session_id: currentSessionId.value,
+    role: 'assistant',
+    content: '',
+    created_at: new Date().toISOString(),
+  }
+  messages.value.push(aiMsg)
+
   try {
-    const res = await api(`/api/chat/sessions/${currentSessionId.value}/messages`, {
+    // 使用 fetch + ReadableStream 读取 SSE 流
+    const response = await fetch(`${API_BASE}/api/chat/sessions/${currentSessionId.value}/messages`, {
       method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content }),
     })
-    const data = await res.json()
 
-    if (data.success) {
-      // 添加AI回复
-      const aiMsg = {
-        id: Date.now() + 1,
-        session_id: currentSessionId.value,
-        role: 'assistant',
-        content: data.reply,
-        created_at: new Date().toISOString(),
-      }
-      messages.value.push(aiMsg)
+    if (!response.ok) {
+      const errData = await response.json().catch(() => null)
+      throw new Error(errData?.detail || `请求失败 (${response.status})`)
+    }
 
-      // 更新会话列表中的标题
-      const session = sessions.value.find(s => s.id === currentSessionId.value)
-      if (session) {
-        session.updated_at = new Date().toISOString()
-        // 如果是第一条消息，标题可能已更新，重新获取
-        if (messages.value.length <= 2) {
-          fetchSessions()
+    const reader = response.body!.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+
+      // 按行解析 SSE 事件
+      const lines = buffer.split('\n')
+      buffer = lines.pop() || '' // 保留未完成的行
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const dataStr = line.slice(6).trim()
+          if (!dataStr) continue
+
+          try {
+            const event = JSON.parse(dataStr)
+
+            if (event.type === 'token') {
+              // 追加 token 到 AI 消息
+              aiMsg.content += event.content
+              // 触发响应式更新（直接修改引用的内容）
+              messages.value = [...messages.value]
+              scrollToBottom()
+            } else if (event.type === 'done') {
+              // 流式完成
+              if (event.title) {
+                // 更新会话标题
+                const session = sessions.value.find(s => s.id === currentSessionId.value)
+                if (session) {
+                  session.title = event.title
+                  session.updated_at = new Date().toISOString()
+                }
+              }
+            } else if (event.type === 'error') {
+              // AI回复出错，显示错误信息
+              if (!aiMsg.content) {
+                aiMsg.content = event.content
+                messages.value = [...messages.value]
+              }
+            }
+          } catch {
+            // 忽略解析错误的行
+          }
         }
       }
-    } else {
-      message.error(data.detail || '发送失败')
     }
-  } catch (e) {
-    message.error('网络错误，请检查后端是否启动')
+  } catch (e: any) {
+    // 如果完全没有收到任何回复，显示错误
+    if (!aiMsg.content) {
+      aiMsg.content = '抱歉，网络连接失败，请检查后端是否启动。'
+      messages.value = [...messages.value]
+    }
+    console.error('流式请求失败:', e)
   } finally {
     isLoading.value = false
+    // 更新会话时间
+    const session = sessions.value.find(s => s.id === currentSessionId.value)
+    if (session) {
+      session.updated_at = new Date().toISOString()
+    }
     await nextTick()
     scrollToBottom()
     focusInput()

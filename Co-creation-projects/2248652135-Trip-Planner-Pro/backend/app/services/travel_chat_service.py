@@ -1,5 +1,6 @@
 """旅游AI对话服务 - 专用于回答旅游相关问题的LLM Agent"""
 
+from typing import Iterator, List
 from ..services.llm_service import get_llm
 
 # 系统提示词 - 严格限定只回答旅游相关问题
@@ -46,23 +47,13 @@ class TravelChatService:
     def __init__(self):
         self.llm = get_llm()
 
-    def chat(self, user_message: str, history: list = None) -> str:
-        """
-        发送消息给旅游AI并获取回复
-
-        Args:
-            user_message: 用户消息
-            history: 历史消息列表，每项包含 role 和 content
-
-        Returns:
-            AI回复文本
-        """
-        # 构建带上下文的对话
+    def _build_messages(self, user_message: str, history: list = None) -> List[dict]:
+        """构建带上下文的对话消息列表"""
         messages = [{"role": "system", "content": TRAVEL_AGENT_PROMPT}]
 
-        # 添加历史上下文（取最近10轮对话，避免超出token限制）
+        # 添加历史上下文（取最近20条消息）
         if history:
-            for msg in history[-20:]:  # 最多取最近20条消息作为上下文
+            for msg in history[-20:]:
                 role = msg.get("role", "user")
                 content = msg.get("content", "")
                 if role in ("user", "assistant"):
@@ -70,13 +61,43 @@ class TravelChatService:
 
         # 添加当前用户消息
         messages.append({"role": "user", "content": user_message})
+        return messages
 
-        # 调用LLM (使用 HelloAgentsLLM.invoke 方法)
+    def chat(self, user_message: str, history: list = None) -> str:
+        """
+        非流式调用：发送消息给旅游AI并获取回复
+
+        Args:
+            user_message: 用户消息
+            history: 历史消息列表
+
+        Returns:
+            AI回复文本
+        """
+        messages = self._build_messages(user_message, history)
         try:
             response = self.llm.invoke(messages=messages)
             return response.content if hasattr(response, 'content') else str(response)
         except Exception as e:
             raise RuntimeError(f"AI对话服务调用失败: {str(e)}")
+
+    def chat_stream(self, user_message: str, history: list = None) -> Iterator[str]:
+        """
+        流式调用：逐块获取AI回复
+
+        Args:
+            user_message: 用户消息
+            history: 历史消息列表
+
+        Yields:
+            str: 文本片段
+        """
+        messages = self._build_messages(user_message, history)
+        try:
+            for chunk in self.llm.think(messages=messages):
+                yield chunk
+        except Exception as e:
+            raise RuntimeError(f"AI对话流式调用失败: {str(e)}")
 
 
 # 全局实例

@@ -1,5 +1,7 @@
-"""旅游AI对话API路由"""
+"""旅游AI对话API路由（SSE流式输出）"""
+import json
 from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import StreamingResponse
 from ...models.schemas import ChatSessionResponse, ChatSessionListResponse, ChatMessagesResponse, ChatSendMessageRequest, ChatDeleteResponse
 from ...database import (
     create_chat_session, list_chat_sessions, get_chat_session,
@@ -67,50 +69,85 @@ async def get_messages(session_id: int, request: Request):
     return ChatMessagesResponse(success=True, messages=messages)
 
 
-@router.post("/sessions/{session_id}/messages", summary="发送消息")
+@router.post("/sessions/{session_id}/messages", summary="发送消息（流式）")
 async def send_message(session_id: int, req: ChatSendMessageRequest, request: Request):
-    """发送消息并获取AI回复（包含历史上下文）"""
+    """
+    发送消息并流式获取AI回复（SSE格式）
+
+    流式返回 SSE 事件：
+    - data: {"type": "token", "content": "文本片段"}
+    - data: {"type": "error", "content": "错误信息"}
+    - data: {"type": "done", "title": "更新后的会话标题"}
+    """
     user = _require_auth(request)
     session = get_chat_session(session_id, user["id"])
     if not session:
         raise HTTPException(status_code=404, detail="会话不存在")
 
-    if not req.content.strip():
+    content = req.content.strip()
+    if not content:
         raise HTTPException(status_code=400, detail="消息不能为空")
 
     # 1. 保存用户消息
-    add_chat_message(session_id, "user", req.content.strip())
+    add_chat_message(session_id, "user", content)
 
     # 2. 获取历史消息（作为上下文）
     history = get_chat_messages(session_id)
 
-    # 3. 调用旅游 AI 获取回复
+    # 3. 返回流式响应
+    return StreamingResponse(
+        _stream_ai_response(session_id, content, history),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        }
+    )
+
+
+async def _stream_ai_response(session_id: int, content: str, history: list):
+    """流式生成AI回复的SSE事件"""
     travel_chat = get_travel_chat_service()
+    full_response = ""
+
     try:
-        reply = travel_chat.chat(
-            user_message=req.content.strip(),
-            history=history[:-1],  # 除了刚保存的最后一条（已包含在history里）
+        # 获取流式生成器
+        stream = travel_chat.chat_stream(
+            user_message=content,
+            history=history[:-1],  # 排除刚保存的最后一条
         )
+
+        for chunk in stream:
+            if chunk:
+                full_response += chunk
+                # 发送 token 事件
+                yield f"data: {json.dumps({'type': 'token', 'content': chunk}, ensure_ascii=False)}\n\n"
+
+        # 流式完成 - 保存AI回复到数据库
+        add_chat_message(session_id, "assistant", full_response)
+
+        # 如果是第一条消息，自动生成会话标题
+        title = None
+        if len(history) <= 1:
+            title = _generate_title(content)
+            update_chat_session_title(session_id, title)
+
+        # 发送完成事件
+        done_event = {"type": "done"}
+        if title:
+            done_event["title"] = title
+        yield f"data: {json.dumps(done_event, ensure_ascii=False)}\n\n"
+
     except Exception as e:
-        reply = f"抱歉，我暂时无法回答您的问题。错误信息：{str(e)}"
-
-    # 4. 保存 AI 回复
-    add_chat_message(session_id, "assistant", reply)
-
-    # 5. 如果这是第一条消息，自动根据内容生成会话标题
-    if len(history) <= 1:
-        title = _generate_title(req.content.strip())
-        update_chat_session_title(session_id, title)
-
-    return {
-        "success": True,
-        "reply": reply,
-    }
+        error_msg = f"抱歉，AI暂时无法回答您的问题，请稍后重试。"
+        # 尝试发送错误事件
+        yield f"data: {json.dumps({'type': 'error', 'content': error_msg}, ensure_ascii=False)}\n\n"
+        yield f"data: {json.dumps({'type': 'done'}, ensure_ascii=False)}\n\n"
 
 
 def _generate_title(user_message: str) -> str:
     """根据用户第一条消息生成会话标题"""
-    # 截取前20个字符作为标题
     title = user_message.strip()[:20]
     if len(user_message) > 20:
         title += "..."
