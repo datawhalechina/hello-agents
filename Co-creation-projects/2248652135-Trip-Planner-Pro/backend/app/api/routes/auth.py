@@ -7,6 +7,7 @@ from ...jwt_utils import (
     verify_access_token, verify_refresh_token,
 )
 from ...redis_service import store_refresh_token, validate_refresh_token, revoke_refresh_token
+from ...config import get_settings
 
 router = APIRouter(prefix="/auth", tags=["用户认证"])
 
@@ -14,7 +15,8 @@ COOKIE_ACCESS_KEY = "access_token"
 COOKIE_REFRESH_KEY = "refresh_token"
 COOKIE_PATH = "/"
 COOKIE_SAMESITE = "lax"
-COOKIE_SECURE = False  # HTTPS 环境下改为 True
+# 根据是否启用SSL自动设置Secure标志
+COOKIE_SECURE = get_settings().ssl_enabled
 
 
 def _set_auth_cookies(response: Response, access_token: str):

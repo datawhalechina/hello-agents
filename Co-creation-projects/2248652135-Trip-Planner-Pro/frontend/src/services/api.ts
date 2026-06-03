@@ -1,7 +1,12 @@
 import axios from 'axios'
 import type { TripFormData, TripPlanResponse } from '@/types'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:8000'
+
+/**
+ * 导出 API 基础 URL，供各视图中的 fetch() 调用使用
+ */
+export const apiBaseUrl: string = API_BASE_URL
 
 /** 后端通过 HttpOnly Cookie 做认证，axios 需附带 cookie */
 const apiClient = axios.create({

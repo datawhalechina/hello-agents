@@ -31,6 +31,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
+import { apiBaseUrl } from '@/services/api'
 
 const router = useRouter()
 const isLoggedIn = ref(false)
@@ -44,7 +45,7 @@ async function checkAuth() {
 
   // 异步验证：确认 cookie 真的有效
   try {
-    const res = await fetch('http://localhost:8000/api/auth/profile', {
+    const res = await fetch(`${apiBaseUrl}/api/auth/profile`, {
       credentials: 'include',
     })
     if (res.ok) {
@@ -95,7 +96,7 @@ function goChat() {
 
 async function handleLogout() {
   try {
-    await fetch('http://localhost:8000/api/auth/logout', {
+    await fetch(`${apiBaseUrl}/api/auth/logout`, {
       method: 'POST',
       credentials: 'include',
     })

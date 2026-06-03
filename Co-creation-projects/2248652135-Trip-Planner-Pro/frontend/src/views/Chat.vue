@@ -197,7 +197,7 @@ const isLoading = ref(false)
 const sessionsLoading = ref(false)
 const sidebarCollapsed = ref(false)
 
-const API_BASE = 'http://localhost:8000'
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://localhost:8000'
 
 /** Cookie 自动携带 token */
 async function api(path: string, options: RequestInit = {}) {

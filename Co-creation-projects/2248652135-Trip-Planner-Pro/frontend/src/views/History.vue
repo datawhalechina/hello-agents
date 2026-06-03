@@ -51,7 +51,8 @@ const records = ref<any[]>([])
 
 /** Cookie 自动携带 token，无需手动传 header */
 async function api(path: string, options: RequestInit = {}) {
-  return fetch(`http://localhost:8000${path}`, {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://localhost:8000'
+  return fetch(`${baseUrl}${path}`, {
     ...options,
     credentials: 'include',
     headers: { 'Content-Type': 'application/json', ...options.headers },

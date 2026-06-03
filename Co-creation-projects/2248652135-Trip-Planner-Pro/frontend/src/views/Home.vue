@@ -353,7 +353,8 @@ const handleSubmit = async () => {
       // 如果已登录，自动保存到历史记录
       const loggedIn = localStorage.getItem('auth_username')
       if (loggedIn) {
-        fetch('http://localhost:8000/api/history', {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://localhost:8000'
+        fetch(`${baseUrl}/api/history`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',

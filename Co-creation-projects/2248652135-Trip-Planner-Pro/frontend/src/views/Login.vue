@@ -76,7 +76,8 @@ async function handleSubmit() {
 
   try {
     const endpoint = isRegister.value ? 'register' : 'login'
-    const res = await fetch(`http://localhost:8000/api/auth/${endpoint}`, {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://localhost:8000'
+    const res = await fetch(`${baseUrl}/api/auth/${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',  // 让 cookie 可被设置

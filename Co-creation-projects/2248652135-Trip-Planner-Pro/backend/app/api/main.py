@@ -61,10 +61,11 @@ async def startup_event():
         print(f"\n❌ 配置验证失败:\n{e}")
         print("\n请检查.env文件并确保所有必要的配置项都已设置")
         raise
-    
+
+    protocol = "https" if settings.ssl_enabled else "http"
     print("\n" + "="*60)
-    print("📚 API文档: http://localhost:8000/docs")
-    print("📖 ReDoc文档: http://localhost:8000/redoc")
+    print(f"📚 API文档: {protocol}://localhost:{settings.port}/docs")
+    print(f"📖 ReDoc文档: {protocol}://localhost:{settings.port}/redoc")
     print("="*60 + "\n")
 
 
@@ -100,11 +101,17 @@ async def health():
 
 if __name__ == "__main__":
     import uvicorn
-    
+
+    ssl_kwargs = {}
+    if settings.ssl_enabled:
+        ssl_kwargs["ssl_certfile"] = settings.get_ssl_certfile()
+        ssl_kwargs["ssl_keyfile"] = settings.get_ssl_keyfile()
+
     uvicorn.run(
         "app.api.main:app",
         host=settings.host,
         port=settings.port,
-        reload=True
+        reload=True,
+        **ssl_kwargs
     )
 

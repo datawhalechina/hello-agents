@@ -183,7 +183,7 @@ Agent可以自动调用以下高德地图MCP工具:
 
 ## 📄 API文档
 
-启动后端服务后,访问 `http://localhost:8000/docs` 查看完整的API文档。
+启动后端服务后,访问 `http://localhost:8000/docs`（或启用 HTTPS 后访问 `https://localhost:8000/docs`）查看完整的API文档。
 
 主要端点:
 - `POST /api/trip/plan` - 生成旅行计划

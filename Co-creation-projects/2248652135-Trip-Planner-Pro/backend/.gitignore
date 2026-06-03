@@ -49,3 +49,6 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
+# SSL证书（本地自签名，部署时使用真实证书）
+certs/
+
