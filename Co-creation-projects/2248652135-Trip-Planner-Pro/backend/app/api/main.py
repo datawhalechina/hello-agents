@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from ..config import get_settings, validate_config, print_config
 from ..database import init_db
+from ..rsa_service import init_rsa_keys
 from .routes import trip, poi, map as map_routes, auth, history, chat
 
 # 获取配置
@@ -52,6 +53,12 @@ async def startup_event():
         print("✅ 数据库初始化成功")
     except Exception as e:
         print(f"⚠️ 数据库初始化失败: {e}")
+
+    # 初始化RSA密钥
+    try:
+        init_rsa_keys()
+    except Exception as e:
+        print(f"⚠️ RSA密钥初始化失败: {e}")
 
     # 验证配置
     try:

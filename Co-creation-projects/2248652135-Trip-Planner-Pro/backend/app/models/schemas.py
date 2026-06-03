@@ -223,15 +223,15 @@ class ErrorResponse(BaseModel):
 # ============ 认证模型 ============
 
 class RegisterRequest(BaseModel):
-    """注册请求"""
+    """注册请求（密码经RSA公钥加密，Base64编码）"""
     username: str = Field(..., min_length=2, max_length=50, description="用户名")
-    password: str = Field(..., min_length=4, max_length=100, description="密码")
+    encrypted_password: str = Field(..., description="RSA-OAEP加密后的密码(Base64)")
 
 
 class LoginRequest(BaseModel):
-    """登录请求"""
+    """登录请求（密码经RSA公钥加密，Base64编码）"""
     username: str = Field(..., description="用户名")
-    password: str = Field(..., description="密码")
+    encrypted_password: str = Field(..., description="RSA-OAEP加密后的密码(Base64)")
 
 
 # ============ 历史记录模型 ============

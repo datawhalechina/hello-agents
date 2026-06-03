@@ -8,6 +8,7 @@ from ...jwt_utils import (
 )
 from ...redis_service import store_refresh_token, validate_refresh_token, revoke_refresh_token
 from ...config import get_settings
+from ...rsa_service import get_public_key_pem, decrypt_data
 
 router = APIRouter(prefix="/auth", tags=["用户认证"])
 
@@ -47,13 +48,20 @@ def require_auth(request: Request) -> dict:
 
 @router.post("/register", summary="用户注册")
 async def register(req: RegisterRequest, response: Response):
-    """注册新用户，设置Access Token Cookie + Refresh Token存入Redis"""
+    """注册新用户（密码经RSA加密），设置Access Token Cookie + Refresh Token存入Redis"""
     if len(req.username) < 2:
         raise HTTPException(status_code=400, detail="用户名至少2个字符")
-    if len(req.password) < 4:
+
+    # RSA解密密码
+    try:
+        password = decrypt_data(req.encrypted_password)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"密码解密失败: {e}")
+
+    if len(password) < 4:
         raise HTTPException(status_code=400, detail="密码至少4个字符")
     try:
-        user = create_user(req.username.strip(), req.password)
+        user = create_user(req.username.strip(), password)
         _issue_tokens(response, user["id"])
         return {"success": True, "message": "注册成功", "username": user["username"]}
     except ValueError as e:
@@ -62,12 +70,27 @@ async def register(req: RegisterRequest, response: Response):
 
 @router.post("/login", summary="用户登录")
 async def login(req: LoginRequest, response: Response):
-    """登录，设置Access Token Cookie + Refresh Token存入Redis"""
-    user = verify_user(req.username.strip(), req.password)
+    """登录（密码经RSA加密），设置Access Token Cookie + Refresh Token存入Redis"""
+    # RSA解密密码
+    try:
+        password = decrypt_data(req.encrypted_password)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"密码解密失败: {e}")
+
+    user = verify_user(req.username.strip(), password)
     if not user:
         raise HTTPException(status_code=401, detail="用户名或密码错误")
     _issue_tokens(response, user["id"])
     return {"success": True, "message": "登录成功", "username": user["username"]}
+
+
+@router.get("/public-key", summary="获取RSA公钥")
+async def public_key():
+    """获取RSA公钥（PEM格式），用于前端加密密码"""
+    return {
+        "success": True,
+        "public_key": get_public_key_pem(),
+    }
 
 
 def _issue_tokens(response: Response, user_id: int):

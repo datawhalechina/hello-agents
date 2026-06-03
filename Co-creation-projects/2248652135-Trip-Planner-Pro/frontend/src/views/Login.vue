@@ -33,14 +33,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
+import { rsaEncrypt, fetchPublicKey } from '@/services/crypto'
 
 const router = useRouter()
 const isRegister = ref(false)
 const loading = ref(false)
 const error = ref('')
+
+// 提前获取 RSA 公钥，提升用户体验
+let publicKeyPem: string | undefined
+onMounted(async () => {
+  try {
+    publicKeyPem = await fetchPublicKey()
+  } catch {
+    // 公钥获取失败不影响后续操作（encrypt 时会再试）
+  }
+})
 
 const form = reactive({
   username: '',
@@ -75,13 +86,19 @@ async function handleSubmit() {
   error.value = ''
 
   try {
+    // RSA 加密密码
+    const encryptedPassword = await rsaEncrypt(form.password, publicKeyPem)
+
     const endpoint = isRegister.value ? 'register' : 'login'
     const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://localhost:8000'
     const res = await fetch(`${baseUrl}/api/auth/${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',  // 让 cookie 可被设置
-      body: JSON.stringify({ username: form.username, password: form.password }),
+      body: JSON.stringify({
+        username: form.username,
+        encrypted_password: encryptedPassword,
+      }),
     })
     const data = await res.json()
 
