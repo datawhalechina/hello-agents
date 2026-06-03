@@ -142,7 +142,7 @@
             placeholder="请输入您的旅行问题..."
             :rows="1"
             :auto-size="{ minRows: 1, maxRows: 4 }"
-            @pressEnter="sendMessage"
+            @pressEnter="onPressEnter"
             :disabled="isLoading"
             class="chat-input"
             ref="inputRef"
@@ -324,6 +324,12 @@ async function deleteSession(sessionId: number) {
   }
 }
 
+/** 处理回车键（在 Ant Design 的 keydown 中阻止换行插入） */
+function onPressEnter(e: KeyboardEvent) {
+  e.preventDefault()
+  sendMessage()
+}
+
 /** 发送消息（流式SSE） */
 async function sendMessage() {
   const content = inputMessage.value.trim()
@@ -331,14 +337,23 @@ async function sendMessage() {
 
   // 先显示用户消息
   const userMsg = {
-    id: Date.now(),
+    id: Date.now() + 1,
     session_id: currentSessionId.value,
     role: 'user',
     content: content,
     created_at: new Date().toISOString(),
   }
   messages.value.push(userMsg)
+
+  // === 立即清空输入框 ===
   inputMessage.value = ''
+  // 直接操作 DOM + 触发 input 事件，确保 Ant Design 内部状态同步
+  const ta = document.querySelector('.chat-input textarea') as HTMLTextAreaElement | null
+  if (ta) {
+    ta.value = ''
+    ta.dispatchEvent(new Event('input', { bubbles: true }))
+  }
+
   isLoading.value = true
 
   await nextTick()
@@ -429,6 +444,13 @@ async function sendMessage() {
     console.error('流式请求失败:', e)
   } finally {
     isLoading.value = false
+    // 兜底：再次确保输入框被清空
+    inputMessage.value = ''
+    const ta2 = document.querySelector('.chat-input textarea') as HTMLTextAreaElement | null
+    if (ta2 && ta2.value !== '') {
+      ta2.value = ''
+      ta2.dispatchEvent(new Event('input', { bubbles: true }))
+    }
     // 更新会话时间
     const session = sessions.value.find(s => s.id === currentSessionId.value)
     if (session) {
