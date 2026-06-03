@@ -1,16 +1,50 @@
 # Chapter 10: Agent Communication Protocols
 
-In previous chapters, we built fully functional standalone agents with reasoning, tool invocation, and memory capabilities. However, when attempting to build more complex AI systems, natural questions arise: **How can agents efficiently interact with the external world? How can multiple agents collaborate with each other?**
+In previous chapters, we built fully functional standalone agents with reasoning, tool invocation, and memory capabilities. However, when attempting to build more complex AI systems, natural questions arise: How can agents efficiently interact with the external world? How can multiple agents collaborate with each other?
 
-This is precisely the core problem that agent communication protocols aim to solve. This chapter will introduce three communication protocols to the HelloAgents framework: **MCP (Model Context Protocol)** for standardized communication between agents and tools, **A2A (Agent-to-Agent Protocol)** for peer-to-peer collaboration between agents, and **ANP (Agent Network Protocol)** for building large-scale agent networks. These three protocols together form the infrastructure layer for agent communication.
+This is precisely the core problem that agent communication protocols aim to solve. This chapter introduces three communication protocols to the HelloAgents framework: MCP (Model Context Protocol) for standardized communication between agents and tools, A2A (Agent-to-Agent Protocol) for peer-to-peer collaboration between agents, and ANP (Agent Network Protocol) for building large-scale agent networks. Together, these three protocols form the infrastructure layer for agent communication.
 
-Through this chapter's learning, you will master the design philosophy and practical skills of agent communication protocols, understand the design differences between three mainstream protocols, and learn how to choose appropriate protocols to solve practical problems.
+By studying this chapter, you will not only master practical skills for all three protocols; more importantly, you will understand why they were designed, why they are designed the way they are (and not otherwise), and how to make correct technology choices from first principles.
 
 ## 10.1 Agent Communication Protocol Fundamentals
 
-### 10.1.1 Why Communication Protocols Are Needed
+### 10.1.1 First Principles: Why Specialized Communication Protocols?
 
-Recall the ReAct agent we built in Chapter 7, which already possesses powerful reasoning and tool invocation capabilities. Let's look at a typical usage scenario:
+Before diving into specific protocols, we must answer a fundamental question: With mature schemes like HTTP, gRPC, and REST APIs, why do we still need protocols purpose-built for agents?
+
+The answer lies in the first principles—understanding the essential differences between agents and traditional software.
+
+Traditional software communication assumes the caller knows what it wants to do and the callee offers deterministic capabilities.
+
+Traditional API call:
+Developer (human) → writes deterministic code → calls deterministic interface → gets deterministic result
+
+LLM-based agents fundamentally break this assumption:
+
+Agent invocation:
+LLM (dynamic decision-making) → decides at runtime what to call → invocation is non-deterministic → results need to be interpreted again
+
+This gap produces three new problems that traditional protocols cannot elegantly solve:
+
+1) Dynamic discovery: Agents decide at run time which tools they need; you cannot hardcode every interface at development time.
+
+2) Semantic understanding: Agents need to “understand” what tools can do, not just mechanically “call” them.
+
+3) Autonomous collaboration: Multiple agents need to negotiate and divide labor like human teams, not just perform simple request–response.
+
+These three problems map directly to the three protocols in this chapter.
+
+Table 10.1 Three core problems and corresponding protocols
+
+- How agents use tools → MCP → Agents ↔ Tools/Data sources
+- How agents collaborate with other agents → A2A → Agent ↔ Agent (peer-to-peer)
+- How lots of agents interconnect at scale → ANP → Agent networks (large-scale)
+
+The key insight: these protocols are not in competition. They are complementary designs that solve problems at different scales. We will return to this unified view in Section 10.6.
+
+### 10.1.2 A Real Pain Point: The M×N Integration Dilemma
+
+Recall the ReAct agent we built in Chapter 7—it already possesses powerful reasoning and tool invocation capabilities. Here’s a typical usage scenario:
 
 ```python
 from hello_agents import ReActAgent, HelloAgentsLLM
@@ -25,165 +59,205 @@ agent.add_tool(SearchTool())
 response = agent.run("Search for the latest AI news and calculate the total market value of related companies")
 ```
 
-This agent works well, but it faces three fundamental limitations. First is the **tool integration dilemma**: Whenever we need to access a new external service (such as GitHub API, database, file system), we must write a specialized Tool class. This is not only labor-intensive, but tools written by different developers cannot be compatible with each other. Second is the **capability expansion bottleneck**: The agent's capabilities are limited to the predefined tool set and cannot dynamically discover and use new services. Finally is the **lack of collaboration**: When tasks are complex enough to require multiple specialized agents to collaborate (such as researcher + writer + editor), we can only coordinate their work through manual orchestration.
-
-Let's understand these limitations through a more specific example. Suppose you want to build an intelligent research assistant that needs to:
+This agent works well—until you want to access more external services (GitHub, databases, file systems), and the pain begins:
 
 ```python
-# Traditional approach: Manually integrate each service
+# Traditional approach: manually integrate each service
 class GitHubTool(BaseTool):
-    """Need to manually write GitHub API adapter"""
-    def run(self, repo_url):
-        # Lots of API calling code...
-        pass
+    """Manually write GitHub API adapter: HTTP requests, auth, error handling..."""
+    def run(self, repo_url): ...
 
 class DatabaseTool(BaseTool):
-    """Need to manually write database adapter"""
-    def run(self, query):
-        # Database connection and query code...
-        pass
+    """Manually write database adapter: connection, query, exception handling..."""
+    def run(self, query): ...
 
 class WeatherTool(BaseTool):
-    """Need to manually write weather API adapter"""
-    def run(self, location):
-        # Weather API calling code...
-        pass
+    """Manually write weather API adapter..."""
+    def run(self, location): ...
 
-# Each new service requires repeating this process
-agent.add_tool(GitHubTool())
-agent.add_tool(DatabaseTool())
-agent.add_tool(WeatherTool())
+# Repeat this for every new service, and re-do for each LLM application
 ```
 
-This approach has obvious problems: code duplication (each tool must handle HTTP requests, error handling, authentication, etc.), difficult to maintain (API changes require modifying all related tools), cannot be reused (tools from other developers cannot be directly used), poor scalability (adding new services requires extensive coding work).
+This is the classic M×N problem:
 
-The **core value of communication protocols** is precisely to solve these problems. It provides a set of standardized interface specifications that allow agents to access various external services in a unified way without needing to write specialized adapters for each service. This is like the Internet's TCP/IP protocol, which allows different devices to communicate with each other without needing to write specialized communication code for each type of device.
+M AI apps × N tools = M×N integration code
 
-With communication protocols, the above code can be simplified to:
+Every AI app has to write its own integration for each tool; the code isn’t compatible or reusable across apps and grows combinatorially.
+
+The core value of communication protocols is to turn M×N into M+N. Like the TCP/IP layer for the Internet, standard protocols let different devices interoperate without writing per-pair glue. With a standard, the code above becomes:
 
 ```python
 from hello_agents.tools import MCPTool
 
-# Connect to MCP server, automatically obtain all tools
-mcp_tool = MCPTool()  # Built-in server provides basic tools
+# Connect to an MCP server and automatically obtain all tools it provides
+mcp_tool = MCPTool()  # built-in server provides basic tools
 
-# Or connect to professional MCP servers
+# Connect to community-maintained MCP servers—no bespoke adapters required
 github_mcp = MCPTool(server_command=["npx", "-y", "@modelcontextprotocol/server-github"])
 database_mcp = MCPTool(server_command=["python", "database_mcp_server.py"])
 
-# Agent automatically obtains all capabilities without manually writing adapters
-agent.add_tool(mcp_tool)
 agent.add_tool(github_mcp)
 agent.add_tool(database_mcp)
 ```
 
-The changes brought by communication protocols are fundamental: **Standardized interfaces** allow different services to provide unified access methods, **interoperability** enables seamless integration of tools from different developers, **dynamic discovery** allows agents to discover new services and capabilities at runtime, and **scalability** enables systems to easily add new functional modules.
+This change is fundamental: standardized interfaces unify access to diverse services; interoperability enables seamless integration across developers; dynamic discovery lets agents discover new capabilities at runtime; scalability enables easy module addition.
 
-### 10.1.2 Comparison of Three Protocol Design Philosophies
+### 10.1.3 Design Philosophy and Underlying Logic of the Three Protocols
 
-Agent communication protocols are not a single solution, but a series of standards designed for different communication scenarios. This chapter uses the three currently mainstream protocols MCP, A2A, and ANP as examples for practice. Below is an overview comparison.
+Having clarified “why protocols,” let’s examine how the three mainstream protocols are designed. Pay close attention to the logic behind each one.
 
-**(1) MCP: Bridge Between Agents and Tools**
+**(1) MCP: The bridge between agents and tools—the “USB‑C of AI”**
 
-MCP (Model Context Protocol) was proposed by the Anthropic team<sup>[1]</sup>, and its core design philosophy is to **standardize the communication method between agents and external tools/resources**. Imagine that your agent needs to access various services such as file systems, databases, GitHub, Slack, etc. The traditional approach is to write specialized adapters for each service, which is not only labor-intensive but also difficult to maintain. MCP defines a unified protocol specification that allows all services to be accessed in the same way.
+Proposed by Anthropic in late 2024, MCP takes inspiration from USB‑C.
 
-MCP's design philosophy is "context sharing". It is not just an RPC (Remote Procedure Call) protocol, but more importantly, it allows agents and tools to share rich contextual information. As shown in Figure 10.1, when an agent accesses a code repository, the MCP server can not only provide file content but also provide contextual information such as code structure, dependency relationships, and commit history, enabling the agent to make more intelligent decisions.
+Before USB‑C, every device had its own port (charging barrel, HDMI, VGA...). USB‑C unified connection—any device supporting it could interoperate.
 
-<div align="center">
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-1.png" alt="" width="85%"/>
-  <p>Figure 10.1 MCP Design Philosophy</p>
-</div>
+MCP’s logic is simple:
 
-**(2) A2A: Dialogue Between Agents**
+1) Tool providers implement an MCP Server once → any MCP-compatible app can use it.
 
-The A2A (Agent-to-Agent Protocol) protocol was proposed by the Google team<sup>2</sup>, and its core design philosophy is to **implement peer-to-peer communication between agents**. Unlike MCP, which focuses on communication between agents and tools, A2A focuses on how agents collaborate with each other. This design allows agents to engage in dialogue, negotiation, and collaboration like human teams.
+2) App developers implement an MCP Client once → they can access any MCP Server.
 
-A2A's design philosophy is "peer-to-peer communication". As shown in Figure 10.2, in an A2A network, each agent is both a service provider and a service consumer. Agents can actively initiate requests and also respond to requests from other agents. This peer-to-peer design avoids the bottleneck of centralized coordinators, making the agent network more flexible and scalable.
+3) Integration cost drops from M×N to M+N.
 
-<div align="center">
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-2.png" alt="" width="85%"/>
-  <p>Figure 10.2 A2A Design Philosophy</p>
-</div>
+As in Figure 10.1, MCP is more than an RPC protocol. Its deeper philosophy is “context sharing.” When an agent accesses a code repository, an MCP Server can return file contents along with structure, dependencies, commit history—rich context that helps the agent decide better.
 
-**(3) ANP: Infrastructure for Agent Networks**
+Figure 10.1 MCP design philosophy
 
-ANP (Agent Network Protocol) is a conceptual protocol framework<sup>3</sup>, currently maintained by the open-source community and not yet having a mature ecosystem. Its core design philosophy is to **build infrastructure for large-scale agent networks**. If MCP solves "how to access tools" and A2A solves "how to dialogue with other agents", then ANP solves "how to discover and connect agents in large-scale networks".
+**(2) A2A: Dialogue between agents**
 
-ANP's design philosophy is "decentralized service discovery". In a network containing hundreds or thousands of agents, how can agents find the services they need? As shown in Figure 10.3, ANP provides service registration, discovery, and routing mechanisms, allowing agents to dynamically discover other services in the network without needing to pre-configure all connection relationships.
+A2A, led by Google in 2025, addresses problems MCP cannot.
 
-<div align="center">
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-3.png" alt="" width="85%"/>
-  <p>Figure 10.3 ANP Design Philosophy</p>
-</div>
+A crucial first-principles point: agent collaboration ≠ tool invocation.
 
-Finally, in Table 10.1, let's use a comparison table to more clearly understand the differences between these three protocols:
+Table 10.2 Tool invocation vs. agent collaboration
 
-<div align="center">
-  <p>Table 10.1 Comparison of Three Protocols</p>
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-table-1.png" alt="" width="85%"/>
-</div>
+- Counterparty nature: tools are passive/stateless; agents are proactive/with memory
+- Interaction pattern: single request–response vs multi-turn negotiation/long-running tasks
+- Task duration: instant vs minutes to days
+- Result nature: deterministic data vs outcomes that may require clarification/iteration
 
-**(4) How to Choose the Right Protocol?**
+A2A’s core metaphor is hiring an expert:
 
-Current protocols are still in early development stages. MCP's ecosystem is relatively mature, although the timeliness of various tools depends on maintainers. It is more recommended to choose MCP tools backed by large companies.
+1) Review the expert’s “business card/CV” (learn what they can do);
 
-The key to choosing a protocol lies in understanding your needs:
+2) Assign a “task” (state the goal, not the steps);
 
-- If your agent needs to access external services (files, databases, APIs), choose **MCP**
-- If you need multiple agents to collaborate on tasks, choose **A2A**
-- If you want to build a large-scale agent ecosystem, consider **ANP**
+3) They may ask clarifying questions;
 
-### 10.1.3 HelloAgents Communication Protocol Architecture Design
+4) They report progress while working;
 
-After understanding the design philosophies of the three protocols, let's see how to implement and use them in the HelloAgents framework. Our design goal is: **Enable learners to use these protocols in the simplest way while maintaining sufficient flexibility to handle complex scenarios**.
+5) They deliver the final result.
 
-As shown in Figure 10.4, the HelloAgents communication protocol architecture adopts a three-layer design, from bottom to top: protocol implementation layer, tool encapsulation layer, and agent integration layer.
+A2A turns these steps into protocol mechanisms (see Section 10.3). Its philosophy is peer-to-peer: every agent is both provider and consumer, avoiding coordinator bottlenecks.
 
-<div align="center">
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-4.png" alt="" width="85%"/>
-  <p>Figure 10.4 HelloAgents Communication Protocol Design</p>
-</div>
+Figure 10.2 A2A design philosophy
 
-**(1) Protocol Implementation Layer**: This layer contains the specific implementations of the three protocols. MCP is implemented based on the FastMCP library, providing client and server functionality; A2A is implemented based on Google's official a2a-sdk; ANP is our self-developed lightweight implementation, providing service discovery and network management functions. Of course, there is currently also an official [implementation](https://github.com/agent-network-protocol/AgentConnect), but considering future iterations, we only simulate the concept here.
+**(3) ANP: Infrastructure for agent networks**
 
-**(2) Tool Encapsulation Layer**: This layer encapsulates protocol implementations into a unified Tool interface. MCPTool, A2ATool, and ANPTool all inherit from BaseTool, providing a consistent `run()` method. This design allows agents to use different protocols in the same way.
+ANP, maintained by the open-source community, has a more ambitious goal. It addresses A2A’s limits at scale:
 
-**(3) Agent Integration Layer**: This layer is the integration point between agents and protocols. All agents (ReActAgent, SimpleAgent, etc.) use protocol tools through the Tool System without needing to care about underlying protocol details.
+The P2P dilemma:
+Agent A wants “an agent who can do financial analysis”
+ → But it doesn’t know who can (discovery)
+ → Even if it finds one, how to trust a stranger? (trust)
+ → With different protocols, how to interoperate? (intercom)
 
-### 10.1.4 Learning Objectives and Quick Experience for This Chapter
+ANP’s core philosophy: make agents first-class citizens of the Internet—discoverable, reachable, and trustable like websites. The logic:
 
-Let's first look at the learning content for Chapter 10:
+1) In an open network, start with trust → a decentralized identity layer (DIDs);
+
+2) Agents may “speak different languages,” so agree on how to talk → a meta-protocol negotiation layer;
+
+3) Only then can they exchange information and collaborate → an application collaboration layer.
+
+As in Figure 10.3, ANP borrows from the Web (DNS, HTTP, semantic web) to rebuild a “discovery–trust–interconnect” substrate for agents.
+
+Figure 10.3 ANP design philosophy
+
+**(4) A unifying analogy and comparison**
+
+The most intuitive way to understand the three protocols is to use three levels of human collaboration:
+
+- MCP: using tools (computer, software, databases) → how to acquire capability
+- A2A: division of labor among colleagues (you help me, I help you) → how to collaborate peer-to-peer
+- ANP: the broader business society (find partners, establish trust, sign contracts) → how to interconnect on an open network
+
+Technical comparison (abridged):
+
+- Full names: Model Context Protocol; Agent-to-Agent Protocol; Agent Network Protocol
+- Problems solved: agent↔tool; agent↔agent; agent networks
+- Core units: Tools/Resources/Prompts; Task; DID + semantic descriptions
+- Scope: one-to-one; one-to-one; many-to-many
+- Discovery mechanism: list tools; Agent Card; semantic graph + DID
+- Trust: in-app authorization; endpoint trust; decentralized identity (cryptography)
+- Underlying protocols: JSON‑RPC 2.0; HTTP + JSON (SSE/Webhook); DID + JSON‑LD + multi‑protocol negotiation
+- Proponents: Anthropic; Google; open-source community
+- Maturity: high (de facto standard); medium (rapid evolution); early (exploratory)
+
+**(5) How to choose? A quick decision tree**
+
+Your need is?
+
+- Let an AI app use external tools/data?
+  → Use MCP
+
+- Let your agent collaborate with another (known) agent?
+  → Use A2A
+
+- Build an open network where masses of agents can discover each other?
+  → Use ANP
+
+A practical note: these ecosystems are still early. MCP is the most mature—start there. A2A can be introduced as needed. ANP targets future large-scale open networks: worth tracking, but no need to rush for production. Favor implementations backed by major vendors and active maintenance.
+
+### 10.1.4 HelloAgents Protocol Architecture
+
+With the design principles clear, how do we implement and use them in HelloAgents? Our goal: make it simple to use these protocols while retaining flexibility for complex scenarios.
+
+As shown in Figure 10.4, HelloAgents adopts a three-layer architecture: a protocol implementation layer, a tool wrapper layer, and an agent integration layer. This separation of concerns echoes the layered philosophies of the three protocols themselves.
+
+Figure 10.4 HelloAgents communication protocol design
+
+- Protocol implementation layer: concrete implementations of all three protocols. MCP is built on FastMCP; A2A builds on Google’s a2a‑sdk; ANP is a lightweight conceptual implementation for discovery/networking (there is an official implementation, AgentConnect, but given its pace of change, we simulate the concepts here).
+
+- Tool wrapper layer: wraps protocol implementations into a unified Tool interface. MCPTool, A2ATool, and ANPTool all inherit from BaseTool and expose a consistent run() so agents can use them uniformly.
+
+- Agent integration layer: all agents (ReActAgent, SimpleAgent, etc.) use protocol tools via the Tool System without worrying about underlying details.
+
+### 10.1.5 Learning Objectives and Quick Start
+
+This chapter’s structure:
 
 ```
 hello_agents/
-├── protocols/                          # Communication protocol module
-│   ├── mcp/                            # MCP protocol implementation (Model Context Protocol)
-│   │   ├── client.py                   # MCP client (supports 5 transport methods)
+├── protocols/                          # Communication protocols
+│   ├── mcp/                            # MCP (Model Context Protocol)
+│   │   ├── client.py                   # MCP client (supports 5 transports)
 │   │   ├── server.py                   # MCP server (FastMCP wrapper)
-│   │   └── utils.py                    # Utility functions (create_context/parse_context)
-│   ├── a2a/                            # A2A protocol implementation (Agent-to-Agent Protocol)
-│   │   └── implementation.py           # A2A server/client (based on a2a-sdk, optional dependency)
-│   └── anp/                            # ANP protocol implementation (Agent Network Protocol)
-│       └── implementation.py           # ANP service discovery/registration (conceptual implementation)
-└── tools/builtin/                      # Built-in tools module
-    └── protocol_tools.py               # Protocol tool wrappers (MCPTool/A2ATool/ANPTool)
+│   │   └── utils.py                    # Utilities (create_context/parse_context)
+│   ├── a2a/                            # A2A (Agent-to-Agent Protocol)
+│   │   └── implementation.py           # A2A server/client (a2a-sdk, optional)
+│   └── anp/                            # ANP (Agent Network Protocol)
+│       └── implementation.py           # ANP discovery/registration (conceptual)
+└── tools/builtin/                      # Built-in tools
+    └── protocol_tools.py               # MCPTool/A2ATool/ANPTool wrappers
 ```
 
-For this chapter's content, the focus is mainly on application, and the learning objective is to have the ability to apply protocols in your own projects. Also, since protocols are currently in early development stages, there's no need to spend too much effort reinventing the wheel. Before starting practical work, let's prepare the development environment:
+This chapter is practice-oriented: the goal is to apply these protocols in your own projects. Given the early state of ecosystems, don’t reinvent the wheel. Prepare the environment:
 
 ```bash
-# Install HelloAgents framework (Chapter 10 version)
+# Install HelloAgents (Chapter 10 version)
 pip install "hello-agents[protocol]==0.2.2"
 
-# Install NodeJS, refer to documentation in Additional-Chapter
+# Install NodeJS (needed by some MCP Servers); see Additional-Chapter
 ```
 
-Let's experience the basic functionality of the three protocols with the simplest code:
+A minimal experience of all three:
 
 ```python
 from hello_agents.tools import MCPTool, A2ATool, ANPTool
 
-# 1. MCP: Access tools
+# 1) MCP: tool access
 mcp_tool = MCPTool()
 result = mcp_tool.run({
     "action": "call_tool",
@@ -192,7 +266,7 @@ result = mcp_tool.run({
 })
 print(f"MCP calculation result: {result}")  # Output: 30.0
 
-# 2. ANP: Service discovery
+# 2) ANP: service discovery
 anp_tool = ANPTool()
 anp_tool.run({
     "action": "register_service",
@@ -203,248 +277,130 @@ anp_tool.run({
 services = anp_tool.run({"action": "discover_services"})
 print(f"Discovered services: {services}")
 
-# 3. A2A: Agent communication
+# 3) A2A: agent communication
 a2a_tool = A2ATool("http://localhost:5000")
 print("A2A tool created successfully")
 ```
 
-This simple example demonstrates the core functionality of the three protocols. In the following sections, we will deeply learn the detailed usage and best practices of each protocol.
+Subsequent sections will dive into each protocol’s design, hands-on usage, and best practices.
 
+## 10.2 MCP in Practice
 
-## 10.2 MCP Protocol in Practice
+Let’s go deep on MCP—how to enable agents to access external tools and resources.
 
-Now, let's dive into MCP and master how to enable agents to access external tools and resources.
+### 10.2.1 Concept Introduction
 
-### 10.2.1 MCP Protocol Concept Introduction
+**(1) MCP: the “USB‑C” for agents**
 
-**(1) MCP: The "USB-C" for Agents**
+As noted in Section 10.1.3, agents often need to read local files, query databases, search GitHub, send Slack messages... Traditionally you write adapters for each service, and function call schemas differ wildly across LLM platforms, forcing rewrites when switching models. Like USB‑C unified device I/O, MCP unifies agent↔tool interaction—any model that supports MCP can access the same tools seamlessly.
 
-Imagine that your agent might need to do many things simultaneously, such as:
-- Read documents from the local file system
-- Query PostgreSQL databases
-- Search code on GitHub
-- Send Slack messages
-- Access Google Drive
+**(2) Why a three-layer architecture?**
 
-Traditionally, you would need to write adapter code for each service, handling different APIs, authentication methods, error handling, etc. This is not only labor-intensive but also difficult to maintain. More importantly, different LLM platforms have vastly different function call implementations, requiring extensive code rewrites when switching models.
+MCP uses Host, Client, and Server. See Figure 10.5: In Claude Desktop, you ask “What documents are on my desktop?”
 
-MCP's emergence changed all this. Just as USB-C unified the connection methods for various devices, **MCP unified the interaction methods between agents and external tools**. Whether you use Claude, GPT, or other models, as long as they support the MCP protocol, they can seamlessly access the same tools and resources.
+Figure 10.5 MCP example
 
-**(2) MCP Architecture**
+The responsibilities reflect separation of concerns:
 
-The MCP protocol adopts a three-layer architecture design of Host, Client, and Servers. Let's understand how these components work together through the scenario in Figure 10.5.
+- Host (Claude Desktop): user-facing UX; manages conversation; focuses on user experience.
 
-Suppose you are using Claude Desktop and asking: "What documents are on my desktop?"
+- Client (inside the Host): connects to the MCP Server; sends/receives requests; one client per server; focuses on protocol communication.
 
-<div align="center">
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-5.png" alt="" width="85%"/>
-  <p>Figure 10.5 MCP Case Demonstration</p>
-</div>
+- Server (e.g., filesystem MCP Server): executes actual operations and returns results; focuses on concrete functionality.
 
-**Responsibilities of the Three-Layer Architecture:**
+End-to-end: question → Host → model analysis → needs file info → Client connects → Server executes → results → model answers. The big win: developers write MCP Servers and ignore Host/Client implementation.
 
-1. **Host (Host Layer)**: Claude Desktop acts as the Host, responsible for receiving user questions and interacting with the Claude model. The Host is the interface users directly interact with, managing the entire conversation flow.
+Why JSON‑RPC 2.0 underneath? Following “don’t reinvent the wheel”: lightweight, language-agnostic, supports requests plus notifications, and is stable.
 
-2. **Client (Client Layer)**: When the Claude model decides it needs to access the file system, the MCP Client built into the Host is activated. The Client is responsible for establishing connections with the appropriate MCP Server, sending requests, and receiving responses.
+**(3) MCP’s three core primitives**
 
-3. **Server (Server Layer)**: The file system MCP Server is called, executes the actual file scanning operation, accesses the desktop directory, and returns the list of found documents.
+MCP defines three core capabilities—Tools, Resources, and Prompts. Understanding them is understanding MCP.
 
-**Complete Interaction Flow:** User question → Claude Desktop (Host) → Claude model analysis → Needs file information → MCP Client connection → File system MCP Server → Execute operation → Return result → Claude generates answer → Display on Claude Desktop
+Why distinguish them? Control boundaries. Side-effecting Tools require explicit authorization; read-only Resources are relatively safe.
 
-The advantage of this architectural design lies in **separation of concerns**: The Host focuses on user experience, the Client focuses on protocol communication, and the Server focuses on specific functionality implementation. Developers only need to focus on developing the corresponding MCP Server without caring about the implementation details of the Host and Client.
+Example Tool definition:
 
-**(3) Core Capabilities of MCP**
-
-As shown in Table 10.2, the MCP protocol provides three core capabilities, forming a complete tool access framework:
-
-<div align="center">
-  <p>Table 10.2 MCP Core Capabilities</p>
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-table-2.png" alt="" width="85%"/>
-</div>
-
-The difference between these three capabilities is: **Tools are active** (execute operations), **Resources are passive** (provide data), **Prompts are instructive** (provide templates).
-
-**(4) MCP Workflow**
-
-Let's understand the complete workflow of MCP through a specific example, as shown in Figure 10.6:
-
-<div align="center">
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-6.png" alt="" width="85%"/>
-  <p>Figure 10.6 MCP Case Demonstration</p>
-</div>
-
-A key question is: **How does Claude (or other LLMs) decide which tools to use?**
-
-When a user asks a question, the complete tool selection process is as follows:
-
-1. **Tool Discovery Phase**: After the MCP Client connects to the Server, it first calls `list_tools()` to obtain description information for all available tools (including tool name, function description, parameter definition)
-
-2. **Context Building**: The Client converts the tool list into a format the LLM can understand and adds it to the system prompt. For example:
-   ```
-   You can use the following tools:
-   - read_file(path: str): Read the content of the file at the specified path
-   - search_code(query: str, language: str): Search in the codebase
-   ```
-
-3. **Model Reasoning**: The LLM analyzes the user's question and available tools, deciding whether to call tools and which tool to call. This decision is based on the tool descriptions and current conversation context
-
-4. **Tool Execution**: If the LLM decides to use a tool, the Client executes the selected tool through the MCP Server and obtains the result
-
-5. **Result Integration**: The tool execution result is sent back to the LLM, which combines the result to generate the final answer
-
-This process is **fully automated**, and the LLM will decide whether to use and how to use tools based on the quality of tool descriptions. Therefore, writing clear and accurate tool descriptions is crucial.
-
-**(5) Differences Between MCP and Function Calling**
-
-Many developers ask: **I'm already using Function Calling, why do I still need MCP?** Let's understand their differences through Table 10.3.
-
-<div align="center">
-  <p>Table 10.3 Function Calling vs MCP Comparison</p>
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-table-3.png" alt="" width="85%"/>
-</div>
-
-Here we use the example of an agent needing to access GitHub repositories and the local file system to compare two implementations of the same task in detail.
-
-**Method 1: Using Function Calling**
-
-```python
-# Step 1: Define functions for each LLM provider
-# OpenAI format
-openai_tools = [
-    {
-        "type": "function",
-        "function": {
-            "name": "search_github",
-            "description": "Search GitHub repositories",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "query": {"type": "string", "description": "Search keywords"}
-                },
-                "required": ["query"]
-            }
-        }
+```json
+{
+  "name": "send_email",
+  "description": "Send an email",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "to": {"type": "string"},
+      "subject": {"type": "string"},
+      "body": {"type": "string"}
     }
-]
-
-# Claude format
-claude_tools = [
-    {
-        "name": "search_github",
-        "description": "Search GitHub repositories",
-        "input_schema": {  # Note: not parameters
-            "type": "object",
-            "properties": {
-                "query": {"type": "string", "description": "Search keywords"}
-            },
-            "required": ["query"]
-        }
-    }
-]
-
-# Step 2: Implement tool functions yourself
-def search_github(query):
-    import requests
-    response = requests.get(
-        "https://api.github.com/search/repositories",
-        params={"q": query}
-    )
-    return response.json()
-
-# Step 3: Handle different model response formats
-# OpenAI response
-if response.choices[0].message.tool_calls:
-    tool_call = response.choices[0].message.tool_calls[0]
-    result = search_github(**json.loads(tool_call.function.arguments))
-
-# Claude response
-if response.content[0].type == "tool_use":
-    tool_use = response.content[0]
-    result = search_github(**tool_use.input)
+  }
+}
 ```
 
-**Method 2: Using MCP**
+**(4) How does an LLM decide which tool to use?**
 
-```python
-from hello_agents.protocols import MCPClient
+Figure 10.6 shows the flow:
 
-# Step 1: Connect to community-provided MCP server (no need to implement yourself)
-github_client = MCPClient([
-    "npx", "-y", "@modelcontextprotocol/server-github"
-])
+1) Tool discovery: after connecting, the client calls list_tools() to obtain tool descriptions (name, function, parameters).
 
-fs_client = MCPClient([
-    "npx", "-y", "@modelcontextprotocol/server-filesystem", "."
-])
+2) Context construction: the client converts tool lists into LLM-friendly prompt formats, e.g.:
+You can use these tools:
+- read_file(path: str): read content at a path
+- search_code(query: str, language: str): search a codebase
 
-# Step 2: Unified calling method (model-independent)
-async with github_client:
-    # Automatically discover tools
-    tools = await github_client.list_tools()
+3) Model reasoning: the LLM analyzes the user’s request plus tool descriptions and decides whether and which tool to call.
 
-    # Call tool (standardized interface)
-    result = await github_client.call_tool(
-        "search_repositories",
-        {"query": "AI agents"}
-    )
+4) Tool execution: the client invokes the chosen tool via the server.
 
-# Step 3: Any model supporting MCP can use it
-# OpenAI, Claude, Llama, etc. all use the same MCP client
-```
+5) Result integration: results are returned to the LLM to produce the final answer.
 
-First, it needs to be clarified that Function Calling and MCP are not in competition, but rather complementary. Function Calling is a core capability of large language models, reflecting the model's inherent intelligence, enabling the model to understand when to call functions and precisely generate corresponding call parameters. In contrast, MCP plays the role of an infrastructure protocol, solving the engineering problem of how tools connect with models at the engineering level, describing and calling tools in a standardized way.
+This is fully automated; the model relies entirely on the quality of tool descriptions—leading directly to best practices (see Section 10.2.5).
 
-We can use a simple analogy to understand: Function Calling is equivalent to learning the skill of "how to make a phone call", including when to dial, how to communicate with the other party, and when to hang up. MCP, on the other hand, is that globally unified "telephone communication standard" that ensures any phone can successfully dial another.
+**(5) MCP and Function Calling: complementary, not competitive**
 
-After understanding their complementary relationship, let's next see how to use the MCP protocol in HelloAgents.
+A common question: I already use Function Calling; why do I need MCP? From first principles and experience:
 
-### 10.2.2 Using MCP Client
+- Function Calling is the model’s capability (when to “make the call,” how to speak, how to parse).
 
-HelloAgents implements complete MCP client functionality based on FastMCP 2.0. We provide both asynchronous and synchronous APIs to suit different usage scenarios. For most applications, the asynchronous API is recommended as it better handles concurrent requests and long-running operations. Below we will provide a step-by-step operation demonstration.
+- MCP is the standardized network—an engineering substrate that enables any phone to dial any other phone.
 
-**(1) Connecting to MCP Server**
+They are complementary: Function Calling is the “skill,” MCP is the “standard.” Below we’ll see how to use MCP in HelloAgents.
 
-The MCP client supports multiple connection methods, with the most common being Stdio mode (communicating with local processes through standard input/output):
+### 10.2.2 Using the MCP Client
+
+HelloAgents provides full MCP client functionality based on FastMCP 2.0, with both async and sync APIs. For most apps, use async for better concurrency and long-running tasks.
+
+**(1) Connect to an MCP server**
 
 ```python
 import asyncio
 from hello_agents.protocols import MCPClient
 
 async def connect_to_server():
-    # Method 1: Connect to community-provided file system server
-    # npx will automatically download and run the @modelcontextprotocol/server-filesystem package
+    # Method 1: connect to community file system server
     client = MCPClient([
         "npx", "-y",
         "@modelcontextprotocol/server-filesystem",
-        "."  # Specify root directory
+        "."
     ])
 
-    # Use async with to ensure connection is properly closed
     async with client:
-        # Use client here
         tools = await client.list_tools()
         print(f"Available tools: {[t['name'] for t in tools]}")
 
-    # Method 2: Connect to custom Python MCP server
+    # Method 2: connect to your own Python MCP server
     client = MCPClient(["python", "my_mcp_server.py"])
     async with client:
-        # Use client...
         pass
 
-# Run async function
 asyncio.run(connect_to_server())
 ```
 
-**(2) Discovering Available Tools**
-
-After successful connection, the first step is usually to query what tools the server provides:
+**(2) Discover available tools**
 
 ```python
 async def discover_tools():
     client = MCPClient(["npx", "-y", "@modelcontextprotocol/server-filesystem", "."])
 
     async with client:
-        # Get all available tools
         tools = await client.list_tools()
 
         print(f"Server provides {len(tools)} tools:")
@@ -452,7 +408,6 @@ async def discover_tools():
             print(f"\nTool name: {tool['name']}")
             print(f"Description: {tool.get('description', 'No description')}")
 
-            # Print parameter information
             if 'inputSchema' in tool:
                 schema = tool['inputSchema']
                 if 'properties' in schema:
@@ -463,40 +418,21 @@ async def discover_tools():
                         print(f"  - {param_name} ({param_type}): {param_desc}")
 
 asyncio.run(discover_tools())
-
-# Output example:
-# Server provides 5 tools:
-#
-# Tool name: read_file
-# Description: Read file content
-# Parameters:
-#   - path (string): File path
-#
-# Tool name: write_file
-# Description: Write file content
-# Parameters:
-#   - path (string): File path
-#   - content (string): File content
 ```
 
-**(3) Calling Tools**
-
-When calling tools, simply provide the tool name and parameters conforming to JSON Schema:
+**(3) Call tools**
 
 ```python
 async def use_tools():
     client = MCPClient(["npx", "-y", "@modelcontextprotocol/server-filesystem", "."])
 
     async with client:
-        # Read file
         result = await client.call_tool("read_file", {"path": "my_README.md"})
         print(f"File content:\n{result}")
 
-        # List directory
         result = await client.call_tool("list_directory", {"path": "."})
         print(f"Current directory files: {result}")
 
-        # Write file
         result = await client.call_tool("write_file", {
             "path": "output.txt",
             "content": "Hello from MCP!"
@@ -506,7 +442,7 @@ async def use_tools():
 asyncio.run(use_tools())
 ```
 
-Here's a safer way to call MCP services for reference:
+Safer call pattern:
 
 ```python
 async def safe_tool_call():
@@ -514,70 +450,59 @@ async def safe_tool_call():
 
     async with client:
         try:
-            # Try to read a potentially non-existent file
             result = await client.call_tool("read_file", {"path": "nonexistent.txt"})
             print(result)
         except Exception as e:
             print(f"Tool call failed: {e}")
-            # Can choose to retry, use default value, or report error to user
 
 asyncio.run(safe_tool_call())
 ```
 
-**(4) Accessing Resources**
-
-Besides tools, MCP servers can also provide resources:
+**(4) Access resources**
 
 ```python
-# List available resources
+# List resources
 resources = client.list_resources()
 print(f"Available resources: {[r['uri'] for r in resources]}")
 
-# Read resource
+# Read a resource
 resource_content = client.read_resource("file:///path/to/resource")
 print(f"Resource content: {resource_content}")
 ```
 
-**(5) Using Prompt Templates**
-
-MCP servers can provide predefined prompt templates:
+**(5) Use prompts**
 
 ```python
-# List available prompts
+# List prompts
 prompts = client.list_prompts()
 print(f"Available prompts: {[p['name'] for p in prompts]}")
 
-# Get prompt content
+# Get a prompt
 prompt = client.get_prompt("code_review", {"language": "python"})
 print(f"Prompt content: {prompt}")
 ```
 
-**(6) Complete Example: Using GitHub MCP Service**
-
-Let's see how to use the community-provided GitHub MCP service through a complete example, using the encapsulated MCP Tools:
+**(6) Example: GitHub MCP service**
 
 ```python
 """
 GitHub MCP Service Example
 
-Note: Need to set environment variable
+Note: set environment variable:
     Windows: $env:GITHUB_PERSONAL_ACCESS_TOKEN="your_token_here"
     Linux/macOS: export GITHUB_PERSONAL_ACCESS_TOKEN="your_token_here"
 """
 
 from hello_agents.tools import MCPTool
 
-# Create GitHub MCP tool
 github_tool = MCPTool(
     server_command=["npx", "-y", "@modelcontextprotocol/server-github"]
 )
 
-# 1. List available tools
 print("📋 Available tools:")
 result = github_tool.run({"action": "list_tools"})
 print(result)
 
-# 2. Search repositories
 print("\n🔍 Search repositories:")
 result = github_tool.run({
     "action": "call_tool",
@@ -589,196 +514,144 @@ result = github_tool.run({
     }
 })
 print(result)
-
 ```
 
-### 10.2.3 MCP Transport Methods Explained
+### 10.2.3 Transport Methods Explained
 
-An important feature of the MCP protocol is **transport agnosticism**. This means the MCP protocol itself does not depend on specific transport methods and can run on different communication channels. HelloAgents, based on FastMCP 2.0, provides complete transport method support, allowing you to choose the most appropriate transport mode based on actual scenarios.
+A hallmark of MCP is transport agnosticism. The protocol runs over multiple channels. HelloAgents (FastMCP 2.0) supports five transport methods so you can choose per scenario.
 
-**(1) Transport Methods Overview**
+**(1) Overview**
 
-HelloAgents' `MCPClient` supports five transport methods, each with different use cases, as shown in Table 10.4:
+- Memory (for testing)
+- Stdio (local processes)
+- Stdio with args
+- HTTP/SSE/StreamableHTTP (remote)
 
-<div align="center">
-  <p>Table 10.4 MCP Transport Methods Comparison</p>
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-table-4.png" alt="" width="85%"/>
-</div>
-
-**(2) Transport Method Usage Examples**
+**(2) Usage examples**
 
 ```python
 from hello_agents.tools import MCPTool
 
-# 1. Memory Transport - Memory transport (for testing)
-# No parameters specified, uses built-in demo server
+# 1) Memory transport (built-in demo server)
 mcp_tool = MCPTool()
 
-# 2. Stdio Transport - Standard input/output transport (local development)
-# Use command list to start local server
+# 2) Stdio (local dev)
 mcp_tool = MCPTool(server_command=["python", "examples/mcp_example_server.py"])
 
-# 3. Stdio Transport with Args - Command transport with parameters
-# Can pass additional parameters
+# 3) Stdio with args
 mcp_tool = MCPTool(server_command=["python", "examples/mcp_example_server.py", "--debug"])
 
-# 4. Stdio Transport - Community server (npx method)
-# Use npx to start community MCP server
+# 4) Stdio via npx (community servers)
 mcp_tool = MCPTool(server_command=["npx", "-y", "@modelcontextprotocol/server-filesystem", "."])
 
-# 5. HTTP/SSE/StreamableHTTP Transport
-# Note: MCPTool is mainly for Stdio and Memory transport
-# For HTTP/SSE and other remote transports, recommend using MCPClient directly
+# 5) HTTP/SSE/StreamableHTTP
+# For remote transports, prefer using MCPClient directly
 ```
 
-**(3) Memory Transport**
-
-Use case: Unit testing, rapid prototyping
+(3) Memory transport
 
 ```python
 from hello_agents.tools import MCPTool
 
-# Use built-in demo server (Memory transport)
 mcp_tool = MCPTool()
+print(mcp_tool.run({"action": "list_tools"}))
 
-# List available tools
-result = mcp_tool.run({"action": "list_tools"})
-print(result)
-
-# Call tool
-result = mcp_tool.run({
+print(mcp_tool.run({
     "action": "call_tool",
     "tool_name": "add",
     "arguments": {"a": 10, "b": 20}
-})
-print(result)
+}))
 ```
 
-**(4) Stdio Transport - Standard Input/Output Transport**
-
-Use case: Local development, debugging, Python script servers
+**(4) Stdio**
 
 ```python
 from hello_agents.tools import MCPTool
 
-# Method 1: Use custom Python server
 mcp_tool = MCPTool(server_command=["python", "my_mcp_server.py"])
-
-# Method 2: Use community server (file system)
 mcp_tool = MCPTool(server_command=["npx", "-y", "@modelcontextprotocol/server-filesystem", "."])
 
-# List tools
-result = mcp_tool.run({"action": "list_tools"})
-print(result)
+print(mcp_tool.run({"action": "list_tools"}))
 
-# Call tool
-result = mcp_tool.run({
+print(mcp_tool.run({
     "action": "call_tool",
     "tool_name": "read_file",
     "arguments": {"path": "README.md"}
-})
-print(result)
+}))
 ```
 
-**(5) HTTP Transport**
-
-Use case: Production environment, remote services, microservice architecture
+**(5) HTTP transport**
 
 ```python
-# Note: MCPTool is mainly for Stdio and Memory transport
-# For HTTP/SSE and other remote transports, recommend using underlying MCPClient
-
 import asyncio
 from hello_agents.protocols import MCPClient
 
 async def test_http_transport():
-    # Connect to remote HTTP MCP server
     client = MCPClient("http://api.example.com/mcp")
 
     async with client:
-        # Get server information
         tools = await client.list_tools()
-        print(f"Remote server tools: {len(tools)} tools")
+        print(f"Remote server tools: {len(tools)}")
 
-        # Call remote tool
         result = await client.call_tool("process_data", {
             "data": "Hello, World!",
             "operation": "uppercase"
         })
         print(f"Remote processing result: {result}")
 
-# Note: Requires actual HTTP MCP server
 # asyncio.run(test_http_transport())
 ```
 
-**(6) SSE Transport - Server-Sent Events Transport**
-
-Use case: Real-time communication, streaming processing, long connections
+**(6) SSE transport**
 
 ```python
-# Note: MCPTool is mainly for Stdio and Memory transport
-# For SSE transport, recommend using underlying MCPClient
-
 import asyncio
 from hello_agents.protocols import MCPClient
 
 async def test_sse_transport():
-    # Connect to SSE MCP server
     client = MCPClient(
         "http://localhost:8080/sse",
         transport_type="sse"
     )
 
     async with client:
-        # SSE is especially suitable for streaming processing
         result = await client.call_tool("stream_process", {
             "input": "Large data processing request",
             "stream": True
         })
-        print(f"Streaming processing result: {result}")
+        print(f"Streaming result: {result}")
 
-# Note: Requires MCP server supporting SSE
 # asyncio.run(test_sse_transport())
 ```
 
-**(7) StreamableHTTP Transport - Streaming HTTP Transport**
-
-Use case: HTTP scenarios requiring bidirectional streaming communication
+**(7) StreamableHTTP**
 
 ```python
-# Note: MCPTool is mainly for Stdio and Memory transport
-# For StreamableHTTP transport, recommend using underlying MCPClient
-
 import asyncio
 from hello_agents.protocols import MCPClient
 
 async def test_streamable_http_transport():
-    # Connect to StreamableHTTP MCP server
     client = MCPClient(
         "http://localhost:8080/mcp",
         transport_type="streamable_http"
     )
 
     async with client:
-        # Supports bidirectional streaming communication
         tools = await client.list_tools()
-        print(f"StreamableHTTP server tools: {len(tools)} tools")
+        print(f"StreamableHTTP tools: {len(tools)}")
 
-# Note: Requires MCP server supporting StreamableHTTP
 # asyncio.run(test_streamable_http_transport())
 ```
 
 ### 10.2.4 Using MCP Tools in Agents
 
-Previously, we learned how to use the MCP client directly. But in practical applications, we prefer to have agents **automatically** call MCP tools rather than manually writing calling code. HelloAgents provides the `MCPTool` wrapper, allowing MCP servers to seamlessly integrate into the agent's tool chain.
+Beyond direct clients, we want agents to automatically invoke MCP tools. HelloAgents provides an MCPTool wrapper to integrate MCP servers into the agent’s toolchain.
 
-**(1) Automatic Expansion Mechanism of MCP Tools**
+**(1) Automatic expansion**
 
-HelloAgents' `MCPTool` has a feature: **automatic expansion**. When you add an MCP tool to an Agent, it automatically expands all tools provided by the MCP server into independent tools, allowing the Agent to call them like ordinary tools.
+MCPTool supports automatic expansion. When you add one MCPTool, it expands all server-provided tools into independent tools callable like any other.
 
-**Method 1: Using Built-in Demo Server**
-
-We previously implemented calculator tool functions, and here we convert them into MCP services. This is the simplest usage method.
+Method 1: built-in demo server
 
 ```python
 from hello_agents import SimpleAgent, HelloAgentsLLM
@@ -786,32 +659,24 @@ from hello_agents.tools import MCPTool
 
 agent = SimpleAgent(name="Assistant", llm=HelloAgentsLLM())
 
-# No configuration needed, automatically uses built-in demo server
 mcp_tool = MCPTool(name="calculator")
 agent.add_tool(mcp_tool)
 # ✅ MCP tool 'calculator' expanded into 6 independent tools
 
-# Agent can directly use expanded tools
 response = agent.run("Calculate 25 times 16")
-print(response)  # Output: The result of 25 times 16 is 400
+print(response)  # 25 × 16 = 400
 ```
 
-**Tools after automatic expansion**:
+Expanded tools include:
 
-- `calculator_add` - Addition calculator
-- `calculator_subtract` - Subtraction calculator
-- `calculator_multiply` - Multiplication calculator
-- `calculator_divide` - Division calculator
-- `calculator_greet` - Friendly greeting
-- `calculator_get_system_info` - Get system information
+- calculator_add
+- calculator_subtract
+- calculator_multiply
+- calculator_divide
+- calculator_greet
+- calculator_get_system_info
 
-When the Agent calls, it only needs to provide parameters, for example: `[TOOL_CALL:calculator_multiply:a=25,b=16]`, and the system will automatically handle type conversion and MCP calls.
-
-**Method 2: Connecting to External MCP Servers**
-
-In actual projects, you need to connect to more powerful MCP servers. These servers can be:
-- **Community-provided official servers** (such as file system, GitHub, database, etc.)
-- **Custom servers you write yourself** (encapsulating business logic)
+Method 2: connect to external MCP servers
 
 ```python
 from hello_agents import SimpleAgent, HelloAgentsLLM
@@ -819,79 +684,53 @@ from hello_agents.tools import MCPTool
 
 agent = SimpleAgent(name="File Assistant", llm=HelloAgentsLLM())
 
-# Example 1: Connect to community-provided file system server
 fs_tool = MCPTool(
-    name="filesystem",  # Specify unique name
+    name="filesystem",
     description="Access local file system",
     server_command=["npx", "-y", "@modelcontextprotocol/server-filesystem", "."]
 )
 agent.add_tool(fs_tool)
 
-# Example 2: Connect to custom Python MCP server
-# For how to write custom MCP servers, refer to Section 10.5
 custom_tool = MCPTool(
-    name="custom_server",  # Use different name
+    name="custom_server",
     description="Custom business logic server",
     server_command=["python", "my_mcp_server.py"]
 )
 agent.add_tool(custom_tool)
 
-# Agent can now automatically use these tools!
 response = agent.run("Please read the my_README.md file and summarize its main content")
 print(response)
 ```
 
-When using multiple MCP servers, be sure to specify a different name for each MCPTool. This name will be added as a prefix to the expanded tool names to avoid conflicts. For example: `name="fs"` will expand to `fs_read_file`, `fs_write_file`, etc. If you need to write your own MCP server to encapsulate specific business logic, refer to Section 10.5.
+When using multiple MCP servers, give each MCPTool a unique name. This name prefixes the expanded tool names to avoid collisions (e.g., fs_read_file, fs_write_file). For writing your own MCP server, see Section 10.5.
 
-**(2) How MCP Tool Automatic Expansion Works**
-
-Understanding the automatic expansion mechanism helps you better use MCP tools. Let's dive into how it works:
+**(2) How automatic expansion works**
 
 ```python
 # User code
 fs_tool = MCPTool(name="fs", server_command=[...])
 agent.add_tool(fs_tool)
 
-# What happens internally:
-# 1. MCPTool connects to server, discovers 14 tools
-# 2. Creates wrapper for each tool:
-#    - fs_read_text_file (parameters: path, tail, head)
-#    - fs_write_file (parameters: path, content)
-#    - ...
-# 3. Registers to Agent's tool registry
+# Internally:
+# 1) Connect and discover tools
+# 2) Create wrappers: fs_read_text_file, fs_write_file, ...
+# 3) Register with the agent
 
-# Agent call
-response = agent.run("Read README.md")
-
-# Inside Agent:
-# 1. Identifies need to call fs_read_text_file
-# 2. Generates parameters: path=README.md
-# 3. Wrapper converts to MCP format:
+# Agent run:
+# 1) Decide to call fs_read_text_file
+# 2) Generate args
+# 3) Convert to MCP payload:
 #    {"action": "call_tool", "tool_name": "read_text_file", "arguments": {"path": "README.md"}}
-# 4. Calls MCP server
-# 5. Returns file content
+# 4) Invoke server and return content
 ```
 
-The system automatically converts types based on tool parameter definitions:
+The system auto-converts types per schema (e.g., strings “25”, “16” to numbers).
 
-```python
-# Agent calls calculator
-agent.run("Calculate 25 times 16")
-
-# Agent generates: a=25,b=16 (string)
-# System automatically converts to: {"a": 25.0, "b": 16.0} (number)
-# MCP server receives correct number type
-```
-
-**(3) Practical Case: Intelligent Document Assistant**
-
-Let's build a complete intelligent document assistant. Here we demonstrate with a simple multi-agent orchestration:
+**(3) Practical case: Intelligent Document Assistant**
 
 ```python
 """
 Multi-Agent Collaborative Intelligent Document Assistant
-
-Uses two SimpleAgents for division of labor:
 - Agent1: GitHub search expert
 - Agent2: Document generation expert
 """
@@ -899,256 +738,146 @@ from hello_agents import SimpleAgent, HelloAgentsLLM
 from hello_agents.tools import MCPTool
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
 load_dotenv(dotenv_path="../HelloAgents/.env")
-
-print("="*70)
-print("Multi-Agent Collaborative Intelligent Document Assistant")
-print("="*70)
-
-# ============================================================
-# Agent 1: GitHub Search Expert
-# ============================================================
-print("\n[Step 1] Creating GitHub search expert...")
 
 github_searcher = SimpleAgent(
     name="GitHub Search Expert",
     llm=HelloAgentsLLM(),
-    system_prompt="""You are a GitHub search expert.
-Your task is to search GitHub repositories and return results.
-Please return clear, structured search results, including:
-- Repository name
-- Brief description
-
-Keep it concise, don't add extra explanations."""
+    system_prompt="""You are a GitHub search expert...
+Keep it concise..."""
 )
-
-# Add GitHub tool
 github_tool = MCPTool(
     name="gh",
     server_command=["npx", "-y", "@modelcontextprotocol/server-github"]
 )
 github_searcher.add_tool(github_tool)
 
-# ============================================================
-# Agent 2: Document Generation Expert
-# ============================================================
-print("\n[Step 2] Creating document generation expert...")
-
 document_writer = SimpleAgent(
     name="Document Generation Expert",
     llm=HelloAgentsLLM(),
-    system_prompt="""You are a document generation expert.
-Your task is to generate structured Markdown reports based on provided information.
-
-The report should include:
-- Title
-- Introduction
-- Main content (listed in points, including project names, descriptions, etc.)
-- Summary
-
-Please output the complete Markdown format report content directly, do not use tools to save."""
+    system_prompt="""You are a document generation expert...
+Output a full Markdown report..."""
 )
-
-# Add file system tool
 fs_tool = MCPTool(
     name="fs",
     server_command=["npx", "-y", "@modelcontextprotocol/server-filesystem", "."]
 )
 document_writer.add_tool(fs_tool)
 
-# ============================================================
-# Execute Task
-# ============================================================
-print("\n" + "="*70)
-print("Starting task execution...")
-print("="*70)
+search_task = "Search for GitHub repositories about 'AI agent', return the top 5 most relevant results"
+search_results = github_searcher.run(search_task)
 
-try:
-    # Step 1: GitHub search
-    print("\n[Step 3] Agent1 searching GitHub...")
-    search_task = "Search for GitHub repositories about 'AI agent', return the top 5 most relevant results"
-
-    search_results = github_searcher.run(search_task)
-
-    print("\nSearch results:")
-    print("-" * 70)
-    print(search_results)
-    print("-" * 70)
-
-    # Step 2: Generate report
-    print("\n[Step 4] Agent2 generating report...")
-    report_task = f"""
+report_task = f"""
 Based on the following GitHub search results, generate a Markdown format research report:
-
 {search_results}
-
-Report requirements:
-1. Title: # AI Agent Framework Research Report
-2. Introduction: Explain this is a GitHub project survey about AI Agents
-3. Main findings: List found projects and their features (including names, descriptions, etc.)
-4. Summary: Summarize common characteristics of these projects
-
-Please output the complete Markdown format report directly.
+...requirements...
 """
+report_content = document_writer.run(report_task)
 
-    report_content = document_writer.run(report_task)
-
-    print("\nReport content:")
-    print("=" * 70)
-    print(report_content)
-    print("=" * 70)
-
-    # Step 3: Save report
-    print("\n[Step 5] Saving report to file...")
-    import os
-    try:
-        with open("report.md", "w", encoding="utf-8") as f:
-            f.write(report_content)
-        print("✅ Report saved to report.md")
-
-        # Verify file
-        file_size = os.path.getsize("report.md")
-        print(f"✅ File size: {file_size} bytes")
-    except Exception as e:
-        print(f"❌ Save failed: {e}")
-
-    print("\n" + "="*70)
-    print("Task completed!")
-    print("="*70)
-
-except Exception as e:
-    print(f"\n❌ Error: {e}")
-    import traceback
-    traceback.print_exc()
-
+with open("report.md", "w", encoding="utf-8") as f:
+    f.write(report_content)
 ```
 
-`github_searcher` will call `gh_search_repositories` during this process to search GitHub projects. The obtained results will be returned to `document_writer` as input, further guiding report generation, and finally saving the report to report.md.
+### 10.2.5 MCP Best Practices
 
-### 10.2.5 MCP Community Ecosystem
+- Write tool descriptions for models, not people. The LLM decides purely from the description.
+  - Poor: “Query user”
+  - Better: “Look up user details by user ID. Use when you need email, signup time, and other profile data.”
 
-A huge advantage of the MCP protocol is its **rich community ecosystem**. Anthropic and community developers have created a large number of ready-made MCP servers, covering various scenarios such as file systems, databases, API services, etc. This means you don't need to write tool adapters from scratch and can directly use these verified servers.
+- Principle of least privilege. Expose only necessary tools; destructive operations should require authorization. This is why Tools (side effects) and Resources (read-only) are distinct.
 
-Here are three resource repositories for the MCP community:
+- Prefer Resources to reduce hallucinations. Provide authoritative data as Resources rather than relying on model memory.
 
-1. **Awesome MCP Servers** (https://github.com/punkpeye/awesome-mcp-servers)
-   - Community-maintained curated list of MCP servers
-   - Contains various third-party servers
-   - Categorized by function, easy to find
+- Reuse mature community servers. Especially those with strong backing and active maintenance.
 
-2. **MCP Servers Website** (https://mcpservers.org/)
-   - Official MCP server directory website
-   - Provides search and filtering functions
-   - Contains usage instructions and examples
+### 10.2.6 MCP Community Ecosystem
 
-3. **Official MCP Servers** (https://github.com/modelcontextprotocol/servers)
-   - Servers officially maintained by Anthropic
-   - Highest quality, most complete documentation
-   - Contains implementations of commonly used services
+A major advantage of MCP is a rich ecosystem. Anthropic and the community have produced many MCP servers covering file systems, databases, APIs, and more. You can reuse instead of writing adapters from scratch.
 
-Tables 10.5 and 10.6 show commonly used official MCP servers and popular community MCP servers:
+Three key resources:
 
-<div align="center">
-  <p>Table 10.5 Commonly Used Official MCP Servers</p>
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-table-5.png" alt="" width="85%"/>
-</div>
+1) Awesome MCP Servers: https://github.com/punkpeye/awesome-mcp-servers
 
-<div align="center">
-  <p>Table 10.6 Popular Community MCP Servers</p>
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-table-6.png" alt="" width="85%"/>
-</div>
+2) MCP Servers Website: https://mcpservers.org/
 
-Here are some particularly interesting case TODOs for reference:
+3) Official MCP Servers: https://github.com/modelcontextprotocol/servers
 
-1. **Automated Web Testing (Playwright)**
+Interesting cases:
 
-   ```python
-   # Agent can automatically:
-   # - Open browser to visit website
-   # - Fill forms and submit
-   # - Screenshot to verify results
-   # - Generate test reports
-   playwright_tool = MCPTool(
-       name="playwright",
-       server_command=["npx", "-y", "@playwright/mcp"]
-   )
-   ```
+- Automated web testing (Playwright)
+- Intelligent note assistant (Obsidian + Perplexity)
+- Project management automation (Jira + GitHub)
+- Content creation workflow (YouTube + Notion + Spotify)
 
-2. **Intelligent Note Assistant (Obsidian + Perplexity)**
-   ```python
-   # Agent can:
-   # - Search latest tech news (Perplexity)
-   # - Organize into structured notes
-   # - Save to Obsidian knowledge base
-   # - Automatically establish links between notes
-   ```
+## 10.3 A2A in Practice
 
-3. **Project Management Automation (Jira + GitHub)**
-   ```python
-   # Agent can:
-   # - Create Jira tasks from GitHub Issues
-   # - Sync code commits to Jira
-   # - Automatically update Sprint progress
-   # - Generate project reports
-   ```
+### 10.3.1 Concept Introduction
 
-5. **Content Creation Workflow (YouTube + Notion + Spotify)**
+From “tools” to “coworkers”: why MCP isn’t enough
 
-   ```python
-   # Agent can:
-   # - Get YouTube video subtitles
-   # - Generate content summaries
-   # - Save to Notion database
-   # - Play background music (Spotify)
-   ```
+MCP solves agent↔tool. But we increasingly need agent↔agent collaboration. Consider travel planning:
 
-Through this section's explanation, I hope you can explore more MCP implementation cases, and contributions to HelloAgents are welcome! Next, let's learn about the A2A protocol.
+Lead agent → delegate → flight agent (searches, compares, decides)
+           → delegate → hotel agent (understands needs, recommends)
 
-## 10.3 A2A Protocol in Practice
+The key difference: the other side isn’t a “tool” but another decision-making agent.
 
-A2A (Agent-to-Agent) is a protocol that supports direct communication and collaboration between agents.
+A2A’s metaphor is hiring an expert (see Section 10.1.3). It abstracts “review CV, assign task, clarify, report progress, deliver” into protocol mechanisms.
 
-### 10.3.1 Protocol Design Motivation
+Core concept 1: Agent Card (the agent’s “business card”)
 
-The MCP protocol solved the interaction between agents and tools, while the A2A protocol solves the collaboration problem between agents. In a task requiring multi-agent (such as researcher, writer, editor) collaboration, they need to communicate, delegate tasks, negotiate capabilities, and synchronize states.
+Every agent publishes a capability declaration at /.well-known/agent.json:
 
-Traditional central coordinator (star topology) solutions have three main problems:
+```json
+{
+  "name": "Flight Booking Agent",
+  "description": "Search, compare, and book flights",
+  "url": "https://flights.example.com/a2a",
+  "capabilities": {"streaming": true, "pushNotifications": true},
+  "skills": [{
+    "id": "search_flights",
+    "name": "Flight Search",
+    "description": "Search flights by origin, destination, and date"
+  }]
+}
+```
 
-- **Single Point of Failure**: Coordinator failure leads to overall system paralysis.
-- **Performance Bottleneck**: All communication goes through the central node, limiting concurrency.
-- **Difficult to Scale**: Adding or modifying agents requires changing central logic.
+Why Agent Card? It’s the basis for dynamic discovery—agents discover and understand others at runtime without hardcoding, like reading an expert’s resume before hiring.
 
-The A2A protocol adopts a peer-to-peer (P2P) architecture (mesh topology), allowing agents to communicate directly, fundamentally solving the above problems. Its core is the two abstract concepts of **Task** and **Artifact**, which is its biggest difference from MCP, as shown in Table 10.7.
+Core concept 2: Task and Artifact
 
-<div align="center">
-  <p>Table 10.7 A2A Core Concepts</p>
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-table-7.png" alt="" width="85%"/>
-</div>
+A2A doesn’t “call a function”—it creates a task with a lifecycle:
 
-To implement management of the collaboration process, A2A defines a standardized lifecycle for tasks, including states such as creation, negotiation, delegation, in-progress, completion, and failure, as shown in Figure 10.7.
+submitted → working → input-required (agent may ask questions) → completed / failed / canceled
 
-<div align="center">
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-7.png" alt="" width="85%"/>
-  <p>Figure 10.7 A2A Task Lifecycle</p>
-</div>
+Why a “task” model? Collaboration is long-running and multi-turn. Tasks naturally support async execution, status tracking, and mid-course clarification—things request–response cannot express well.
 
+Core concept 3: Task lifecycle
 
-This mechanism enables agents to perform task negotiation, progress tracking, and exception handling.
+A2A defines standardized lifecycle states for task management: creation, negotiation, delegation, in-progress, completion, failure (Figure 10.7).
 
-The A2A request lifecycle is a sequence that details the four main steps a request follows: agent discovery, authentication, send message API, and send message stream API. Figure 10.8 below, borrowed from the official website's flowchart, shows the operational flow, illustrating the interaction between client, A2A server, and authentication server.
+A2A request lifecycle (Figure 10.8) shows agent discovery, authentication, send message API, and streaming (SSE/webhooks).
 
-<div align="center">
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-8.png" alt="" width="85%"/>
-  <p>Figure 10.8 A2A Request Lifecycle</p>
-</div>
+Interaction modes:
+
+- Synchronous request/response
+- Streaming (SSE) for real-time progress
+- Push notifications (Webhooks) for long-running tasks
+
+MCP and A2A are complementary
+
+An agent can use MCP to call tools (e.g., crunch numbers in a spreadsheet) and A2A to delegate to other agents (ask a colleague for help). In practice, both coexist:
+
+User agent ←→ Financial agent (via A2A)
+                  │
+                  ▼
+          Databases/Calculators/Reporting (via MCP)
 
 ### 10.3.2 A2A Protocol in Practice
 
-Most existing A2A implementations are `Sample Code`, and even Python implementations are quite cumbersome. Therefore, here we only adopt a method that simulates the protocol's ideas, implementing partial functionality through the A2A-SDK.
+Most A2A implementations are samples; even Python options can be cumbersome. Here we simulate the protocol concepts and implement partial functionality via a2a‑sdk.
 
-**(2) Creating a Simple A2A Agent**
-
+**(1) Create a simple A2A agent (calculator)**
 Let's create an A2A agent, again using the calculator case as a demonstration:
 
 ```python
@@ -1212,33 +941,7 @@ def create_calculator_agent():
 
     print(f"✅ Calculator agent created successfully, supported skills: {list(calculator.skills.keys())}")
     return calculator
-
-# Create agent
-calc_agent = create_calculator_agent()
-if calc_agent:
-    # Test skills
-    print("\n🧪 Testing agent skills:")
-    test_queries = [
-        "Get information",
-        "Calculate 10 + 5",
-        "Calculate 6 * 7"
-    ]
-
-    for query in test_queries:
-        if "information" in query.lower():
-            result = calc_agent.skills["info"](query)
-        elif "+" in query:
-            result = calc_agent.skills["add"](query)
-        elif "*" in query or "×" in query:
-            result = calc_agent.skills["multiply"](query)
-        else:
-            result = "Unknown query type"
-
-        print(f"  📝 Query: {query}")
-        print(f"  🤖 Reply: {result}")
-        print()
 ```
-
 **(2) Custom A2A Agent**
 
 You can also create your own A2A agent, here's a simple demonstration:
@@ -1583,9 +1286,7 @@ if __name__ == "__main__":
     handle_customer_query("How do I integrate it into my Python project?")
 ```
 
-**(3) Advanced Usage: Agent Negotiation**
-
-The A2A protocol also supports negotiation mechanisms between Agents:
+**(3) Advanced: negotiation between agents**
 
 ```python
 from hello_agents.protocols import A2AServer, A2AClient
@@ -1652,46 +1353,49 @@ threading.Thread(target=lambda: agent1.run(port=7000), daemon=True).start()
 threading.Thread(target=lambda: agent2.run(port=7001), daemon=True).start()
 ```
 
-## 10.4 ANP Protocol in Practice
+### 10.3.5 A2A Best Practices
 
-After the MCP protocol solved tool invocation and the A2A protocol solved peer-to-peer agent collaboration, the ANP protocol focuses on solving agent management problems in large-scale, open network environments.
+- Design a clear Agent Card: describe skills so others can judge “should I call you?”—same spirit as MCP’s “descriptions are for models.”
 
-In Sections 10.2 and 10.3, we learned about MCP (tool access) and A2A (agent collaboration). Now, let's learn about the ANP (Agent Network Protocol) protocol, which focuses on building **large-scale, open agent networks**.
+- Use streaming or push for long tasks: don’t make callers wait blindly; leverage SSE/Webhooks.
 
-### 10.4.1 Protocol Goals
+- Handle input-required gracefully: ask for missing info instead of guessing or failing outright.
 
-When a network contains a large number of agents with different functions (e.g., natural language processing, image recognition, data analysis, etc.), the system faces a series of challenges:
+## 10.4 ANP in Practice
 
-- **Service Discovery**: When a new task arrives, how to quickly find agents capable of handling that task?
-- **Intelligent Routing**: If multiple agents can handle the same task, how to choose the most suitable one (e.g., based on load, cost, etc.) and dispatch the task to it?
-- **Dynamic Scaling**: How to make newly joined agents discoverable and callable by other members?
+### 10.4.1 Concept Introduction
 
-The design goal of ANP is to provide a standardized mechanism to solve the above service discovery, routing selection, and network scalability problems.
+From “known peers” to an “open network of strangers”: why ANP?
 
-To achieve its design goals, ANP defines the following core concepts, as shown in Table 10.8:
+A2A solves P2P between known agents. As the number grows from a few to thousands, new issues appear (10.1.3’s “P2P dilemma”):
 
-<div align="center">
-  <p>Table 10.8 ANP Core Concepts</p>
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-table-8.png" alt="" width="85%"/>
-</div>
+- How to discover unknown agents?
+- How to trust them?
+- How to communicate across different protocols?
 
-We also borrow from the official [Getting Started Guide](https://github.com/agent-network-protocol/AgentNetworkProtocol/blob/main/docs/chinese/ANP入门指南.md) to introduce ANP's architectural design, as shown in Figure 10.9
+Analogy: A2A is “how to talk after you have a phone number,” while ANP is “how to find the right agent in the wild and establish trust.”
 
-<div align="center">
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-9.png" alt="" width="85%"/>
-  <p>Figure 10.9 ANP Overall Process</p>
-</div>
+ANP’s three-layer logic (order matters):
 
+- Identity & crypto: decentralized identity (DID) → trust first
+- Meta-protocol: agree on how to communicate → then interoperate
+- Application layer: exchange and collaborate → finally do work
 
-In this flowchart, the main steps include:
+Core concepts:
 
-**1. Service Discovery and Matching:** First, Agent A uses a public discovery service to query based on semantic or functional descriptions to locate Agent B that meets its task requirements. The discovery service establishes an index by pre-crawling standard endpoints (`.well-known/agent-descriptions`) exposed by each agent, thereby achieving dynamic matching between service demanders and providers.
+- DID-based decentralized identity (cryptographic trust)
+- Meta-protocol negotiation (agree on transport/format)
+- Semantic, machine-readable agent descriptions (JSON‑LD / semantic web)
 
-**2. DID-based Identity Verification:** At the start of interaction, Agent A uses its private key to sign a request containing its own DID. After Agent B receives it, it parses the DID to obtain the corresponding public key and uses it to verify the authenticity of the signature and the integrity of the request, thereby establishing trusted communication between both parties.
+Figure 10.9 shows the overall flow. A typical “discover–verify–negotiate–collaborate” pipeline:
 
-**3. Standardized Service Execution:** After identity verification passes, Agent B responds to the request, and both parties exchange data or invoke services (such as booking, querying, etc.) according to predefined standard interfaces and data formats. Standardized interaction processes are the foundation for achieving cross-platform and cross-system interoperability.
+1) Discover: A finds “a financial analysis agent B” via a semantic index;
 
-In summary, the core of this mechanism is using DID to build a decentralized trust foundation and leveraging standardized description protocols to achieve dynamic service discovery. This approach enables agents to form collaborative networks on the internet securely and efficiently without requiring central coordination.
+2) Verify: A fetches B’s DID document and validates signatures with B’s public key;
+
+3) Negotiate: A and B agree on protocol and formats;
+
+4) Collaborate: exchange messages and execute tasks.
 
 ### 10.4.2 Using ANP Service Discovery
 
@@ -1882,26 +1586,20 @@ for i in range(10):
     server.metadata["load"] += 0.1
 ```
 
-## 10.5 Building Custom MCP Servers
+## 10.5 Building a Custom MCP Server
 
-In previous sections, we learned how to use existing MCP services. We also learned about the characteristics of different protocols. Now, let's learn how to build our own MCP server.
+Beyond consuming existing MCP services, you’ll often need custom servers for your business.
 
-### 10.5.1 Creating Your First MCP Server
+### 10.5.1 Create Your First MCP Server
 
-**(1) Why Build a Custom MCP Server?**
+Why build a custom server?
 
-Although you can directly use public MCP services, in many practical application scenarios, you need to build custom MCP servers to meet specific needs.
+- Encapsulate business logic
+- Access private data securely
+- Optimize performance for hot paths/low latency
+- Extend functionality (proprietary models, special hardware)
 
-Main motivations include the following:
-
-- **Encapsulating Business Logic**: Encapsulate enterprise-specific business processes or complex operations as standardized MCP tools for unified invocation by agents.
-- **Accessing Private Data**: Create a secure and controllable interface or proxy for accessing internal databases, APIs, or other private data sources that cannot be exposed to the public network.
-- **Performance Optimization**: Perform deep optimization for high-frequency calls or application scenarios with strict response latency requirements.
-- **Custom Feature Extension**: Implement specific functions not provided by standard MCP services, such as integrating proprietary algorithm models or connecting to specific hardware devices.
-
-**(2) Teaching Case: Weather Query MCP Server**
-
-Let's start with a simple weather query server and gradually learn MCP server development:
+Teaching case: Weather MCP server
 
 ```python
 #!/usr/bin/env python3
@@ -1923,6 +1621,7 @@ CITY_MAP = {
     "Chongqing": "Chongqing", "Wuhan": "Wuhan", "Xi'an": "Xi'an",
     "Nanjing": "Nanjing", "Tianjin": "Tianjin", "Suzhou": "Suzhou"
 }
+
 
 
 def get_weather_data(city: str) -> Dict[str, Any]:
@@ -2334,99 +2033,162 @@ agent.add_tool(weather_tool)
 response = agent.run("How's the weather in Beijing today?")
 ```
 
-Of course, this is just an example, and there are more usages to explore on your own. Figure 10.11 below shows the information included when an MCP tool is successfully published, displaying the service name "Weather", its unique identifier `@jjyaoao/weather-mcp-server`, and status information. The Tools area shows the methods we just implemented, and the Connect area provides technical information needed to connect and use this service, including the service's **access URL address** and **configuration code snippets** in multiple languages/environments. If you want to learn more, you can click this [link](https://smithery.ai/server/@jjyaoao/weather-mcp-server).
+## 10.6 A Unified View: How the Three Protocols Work Together
 
-<div align="center">
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-11.png" alt="" width="85%"/>
-  <p>Figure 10.11 Successfully Published MCP Tool on Smithery</p>
-</div>
+### 10.6.1 Why three protocols, not one?
 
-Now it's time to create your own MCP server!
+They solve problems at different scales:
 
+- MCP → single agent ↔ tools (micro: capability acquisition)
+- A2A → agent ↔ agent (meso: peer collaboration)
+- ANP → agent networks (macro: open interconnection)
 
+Like human collaboration:
+- MCP is “using tools”
+- A2A is “division of labor”
+- ANP is “forming a society”
 
-## 10.6 Chapter Summary
+### 10.6.2 A complete story of collaboration
 
-This chapter systematically introduced three core protocols for agent communication: MCP, A2A, and ANP, and explored their design philosophies, application scenarios, and practical methods.
+Coexistence:
 
-**Protocol Positioning:**
+- ANP layer: Agent A discovers and verifies financial expert Agent B on an open network
+- A2A layer: A assigns “analyze quarterly financials” to B; they negotiate and exchange progress
+- MCP layer: B calls databases and calculators via MCP to complete the task
 
-- **MCP (Model Context Protocol)**: As a bridge between agents and tools, provides a unified tool access interface, suitable for enhancing the capabilities of individual agents.
-- **A2A (Agent-to-Agent Protocol)**: As a dialogue system between agents, supports direct communication and task negotiation, suitable for close collaboration in small-scale teams.
-- **ANP (Agent Network Protocol)**: As the "internet" for agents, provides service discovery, routing, and load balancing mechanisms, suitable for building large-scale, open agent networks.
-
-**HelloAgents Integration Solution**
-
-In the `HelloAgents` framework, these three protocols are uniformly abstracted as tools (Tool), achieving seamless integration, allowing developers to flexibly add different levels of communication capabilities to agents:
+In HelloAgents, all three are abstracted as tools:
 
 ```python
-# Unified Tool interface
 from hello_agents.tools import MCPTool, A2ATool, ANPTool
 
-# All protocols can be added to Agent as Tools
-agent.add_tool(MCPTool(...))
-agent.add_tool(A2ATool(...))
-agent.add_tool(ANPTool(...))
+agent.add_tool(MCPTool(...))   # micro: tool capabilities
+agent.add_tool(A2ATool(...))   # meso: collaborate with agents
+agent.add_tool(ANPTool(...))   # macro: discover partners on the network
 ```
 
-**Practical Experience Summary**
+### 10.6.3 Shared design kernel
 
-- Prioritize using mature community MCP services to reduce unnecessary redundant development.
-- Choose appropriate protocols based on system scale: A2A is recommended for small-scale collaboration scenarios, while ANP should be used for large-scale network scenarios.
+Despite solving different problems, they share design principles:
 
-After completing this chapter, it is recommended that you:
+- Standardization: unify interfaces to avoid fragmentation (MCP primitives / A2A Task / ANP DID)
+- Dynamic discovery: runtime capability discovery (MCP list tools / A2A Agent Card / ANP semantic discovery)
+- Separation of concerns: each protocol focuses on its layer
+- Borrow from mature ecosystems: MCP↔USB‑C; A2A↔hiring experts; ANP↔the Web
+- Designed for autonomy: assume the counterparty is a decision-making agent, not a passive executor
 
-1. **Hands-on Practice**:
-   - Build your own MCP server
-   - Create multi-agent collaboration systems using protocols
-   - Combination application strategies for MCP, A2A, and ANP
-2. **In-depth Learning**:
-   - Read MCP official documentation: https://modelcontextprotocol.io
-   - Read A2A official documentation: https://a2a-protocol.org/latest/
-   - Read ANP official documentation: https://agent-network-protocol.com/guide/
-3. **Participate in Community**:
-   - Contribute new MCP services to the community
-   - Share your own developed agent implementation cases
-   - Participate in technical standard discussions for related protocols, or ask questions in Issues or directly help HelloAgents support new example cases
+### 10.6.4 Selection and rollout advice
 
-**Congratulations on completing Chapter 10!**
+- Start with MCP: most mature, immediate value
+- Add A2A as needed: when a single agent can’t carry all tasks and you need specialists
+- Be cautious with ANP: aimed at large, open networks; unless you’re truly building an open ecosystem, don’t rush
+- Don’t overdesign: often MCP alone suffices—don’t add complexity for its own sake
 
-You now have mastered the core knowledge of agent communication protocols. Keep up the good work! 🚀
+## 10.7 State of the Ecosystem and Future Trends
+
+A deep pattern: the adoption speed of a protocol matches the urgency of the pain it solves.
+
+### 10.7.1 MCP: from protocol to de facto standard
+
+- Native in Anthropic Claude
+- OpenAI announced MCP support (2025)—cross-vendor consensus
+- Integrated into mainstream IDEs (VS Code, Cursor, Zed)
+- Thousands of open-source MCP servers already exist
+
+Why MCP is winning early:
+- The pain is acute (M×N integration)
+- Low barrier (JSON‑RPC; write a server in hours)
+- Immediate value (tools deliver instant utility)
+- Big tech backing (once multiple giants adopt, it becomes a standard)
+
+Trends: remote MCP (HTTP/SSE) for SaaS servers, stronger OAuth patterns, npm-like registries.
+
+### 10.7.2 A2A: a consortium-driven collaboration standard
+
+Launched by Google in 2025, with 50+ companies (Salesforce, SAP, ServiceNow...) backing it; donated to a neutral foundation mid-2025.
+
+Why a consortium? MCP benefits even with one-sided implementation; agent collaboration needs both sides on the same protocol—classic cold start. A broad alliance builds network effects.
+
+Reality check: A2A still evolving fast; specs not fully frozen. Good to pilot and track; evaluate stability for production.
+
+### 10.7.3 ANP: a visionary “agent internet” exploration
+
+ANP is the most forward-looking and the earliest-stage: community-led, core specs (DID, meta-protocol, semantic desc) published, but lacking big commercial push.
+
+Why slow adoption? Pain horizon:
+- MCP solves “today’s pain” (tool integration)
+- A2A solves “tomorrow’s pain” (multi-agent collaboration)
+- ANP solves “the day after” (open, large-scale interconnection and trust)
+
+Most applications are still “single agent + tools.” But the questions ANP asks are real and inevitable at scale. Its exploration has strategic value.
+
+## 10.8 Summary
+
+This chapter systematically introduced three core protocols for agent communication. More important than memorizing details is internalizing the common engineering mindset behind them.
+
+Protocol positioning:
+- MCP: the bridge between agents and tools; unify tool access; enhance a single agent’s capability
+- A2A: dialogue between agents; task negotiation; suited for tight collaboration
+- ANP: the “internet” of agents; discovery, trust, interconnect; suited for large, open networks
+
+One-line memory:
+MCP lets agents “use tools,” A2A lets agents “ask colleagues for help,” ANP lets agents “find and trust each other across the network.”
+
+Five mindsets to internalize:
+1) For any new tech, ask “what problem does it solve?”
+2) Think from first principles—agents make autonomous decisions, so we need new protocols.
+3) Understand “why it’s designed this way”—MCP’s primitives draw control boundaries; A2A’s tasks support long collaboration; ANP’s DID provides decentralized trust.
+4) Embrace layering and composition—no single universal protocol; combine focused ones.
+5) Use analogies to build intuition—USB‑C, hiring experts, the internet.
+
+Suggested next steps:
+
+- Hands-on:
+  - Build your own MCP server
+  - Create multi-agent collaboration systems
+  - Combine MCP, A2A, and ANP effectively
+
+- In-depth reading:
+  - MCP docs: https://modelcontextprotocol.io
+  - A2A docs: https://a2a-protocol.org/latest/
+  - ANP docs: https://agent-network-protocol.com/guide/
+
+- Community participation:
+  - Contribute new MCP servers
+  - Share your agent implementations
+  - Join standards discussions; open issues; help HelloAgents with new examples
+
+Congratulations on completing Chapter 10!
+You now have the core knowledge of agent communication protocols. Keep going! 🚀
 
 ## Exercises
 
-> **Note**: Some exercises do not have standard answers. The focus is on cultivating learners' comprehensive understanding and practical ability in agent communication protocols.
+> **Note**: Some exercises do not have standard answers. The goal is to cultivate comprehensive understanding and practical ability.
 
-1. This chapter introduced three agent communication protocols: MCP, A2A, and ANP. Please analyze:
+1) MCP, A2A, ANP analysis:
+   - Based on Section 10.1.3, analyze why MCP emphasizes “context sharing,” A2A emphasizes “conversational collaboration,” and ANP emphasizes “network topology.” What core problems does each solve?
+   - Suppose you’re building an “intelligent customer service system” needing: (1) access to customer DB and order systems; (2) multiple specialized agents collaborating on complex issues; (3) large-scale concurrent users. Choose the best protocol for each and explain why.
+   - Can they be combined? Design a scenario that uses MCP, A2A, and ANP together; draw the system architecture and explain each protocol’s role.
 
-   - Section 10.1.2 compared the design philosophies of the three protocols. Please analyze in depth: Why does MCP emphasize "context sharing", A2A emphasize "conversational collaboration", and ANP emphasize "network topology"? What core problems do these design philosophies solve respectively?
-   - Suppose you want to build an "intelligent customer service system" that requires the following functions: (1) Access customer database and order system; (2) Multiple professional customer service agents collaborate to handle complex problems; (3) Support large-scale concurrent user requests. Please select the most appropriate protocol for each function and explain your reasoning.
-   - Can the three protocols be used in combination? Please design a practical application scenario showing how to use MCP, A2A, and ANP simultaneously to build a complete agent system. Draw a system architecture diagram and explain the responsibilities of each protocol.
-
-2. MCP (Model Context Protocol) is the standard protocol for agent-tool communication. Based on the content in Section 10.2, please think deeply:
-
+2) MCP deep dive (hands-on recommended):
    > **Note**: This is a hands-on practice question, actual operation is recommended
+   
+   - Extend the MCP server from Section 10.5.1 to add: (1) database query tool; (2) data visualization tool; (3) report generation tool. Require collaboration among tools for complex analysis.
+   - Study Resources and Prompts from the MCP docs, then design a scenario that leverages Tools, Resources, and Prompts together.
+   - MCP uses JSON‑RPC 2.0 over stdio. Analyze pros/cons. If you need remote servers over HTTP/WebSocket, how would you extend the implementation?
 
-   - In the MCP server implementation in Section 10.2.3, we defined core methods such as `list_tools` and `call_tool`. Please extend this implementation by adding a new MCP server that provides the following tools: (1) Database query tool; (2) Data visualization tool; (3) Report generation tool. Require that tools can collaborate to complete complex data analysis tasks.
-   - The MCP protocol supports two important concepts: "Resources" and "Prompts", but this chapter mainly focuses on "Tools". Please consult the MCP official documentation to understand the design purposes of Resources and Prompts, and design an application scenario showing how to use these three core concepts to build a more powerful agent system.
-   - MCP uses JSON-RPC 2.0 as the underlying communication protocol and communicates between processes via stdio. Please analyze: What are the advantages and limitations of this design? If you need to support remote MCP servers (accessed via HTTP/WebSocket), how should the current implementation be extended?
-
-3. A2A (Agent-to-Agent Protocol) supports conversational collaboration between agents. Based on the content in Section 10.3, please complete the following extended practice:
-
+3) A2A collaboration (hands-on recommended):
    > **Note**: This is a hands-on practice question, actual operation is recommended
+   
+   - Extend the “research team” case in Section 10.3.3 by adding a “Reviewer” agent that evaluates papers and suggests revisions. Design the workflow and implement it.
+   - If conflicts arise (two agents disagree), how to resolve? Extend A2A with “negotiation” and “voting” message types.
+   - Compare A2A with multi-agent frameworks like AutoGen and CAMEL (Chapter 6). What’s their relationship? Can they replace each other? Design a way for A2A-based agents to communicate with AutoGen agents.
 
-   - In the "research team" case in Section 10.3.4, researchers and writers collaborate through the A2A protocol to complete paper writing. Please extend this case by adding a third agent "Reviewer", which can review paper quality and provide revision suggestions. Design the collaboration process among the three agents and implement complete code.
-   - The A2A protocol defines message types such as `task` and `task_result`. Please analyze: If conflicts occur during collaboration (such as two agents having different opinions on the same issue), how should a conflict resolution mechanism be designed? Please extend the A2A protocol by adding message types such as "negotiation" and "voting".
-   - Compare the A2A protocol with multi-agent frameworks such as AutoGen and CAMEL introduced in Chapter 6: What is the relationship between A2A as a standard protocol and these frameworks? Can they replace each other? Please design a solution that allows agents based on the A2A protocol to communicate with agents in the AutoGen framework.
+4) ANP large-scale networking:
+   - Choose topologies (star/mesh/hierarchical) for different scenarios. As the network scales from 10 to 1000 agents, how should topology evolve?
+   - Design an intelligent routing algorithm considering task types, agent capabilities, and network load.
+   - In a distributed scheduling system, if a critical agent fails, how should the system respond? Design fault detection, failover, and state recovery.
 
-4. ANP (Agent Network Protocol) supports large-scale agent networks. Based on the content in Section 10.4, please analyze in depth:
-
-   - Section 10.4.2 introduced ANP's network topology design, including star, mesh, hierarchical, and other structures. Please analyze: In what scenarios should which topology structure be chosen? If the network scale expands from 10 agents to 1000 agents, how should the topology structure evolve?
-   - The ANP protocol supports "routing" and "discovery" mechanisms, allowing agents to dynamically find suitable collaboration partners. Please design an "intelligent routing algorithm": automatically select the optimal message routing path based on task type, agent capabilities, network load, and other factors.
-   - In the "smart city" case in Section 10.4.4, multiple agents collaborate to manage city systems. Please think: If a critical agent (such as a traffic management agent) fails, how should the entire system respond? Please design a "fault tolerance mechanism", including fault detection, backup switching, state recovery, and other functions.
-
-5. Security and privacy protection of agent communication protocols are key issues in practical applications. Please think:
-
+5) Security and privacy:
    - In the MCP client implementation in Section 10.2.4, agents can call any tool provided by the MCP server. Please analyze: What security risks does this design have? If the MCP server provides dangerous operations (such as deleting files, executing system commands), how should a permission control mechanism be designed?
    - A2A and ANP protocols involve communication between multiple agents, which may contain sensitive information (such as user privacy data, business secrets). Please design an "end-to-end encryption" solution: ensure that messages are not eavesdropped or tampered with during transmission, while supporting agent identity authentication and access control.
    - In large-scale agent networks, malicious agents may send false information, launch denial-of-service attacks, or steal data from other agents. Please design a "trust evaluation system": dynamically evaluate the trustworthiness of each agent based on historical behavior, collaboration quality, community evaluation, and other factors, and adjust communication strategies accordingly.
