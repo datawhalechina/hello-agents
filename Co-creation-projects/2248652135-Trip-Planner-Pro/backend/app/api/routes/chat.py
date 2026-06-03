@@ -134,9 +134,9 @@ async def _stream_ai_response(user_id: int, session_id: int, content: str, histo
         # 流式完成 - 保存AI回复到数据库
         add_chat_message(session_id, "assistant", full_response)
 
-        # 从对话中提取用户画像（异步更新）
+        # 从用户消息中提取/更新用户画像（传历史消息作为上下文，不传AI回复）
         try:
-            extract_and_update_profile(user_id, content, full_response)
+            extract_and_update_profile(user_id, content, history)
         except Exception:
             pass  # 画像提取失败不影响主流程
 
