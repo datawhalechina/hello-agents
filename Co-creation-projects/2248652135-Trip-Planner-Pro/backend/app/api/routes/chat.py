@@ -9,7 +9,7 @@ from ...database import (
     update_chat_session_title
 )
 from ...services.travel_chat_service import get_travel_chat_service
-from ...services.user_profile_service import get_profile_context, extract_and_update_profile
+from ...services.user_profile_service import get_profile_context, extract_and_update_profile, get_cross_session_context
 from .auth import require_auth
 
 router = APIRouter(prefix="/chat", tags=["旅游AI对话"])
@@ -95,8 +95,8 @@ async def send_message(session_id: int, req: ChatSendMessageRequest, request: Re
     # 2. 获取历史消息（作为上下文）
     history = get_chat_messages(session_id)
 
-    # 3. 获取用户画像上下文
-    profile_context = get_profile_context(user["id"])
+    # 3. 获取用户画像上下文（传入 session_id 启用会话级快照，保证 LLM prompt cache 命中）
+    profile_context = get_profile_context(user["id"], session_id=session_id)
     if profile_context:
         print(f"  👤 用户 {user['id']} 已加载画像上下文")
 
@@ -134,9 +134,13 @@ async def _stream_ai_response(user_id: int, session_id: int, content: str, histo
         # 流式完成 - 保存AI回复到数据库
         add_chat_message(session_id, "assistant", full_response)
 
-        # 从用户消息中提取/更新用户画像（传历史消息作为上下文，不传AI回复）
+        # 从用户消息中提取/更新用户画像（跨会话上下文 + 当前会话历史）
         try:
-            extract_and_update_profile(user_id, content, history)
+            cross_ctx = get_cross_session_context(user_id, max_sessions=5, max_messages=6)
+            extract_and_update_profile(
+                user_id, content, history,
+                cross_session_context=cross_ctx,
+            )
         except Exception:
             pass  # 画像提取失败不影响主流程
 
