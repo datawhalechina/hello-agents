@@ -3,26 +3,41 @@
 from __future__ import annotations
 
 import logging
+import io
 import re
+from contextlib import redirect_stdout
 from pathlib import Path
 from queue import Empty, Queue
-from threading import Lock, Thread
+from threading import Lock, Semaphore, Thread
 from typing import Any, Callable, Iterator
+from uuid import uuid4
 
-from hello_agents import HelloAgentsLLM, ToolAwareSimpleAgent
+from hello_agents import HelloAgentsLLM
 from hello_agents.tools import ToolRegistry
-from hello_agents.tools.builtin.note_tool import NoteTool
 
 from config import Configuration
+from note_tool import NoteTool
+from tool_aware_agent import ToolAwareSimpleAgent
 from prompts import (
+    job_extractor_instructions,
     report_writer_instructions,
     task_summarizer_instructions,
     todo_planner_system_prompt,
 )
-from models import SummaryState, SummaryStateOutput, TodoItem
+from models import JobItem, SummaryState, SummaryStateOutput, TodoItem
+from services.job_extractor import JobExtractionService
 from services.planner import PlanningService
 from services.reporter import ReportingService
-from services.search import dispatch_search, prepare_research_context
+from services.search import (
+    build_platform_job_query,
+    build_search_diagnostics,
+    build_strict_job_query,
+    dispatch_search,
+    merge_search_results,
+    prepare_research_context,
+    prioritize_job_search_results,
+)
+from services.search_diagnostics import persist_search_diagnostics
 from services.summarizer import SummarizationService
 from services.tool_events import ToolCallTracker
 
@@ -45,7 +60,8 @@ class DeepResearchAgent:
         self.tools_registry: ToolRegistry | None = None
         if self.note_tool:
             registry = ToolRegistry()
-            registry.register_tool(self.note_tool)
+            with redirect_stdout(io.StringIO()):
+                registry.register_tool(self.note_tool)
             self.tools_registry = registry
 
         self._tool_tracker = ToolCallTracker(
@@ -55,21 +71,29 @@ class DeepResearchAgent:
         self._state_lock = Lock()
 
         self.todo_agent = self._create_tool_aware_agent(
-            name="研究规划专家",
+            name="求职规划专家",
             system_prompt=todo_planner_system_prompt.strip(),
         )
         self.report_agent = self._create_tool_aware_agent(
-            name="报告撰写专家",
+            name="求职行动报告专家",
             system_prompt=report_writer_instructions.strip(),
         )
 
         self._summarizer_factory: Callable[[], ToolAwareSimpleAgent] = lambda: self._create_tool_aware_agent(  # noqa: E501
-            name="任务总结专家",
+            name="岗位分析专家",
             system_prompt=task_summarizer_instructions.strip(),
+        )
+        self._job_extractor_factory: Callable[[], ToolAwareSimpleAgent] = lambda: self._create_tool_aware_agent(  # noqa: E501
+            name="岗位抽取与匹配专家",
+            system_prompt=job_extractor_instructions.strip(),
         )
 
         self.planner = PlanningService(self.todo_agent, self.config)
         self.summarizer = SummarizationService(self._summarizer_factory, self.config)
+        self.job_extractor = JobExtractionService(
+            self._job_extractor_factory,
+            self.config,
+        )
         self.reporting = ReportingService(self.report_agent, self.config)
         self._last_search_notices: list[str] = []
 
@@ -78,7 +102,10 @@ class DeepResearchAgent:
     # ------------------------------------------------------------------
     def _init_llm(self) -> HelloAgentsLLM:
         """Instantiate HelloAgentsLLM following configuration preferences."""
-        llm_kwargs: dict[str, Any] = {"temperature": 0.0}
+        llm_kwargs: dict[str, Any] = {
+            "temperature": 0.0,
+            "timeout": self.config.llm_timeout,
+        }
 
         model_id = self.config.llm_model_id or self.config.local_llm
         if model_id:
@@ -122,42 +149,53 @@ class DeepResearchAgent:
         self._tool_event_sink_enabled = sink is not None
         self._tool_tracker.set_event_sink(sink)
 
+    def _create_state(self, topic: str) -> SummaryState:
+        """Create per-run state with a stable diagnostic run id."""
+        return SummaryState(run_id=uuid4().hex[:12], research_topic=topic)
+
     def run(self, topic: str) -> SummaryStateOutput:
         """Execute the research workflow and return the final report."""
-        state = SummaryState(research_topic=topic)
+        state = self._create_state(topic)
         state.todo_items = self.planner.plan_todo_list(state)
         self._drain_tool_events(state)
 
         if not state.todo_items:
-            logger.info("No TODO items generated; falling back to single task")
-            state.todo_items = [self.planner.create_fallback_task(state)]
+            logger.info("No TODO items generated; falling back to internship tasks")
+            state.todo_items = self.planner.create_fallback_tasks(state)
 
         for task in state.todo_items:
-            self._execute_task(state, task, emit_stream=False)
+            for _ in self._execute_task(state, task, emit_stream=False):
+                pass
 
         report = self.reporting.generate_report(state)
         self._drain_tool_events(state)
         state.structured_report = report
         state.running_summary = report
-        self._persist_final_report(state, report)
+        try:
+            self._persist_final_report(state, report)
+        except Exception as exc:  # pragma: no cover - report should still return
+            logger.exception("Persisting final report note failed", exc_info=exc)
+        self._persist_search_diagnostics(state)
 
         return SummaryStateOutput(
             running_summary=report,
             report_markdown=report,
             todo_items=state.todo_items,
+            job_items=state.job_items,
+            search_diagnostics=state.search_diagnostics,
         )
 
     def run_stream(self, topic: str) -> Iterator[dict[str, Any]]:
         """Execute the workflow yielding incremental progress events."""
-        state = SummaryState(research_topic=topic)
+        state = self._create_state(topic)
         logger.debug("Starting streaming research: topic=%s", topic)
-        yield {"type": "status", "message": "初始化研究流程"}
+        yield {"type": "status", "message": "初始化找实习流程"}
 
         state.todo_items = self.planner.plan_todo_list(state)
         for event in self._drain_tool_events(state, step=0):
             yield event
         if not state.todo_items:
-            state.todo_items = [self.planner.create_fallback_task(state)]
+            state.todo_items = self.planner.create_fallback_tasks(state)
 
         channel_map: dict[int, dict[str, Any]] = {}
         for index, task in enumerate(state.todo_items, start=1):
@@ -199,6 +237,7 @@ class DeepResearchAgent:
         self._set_tool_event_sink(tool_event_sink)
 
         threads: list[Thread] = []
+        task_semaphore = Semaphore(max(1, self.config.task_concurrency))
 
         def worker(task: TodoItem, step: int) -> None:
             try:
@@ -215,8 +254,9 @@ class DeepResearchAgent:
                     task=task,
                 )
 
-                for event in self._execute_task(state, task, emit_stream=True, step=step):
-                    enqueue(event, task=task)
+                with task_semaphore:
+                    for event in self._execute_task(state, task, emit_stream=True, step=step):
+                        enqueue(event, task=task)
             except Exception as exc:  # pragma: no cover - defensive guardrail
                 logger.exception("Task execution failed", exc_info=exc)
                 enqueue(
@@ -271,13 +311,22 @@ class DeepResearchAgent:
         state.structured_report = report
         state.running_summary = report
 
-        note_event = self._persist_final_report(state, report)
+        try:
+            note_event = self._persist_final_report(state, report)
+        except Exception as exc:  # pragma: no cover - report should still stream
+            logger.exception("Persisting final report note failed", exc_info=exc)
+            note_event = None
         if note_event:
             yield note_event
+
+        self._persist_search_diagnostics(state)
 
         yield {
             "type": "final_report",
             "report": report,
+            "job_items": [self._serialize_job(job) for job in state.job_items],
+            "search_diagnostics": state.search_diagnostics,
+            "search_diagnostics_path": state.search_diagnostics_path,
             "note_id": state.report_note_id,
             "note_path": state.report_note_path,
         }
@@ -297,13 +346,58 @@ class DeepResearchAgent:
         """Run search + summarization for a single task."""
         task.status = "in_progress"
 
+        original_query = task.query
+        is_job_search_task = self._is_job_search_task(task)
+        if is_job_search_task:
+            task.query = build_strict_job_query(task.query)
+
         search_result, notices, answer_text, backend = dispatch_search(
             task.query,
             self.config,
             state.research_loop_count,
         )
+        raw_search_results = self._extract_search_results(search_result)
+        retry_query: str | None = None
+
+        if is_job_search_task:
+            search_result = prioritize_job_search_results(search_result)
+            if not search_result or not search_result.get("results"):
+                retry_query = build_platform_job_query(original_query)
+                retry_result, retry_notices, retry_answer, retry_backend = dispatch_search(
+                    retry_query,
+                    self.config,
+                    state.research_loop_count,
+                )
+                raw_search_results.extend(self._extract_search_results(retry_result))
+                retry_result = prioritize_job_search_results(retry_result)
+                search_result = merge_search_results(search_result, retry_result)
+                notices.extend(retry_notices)
+                answer_text = answer_text or retry_answer
+                backend = retry_backend or backend
+                task.query = retry_query
+
         self._last_search_notices = notices
         task.notices = notices
+
+        if self._is_job_extraction_task(task):
+            diagnostics = build_search_diagnostics(
+                task_id=task.id,
+                task_title=task.title,
+                backend=backend,
+                query=original_query,
+                final_query=task.query,
+                retry_query=retry_query,
+                raw_results=raw_search_results,
+            )
+            with self._state_lock:
+                state.search_diagnostics.append(diagnostics)
+            if emit_stream:
+                yield {
+                    "type": "search_diagnostics",
+                    "task_id": task.id,
+                    "diagnostics": diagnostics,
+                    "step": step,
+                }
 
         if emit_stream:
             for event in self._drain_tool_events(state, step=step):
@@ -355,6 +449,23 @@ class DeepResearchAgent:
             state.web_research_results.append(context)
             state.sources_gathered.append(sources_summary)
             state.research_loop_count += 1
+
+        if self._is_job_extraction_task(task):
+            jobs = self.job_extractor.extract_jobs(state, task, search_result, context)
+            if jobs:
+                with self._state_lock:
+                    state.job_items = self._merge_job_items(state.job_items, jobs)
+                    all_jobs_snapshot = list(state.job_items)
+                if emit_stream:
+                    yield {
+                        "type": "job_items",
+                        "task_id": task.id,
+                        "jobs": [self._serialize_job(job) for job in jobs],
+                        "all_jobs": [
+                            self._serialize_job(job) for job in all_jobs_snapshot
+                        ],
+                        "step": step,
+                    }
 
         summary_text: str | None = None
 
@@ -429,6 +540,30 @@ class DeepResearchAgent:
         """Expose recorded tool events for legacy integrations."""
         return self._tool_tracker.as_dicts()
 
+    def _persist_search_diagnostics(self, state: SummaryState) -> None:
+        """Persist per-run search diagnostics when available."""
+        if state.search_diagnostics_path:
+            return
+        try:
+            path = persist_search_diagnostics(
+                run_id=state.run_id or uuid4().hex[:12],
+                diagnostics=state.search_diagnostics,
+            )
+        except Exception as exc:  # pragma: no cover - diagnostics should not block report
+            logger.exception("Persisting search diagnostics failed", exc_info=exc)
+            return
+        state.search_diagnostics_path = path
+
+    @staticmethod
+    def _extract_search_results(search_result: dict[str, Any] | None) -> list[dict[str, Any]]:
+        """Return dict search results from a structured search payload."""
+        if not search_result:
+            return []
+        results = search_result.get("results")
+        if not isinstance(results, list):
+            return []
+        return [item for item in results if isinstance(item, dict)]
+
     def _serialize_task(self, task: TodoItem) -> dict[str, Any]:
         """Convert task dataclass to serializable dict for frontend."""
         return {
@@ -444,19 +579,87 @@ class DeepResearchAgent:
             "stream_token": task.stream_token,
         }
 
+    def _serialize_job(self, job: JobItem) -> dict[str, Any]:
+        """Convert extracted job dataclass to serializable dict for frontend."""
+        return {
+            "id": job.id,
+            "company": job.company,
+            "title": job.title,
+            "location": job.location,
+            "source_url": job.source_url,
+            "source_title": job.source_title,
+            "requirements": job.requirements,
+            "responsibilities": job.responsibilities,
+            "tech_stack": job.tech_stack,
+            "duration": job.duration,
+            "deadline": job.deadline,
+            "match_score": job.match_score,
+            "match_reason": job.match_reason,
+            "resume_advice": job.resume_advice,
+            "risks": job.risks,
+        }
+
+    def _merge_job_items(
+        self,
+        existing: list[JobItem],
+        incoming: list[JobItem],
+    ) -> list[JobItem]:
+        """Merge extracted jobs while preserving unique source URLs."""
+        merged: list[JobItem] = []
+        seen: set[str] = set()
+        for job in [*existing, *incoming]:
+            key = self._job_dedupe_key(job)
+            if key in seen:
+                continue
+            seen.add(key)
+            merged.append(job)
+        return merged
+
+    @staticmethod
+    def _job_dedupe_key(job: JobItem) -> str:
+        url = (job.source_url or "").strip().lower()
+        if url and url != "未确认":
+            return f"url:{url}"
+        return f"text:{job.company.strip().lower()}|{job.title.strip().lower()}"
+
+    @staticmethod
+    def _is_job_search_task(task: TodoItem) -> bool:
+        """Return True for tasks whose purpose is finding concrete job/JD links."""
+
+        text = f"{task.title} {task.intent}"
+        return "岗位搜索" in text or ("岗位" in text and "搜索" in text)
+
+    @staticmethod
+    def _is_job_extraction_task(task: TodoItem) -> bool:
+        """Return True for tasks likely to contain concrete jobs or JD details."""
+
+        text = f"{task.title} {task.intent} {task.query}"
+        return any(
+            keyword in text
+            for keyword in (
+                "岗位搜索",
+                "JD要求",
+                "JD分析",
+                "招聘JD",
+                "岗位要求",
+                "职位描述",
+                "任职要求",
+            )
+        )
+
     def _persist_final_report(self, state: SummaryState, report: str) -> dict[str, Any] | None:
         if not self.note_tool or not report or not report.strip():
             return None
 
-        note_title = f"研究报告：{state.research_topic}".strip() or "研究报告"
-        tags = ["deep_research", "report"]
+        note_title = f"找实习行动报告：{state.research_topic}".strip() or "找实习行动报告"
+        tags = ["internship_agent", "report"]
         content = report.strip()
 
         note_id = self._find_existing_report_note_id(state)
         response = ""
 
         if note_id:
-            response = self.note_tool.run(
+            response = self._run_note_tool_text(
                 {
                     "action": "update",
                     "note_id": note_id,
@@ -470,7 +673,7 @@ class DeepResearchAgent:
                 note_id = None
 
         if not note_id:
-            response = self.note_tool.run(
+            response = self._run_note_tool_text(
                 {
                     "action": "create",
                     "title": note_title,
@@ -502,6 +705,12 @@ class DeepResearchAgent:
 
         return payload
 
+    def _run_note_tool_text(self, parameters: dict[str, Any]) -> str:
+        response = self.note_tool.run(parameters) if self.note_tool else None
+        if hasattr(response, "text"):
+            return str(response.text)
+        return str(response or "")
+
     def _find_existing_report_note_id(self, state: SummaryState) -> str | None:
         if state.report_note_id:
             return state.report_note_id
@@ -521,7 +730,10 @@ class DeepResearchAgent:
             note_type = parameters.get("note_type")
             if note_type != "conclusion":
                 title = parameters.get("title")
-                if not (isinstance(title, str) and title.startswith("研究报告")):
+                if not (
+                    isinstance(title, str)
+                    and title.startswith(("研究报告", "找实习行动报告"))
+                ):
                     continue
 
             note_id = parameters.get("note_id")

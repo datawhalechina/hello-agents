@@ -1,8 +1,14 @@
 import os
+from pathlib import Path
 from enum import Enum
 from typing import Any, Optional
 
+from dotenv import load_dotenv
 from pydantic import BaseModel, Field
+
+
+load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+load_dotenv()
 
 
 class SearchAPI(Enum):
@@ -47,9 +53,22 @@ class Configuration(BaseModel):
         description="Directory for NoteTool to persist task notes",
     )
     fetch_full_page: bool = Field(
-        default=True,
+        default=False,
         title="Fetch Full Page",
         description="Include the full page content in the search results",
+    )
+    task_concurrency: int = Field(
+        default=1,
+        title="Task Concurrency",
+        description="Maximum number of research tasks to execute concurrently",
+    )
+    cors_allow_origins: str = Field(
+        default=(
+            "http://localhost:5173,http://localhost:5174,"
+            "http://127.0.0.1:5173,http://127.0.0.1:5174"
+        ),
+        title="CORS Allow Origins",
+        description="Comma-separated list of allowed browser origins",
     )
     ollama_base_url: str = Field(
         default="http://localhost:11434",
@@ -86,6 +105,31 @@ class Configuration(BaseModel):
         title="LLM Model ID",
         description="Optional model identifier for custom OpenAI-compatible services",
     )
+    llm_timeout: int = Field(
+        default=60,
+        title="LLM Timeout",
+        description="Timeout in seconds for LLM requests",
+    )
+    llm_retry_attempts: int = Field(
+        default=2,
+        title="LLM Retry Attempts",
+        description="Number of retries for LLM rate limit errors",
+    )
+    llm_retry_base_delay: float = Field(
+        default=5.0,
+        title="LLM Retry Base Delay",
+        description="Base retry delay in seconds for LLM rate limits",
+    )
+    llm_retry_max_delay: float = Field(
+        default=20.0,
+        title="LLM Retry Max Delay",
+        description="Maximum retry delay in seconds for LLM rate limits",
+    )
+    llm_min_interval_seconds: float = Field(
+        default=2.0,
+        title="LLM Min Interval",
+        description="Minimum interval between process-local LLM calls",
+    )
 
     @classmethod
     def from_env(cls, overrides: Optional[dict[str, Any]] = None) -> "Configuration":
@@ -106,10 +150,17 @@ class Configuration(BaseModel):
             "llm_api_key": os.getenv("LLM_API_KEY"),
             "llm_model_id": os.getenv("LLM_MODEL_ID"),
             "llm_base_url": os.getenv("LLM_BASE_URL"),
+            "llm_timeout": os.getenv("LLM_TIMEOUT"),
+            "llm_retry_attempts": os.getenv("LLM_RETRY_ATTEMPTS"),
+            "llm_retry_base_delay": os.getenv("LLM_RETRY_BASE_DELAY"),
+            "llm_retry_max_delay": os.getenv("LLM_RETRY_MAX_DELAY"),
+            "llm_min_interval_seconds": os.getenv("LLM_MIN_INTERVAL_SECONDS"),
             "lmstudio_base_url": os.getenv("LMSTUDIO_BASE_URL"),
             "ollama_base_url": os.getenv("OLLAMA_BASE_URL"),
             "max_web_research_loops": os.getenv("MAX_WEB_RESEARCH_LOOPS"),
             "fetch_full_page": os.getenv("FETCH_FULL_PAGE"),
+            "task_concurrency": os.getenv("TASK_CONCURRENCY"),
+            "cors_allow_origins": os.getenv("CORS_ALLOW_ORIGINS"),
             "strip_thinking_tokens": os.getenv("STRIP_THINKING_TOKENS"),
             "use_tool_calling": os.getenv("USE_TOOL_CALLING"),
             "search_api": os.getenv("SEARCH_API"),
@@ -140,4 +191,13 @@ class Configuration(BaseModel):
         """Best-effort resolution of the model identifier to use."""
 
         return self.llm_model_id or self.local_llm
+
+    def resolved_cors_origins(self) -> list[str]:
+        """Return the configured CORS origins as a clean list."""
+
+        return [
+            origin.strip()
+            for origin in self.cors_allow_origins.split(",")
+            if origin.strip()
+        ]
 

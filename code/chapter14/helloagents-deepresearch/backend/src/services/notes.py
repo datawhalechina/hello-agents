@@ -9,6 +9,7 @@ from models import TodoItem
 
 def build_note_guidance(task: TodoItem) -> str:
     """Generate note tool usage guidance for a specific task."""
+    return "笔记协作指引：无需调用笔记工具，请直接基于检索上下文输出用户可读的总结。\n"
 
     tags_list = ["deep_research", f"task_{task.id}"]
     tags_literal = json.dumps(tags_list, ensure_ascii=False)

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sys
+from dataclasses import asdict
 from typing import Any, Dict, Iterator, Optional
 
 from fastapi import FastAPI, HTTPException
@@ -16,22 +17,13 @@ from config import Configuration, SearchAPI
 from agent import DeepResearchAgent
 
 # 添加控制台日志处理程序
+logger.remove()
 logger.add(
     sys.stderr,
     level="INFO",
     format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <4}</level> | <cyan>using_function:{function}</cyan> | <cyan>{file}:{line}</cyan> | <level>{message}</level>",
     colorize=True,
 )
-
-
-# 添加错误日志文件处理程序
-logger.add(
-    sink=sys.stderr,
-    level="ERROR",
-    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <4}</level> | <cyan>using_function:{function}</cyan> | <cyan>{file}:{line}</cyan> | <level>{message}</level>",
-    colorize=True,
-)
-
 
 class ResearchRequest(BaseModel):
     """Payload for triggering a research run."""
@@ -52,6 +44,14 @@ class ResearchResponse(BaseModel):
     todo_items: list[dict[str, Any]] = Field(
         default_factory=list,
         description="Structured TODO items with summaries and sources",
+    )
+    job_items: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Structured internship/job items with match signals",
+    )
+    search_diagnostics: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Search quality diagnostics for job/JD tasks",
     )
 
 
@@ -77,10 +77,11 @@ def _build_config(payload: ResearchRequest) -> Configuration:
 
 def create_app() -> FastAPI:
     app = FastAPI(title="HelloAgents Deep Researcher")
+    config = Configuration.from_env()
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=config.resolved_cors_origins(),
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -98,14 +99,16 @@ def create_app() -> FastAPI:
             base_url = config.llm_base_url or "unset"
 
         logger.info(
-            "DeepResearch configuration loaded: provider=%s model=%s base_url=%s search_api=%s "
-            "max_loops=%s fetch_full_page=%s tool_calling=%s strip_thinking=%s api_key=%s",
+            "DeepResearch configuration loaded: provider={} model={} base_url={} search_api={} "
+            "max_loops={} fetch_full_page={} task_concurrency={} tool_calling={} "
+            "strip_thinking={} api_key={}",
             config.llm_provider,
             config.resolved_model() or "unset",
             base_url,
             (config.search_api.value if isinstance(config.search_api, SearchAPI) else config.search_api),
             config.max_web_research_loops,
             config.fetch_full_page,
+            config.task_concurrency,
             config.use_tool_calling,
             config.strip_thinking_tokens,
             _mask_secret(config.llm_api_key),
@@ -144,6 +147,8 @@ def create_app() -> FastAPI:
         return ResearchResponse(
             report_markdown=(result.report_markdown or result.running_summary or ""),
             todo_items=todo_payload,
+            job_items=[asdict(item) for item in result.job_items],
+            search_diagnostics=result.search_diagnostics,
         )
 
     @app.post("/research/stream")

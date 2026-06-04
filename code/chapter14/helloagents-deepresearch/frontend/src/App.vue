@@ -18,21 +18,34 @@
             </svg>
           </div>
           <div>
-            <h1>深度研究助手</h1>
-            <p>结合多轮智能检索与总结，实时呈现洞见与引用。</p>
+            <h1>找实习助手</h1>
+            <p>搜索岗位和投递渠道，分析 JD 要求，生成可执行的投递建议。</p>
           </div>
         </header>
 
         <form class="form" @submit.prevent="handleSubmit">
           <label class="field">
-            <span>研究主题</span>
+            <span>求职目标</span>
             <textarea
               v-model="form.topic"
-              placeholder="例如：探索多模态模型在 2025 年的关键突破"
+              placeholder="例如：我想找 2026 暑期 Java 后端实习，城市上海/杭州，会 Spring Boot、MySQL、Redis，有一个 RAG 项目。"
               rows="4"
               required
             ></textarea>
           </label>
+
+          <section class="example-prompts" aria-label="求职目标示例">
+            <button
+              v-for="example in internshipExamples"
+              :key="example.label"
+              type="button"
+              class="example-chip"
+              :disabled="loading"
+              @click="fillExample(example.text)"
+            >
+              {{ example.label }}
+            </button>
+          </section>
 
           <section class="options">
             <label class="field option">
@@ -61,7 +74,7 @@
                 >
                   <circle cx="12" cy="12" r="9" stroke-width="3" />
                 </svg>
-                {{ loading ? "研究进行中..." : "开始研究" }}
+                {{ loading ? "正在找实习..." : "开始找实习" }}
               </span>
             </button>
             <button
@@ -70,7 +83,7 @@
               class="secondary-btn"
               @click="cancelResearch"
             >
-              取消研究
+              取消找实习
             </button>
           </div>
         </form>
@@ -84,14 +97,14 @@
           {{ error }}
         </p>
         <p v-else-if="loading" class="hint muted">
-          正在收集线索与证据，实时进展见右侧区域。
+          正在收集岗位、JD 和投递渠道线索，实时进展见右侧区域。
         </p>
       </section>
     </div>
 
     <!-- 全屏状态：左右分栏布局 -->
     <div v-else class="layout layout-fullscreen">
-      <!-- 左侧：研究信息 -->
+      <!-- 左侧：求职信息 -->
       <aside class="sidebar">
         <div class="sidebar-header">
           <button class="back-btn" @click="goBack" :disabled="loading">
@@ -100,12 +113,12 @@
             </svg>
             返回
           </button>
-          <h2>🔍 深度研究助手</h2>
+          <h2>找实习助手</h2>
         </div>
 
         <div class="research-info">
           <div class="info-item">
-            <label>研究主题</label>
+            <label>求职目标</label>
             <p class="topic-display">{{ form.topic }}</p>
           </div>
 
@@ -115,7 +128,7 @@
           </div>
 
           <div class="info-item" v-if="totalTasks > 0">
-            <label>研究进度</label>
+            <label>找实习进度</label>
             <div class="progress-bar">
               <div class="progress-fill" :style="{ width: `${(completedTasks / totalTasks) * 100}%` }"></div>
             </div>
@@ -128,12 +141,12 @@
             <svg viewBox="0 0 24 24" width="18" height="18">
               <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
             </svg>
-            开始新研究
+            开始新的求职分析
           </button>
         </div>
       </aside>
 
-      <!-- 右侧：研究结果 -->
+      <!-- 右侧：求职分析结果 -->
       <section
         class="panel panel-result"
         v-if="todoTasks.length || reportMarkdown || progressLogs.length"
@@ -142,7 +155,7 @@
           <div class="status-main">
             <div class="status-chip" :class="{ active: loading }">
               <span class="dot"></span>
-              {{ loading ? "研究进行中" : "研究流程完成" }}
+              {{ loading ? "正在找实习" : "找实习流程完成" }}
             </div>
             <span class="status-meta">
               任务进度：{{ completedTasks }} / {{ totalTasks || todoTasks.length || 1 }}
@@ -164,6 +177,169 @@
             </li>
           </transition-group>
         </div>
+
+        <section
+          class="job-workbench"
+          :class="{ 'block-highlight': jobHighlight }"
+          v-if="jobItems.length || (!loading && (todoTasks.length || reportMarkdown))"
+        >
+          <div class="block-header">
+            <div>
+              <h3>推荐岗位清单</h3>
+              <p class="muted">
+                基于当前求职目标和公开来源抽取，重要信息请点开来源核验。
+              </p>
+            </div>
+            <span class="job-count">{{ jobItems.length }} 个岗位线索</span>
+          </div>
+
+          <section v-if="latestSearchDiagnostics" class="diagnostics-panel">
+            <div class="diagnostics-head">
+              <div>
+                <h4>搜索质量诊断</h4>
+                <p class="muted">
+                  {{ latestSearchDiagnostics.backend }} · {{ latestSearchDiagnostics.taskTitle }}
+                </p>
+              </div>
+              <span class="diagnostics-score">
+                {{ latestSearchDiagnostics.counts.reliable }} / {{ latestSearchDiagnostics.counts.raw }} 可靠来源
+              </span>
+            </div>
+
+            <div class="diagnostics-metrics">
+              <span>原始结果：{{ totalDiagnosticCounts.raw }}</span>
+              <span>可靠岗位：{{ totalDiagnosticCounts.reliable }}</span>
+              <span>已过滤：{{ totalDiagnosticCounts.filtered }}</span>
+            </div>
+
+            <p class="diagnostics-suggestion">
+              {{ latestSearchDiagnostics.suggestion }}
+            </p>
+
+            <div v-if="diagnosticReasonEntries.length" class="reason-row">
+              <span
+                v-for="[reason, count] in diagnosticReasonEntries"
+                :key="reason"
+              >
+                {{ formatRejectReason(reason) }} × {{ count }}
+              </span>
+            </div>
+          </section>
+
+          <div v-if="jobItems.length" class="job-workbench-grid">
+            <aside class="job-list" aria-label="推荐岗位列表">
+              <button
+                v-for="job in jobItems"
+                :key="job.id"
+                type="button"
+                class="job-list-item"
+                :class="{ active: activeJobId === job.id }"
+                @click="activeJobId = job.id"
+              >
+                <span class="job-list-title">{{ job.title }}</span>
+                <span class="job-list-meta">
+                  {{ job.company }} · {{ job.location }}
+                </span>
+                <span
+                  class="score-badge"
+                  :class="{ pending: job.matchScore === null }"
+                >
+                  {{ formatMatchScore(job.matchScore) }}
+                </span>
+              </button>
+            </aside>
+
+            <article class="job-detail" v-if="activeJob">
+              <header class="job-detail-head">
+                <div>
+                  <h4>{{ activeJob.title }}</h4>
+                  <p class="muted">
+                    {{ activeJob.company }} · {{ activeJob.location }}
+                  </p>
+                </div>
+                <span
+                  class="score-badge large"
+                  :class="{ pending: activeJob.matchScore === null }"
+                >
+                  {{ formatMatchScore(activeJob.matchScore) }}
+                </span>
+              </header>
+
+              <div class="job-facts">
+                <span>实习周期：{{ activeJob.duration }}</span>
+                <span>截止日期：{{ activeJob.deadline }}</span>
+                <a
+                  v-if="validJobSourceUrl(activeJob.sourceUrl)"
+                  :href="activeJob.sourceUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  查看来源：{{ activeJob.sourceTitle }}
+                </a>
+                <span v-else>来源：未确认</span>
+              </div>
+
+              <section class="job-detail-section">
+                <h5>JD要求</h5>
+                <ul v-if="activeJob.requirements.length">
+                  <li v-for="item in activeJob.requirements" :key="item">
+                    {{ item }}
+                  </li>
+                </ul>
+                <p v-else class="muted">暂无可靠信息</p>
+              </section>
+
+              <section class="job-detail-section">
+                <h5>岗位职责</h5>
+                <ul v-if="activeJob.responsibilities.length">
+                  <li v-for="item in activeJob.responsibilities" :key="item">
+                    {{ item }}
+                  </li>
+                </ul>
+                <p v-else class="muted">暂无可靠信息</p>
+              </section>
+
+              <section class="job-detail-section">
+                <h5>技术栈</h5>
+                <div v-if="activeJob.techStack.length" class="tag-row">
+                  <span v-for="item in activeJob.techStack" :key="item">
+                    {{ item }}
+                  </span>
+                </div>
+                <p v-else class="muted">暂无可靠信息</p>
+              </section>
+
+              <section class="job-detail-section">
+                <h5>匹配理由</h5>
+                <p>{{ activeJob.matchReason }}</p>
+              </section>
+
+              <section class="job-detail-section">
+                <h5>简历建议</h5>
+                <ul v-if="activeJob.resumeAdvice.length">
+                  <li v-for="item in activeJob.resumeAdvice" :key="item">
+                    {{ item }}
+                  </li>
+                </ul>
+                <p v-else class="muted">暂无可靠信息</p>
+              </section>
+
+              <section class="job-detail-section">
+                <h5>风险与待确认</h5>
+                <ul v-if="activeJob.risks.length">
+                  <li v-for="item in activeJob.risks" :key="item">
+                    {{ item }}
+                  </li>
+                </ul>
+                <p v-else class="muted">暂无可靠信息</p>
+              </section>
+            </article>
+          </div>
+
+          <p v-else class="muted job-empty">
+            暂未找到可靠岗位/JD链接。{{ latestSearchDiagnostics?.suggestion || "请调整求职目标或切换搜索引擎后重试。" }}
+          </p>
+        </section>
 
         <div class="tasks-section" v-if="todoTasks.length">
           <aside class="tasks-list">
@@ -237,7 +413,17 @@
               class="sources-block"
               :class="{ 'block-highlight': sourcesHighlight }"
             >
-              <h3>最新来源</h3>
+              <div class="block-header">
+                <h3>岗位/JD/渠道来源</h3>
+                <button
+                  type="button"
+                  class="secondary-btn compact-btn"
+                  :disabled="!currentTaskSourcesText"
+                  @click="copyCurrentTaskSources"
+                >
+                  复制当前来源
+                </button>
+              </div>
               <template v-if="currentTaskSources.length">
                 <ul class="sources-list">
                   <li
@@ -260,14 +446,14 @@
                   </li>
                 </ul>
               </template>
-              <p v-else class="muted">暂无可用来源</p>
+              <p v-else class="muted">暂无岗位/JD/渠道来源，可以调整求职目标或切换搜索引擎后重试。</p>
             </section>
 
             <section
               class="summary-block"
               :class="{ 'block-highlight': summaryHighlight }"
             >
-              <h3>任务总结</h3>
+              <h3>岗位分析</h3>
               <pre class="block-pre">{{ currentTaskSummary || "暂无可用信息" }}</pre>
             </section>
 
@@ -326,7 +512,17 @@
           class="report-block"
           :class="{ 'block-highlight': reportHighlight }"
         >
-          <h3>最终报告</h3>
+          <div class="block-header">
+            <h3>找实习行动报告</h3>
+            <button
+              type="button"
+              class="secondary-btn compact-btn"
+              :disabled="!reportMarkdown"
+              @click="copyReport"
+            >
+              复制报告
+            </button>
+          </div>
           <pre class="block-pre">{{ reportMarkdown }}</pre>
         </div>
       </section>
@@ -376,6 +572,45 @@ interface TodoTaskView {
   toolCalls: ToolCallLog[];
 }
 
+interface JobItemView {
+  id: string;
+  company: string;
+  title: string;
+  location: string;
+  sourceUrl: string;
+  sourceTitle: string;
+  requirements: string[];
+  responsibilities: string[];
+  techStack: string[];
+  duration: string;
+  deadline: string;
+  matchScore: number | null;
+  matchReason: string;
+  resumeAdvice: string[];
+  risks: string[];
+}
+
+interface SearchDiagnosticsView {
+  taskId: number;
+  taskTitle: string;
+  backend: string;
+  query: string;
+  finalQuery: string;
+  retryQuery: string | null;
+  counts: {
+    raw: number;
+    reliable: number;
+    filtered: number;
+  };
+  rejectReasons: Record<string, number>;
+  rejectedSamples: Array<{
+    title: string;
+    url: string;
+    reason: string;
+  }>;
+  suggestion: string;
+}
+
 const form = reactive({
   topic: "",
   searchApi: ""
@@ -389,12 +624,16 @@ const isExpanded = ref(false);
 
 const todoTasks = ref<TodoTaskView[]>([]);
 const activeTaskId = ref<number | null>(null);
+const jobItems = ref<JobItemView[]>([]);
+const activeJobId = ref<string | null>(null);
+const searchDiagnostics = ref<SearchDiagnosticsView[]>([]);
 const reportMarkdown = ref("");
 
 const summaryHighlight = ref(false);
 const sourcesHighlight = ref(false);
 const reportHighlight = ref(false);
 const toolHighlight = ref(false);
+const jobHighlight = ref(false);
 
 let currentController: AbortController | null = null;
 
@@ -406,11 +645,27 @@ const searchOptions = [
   "searxng"
 ];
 
+const internshipExamples = [
+  {
+    label: "Java 后端实习",
+    text: "我想找 2026 暑期 Java 后端实习，城市上海/杭州，会 Spring Boot、MySQL、Redis，有一个 RAG 项目。"
+  },
+  {
+    label: "AI 应用实习",
+    text: "我想找 2026 暑期 AI 应用开发实习，城市北京/上海/远程，会 Python、FastAPI、LLM、RAG，有 Agent 项目经验。"
+  },
+  {
+    label: "前端实习",
+    text: "我想找 2026 暑期前端开发实习，城市杭州/上海，会 Vue、TypeScript、Vite，做过一个后台管理系统项目。"
+  }
+];
+
 const TASK_STATUS_LABEL: Record<string, string> = {
   pending: "待执行",
   in_progress: "进行中",
   completed: "已完成",
-  skipped: "已跳过"
+  skipped: "已跳过",
+  failed: "失败"
 };
 
 function formatTaskStatus(status: string): string {
@@ -434,11 +689,43 @@ const currentTaskSummary = computed(() => currentTask.value?.summary ?? "");
 const currentTaskTitle = computed(() => currentTask.value?.title ?? "");
 const currentTaskIntent = computed(() => currentTask.value?.intent ?? "");
 const currentTaskQuery = computed(() => currentTask.value?.query ?? "");
+const currentTaskSourcesText = computed(
+  () => currentTask.value?.sourcesSummary ?? ""
+);
 const currentTaskNoteId = computed(() => currentTask.value?.noteId ?? "");
 const currentTaskNotePath = computed(() => currentTask.value?.notePath ?? "");
 const currentTaskToolCalls = computed(
   () => currentTask.value?.toolCalls ?? []
 );
+const activeJob = computed(() => {
+  if (activeJobId.value) {
+    return jobItems.value.find((job) => job.id === activeJobId.value) ?? null;
+  }
+  return jobItems.value[0] ?? null;
+});
+const latestSearchDiagnostics = computed(
+  () => searchDiagnostics.value[searchDiagnostics.value.length - 1] ?? null
+);
+const totalDiagnosticCounts = computed(() =>
+  searchDiagnostics.value.reduce(
+    (acc, item) => {
+      acc.raw += item.counts.raw;
+      acc.reliable += item.counts.reliable;
+      acc.filtered += item.counts.filtered;
+      return acc;
+    },
+    { raw: 0, reliable: 0, filtered: 0 }
+  )
+);
+const diagnosticReasonEntries = computed(() => {
+  const reasons: Record<string, number> = {};
+  for (const item of searchDiagnostics.value) {
+    for (const [reason, count] of Object.entries(item.rejectReasons)) {
+      reasons[reason] = (reasons[reason] ?? 0) + count;
+    }
+  }
+  return Object.entries(reasons).sort((a, b) => b[1] - a[1]);
+});
 
 const pulse = (flag: typeof summaryHighlight) => {
   flag.value = false;
@@ -582,6 +869,181 @@ function ensureRecord(value: unknown): Record<string, unknown> {
   return {};
 }
 
+function extractStringList(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => (typeof item === "string" ? item.trim() : ""))
+      .filter(Boolean);
+  }
+  if (typeof value === "string" && value.trim()) {
+    return [value.trim()];
+  }
+  return [];
+}
+
+function extractScore(value: unknown): number | null {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+  const score = Number(value);
+  if (!Number.isFinite(score)) {
+    return null;
+  }
+  return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+function extractNumber(value: unknown): number {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? Math.max(0, Math.round(numberValue)) : 0;
+}
+
+function normalizeSearchDiagnostics(value: unknown): SearchDiagnosticsView | null {
+  const item = ensureRecord(value);
+  const counts = ensureRecord(item.counts);
+  const rejectReasonsRaw = ensureRecord(item.reject_reasons);
+  const rejectReasons: Record<string, number> = {};
+  for (const [reason, count] of Object.entries(rejectReasonsRaw)) {
+    rejectReasons[reason] = extractNumber(count);
+  }
+
+  return {
+    taskId: extractNumber(item.task_id),
+    taskTitle: extractOptionalString(item.task_title) || "岗位搜索",
+    backend: extractOptionalString(item.backend) || "unknown",
+    query: extractOptionalString(item.query) || "",
+    finalQuery: extractOptionalString(item.final_query) || "",
+    retryQuery: extractOptionalString(item.retry_query),
+    counts: {
+      raw: extractNumber(counts.raw),
+      reliable: extractNumber(counts.reliable),
+      filtered: extractNumber(counts.filtered)
+    },
+    rejectReasons,
+    rejectedSamples: Array.isArray(item.rejected_samples)
+      ? item.rejected_samples.map((sample) => {
+          const record = ensureRecord(sample);
+          return {
+            title: extractOptionalString(record.title) || "",
+            url: extractOptionalString(record.url) || "",
+            reason: extractOptionalString(record.reason) || "unknown"
+          };
+        })
+      : [],
+    suggestion:
+      extractOptionalString(item.suggestion) ||
+      "请调整求职目标或切换搜索引擎后重试。"
+  };
+}
+
+function applySearchDiagnosticsPayload(value: unknown, replace = false) {
+  if (replace) {
+    searchDiagnostics.value = [];
+  }
+
+  const values = Array.isArray(value) ? value : [value];
+  const parsed = values
+    .map((item) => normalizeSearchDiagnostics(item))
+    .filter((item): item is SearchDiagnosticsView => Boolean(item));
+  if (!parsed.length) {
+    return;
+  }
+
+  const byTaskId = new Map<number, SearchDiagnosticsView>();
+  for (const item of [...searchDiagnostics.value, ...parsed]) {
+    byTaskId.set(item.taskId, item);
+  }
+  searchDiagnostics.value = Array.from(byTaskId.values());
+}
+
+function formatRejectReason(reason: string): string {
+  const labels: Record<string, string> = {
+    tutorial_or_blog: "教程/博客",
+    interview_noise: "面经/面试",
+    not_job_url: "非招聘页",
+    missing_jd_terms: "缺少JD特征",
+    empty_result: "空结果"
+  };
+  return labels[reason] ?? reason;
+}
+
+function normalizeJobItem(value: unknown, index: number): JobItemView | null {
+  const item = ensureRecord(value);
+  const id =
+    extractOptionalString(item.id) ||
+    extractOptionalString(item.source_url) ||
+    `job-${index + 1}`;
+  const title = extractOptionalString(item.title) || "未确认";
+  const company = extractOptionalString(item.company) || "未确认";
+  const sourceUrl = extractOptionalString(item.source_url) || "";
+  const sourceTitle = extractOptionalString(item.source_title) || title;
+
+  if (title === "未确认" && company === "未确认" && !sourceUrl) {
+    return null;
+  }
+
+  return {
+    id,
+    company,
+    title,
+    location: extractOptionalString(item.location) || "未确认",
+    sourceUrl,
+    sourceTitle,
+    requirements: extractStringList(item.requirements),
+    responsibilities: extractStringList(item.responsibilities),
+    techStack: extractStringList(item.tech_stack),
+    duration: extractOptionalString(item.duration) || "未确认",
+    deadline: extractOptionalString(item.deadline) || "未确认",
+    matchScore: extractScore(item.match_score),
+    matchReason:
+      extractOptionalString(item.match_reason) || "信息不足，需点开来源确认",
+    resumeAdvice: extractStringList(item.resume_advice),
+    risks: extractStringList(item.risks)
+  };
+}
+
+function mergeJobItems(incoming: JobItemView[]) {
+  const seen = new Set<string>();
+  const merged: JobItemView[] = [];
+  for (const job of [...jobItems.value, ...incoming]) {
+    const key = job.sourceUrl || `${job.company}|${job.title}|${job.id}`;
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    merged.push(job);
+  }
+  jobItems.value = merged;
+  if (!activeJobId.value && merged.length) {
+    activeJobId.value = merged[0].id;
+  }
+}
+
+function applyJobPayload(value: unknown, replace = false) {
+  if (!Array.isArray(value)) {
+    return;
+  }
+  if (replace) {
+    jobItems.value = [];
+    activeJobId.value = null;
+  }
+  const parsed = value
+    .map((item, index) => normalizeJobItem(item, index))
+    .filter((item): item is JobItemView => Boolean(item));
+  if (!parsed.length) {
+    return;
+  }
+  mergeJobItems(parsed);
+  pulse(jobHighlight);
+}
+
+function formatMatchScore(score: number | null): string {
+  return score === null ? "待确认" : `${score} 分`;
+}
+
+function validJobSourceUrl(url: string): boolean {
+  return /^https?:\/\//.test(url);
+}
+
 function applyNoteMetadata(
   task: TodoTaskView,
   payload: Record<string, unknown>
@@ -621,14 +1083,42 @@ async function copyNotePath(path: string | null | undefined) {
     return;
   }
 
+  await copyText(path, `已复制笔记路径：${path}`, "复制以下笔记路径");
+}
+
+async function copyReport() {
+  await copyText(reportMarkdown.value, "已复制找实习行动报告", "复制以下报告内容");
+}
+
+async function copyCurrentTaskSources() {
+  const title = currentTaskTitle.value || "当前任务";
+  await copyText(
+    currentTaskSourcesText.value,
+    `已复制来源：${title}`,
+    "复制以下来源内容"
+  );
+}
+
+async function copyText(text: string | null | undefined, successLog: string, promptTitle: string) {
+  if (!text) {
+    return;
+  }
+
   try {
-    await navigator.clipboard.writeText(path);
-    progressLogs.value.push(`已复制笔记路径：${path}`);
+    await navigator.clipboard.writeText(text);
+    progressLogs.value.push(successLog);
   } catch (error) {
     console.warn("无法直接复制到剪贴板", error);
-    window.prompt("复制以下笔记路径", path);
-    progressLogs.value.push("请手动复制笔记路径");
+    window.prompt(promptTitle, text);
+    progressLogs.value.push("请手动复制内容");
   }
+}
+
+function fillExample(text: string) {
+  if (loading.value) {
+    return;
+  }
+  form.topic = text;
 }
 
 function resetWorkflowState() {
@@ -640,6 +1130,10 @@ function resetWorkflowState() {
   sourcesHighlight.value = false;
   reportHighlight.value = false;
   toolHighlight.value = false;
+  jobHighlight.value = false;
+  jobItems.value = [];
+  activeJobId.value = null;
+  searchDiagnostics.value = [];
   logsCollapsed.value = false;
 }
 
@@ -670,7 +1164,7 @@ function upsertTaskMetadata(task: TodoTaskView, payload: Record<string, unknown>
 
 const handleSubmit = async () => {
   if (!form.topic.trim()) {
-    error.value = "请输入研究主题";
+    error.value = "请输入求职目标";
     return;
   }
 
@@ -811,6 +1305,12 @@ const handleSubmit = async () => {
             }
           } else if (status === "skipped") {
             progressLogs.value.push(`任务跳过：${task.title}`);
+          } else if (status === "failed") {
+            const detail =
+              typeof event.detail === "string" && event.detail.trim()
+                ? `：${event.detail.trim()}`
+                : "";
+            progressLogs.value.push(`任务失败：${task.title}${detail}`);
           }
           return;
         }
@@ -918,14 +1418,38 @@ const handleSubmit = async () => {
           return;
         }
 
+        if (event.type === "search_diagnostics") {
+          const payload = event as Record<string, unknown>;
+          applySearchDiagnosticsPayload(payload.diagnostics);
+          const latest = latestSearchDiagnostics.value;
+          if (latest) {
+            progressLogs.value.push(
+              `搜索诊断：${latest.counts.reliable}/${latest.counts.raw} 个可靠来源`
+            );
+          }
+          return;
+        }
+
+        if (event.type === "job_items") {
+          const payload = event as Record<string, unknown>;
+          applyJobPayload(payload.all_jobs || payload.jobs, Boolean(payload.all_jobs));
+          if (jobItems.value.length) {
+            progressLogs.value.push(`已更新推荐岗位清单：${jobItems.value.length} 个`);
+          }
+          return;
+        }
+
         if (event.type === "final_report") {
+          const payload = event as Record<string, unknown>;
+          applyJobPayload(payload.job_items, true);
+          applySearchDiagnosticsPayload(payload.search_diagnostics, true);
           const report =
             typeof event.report === "string" && event.report.trim()
               ? event.report.trim()
               : "";
           reportMarkdown.value = report || "报告生成失败，未获得有效内容";
           pulse(reportHighlight);
-          progressLogs.value.push("最终报告已生成");
+          progressLogs.value.push("找实习行动报告已生成");
           return;
         }
 
@@ -933,9 +1457,9 @@ const handleSubmit = async () => {
           const detail =
             typeof event.detail === "string" && event.detail.trim()
               ? event.detail
-              : "研究过程中发生错误";
+              : "找实习过程中发生错误";
           error.value = detail;
-          progressLogs.value.push("研究失败，已停止流程");
+          progressLogs.value.push("找实习流程失败，已停止");
         }
       },
       { signal: controller.signal }
@@ -946,7 +1470,7 @@ const handleSubmit = async () => {
     }
   } catch (err) {
     if (err instanceof DOMException && err.name === "AbortError") {
-      progressLogs.value.push("已取消当前研究任务");
+      progressLogs.value.push("已取消当前找实习任务");
     } else {
       error.value = err instanceof Error ? err.message : "请求失败";
     }
@@ -968,7 +1492,7 @@ const cancelResearch = () => {
 
 const goBack = () => {
   if (loading.value) {
-    return; // 研究进行中不允许返回
+    return; // 找实习流程进行中不允许返回
   }
   isExpanded.value = false;
 };
@@ -1178,6 +1702,35 @@ onBeforeUnmount(() => {
   color: #475569;
 }
 
+.example-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.example-chip {
+  border: 1px solid rgba(59, 130, 246, 0.28);
+  background: rgba(219, 234, 254, 0.45);
+  color: #1e40af;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.example-chip:hover:not(:disabled) {
+  background: rgba(191, 219, 254, 0.72);
+  border-color: rgba(37, 99, 235, 0.45);
+  transform: translateY(-1px);
+}
+
+.example-chip:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 textarea,
 input,
 select {
@@ -1275,6 +1828,17 @@ select:focus {
   background: rgba(148, 163, 184, 0.2);
   border-color: rgba(148, 163, 184, 0.35);
   color: #0f172a;
+}
+
+.secondary-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.compact-btn {
+  padding: 7px 12px;
+  border-radius: 12px;
+  font-size: 12px;
 }
 
 .error-chip {
@@ -1433,6 +1997,257 @@ select:focus {
   transform: translateY(-6px);
 }
 
+.job-workbench {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  border-radius: 18px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.job-workbench h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.job-count {
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(191, 219, 254, 0.32);
+  border: 1px solid rgba(59, 130, 246, 0.28);
+  color: #1e3a8a;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.diagnostics-panel {
+  padding: 16px;
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  border-radius: 16px;
+  background: rgba(239, 246, 255, 0.62);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.diagnostics-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.diagnostics-head h4 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  color: #1f2937;
+}
+
+.diagnostics-score {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.diagnostics-metrics,
+.reason-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.diagnostics-metrics span,
+.reason-row span {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.diagnostics-suggestion {
+  margin: 0;
+  color: #1f2937;
+  line-height: 1.7;
+}
+
+.job-workbench-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.job-list-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 10px;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.86);
+  color: #1f2937;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.job-list-item.active,
+.job-list-item:hover {
+  border-color: rgba(59, 130, 246, 0.42);
+  background: rgba(219, 234, 254, 0.5);
+}
+
+.job-list-title {
+  grid-column: 1 / -1;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.job-list-meta {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.score-badge {
+  align-self: start;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.16);
+  color: #15803d;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.score-badge.pending {
+  background: rgba(148, 163, 184, 0.18);
+  color: #475569;
+}
+
+.score-badge.large {
+  padding: 7px 12px;
+  font-size: 13px;
+}
+
+.job-detail {
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 16px;
+  padding: 18px;
+  background: rgba(248, 250, 252, 0.82);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.job-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.job-detail h4,
+.job-detail h5 {
+  margin: 0;
+  color: #1f2937;
+}
+
+.job-detail h4 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.job-detail h5 {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.job-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.job-facts span,
+.job-facts a {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: #475569;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.job-facts a {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.job-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.job-detail-section p {
+  margin: 0;
+  color: #1f2937;
+  line-height: 1.7;
+}
+
+.job-detail-section ul {
+  margin: 0 0 0 18px;
+  padding: 0;
+  color: #1f2937;
+  line-height: 1.7;
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-row span {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(219, 234, 254, 0.7);
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.job-empty {
+  margin: 0;
+  padding: 14px;
+  border: 1px dashed rgba(148, 163, 184, 0.45);
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.7);
+}
+
 .tasks-section {
   display: grid;
   grid-template-columns: 280px 1fr;
@@ -1441,6 +2256,10 @@ select:focus {
 }
 
 @media (max-width: 960px) {
+  .job-workbench-grid {
+    grid-template-columns: 1fr;
+  }
+
   .tasks-section {
     grid-template-columns: 1fr;
   }
@@ -1539,6 +2358,11 @@ select:focus {
 .task-status.skipped {
   background: rgba(248, 113, 113, 0.18);
   color: #b91c1c;
+}
+
+.task-status.failed {
+  background: rgba(239, 68, 68, 0.18);
+  color: #991b1b;
 }
 
 .task-intent {
@@ -1682,6 +2506,19 @@ select:focus {
   font-size: 18px;
   font-weight: 600;
   color: #1f2937;
+}
+
+.block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.block-header h3 {
+  margin: 0;
 }
 
 .block-pre {
@@ -1928,6 +2765,11 @@ select:focus {
   margin: 0 0 14px;
   color: #1f2937;
   letter-spacing: 0.02em;
+}
+
+.sources-block .block-header h3,
+.report-block .block-header h3 {
+  margin: 0;
 }
 
 .sources-list {

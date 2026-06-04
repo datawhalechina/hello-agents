@@ -28,7 +28,18 @@ requires = ["setuptools>=73.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["src"]
+py-modules = [
+    "agent",
+    "config",
+    "main",
+    "models",
+    "note_tool",
+    "prompts",
+    "search_tool",
+    "tool_aware_agent",
+    "utils",
+]
+packages = ["services"]
 
 [tool.setuptools.package-dir]
 "" = "src"
