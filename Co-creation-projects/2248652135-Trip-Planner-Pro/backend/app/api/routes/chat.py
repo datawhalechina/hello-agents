@@ -9,7 +9,7 @@ from ...database import (
     update_chat_session_title
 )
 from ...services.travel_chat_service import get_travel_chat_service
-from ...services.user_profile_service import get_profile_context, extract_and_update_profile, get_cross_session_context
+from ...services.user_profile_service import load_profile_text, extract_and_update_profile, get_cross_session_context
 from .auth import require_auth
 
 router = APIRouter(prefix="/chat", tags=["旅游AI对话"])
@@ -95,14 +95,21 @@ async def send_message(session_id: int, req: ChatSendMessageRequest, request: Re
     # 2. 获取历史消息（作为上下文）
     history = get_chat_messages(session_id)
 
-    # 3. 获取用户画像上下文（传入 session_id 启用会话级快照，保证 LLM prompt cache 命中）
-    profile_context = get_profile_context(user["id"], session_id=session_id)
-    if profile_context:
-        print(f"  👤 用户 {user['id']} 已加载画像上下文")
+    # 3. 如果是会话首条消息，加载用户画像并包装为 XML 标签用户消息
+    profile_message = ""
+    if len(history) <= 1:
+        profile_text = load_profile_text(user["id"])
+        if profile_text:
+            profile_message = (
+                f"<user_profile>\n{profile_text}\n"
+                f"（注意：如果我现在说的与上述偏好不一致，请以我当前说的为准。）\n"
+                f"</user_profile>"
+            )
+            print(f"  👤 用户 {user['id']} 已加载画像上下文")
 
     # 4. 返回流式响应
     return StreamingResponse(
-        _stream_ai_response(user["id"], session_id, content, history, profile_context),
+        _stream_ai_response(user["id"], session_id, content, history, profile_message),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
@@ -112,17 +119,17 @@ async def send_message(session_id: int, req: ChatSendMessageRequest, request: Re
     )
 
 
-async def _stream_ai_response(user_id: int, session_id: int, content: str, history: list, profile_context: str = ""):
+async def _stream_ai_response(user_id: int, session_id: int, content: str, history: list, profile_message: str = ""):
     """流式生成AI回复的SSE事件"""
     travel_chat = get_travel_chat_service()
     full_response = ""
 
     try:
-        # 获取流式生成器（携带用户画像上下文）
+        # 获取流式生成器（携带用户画像消息）
         stream = travel_chat.chat_stream(
             user_message=content,
             history=history[:-1],  # 排除刚保存的最后一条
-            profile_context=profile_context,
+            profile_message=profile_message,
         )
 
         for chunk in stream:
