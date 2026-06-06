@@ -15,6 +15,13 @@ export interface StreamOptions {
   signal?: AbortSignal;
 }
 
+export class StreamInterruptedError extends Error {
+  constructor(message = "找实习连接中断，尚未收到完成信号") {
+    super(message);
+    this.name = "StreamInterruptedError";
+  }
+}
+
 export interface JobApplicationPayload {
   id?: string | null;
   company: string;
@@ -121,6 +128,32 @@ export async function runResearchStream(
   const reader = body.getReader();
   const decoder = new TextDecoder("utf-8");
   let buffer = "";
+  let receivedTerminalEvent = false;
+
+  const handleRawEvent = (rawEvent: string): boolean => {
+    if (!rawEvent.startsWith("data:")) {
+      return false;
+    }
+
+    const dataPayload = rawEvent.slice(5).trim();
+    if (!dataPayload) {
+      return false;
+    }
+
+    try {
+      const event = JSON.parse(dataPayload) as ResearchStreamEvent;
+      onEvent(event);
+
+      if (event.type === "error" || event.type === "done") {
+        receivedTerminalEvent = true;
+        return true;
+      }
+    } catch (error) {
+      console.error("解析流式事件失败：", error, dataPayload);
+    }
+
+    return false;
+  };
 
   while (true) {
     const { value, done } = await reader.read();
@@ -131,20 +164,8 @@ export async function runResearchStream(
       const rawEvent = buffer.slice(0, boundary).trim();
       buffer = buffer.slice(boundary + 2);
 
-      if (rawEvent.startsWith("data:")) {
-        const dataPayload = rawEvent.slice(5).trim();
-        if (dataPayload) {
-          try {
-            const event = JSON.parse(dataPayload) as ResearchStreamEvent;
-            onEvent(event);
-
-            if (event.type === "error" || event.type === "done") {
-              return;
-            }
-          } catch (error) {
-            console.error("解析流式事件失败：", error, dataPayload);
-          }
-        }
+      if (handleRawEvent(rawEvent)) {
+        return;
       }
 
       boundary = buffer.indexOf("\n\n");
@@ -153,20 +174,15 @@ export async function runResearchStream(
     if (done) {
       // 处理可能的尾巴事件
       if (buffer.trim()) {
-        const rawEvent = buffer.trim();
-        if (rawEvent.startsWith("data:")) {
-          const dataPayload = rawEvent.slice(5).trim();
-          if (dataPayload) {
-            try {
-              const event = JSON.parse(dataPayload) as ResearchStreamEvent;
-              onEvent(event);
-            } catch (error) {
-              console.error("解析流式事件失败：", error, dataPayload);
-            }
-          }
+        if (handleRawEvent(buffer.trim())) {
+          return;
         }
       }
       break;
     }
+  }
+
+  if (!receivedTerminalEvent) {
+    throw new StreamInterruptedError();
   }
 }
