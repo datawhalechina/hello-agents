@@ -1,5 +1,6 @@
 """旅游AI对话API路由（SSE流式输出）"""
 import json
+import asyncio
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from ...models.schemas import ChatSessionResponse, ChatSessionListResponse, ChatMessagesResponse, ChatSendMessageRequest, ChatDeleteResponse
@@ -141,27 +142,22 @@ async def _stream_ai_response(user_id: int, session_id: int, content: str, histo
         # 流式完成 - 保存AI回复到数据库
         add_chat_message(session_id, "assistant", full_response)
 
-        # 从用户消息中提取/更新用户画像（跨会话上下文 + 当前会话历史）
-        try:
-            cross_ctx = get_cross_session_context(user_id, max_sessions=5, max_messages=6)
-            extract_and_update_profile(
-                user_id, content, history,
-                cross_session_context=cross_ctx,
-            )
-        except Exception:
-            pass  # 画像提取失败不影响主流程
-
         # 如果是第一条消息，自动生成会话标题
         title = None
         if len(history) <= 1:
             title = _generate_title(content)
             update_chat_session_title(session_id, title)
 
-        # 发送完成事件
+        # 发送完成事件（先发送，不阻塞）
         done_event = {"type": "done"}
         if title:
             done_event["title"] = title
         yield f"data: {json.dumps(done_event, ensure_ascii=False)}\n\n"
+
+        # 后台异步执行画像提取，不阻塞主进程（SSE 流已关闭）
+        asyncio.create_task(
+            asyncio.to_thread(_run_profile_extraction, user_id, content, history)
+        )
 
     except Exception as e:
         error_msg = f"抱歉，AI暂时无法回答您的问题，请稍后重试。"
@@ -176,3 +172,18 @@ def _generate_title(user_message: str) -> str:
     if len(user_message) > 20:
         title += "..."
     return title
+
+
+def _run_profile_extraction(user_id: int, content: str, history: list):
+    """在后台线程中同步执行画像提取（不阻塞 SSE 流主进程）
+
+    由 asyncio.to_thread 调度到线程池执行，避免阻塞事件循环。
+    """
+    try:
+        cross_ctx = get_cross_session_context(user_id, max_sessions=5, max_messages=6)
+        extract_and_update_profile(
+            user_id, content, history,
+            cross_session_context=cross_ctx,
+        )
+    except Exception:
+        pass  # 画像提取失败不影响主流程

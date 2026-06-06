@@ -5,11 +5,15 @@
 - 通过文件 mtime 检测外部修改，自动刷新缓存
 - 写入时同时更新缓存和文件，保证读写一致性
 - 每条用户画像使用 frontmatter 记录元数据（更新时间、来源会话）
+
+画像提取逻辑委托给 ProfileExtractionAgent 子代理执行，
+而非直接调用 LLM，保持多智能体架构一致性。
 """
 
 import time
 from pathlib import Path
 from typing import Optional
+from ..agents.profile_extraction_agent import ProfileExtractionAgent
 from ..services.llm_service import get_llm
 from ..database import get_db
 
@@ -28,41 +32,8 @@ _session_snapshot_cache: dict[int, str] = {}
 # 缓存 TTL：300 秒（5 分钟内认为缓存新鲜，无需 stat 文件）
 _CACHE_TTL = 300
 
-# 提取画像的 LLM 提示词
-EXTRACT_PROFILE_PROMPT = """你是一个用户偏好分析专家。请根据用户的对话消息，提取该用户的旅行偏好。
-
-## 核心规则
-1. 只从「用户消息」中提取用户**自己表达**的偏好，不要提取AI助手的建议或推荐
-2. 如果用户消息需要结合对话历史才能理解（如"好的"、"这个不错"、"是的"），参考上下文来推断用户偏好
-3. 不要提取一次性信息（如"明天去故宫"），只提取稳定的偏好特征（如"喜欢历史文化景点"）
-4. 每条控制在20字以内，总条目不超过8条
-5. 宁缺毋滥，只输出有明显依据的偏好
-
-## 冲突处理（重要）
-将新提取的偏好与「已有画像」逐条对比：
-- **冲突**：如果新消息表达的偏好与某条旧画像矛盾（如"喜欢安静" vs "喜欢热闹"），删除旧条目，用新条目替代
-- **一致**：如果新消息与旧画像一致，保留旧画像条目（不重复添加）
-- **新增**：如果新消息表达了旧画像中没有的偏好，作为新条目添加
-- **无关**：如果用户消息不包含偏好信息，跳过本轮提取
-
-## 输出格式
-只输出更新后的完整画像，每行一条，以"- "开头，不要输出任何其他内容：
-
-- 偏好1
-- 偏好2
-
----
-
-已有画像：
-{existing_profile}
-
-对话历史（用于理解上下文）：
-{conversation_context}
-
-最新用户消息：{user_message}
-
-请输出更新后的完整画像：
-"""
+# 画像提取 Agent 全局实例（惰性初始化）
+_profile_extraction_agent: Optional[ProfileExtractionAgent] = None
 
 
 def _ensure_profiles_dir():
@@ -105,6 +76,16 @@ def _build_frontmatter(user_id: int) -> str:
         f"updated_at: '{now}'\n"
         f"---"
     )
+
+
+def get_profile_extraction_agent() -> ProfileExtractionAgent:
+    """获取画像提取 Agent 实例（单例，惰性初始化）"""
+    global _profile_extraction_agent
+    if _profile_extraction_agent is None:
+        llm = get_llm()
+        _profile_extraction_agent = ProfileExtractionAgent(llm)
+        print(f"  ✅ 用户画像提取 Agent 初始化成功")
+    return _profile_extraction_agent
 
 
 def _invalidate_cache(user_id: int):
@@ -237,20 +218,14 @@ def extract_and_update_profile(
 
     conversation_context = "\n".join(context_parts) if context_parts else "（无）"
 
-    # 构建提取提示
-    prompt = EXTRACT_PROFILE_PROMPT.format(
-        existing_profile=existing or "（无）",
-        conversation_context=conversation_context,
-        user_message=user_msg[:300],
-    )
-
     try:
-        llm = get_llm()
-        response = llm.invoke(messages=[{"role": "user", "content": prompt}])
-        new_profile = response.content if hasattr(response, 'content') else str(response)
+        agent = get_profile_extraction_agent()
+        new_profile = agent.extract(
+            existing_profile=existing,
+            conversation_context=conversation_context,
+            user_message=user_msg[:300],
+        )
 
-        # 清理输出
-        new_profile = new_profile.strip()
         if not new_profile:
             return
 
