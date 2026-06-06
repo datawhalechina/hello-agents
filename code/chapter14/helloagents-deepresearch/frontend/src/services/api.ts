@@ -15,6 +15,82 @@ export interface StreamOptions {
   signal?: AbortSignal;
 }
 
+export interface JobApplicationPayload {
+  id?: string | null;
+  company: string;
+  title: string;
+  location: string;
+  source_url: string;
+  source_title: string;
+  requirements: string[];
+  responsibilities: string[];
+  tech_stack: string[];
+  duration: string;
+  deadline: string;
+  match_score: number | null;
+  match_reason: string;
+  resume_advice: string[];
+  risks: string[];
+  application_status?: string | null;
+  status_note?: string | null;
+}
+
+export interface ApplicationListResponse {
+  job_items: unknown[];
+  statuses: string[];
+}
+
+async function requestJson<T>(
+  path: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const headers = new Headers(options.headers);
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  const response = await fetch(`${baseURL}${path}`, {
+    ...options,
+    headers
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => "");
+    throw new Error(errorText || `请求失败，状态码：${response.status}`);
+  }
+
+  return (await response.json()) as T;
+}
+
+export async function listApplications(): Promise<ApplicationListResponse> {
+  return requestJson<ApplicationListResponse>("/applications");
+}
+
+export async function saveApplication(
+  payload: JobApplicationPayload
+): Promise<unknown> {
+  return requestJson<unknown>("/applications", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function updateApplication(
+  id: string,
+  payload: Pick<JobApplicationPayload, "application_status" | "status_note">
+): Promise<unknown> {
+  return requestJson<unknown>(`/applications/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function deleteApplication(id: string): Promise<unknown> {
+  return requestJson<unknown>(`/applications/${encodeURIComponent(id)}`, {
+    method: "DELETE"
+  });
+}
+
 export async function runResearchStream(
   payload: ResearchRequest,
   onEvent: (event: ResearchStreamEvent) => void,

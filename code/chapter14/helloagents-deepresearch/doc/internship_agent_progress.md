@@ -1,6 +1,6 @@
 # 找实习助手 Agent 开发进度
 
-更新时间：2026-06-04
+更新时间：2026-06-05
 
 ## 当前目标
 
@@ -82,6 +82,14 @@
   - 未实现搜索后端会明确提示“已降级为 DuckDuckGo”，不再静默或英文提示。
   - `job_items` SSE 输出前会使用锁内快照，避免并发合并时读到半更新状态。
   - 前端已移除未使用的 `axios` 依赖，并更新 lockfile。
+- 已完成本地岗位保存与投递状态管理：
+  - 后端新增 `services/applications.py`，使用 `backend/data/applications.json` 保存岗位和投递状态。
+  - 新增辅助接口：`GET /applications`、`POST /applications`、`PATCH /applications/{item_id}`、`DELETE /applications/{item_id}`。
+  - 投递状态限定为：待投递、已投递、笔试、面试、拒绝、Offer、放弃。
+  - 保存岗位按来源链接生成稳定 ID；同一来源重复保存会更新岗位信息并保留已有状态。
+  - 前端岗位工作台新增“保存岗位”“更新保存”“移除”、状态下拉、备注输入和“已保存岗位”清单。
+  - 初始页会显示已保存岗位入口，刷新页面后可继续查看本地跟踪清单。
+  - 新增 `test_applications.py`，覆盖保存、去重、状态更新、状态校验和删除。
 
 ## 当前状态
 
@@ -97,7 +105,8 @@
 - 输出仍包含 `todo_items` 和 `report_markdown`。
 - 输出已兼容新增 `job_items`，旧前端或旧调用方可继续忽略该字段。
 - 输出已兼容新增 `search_diagnostics`，用于解释岗位清单质量和空结果原因。
-- 已新增 `JobItem`；暂未新增 `MatchResult`、岗位保存或投递状态模型。
+- 已新增 `JobItem`；暂未新增 `MatchResult`。
+- 岗位保存与投递状态已通过本地 JSON 和辅助 API 落地，不影响现有 `/research` 与 `/research/stream` 兼容性。
 - 后端 `.env` 已设置 `FETCH_FULL_PAGE=False` 和 `TASK_CONCURRENCY=1`，重启后生效。
 - LLM 限流容错默认生效，可通过 `.env` 调整：
   - `LLM_RETRY_ATTEMPTS=2`
@@ -119,7 +128,7 @@ cd D:\1-school\agent\14\helloagents-deepresearch\backend
 结果：
 
 ```text
-Ran 40 tests
+Ran 45 tests
 OK
 ```
 
@@ -152,6 +161,7 @@ TASK_CONCURRENCY=1
 - 尚未进行搜索诊断面板的真实 LLM + 搜索 API 完整端到端复测。
 - 尚未用真实 429 场景完整复测前端流式展示；当前已由单元测试覆盖流式 Summarizer 429 兜底。
 - 尚未拆分前端大型 `App.vue`，该项作为后续工程化任务保留。
+- 尚未将岗位保存清单升级为 SQLite 或多用户存储；当前适合单机本地开发和演示。
 
 ## 下一步
 
@@ -166,7 +176,7 @@ TASK_CONCURRENCY=1
 7. 手动切换搜索引擎重跑，比较两次诊断 JSON 中的可靠来源数量。
 8. 检查“复制当前来源”和“复制报告”是否可用。
 9. 若仍频繁触发 429，可临时提高 `LLM_MIN_INTERVAL_SECONDS` 或降低搜索/总结频率后重启后端。
-10. 后续可考虑前端组件拆分、SSE 断线重连、岗位保存、投递状态管理、简历上传匹配或模型切换配置。
+10. 后续可考虑前端组件拆分、SSE 断线重连、简历上传匹配、模型切换配置或将岗位库升级为 SQLite。
 
 推荐测试输入：
 

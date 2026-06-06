@@ -88,6 +88,20 @@
           </div>
         </form>
 
+        <section v-if="savedJobItems.length" class="saved-jobs-home">
+          <div>
+            <h2>已保存岗位</h2>
+            <p class="muted">{{ savedApplicationCount }} 个岗位正在跟踪</p>
+          </div>
+          <button
+            type="button"
+            class="secondary-btn compact-btn"
+            @click="openSavedApplications"
+          >
+            查看清单
+          </button>
+        </section>
+
         <p v-if="error" class="error-chip">
           <svg viewBox="0 0 20 20" aria-hidden="true">
             <path
@@ -149,7 +163,7 @@
       <!-- 右侧：求职分析结果 -->
       <section
         class="panel panel-result"
-        v-if="todoTasks.length || reportMarkdown || progressLogs.length"
+        v-if="todoTasks.length || reportMarkdown || progressLogs.length || savedJobItems.length"
       >
         <header class="status-bar">
           <div class="status-main">
@@ -181,7 +195,7 @@
         <section
           class="job-workbench"
           :class="{ 'block-highlight': jobHighlight }"
-          v-if="jobItems.length || (!loading && (todoTasks.length || reportMarkdown))"
+          v-if="jobItems.length || savedJobItems.length || (!loading && (todoTasks.length || reportMarkdown))"
         >
           <div class="block-header">
             <div>
@@ -190,7 +204,18 @@
                 基于当前求职目标和公开来源抽取，重要信息请点开来源核验。
               </p>
             </div>
-            <span class="job-count">{{ jobItems.length }} 个岗位线索</span>
+            <div class="job-header-actions">
+              <span class="job-count">{{ jobItems.length }} 个岗位线索</span>
+              <span class="job-count saved">{{ savedApplicationCount }} 个已保存</span>
+              <button
+                type="button"
+                class="secondary-btn compact-btn"
+                :disabled="applicationsLoading"
+                @click="refreshApplications(true)"
+              >
+                刷新保存
+              </button>
+            </div>
           </div>
 
           <section v-if="latestSearchDiagnostics" class="diagnostics-panel">
@@ -246,6 +271,12 @@
                 >
                   {{ formatMatchScore(job.matchScore) }}
                 </span>
+                <span
+                  v-if="findSavedJob(job)"
+                  class="application-badge"
+                >
+                  {{ findSavedJob(job)?.applicationStatus }}
+                </span>
               </button>
             </aside>
 
@@ -264,6 +295,64 @@
                   {{ formatMatchScore(activeJob.matchScore) }}
                 </span>
               </header>
+
+              <section class="application-panel">
+                <div class="application-panel-head">
+                  <div>
+                    <h5>投递跟踪</h5>
+                    <p class="muted">
+                      {{ activeSavedJob ? "此岗位已加入本地跟踪清单。" : "保存后可以维护投递阶段和备注。" }}
+                    </p>
+                  </div>
+                  <div class="application-actions">
+                    <button
+                      type="button"
+                      class="secondary-btn compact-btn"
+                      :disabled="applicationsLoading"
+                      @click="saveActiveJob"
+                    >
+                      {{ activeSavedJob ? "更新保存" : "保存岗位" }}
+                    </button>
+                    <button
+                      v-if="activeSavedJob"
+                      type="button"
+                      class="secondary-btn compact-btn danger"
+                      :disabled="applicationsLoading"
+                      @click="removeActiveSavedJob"
+                    >
+                      移除
+                    </button>
+                  </div>
+                </div>
+
+                <div v-if="activeSavedJob" class="application-controls">
+                  <label>
+                    <span>投递状态</span>
+                    <select
+                      :value="activeJobStatus"
+                      :disabled="applicationsLoading"
+                      @change="updateActiveJobStatus"
+                    >
+                      <option
+                        v-for="status in applicationStatuses"
+                        :key="status"
+                        :value="status"
+                      >
+                        {{ status }}
+                      </option>
+                    </select>
+                  </label>
+                  <label class="application-note-field">
+                    <span>备注</span>
+                    <input
+                      :value="activeSavedJob.statusNote"
+                      :disabled="applicationsLoading"
+                      placeholder="例如：已找学长内推、周三一面"
+                      @change="updateActiveJobNote"
+                    />
+                  </label>
+                </div>
+              </section>
 
               <div class="job-facts">
                 <span>实习周期：{{ activeJob.duration }}</span>
@@ -336,9 +425,65 @@
             </article>
           </div>
 
-          <p v-else class="muted job-empty">
+          <p v-else-if="!savedJobItems.length" class="muted job-empty">
             暂未找到可靠岗位/JD链接。{{ latestSearchDiagnostics?.suggestion || "请调整求职目标或切换搜索引擎后重试。" }}
           </p>
+
+          <section v-if="savedJobItems.length" class="saved-jobs-panel">
+            <div class="saved-jobs-head">
+              <div>
+                <h4>已保存岗位</h4>
+                <p class="muted">
+                  本地保存的投递跟踪清单，刷新页面后仍会保留。
+                </p>
+              </div>
+              <span class="job-count saved">{{ savedApplicationCount }} 个</span>
+            </div>
+
+            <ul class="saved-jobs-list">
+              <li v-for="job in savedJobItems" :key="job.id">
+                <button
+                  type="button"
+                  class="saved-job-main"
+                  @click="focusSavedJob(job)"
+                >
+                  <span class="saved-job-title">{{ job.title }}</span>
+                  <span class="saved-job-meta">
+                    {{ job.company }} · {{ job.location }}
+                  </span>
+                </button>
+                <select
+                  class="saved-job-status"
+                  :value="job.applicationStatus || applicationStatuses[0]"
+                  :disabled="applicationsLoading"
+                  @change="updateSavedJobStatus(job, $event)"
+                >
+                  <option
+                    v-for="status in applicationStatuses"
+                    :key="status"
+                    :value="status"
+                  >
+                    {{ status }}
+                  </option>
+                </select>
+                <input
+                  class="saved-job-note"
+                  :value="job.statusNote"
+                  :disabled="applicationsLoading"
+                  placeholder="备注"
+                  @change="updateSavedJobNote(job, $event)"
+                />
+                <button
+                  type="button"
+                  class="secondary-btn compact-btn danger"
+                  :disabled="applicationsLoading"
+                  @click="removeSavedJob(job)"
+                >
+                  移除
+                </button>
+              </li>
+            </ul>
+          </section>
         </section>
 
         <div class="tasks-section" v-if="todoTasks.length">
@@ -532,10 +677,15 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, reactive, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue";
 
 import {
+  deleteApplication,
+  listApplications,
   runResearchStream,
+  saveApplication,
+  updateApplication,
+  type JobApplicationPayload,
   type ResearchStreamEvent
 } from "./services/api";
 
@@ -588,6 +738,10 @@ interface JobItemView {
   matchReason: string;
   resumeAdvice: string[];
   risks: string[];
+  applicationStatus: string | null;
+  statusNote: string;
+  savedAt: string;
+  updatedAt: string;
 }
 
 interface SearchDiagnosticsView {
@@ -627,6 +781,17 @@ const activeTaskId = ref<number | null>(null);
 const jobItems = ref<JobItemView[]>([]);
 const activeJobId = ref<string | null>(null);
 const searchDiagnostics = ref<SearchDiagnosticsView[]>([]);
+const savedJobItems = ref<JobItemView[]>([]);
+const applicationStatuses = ref<string[]>([
+  "待投递",
+  "已投递",
+  "笔试",
+  "面试",
+  "拒绝",
+  "Offer",
+  "放弃"
+]);
+const applicationsLoading = ref(false);
 const reportMarkdown = ref("");
 
 const summaryHighlight = ref(false);
@@ -703,6 +868,16 @@ const activeJob = computed(() => {
   }
   return jobItems.value[0] ?? null;
 });
+const activeSavedJob = computed(() => {
+  if (!activeJob.value) {
+    return null;
+  }
+  return findSavedJob(activeJob.value);
+});
+const activeJobStatus = computed(
+  () => activeSavedJob.value?.applicationStatus || applicationStatuses.value[0]
+);
+const savedApplicationCount = computed(() => savedJobItems.value.length);
 const latestSearchDiagnostics = computed(
   () => searchDiagnostics.value[searchDiagnostics.value.length - 1] ?? null
 );
@@ -997,7 +1172,22 @@ function normalizeJobItem(value: unknown, index: number): JobItemView | null {
     matchReason:
       extractOptionalString(item.match_reason) || "信息不足，需点开来源确认",
     resumeAdvice: extractStringList(item.resume_advice),
-    risks: extractStringList(item.risks)
+    risks: extractStringList(item.risks),
+    applicationStatus: extractOptionalString(item.application_status),
+    statusNote: extractOptionalString(item.status_note) || "",
+    savedAt: extractOptionalString(item.saved_at) || "",
+    updatedAt: extractOptionalString(item.updated_at) || ""
+  };
+}
+
+function normalizeSavedJobItem(value: unknown, index: number): JobItemView | null {
+  const job = normalizeJobItem(value, index);
+  if (!job) {
+    return null;
+  }
+  return {
+    ...job,
+    applicationStatus: job.applicationStatus || applicationStatuses.value[0]
   };
 }
 
@@ -1034,6 +1224,201 @@ function applyJobPayload(value: unknown, replace = false) {
   }
   mergeJobItems(parsed);
   pulse(jobHighlight);
+}
+
+function sameJob(a: JobItemView, b: JobItemView): boolean {
+  if (a.sourceUrl && b.sourceUrl) {
+    return a.sourceUrl === b.sourceUrl;
+  }
+  return a.id === b.id;
+}
+
+function findSavedJob(job: JobItemView): JobItemView | null {
+  return savedJobItems.value.find((saved) => sameJob(saved, job)) ?? null;
+}
+
+function upsertSavedJob(job: JobItemView) {
+  savedJobItems.value = [
+    job,
+    ...savedJobItems.value.filter((saved) => !sameJob(saved, job))
+  ];
+}
+
+function applySavedApplicationsPayload(value: unknown) {
+  const payload = ensureRecord(value);
+  const statuses = Array.isArray(payload.statuses)
+    ? payload.statuses
+        .map((status) => (typeof status === "string" ? status.trim() : ""))
+        .filter(Boolean)
+    : [];
+  if (statuses.length) {
+    applicationStatuses.value = statuses;
+  }
+
+  const items = Array.isArray(payload.job_items) ? payload.job_items : [];
+  savedJobItems.value = items
+    .map((item, index) => normalizeSavedJobItem(item, index))
+    .filter((item): item is JobItemView => Boolean(item));
+}
+
+function toApplicationPayload(
+  job: JobItemView,
+  overrides: Partial<JobApplicationPayload> = {}
+): JobApplicationPayload {
+  return {
+    id: job.id,
+    company: job.company,
+    title: job.title,
+    location: job.location,
+    source_url: job.sourceUrl,
+    source_title: job.sourceTitle,
+    requirements: job.requirements,
+    responsibilities: job.responsibilities,
+    tech_stack: job.techStack,
+    duration: job.duration,
+    deadline: job.deadline,
+    match_score: job.matchScore,
+    match_reason: job.matchReason,
+    resume_advice: job.resumeAdvice,
+    risks: job.risks,
+    application_status: job.applicationStatus,
+    status_note: job.statusNote,
+    ...overrides
+  };
+}
+
+async function refreshApplications(showLog = false) {
+  applicationsLoading.value = true;
+  try {
+    const payload = await listApplications();
+    applySavedApplicationsPayload(payload);
+    if (showLog) {
+      progressLogs.value.push(`已刷新保存岗位：${savedApplicationCount.value} 个`);
+    }
+  } catch (error) {
+    console.warn("读取保存岗位失败", error);
+    if (showLog) {
+      progressLogs.value.push("读取保存岗位失败，请确认后端已启动");
+    }
+  } finally {
+    applicationsLoading.value = false;
+  }
+}
+
+async function saveJob(job: JobItemView) {
+  applicationsLoading.value = true;
+  try {
+    const saved = await saveApplication(
+      toApplicationPayload(job, {
+        application_status: undefined,
+        status_note: undefined
+      })
+    );
+    const parsed = normalizeSavedJobItem(saved, 0);
+    if (parsed) {
+      upsertSavedJob(parsed);
+      progressLogs.value.push(`已保存岗位：${parsed.company} · ${parsed.title}`);
+      pulse(jobHighlight);
+    }
+  } catch (error) {
+    console.error("保存岗位失败", error);
+    progressLogs.value.push("保存岗位失败，请稍后重试");
+  } finally {
+    applicationsLoading.value = false;
+  }
+}
+
+async function saveActiveJob() {
+  if (!activeJob.value) {
+    return;
+  }
+  await saveJob(activeJob.value);
+}
+
+async function updateSavedJob(
+  job: JobItemView,
+  patch: Pick<JobApplicationPayload, "application_status" | "status_note">
+) {
+  applicationsLoading.value = true;
+  try {
+    const updated = await updateApplication(job.id, patch);
+    const parsed = normalizeSavedJobItem(updated, 0);
+    if (parsed) {
+      upsertSavedJob(parsed);
+      progressLogs.value.push(`已更新投递状态：${parsed.title}`);
+    }
+  } catch (error) {
+    console.error("更新投递状态失败", error);
+    progressLogs.value.push("更新投递状态失败，请稍后重试");
+  } finally {
+    applicationsLoading.value = false;
+  }
+}
+
+async function updateSavedJobStatus(job: JobItemView, event: Event) {
+  const value = (event.target as HTMLSelectElement | null)?.value;
+  if (!value) {
+    return;
+  }
+  await updateSavedJob(job, { application_status: value });
+}
+
+async function updateActiveJobStatus(event: Event) {
+  if (!activeSavedJob.value) {
+    return;
+  }
+  await updateSavedJobStatus(activeSavedJob.value, event);
+}
+
+async function updateSavedJobNote(job: JobItemView, event: Event) {
+  const value = (event.target as HTMLInputElement | null)?.value ?? "";
+  await updateSavedJob(job, { status_note: value });
+}
+
+async function updateActiveJobNote(event: Event) {
+  if (!activeSavedJob.value) {
+    return;
+  }
+  await updateSavedJobNote(activeSavedJob.value, event);
+}
+
+async function removeSavedJob(job: JobItemView) {
+  applicationsLoading.value = true;
+  try {
+    await deleteApplication(job.id);
+    savedJobItems.value = savedJobItems.value.filter((saved) => saved.id !== job.id);
+    progressLogs.value.push(`已移除保存岗位：${job.title}`);
+  } catch (error) {
+    console.error("移除保存岗位失败", error);
+    progressLogs.value.push("移除保存岗位失败，请稍后重试");
+  } finally {
+    applicationsLoading.value = false;
+  }
+}
+
+async function removeActiveSavedJob() {
+  if (!activeSavedJob.value) {
+    return;
+  }
+  await removeSavedJob(activeSavedJob.value);
+}
+
+function focusSavedJob(job: JobItemView) {
+  const existing = jobItems.value.find((item) => sameJob(item, job));
+  if (existing) {
+    activeJobId.value = existing.id;
+  } else {
+    jobItems.value = [job, ...jobItems.value];
+    activeJobId.value = job.id;
+  }
+  isExpanded.value = true;
+}
+
+function openSavedApplications() {
+  isExpanded.value = true;
+  if (savedJobItems.value.length) {
+    focusSavedJob(savedJobItems.value[0]);
+  }
 }
 
 function formatMatchScore(score: number | null): string {
@@ -1507,6 +1892,10 @@ const startNewResearch = () => {
   form.searchApi = "";
 };
 
+onMounted(() => {
+  void refreshApplications();
+});
+
 onBeforeUnmount(() => {
   if (currentController) {
     currentController.abort();
@@ -1841,6 +2230,17 @@ select:focus {
   font-size: 12px;
 }
 
+.secondary-btn.danger {
+  border-color: rgba(248, 113, 113, 0.35);
+  background: rgba(254, 226, 226, 0.55);
+  color: #b91c1c;
+}
+
+.secondary-btn.danger:hover {
+  border-color: rgba(239, 68, 68, 0.48);
+  background: rgba(254, 202, 202, 0.68);
+}
+
 .error-chip {
   margin-top: 16px;
   display: inline-flex;
@@ -2014,6 +2414,32 @@ select:focus {
   color: #1f2937;
 }
 
+.saved-jobs-home {
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.saved-jobs-home h2 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  color: #1f2937;
+}
+
+.job-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .job-count {
   padding: 7px 12px;
   border-radius: 999px;
@@ -2022,6 +2448,13 @@ select:focus {
   color: #1e3a8a;
   font-size: 12px;
   font-weight: 600;
+}
+
+.job-count.saved,
+.application-badge {
+  background: rgba(220, 252, 231, 0.58);
+  border-color: rgba(34, 197, 94, 0.28);
+  color: #15803d;
 }
 
 .diagnostics-panel {
@@ -2149,6 +2582,16 @@ select:focus {
   font-size: 13px;
 }
 
+.application-badge {
+  align-self: start;
+  padding: 4px 9px;
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .job-detail {
   border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 16px;
@@ -2180,6 +2623,65 @@ select:focus {
 .job-detail h5 {
   font-size: 14px;
   font-weight: 700;
+}
+
+.application-panel {
+  padding: 14px;
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  border-radius: 14px;
+  background: rgba(239, 246, 255, 0.62);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.application-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.application-panel h5,
+.application-panel p {
+  margin: 0;
+}
+
+.application-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.application-controls {
+  display: grid;
+  grid-template-columns: minmax(140px, 180px) minmax(220px, 1fr);
+  gap: 10px;
+}
+
+.application-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.application-controls select,
+.application-controls input,
+.saved-job-status,
+.saved-job-note {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #1f2937;
+  font-size: 13px;
+  padding: 8px 10px;
+  box-sizing: border-box;
 }
 
 .job-facts {
@@ -2248,6 +2750,78 @@ select:focus {
   background: rgba(248, 250, 252, 0.7);
 }
 
+.saved-jobs-panel {
+  padding-top: 16px;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.saved-jobs-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.saved-jobs-head h4 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  color: #1f2937;
+}
+
+.saved-jobs-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.saved-jobs-list li {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.5fr) minmax(112px, 140px) minmax(180px, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.78);
+}
+
+.saved-job-main {
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.saved-job-title,
+.saved-job-meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saved-job-title {
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.saved-job-meta {
+  color: #64748b;
+  font-size: 12px;
+}
+
 .tasks-section {
   display: grid;
   grid-template-columns: 280px 1fr;
@@ -2257,6 +2831,11 @@ select:focus {
 
 @media (max-width: 960px) {
   .job-workbench-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .application-controls,
+  .saved-jobs-list li {
     grid-template-columns: 1fr;
   }
 

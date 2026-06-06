@@ -15,6 +15,7 @@ from pydantic import BaseModel, Field
 
 from config import Configuration, SearchAPI
 from agent import DeepResearchAgent
+from services.applications import APPLICATION_STATUSES, ApplicationStore
 
 # 添加控制台日志处理程序
 logger.remove()
@@ -55,6 +56,48 @@ class ResearchResponse(BaseModel):
     )
 
 
+class JobApplicationPayload(BaseModel):
+    """Saved internship/job item plus optional tracking metadata."""
+
+    id: Optional[str] = None
+    company: str = "未确认"
+    title: str = "未确认"
+    location: str = "未确认"
+    source_url: str = ""
+    source_title: str = "未确认"
+    requirements: list[str] = Field(default_factory=list)
+    responsibilities: list[str] = Field(default_factory=list)
+    tech_stack: list[str] = Field(default_factory=list)
+    duration: str = "未确认"
+    deadline: str = "未确认"
+    match_score: Optional[int] = None
+    match_reason: str = "信息不足，需点开来源确认"
+    resume_advice: list[str] = Field(default_factory=list)
+    risks: list[str] = Field(default_factory=list)
+    application_status: Optional[str] = Field(
+        default=None,
+        description="Optional tracking status for this application",
+    )
+    status_note: Optional[str] = Field(
+        default=None,
+        description="Optional user note for this saved application",
+    )
+
+
+class JobApplicationUpdate(BaseModel):
+    """Mutable tracking fields for a saved application."""
+
+    application_status: Optional[str] = None
+    status_note: Optional[str] = None
+
+
+class JobApplicationListResponse(BaseModel):
+    """Response payload for saved internship applications."""
+
+    job_items: list[dict[str, Any]] = Field(default_factory=list)
+    statuses: list[str] = Field(default_factory=lambda: list(APPLICATION_STATUSES))
+
+
 def _mask_secret(value: Optional[str], visible: int = 4) -> str:
     """Mask sensitive tokens while keeping leading and trailing characters."""
     if not value:
@@ -78,6 +121,7 @@ def _build_config(payload: ResearchRequest) -> Configuration:
 def create_app() -> FastAPI:
     app = FastAPI(title="HelloAgents Deep Researcher")
     config = Configuration.from_env()
+    application_store = ApplicationStore()
 
     app.add_middleware(
         CORSMiddleware,
@@ -117,6 +161,48 @@ def create_app() -> FastAPI:
     @app.get("/healthz")
     def health_check() -> Dict[str, str]:
         return {"status": "ok"}
+
+    @app.get("/applications", response_model=JobApplicationListResponse)
+    def list_applications() -> JobApplicationListResponse:
+        return JobApplicationListResponse(
+            job_items=application_store.list_applications(),
+            statuses=list(APPLICATION_STATUSES),
+        )
+
+    @app.post("/applications")
+    def save_application(payload: JobApplicationPayload) -> dict[str, Any]:
+        try:
+            return application_store.save_application(
+                payload.model_dump(
+                    exclude={"application_status", "status_note"},
+                ),
+                application_status=payload.application_status,
+                status_note=payload.status_note,
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.patch("/applications/{item_id}")
+    def update_application(
+        item_id: str,
+        payload: JobApplicationUpdate,
+    ) -> dict[str, Any]:
+        try:
+            return application_store.update_application(
+                item_id,
+                application_status=payload.application_status,
+                status_note=payload.status_note,
+            )
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail="Saved job not found") from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.delete("/applications/{item_id}")
+    def delete_application(item_id: str) -> dict[str, bool]:
+        if not application_store.delete_application(item_id):
+            raise HTTPException(status_code=404, detail="Saved job not found")
+        return {"deleted": True}
 
     @app.post("/research", response_model=ResearchResponse)
     def run_research(payload: ResearchRequest) -> ResearchResponse:
