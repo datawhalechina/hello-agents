@@ -1,6 +1,7 @@
 """多智能体旅行规划系统"""
 
 import json
+from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Any, List
 from hello_agents import SimpleAgent
 from .mcp_tool import MCPTool
@@ -176,11 +177,28 @@ class MultiAgentTripPlanner:
             settings = get_settings()
             self.llm = get_llm()
 
-            # 创建共享的MCP工具(只创建一次)
-            print("  - 创建共享MCP工具...")
-            self.amap_tool = MCPTool(
+            # 创建三个独立的MCP工具实例，每个Agent独享一个
+            # 这是并行化的前提：多个子进程同时调用高德MCP不会相互干扰
+            print("  - 创建MCP工具实例(景点搜索)...")
+            self.amap_tool_attraction = MCPTool(
                 name="amap",
-                description="高德地图服务",
+                description="高德地图服务(景点搜索)",
+                server_command=["uvx", "amap-mcp-server"],
+                env={"AMAP_MAPS_API_KEY": settings.amap_api_key},
+                auto_expand=True
+            )
+            print("  - 创建MCP工具实例(天气查询)...")
+            self.amap_tool_weather = MCPTool(
+                name="amap",
+                description="高德地图服务(天气查询)",
+                server_command=["uvx", "amap-mcp-server"],
+                env={"AMAP_MAPS_API_KEY": settings.amap_api_key},
+                auto_expand=True
+            )
+            print("  - 创建MCP工具实例(酒店推荐)...")
+            self.amap_tool_hotel = MCPTool(
+                name="amap",
+                description="高德地图服务(酒店推荐)",
                 server_command=["uvx", "amap-mcp-server"],
                 env={"AMAP_MAPS_API_KEY": settings.amap_api_key},
                 auto_expand=True
@@ -193,7 +211,7 @@ class MultiAgentTripPlanner:
                 llm=self.llm,
                 system_prompt=ATTRACTION_AGENT_PROMPT
             )
-            self.attraction_agent.add_tool(self.amap_tool)
+            self.attraction_agent.add_tool(self.amap_tool_attraction)
 
             # 创建天气查询Agent
             print("  - 创建天气查询Agent...")
@@ -202,7 +220,7 @@ class MultiAgentTripPlanner:
                 llm=self.llm,
                 system_prompt=WEATHER_AGENT_PROMPT
             )
-            self.weather_agent.add_tool(self.amap_tool)
+            self.weather_agent.add_tool(self.amap_tool_weather)
 
             # 创建酒店推荐Agent
             print("  - 创建酒店推荐Agent...")
@@ -211,7 +229,7 @@ class MultiAgentTripPlanner:
                 llm=self.llm,
                 system_prompt=HOTEL_AGENT_PROMPT
             )
-            self.hotel_agent.add_tool(self.amap_tool)
+            self.hotel_agent.add_tool(self.amap_tool_hotel)
 
             # 创建行程规划Agent(不需要工具)
             print("  - 创建行程规划Agent...")
@@ -222,9 +240,9 @@ class MultiAgentTripPlanner:
             )
 
             print(f"✅ 多智能体系统初始化成功")
-            print(f"   景点搜索Agent: {len(self.attraction_agent.list_tools())} 个工具")
-            print(f"   天气查询Agent: {len(self.weather_agent.list_tools())} 个工具")
-            print(f"   酒店推荐Agent: {len(self.hotel_agent.list_tools())} 个工具")
+            print(f"   景点搜索Agent: {len(self.attraction_agent.list_tools())} 个工具(独立实例)")
+            print(f"   天气查询Agent: {len(self.weather_agent.list_tools())} 个工具(独立实例)")
+            print(f"   酒店推荐Agent: {len(self.hotel_agent.list_tools())} 个工具(独立实例)")
 
         except Exception as e:
             print(f"❌ 多智能体系统初始化失败: {str(e)}")
@@ -252,26 +270,35 @@ class MultiAgentTripPlanner:
             print(f"出行人群: {request.traveler_group if request.traveler_group else '未指定'}")
             print(f"{'='*60}\n")
 
-            # 步骤1: 景点搜索Agent搜索景点
-            print("📍 步骤1: 搜索景点...")
-            attraction_query = self._build_attraction_query(request)
-            attraction_response = self.attraction_agent.run(attraction_query)
-            print(f"景点搜索结果: {attraction_response[:200]}...\n")
+            # ── 阶段一：并行执行无依赖的搜索/查询任务 ──
+            print("🚀 阶段一：并行搜索景点、天气、酒店...")
+            with ThreadPoolExecutor(max_workers=3) as executor:
+                future_attractions = executor.submit(
+                    self.attraction_agent.run,
+                    self._build_attraction_query(request)
+                )
+                future_weather = executor.submit(
+                    self.weather_agent.run,
+                    f"请查询{request.city}的天气信息"
+                )
+                future_hotel = executor.submit(
+                    self.hotel_agent.run,
+                    f"请搜索{request.city}的{request.accommodation}酒店"
+                )
 
-            # 步骤2: 天气查询Agent查询天气
-            print("🌤️  步骤2: 查询天气...")
-            weather_query = f"请查询{request.city}的天气信息"
-            weather_response = self.weather_agent.run(weather_query)
-            print(f"天气查询结果: {weather_response[:200]}...\n")
+                # 等待全部完成（屏障），按原始顺序获取结果
+                print("  ⏳ 等待三个并行任务完成...")
+                attraction_response = future_attractions.result()
+                print(f"📍 景点搜索完成: {attraction_response[:200]}...\n")
 
-            # 步骤3: 酒店推荐Agent搜索酒店
-            print("🏨 步骤3: 搜索酒店...")
-            hotel_query = f"请搜索{request.city}的{request.accommodation}酒店"
-            hotel_response = self.hotel_agent.run(hotel_query)
-            print(f"酒店搜索结果: {hotel_response[:200]}...\n")
+                weather_response = future_weather.result()
+                print(f"🌤️  天气查询完成: {weather_response[:200]}...\n")
 
-            # 步骤4: 行程规划Agent整合信息生成计划
-            print("📋 步骤4: 生成行程计划...")
+                hotel_response = future_hotel.result()
+                print(f"🏨 酒店搜索完成: {hotel_response[:200]}...\n")
+
+            # ── 阶段二：依赖阶段一的结果，顺序执行 ──
+            print("📋 阶段二：生成行程计划...")
             planner_query = self._build_planner_query(request, attraction_response, weather_response, hotel_response)
             planner_response = self.planner_agent.run(planner_query)
             print(f"行程规划结果: {planner_response[:300]}...\n")
