@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from ..config import get_settings, validate_config, print_config
 from ..database import init_db
 from ..rsa_service import init_rsa_keys
+from ..user_context import UserContextMiddleware
 from .routes import trip, poi, map as map_routes, auth, history, chat
 
 # 获取配置
@@ -27,6 +28,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 注册用户上下文中间件（在每个请求中解析 JWT Cookie，注入 current_user）
+app.add_middleware(UserContextMiddleware)
 
 # 注册路由
 app.include_router(trip.router, prefix="/api")

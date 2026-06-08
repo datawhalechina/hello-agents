@@ -31,39 +31,25 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { apiBaseUrl } from '@/services/api'
 
 const router = useRouter()
 const isLoggedIn = ref(false)
 const username = ref('')
 
-async function checkAuth() {
-  // 先读 localStorage 缓存（避免每次路由切换都请求）
-  const cachedUser = localStorage.getItem('auth_username')
-  isLoggedIn.value = !!cachedUser
-  username.value = cachedUser || ''
-
-  // 异步验证：确认 cookie 真的有效
-  try {
-    const res = await fetch(`${apiBaseUrl}/api/auth/profile`, {
-      credentials: 'include',
-    })
-    if (res.ok) {
-      const data = await res.json()
-      isLoggedIn.value = true
-      username.value = data.username
-      localStorage.setItem('auth_username', data.username)
-    } else {
-      isLoggedIn.value = false
-      username.value = ''
-      localStorage.removeItem('auth_username')
-    }
-  } catch {
-    // 后端未启动时不改变状态
-  }
+/** 从 document.cookie 读取用户名（由后端设置，非 HttpOnly，零请求） */
+function getUsernameFromCookie(): string | null {
+  const match = document.cookie.match(/(?:^|;\s*)auth_username=([^;]*)/)
+  return match ? decodeURIComponent(match[1]) : null
 }
 
-// 每次路由切换时重新检查
+function checkAuth() {
+  // 直接从 Cookie 读取，无需调 /api/auth/profile 接口
+  const name = getUsernameFromCookie()
+  isLoggedIn.value = !!name
+  username.value = name || ''
+}
+
+// 每次路由切换时检查 Cookie
 router.afterEach(() => {
   checkAuth()
 })
@@ -96,7 +82,7 @@ function goChat() {
 
 async function handleLogout() {
   try {
-    await fetch(`${apiBaseUrl}/api/auth/logout`, {
+    await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://localhost:8000'}/api/auth/logout`, {
       method: 'POST',
       credentials: 'include',
     })

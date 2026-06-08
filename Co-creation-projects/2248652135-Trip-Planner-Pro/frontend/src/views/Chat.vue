@@ -230,16 +230,17 @@ function formatTime(timeStr: string): string {
   }
 }
 
-/** 检查登录状态 */
-async function checkAuth() {
-  try {
-    const res = await api('/api/auth/profile')
-    isLoggedIn.value = res.ok
-    if (res.ok) {
-      fetchSessions()
-    }
-  } catch {
-    isLoggedIn.value = false
+/** 从 Cookie 读取用户名（后端设置，非 HttpOnly，零请求） */
+function getUsernameFromCookie(): string | null {
+  const match = document.cookie.match(/(?:^|;\s*)auth_username=([^;]*)/)
+  return match ? decodeURIComponent(match[1]) : null
+}
+
+/** 检查登录状态（直接从 Cookie 判断，不再调 profile API） */
+function checkAuth() {
+  isLoggedIn.value = !!getUsernameFromCookie()
+  if (isLoggedIn.value) {
+    fetchSessions()
   }
 }
 
