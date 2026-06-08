@@ -632,6 +632,7 @@ const exportAsImage = async () => {
 // 导出为PDF
 const exportAsPDF = async () => {
   try {
+    await captureMapImage()
     message.loading({ content: '正在生成PDF...', key: 'export', duration: 0 })
 
     const element = document.querySelector('.main-content') as HTMLElement
@@ -778,9 +779,11 @@ const exportAsPDF = async () => {
     }
 
     pdf.save(`旅行计划_${tripPlan.value?.city}_${new Date().getTime()}.pdf`)
+    restoreMap()
 
     message.success({ content: 'PDF导出成功!', key: 'export' })
   } catch (error: any) {
+    restoreMap()
     console.error('导出PDF失败:', error)
     message.error({ content: `导出PDF失败: ${error.message}`, key: 'export' })
   }
