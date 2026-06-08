@@ -9,6 +9,7 @@ from ...jwt_utils import (
 from ...redis_service import store_refresh_token, validate_refresh_token, revoke_refresh_token
 from ...config import get_settings
 from ...rsa_service import get_public_key_pem, decrypt_data
+from ...user_context import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["用户认证"])
 
@@ -39,15 +40,15 @@ def _clear_auth_cookies(response: Response):
     response.delete_cookie(COOKIE_REFRESH_KEY, path=COOKIE_REFRESH_PATH)  # 新：path="/api/auth"
 
 
-def require_auth(request: Request) -> dict:
-    """从 Cookie 中读取 Access Token 验证"""
-    token = request.cookies.get(COOKIE_ACCESS_KEY)
-    if not token:
+def require_auth(request: Request = None) -> dict:
+    """
+    从请求上下文获取当前用户（中间件已统一处理 Cookie 和 Header）。
+    返回 {"id": user_id}，未登录时抛 401。
+    """
+    user = get_current_user()
+    if not user:
         raise HTTPException(status_code=401, detail="未登录")
-    try:
-        return verify_access_token(token)
-    except Exception:
-        raise HTTPException(status_code=401, detail="Token已过期或无效，请重新登录")
+    return {"id": user["id"]}
 
 
 @router.post("/register", summary="用户注册")
@@ -67,8 +68,13 @@ async def register(req: RegisterRequest, request: Request, response: Response):
     try:
         user = create_user(req.username.strip(), password)
         user_agent = request.headers.get("User-Agent", "")
-        _issue_tokens(response, user["id"], username=user["username"], user_agent=user_agent)
-        return {"success": True, "message": "注册成功", "username": user["username"]}
+        access_token, refresh_token = _issue_tokens(response, user["id"], username=user["username"], user_agent=user_agent)
+        return {
+            "success": True, "message": "注册成功",
+            "username": user["username"],
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+        }
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e))
 
@@ -86,8 +92,13 @@ async def login(req: LoginRequest, request: Request, response: Response):
     if not user:
         raise HTTPException(status_code=401, detail="用户名或密码错误")
     user_agent = request.headers.get("User-Agent", "")
-    _issue_tokens(response, user["id"], username=user["username"], user_agent=user_agent)
-    return {"success": True, "message": "登录成功", "username": user["username"]}
+    access_token, refresh_token = _issue_tokens(response, user["id"], username=user["username"], user_agent=user_agent)
+    return {
+        "success": True, "message": "登录成功",
+        "username": user["username"],
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+    }
 
 
 @router.get("/public-key", summary="获取RSA公钥")
@@ -99,11 +110,12 @@ async def public_key():
     }
 
 
-def _issue_tokens(response: Response, user_id: int, username: str = "", user_agent: str = ""):
+def _issue_tokens(response: Response, user_id: int, username: str = "", user_agent: str = "") -> tuple[str, str]:
     """签发双Token + 前端可读用户名Cookie
     - access_token   (HttpOnly,  /)           → JWT认证
     - refresh_token  (HttpOnly,  /api/auth)   → 刷新Token (Redis存设备信息)
     - auth_username  (可读,      /)           → 前端直接读，零请求
+    返回: (access_token, refresh_token) — 非浏览器设备可拿到令牌
     """
     # Access Token -> HttpOnly Cookie (全路径携带)
     access_token = create_access_token(user_id)
@@ -131,11 +143,14 @@ def _issue_tokens(response: Response, user_id: int, username: str = "", user_age
             max_age=1800, path=COOKIE_PATH,
         )
 
+    return access_token, refresh_token
+
 
 @router.post("/refresh", summary="刷新Token")
 async def refresh(request: Request, response: Response):
-    """用 Refresh Token（Cookie中）换取新的双Token，同时校验设备信息"""
-    refresh_token = request.cookies.get(COOKIE_REFRESH_KEY)
+    """用 Refresh Token 换取新的双Token，支持 Cookie 或 X-Refresh-Token Header"""
+    # 先从 Cookie 取，再尝试 Header（兼容非浏览器设备）
+    refresh_token = request.cookies.get(COOKIE_REFRESH_KEY) or request.headers.get("X-Refresh-Token", "")
     if not refresh_token:
         raise HTTPException(status_code=401, detail="未登录，缺少Refresh Token")
 
@@ -163,17 +178,24 @@ async def refresh(request: Request, response: Response):
 
     # 5. 签发新双Token（绑定当前设备信息 + 用户名Cookie）
     user_info = get_user_by_id(payload["id"])
-    _issue_tokens(response, payload["id"],
-                  username=user_info["username"] if user_info else "",
-                  user_agent=current_ua)
+    new_access, new_refresh = _issue_tokens(response, payload["id"],
+                                            username=user_info["username"] if user_info else "",
+                                            user_agent=current_ua)
 
-    return {"success": True, "message": "Token刷新成功"}
+    return {
+        "success": True,
+        "message": "Token刷新成功",
+        "access_token": new_access,
+        "refresh_token": new_refresh,
+        "username": user_info["username"] if user_info else "",
+    }
 
 
 @router.post("/logout", summary="用户登出")
 async def logout(request: Request, response: Response):
-    """登出：清除Cookie + 吊销Redis中的Refresh Token"""
-    refresh_token = request.cookies.get(COOKIE_REFRESH_KEY)
+    """登出：清除Cookie + 吊销Redis中的Refresh Token（支持Cookie或Header）"""
+    # 优先取 Cookie，再尝试 Header（兼容非浏览器设备）
+    refresh_token = request.cookies.get(COOKIE_REFRESH_KEY) or request.headers.get("X-Refresh-Token", "")
     if refresh_token:
         try:
             payload = verify_refresh_token(refresh_token)
@@ -187,9 +209,8 @@ async def logout(request: Request, response: Response):
 
 @router.get("/profile", summary="获取用户信息")
 async def profile(request: Request):
-    """获取当前登录用户信息"""
-    user = require_auth(request)
-    user_info = get_user_by_id(user["id"])
-    if not user_info:
-        raise HTTPException(status_code=404, detail="用户不存在")
-    return {"success": True, "username": user_info["username"]}
+    """获取当前登录用户信息（从上下文直接读取，无需查DB）"""
+    user = get_current_user()
+    if not user:
+        raise HTTPException(status_code=401, detail="未登录")
+    return {"success": True, "username": user["username"]}
