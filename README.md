@@ -35,6 +35,23 @@
 ### 本地阅读
 如果您希望在本地阅读或贡献内容，请参考下方的学习指南。
 
+### 🤖 AI 伴学（Agent 技能）
+
+&emsp;&emsp;本仓库内置了两个学习伴学技能。clone 本仓库后，在 Claude Code、Cursor、Codex、OpenClaw 等任意支持 Agent Skills / AGENTS.md 的 AI 编程助手中打开仓库目录即可使用：
+
+| 技能 | 作用 |
+| ---- | ---- |
+| [`/find-your-level`](./.claude/skills/find-your-level/SKILL.md) | 十道题的定级测验，把你的已有知识映射到一个起始章节，并生成带学时估算的个性化学习路径 |
+| [`/check-understanding <章节>`](./.claude/skills/check-understanding/SKILL.md) | 按章节出八道题（四道概念 + 四道实践），评分并把错题定位到需要复习的具体小节 |
+
+```bash
+# 在仓库根目录启动你的 AI 助手后：
+/find-your-level            # 不知道从哪章开始？先定级
+/check-understanding 8      # 学完第八章，测测掌握程度
+```
+
+&emsp;&emsp;Claude Code 中技能开箱即用；其他助手会通过仓库根目录的 [AGENTS.md](./AGENTS.md) 识别这两个技能。想了解这类技能怎么写，见 [Extra08-如何写出好的Skill](./Extra-Chapter/Extra08-如何写出好的Skill.md)。
+
 ### ✨ 你将收获什么？
 
 - 📖 <strong>Datawhale 开源免费</strong> 完全免费学习本项目所有内容，与社区共同成长

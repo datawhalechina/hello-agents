@@ -161,8 +161,9 @@ cython_debug/
 .DS_Store
 .obsidian
 
-# 忽略各种文件夹下codex AGENRS.md
+# 忽略各种文件夹下codex AGENRS.md（根目录 AGENTS.md 是仓库技能路由文件，不忽略）
 AGENTS.md
+!/AGENTS.md
 test_*.py
 !test_tools.py
 .workbuddy/

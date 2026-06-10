@@ -35,6 +35,23 @@
 ### Local Reading
 If you wish to read locally or contribute content, please refer to the learning guide below.
 
+### 🤖 AI Study Companion (Agent Skills)
+
+This repository ships with two built-in study-companion skills. After cloning, open the repo directory in any AI coding assistant that supports Agent Skills / AGENTS.md (Claude Code, Cursor, Codex, OpenClaw, etc.):
+
+| Skill | What it does |
+| ----- | ------------ |
+| [`/find-your-level`](./.claude/skills/find-your-level/SKILL.md) | A 10-question placement quiz that maps your existing knowledge to a starting chapter and generates a personalized learning path with estimated study hours |
+| [`/check-understanding <chapter>`](./.claude/skills/check-understanding/SKILL.md) | An 8-question per-chapter quiz (4 conceptual + 4 practical) that scores your answers and points each mistake back to the specific section to review |
+
+```bash
+# After launching your AI assistant in the repo root:
+/find-your-level            # Not sure where to start? Take the placement quiz
+/check-understanding 8      # Finished Chapter 8? Test your understanding
+```
+
+The skills work out of the box in Claude Code; other assistants discover them via [AGENTS.md](./AGENTS.md) in the repo root. To learn how skills like these are written, see [Extra08 - How to Write a Good Skill](./Extra-Chapter/Extra08-如何写出好的Skill.md).
+
 ### ✨ What Will You Gain?
 
 - 📖 **Datawhale Open Source & Free** - Learn all project content completely free, grow with the community
