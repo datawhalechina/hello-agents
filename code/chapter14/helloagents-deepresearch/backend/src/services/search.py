@@ -45,7 +45,6 @@ JOB_SEARCH_NEGATIVE_TERMS = (
     "提示词",
     "prompt",
     "案例",
-    "经验",
     "通关计划",
     "JavaGuide",
     "CSDN",
@@ -68,7 +67,6 @@ JOB_SEARCH_TUTORIAL_TERMS = (
     "提示词",
     "prompt",
     "案例",
-    "经验",
     "开源项目",
     "JavaGuide",
     "CSDN",
@@ -216,6 +214,7 @@ def build_platform_job_query(query: str) -> str:
     additions = (
         "BOSS直聘 实习僧 牛客招聘 应届生 校招官网 招聘官网 "
         "岗位详情 JD 投递入口 实习生招聘 职位描述 任职要求 "
+        "site:zhipin.com/job_detail site:shixiseng.com/intern site:jobs.bytedance.com "
         "-面经 -面试 -教程 -博客 -学习资源 -开源项目 -提示词"
     )
     return f"{query} {additions}".strip()
@@ -295,17 +294,20 @@ def classify_job_source(item: dict[str, Any]) -> str:
     if not text.strip():
         return "empty_result"
 
+    has_trusted_job_url = any(part in url_lower for part in JOB_SEARCH_POSITIVE_URLS)
+    has_generic_job_url = any(part in url_lower for part in JOB_SEARCH_GENERIC_JOB_URL_PARTS)
+    has_required_term = any(term.lower() in text_lower for term in JOB_SEARCH_REQUIRED_TERMS)
+
+    if has_trusted_job_url:
+        return "reliable"
+
     if any(term.lower() in text_lower for term in JOB_SEARCH_INTERVIEW_TERMS):
         return "interview_noise"
 
     if any(term.lower() in text_lower for term in JOB_SEARCH_TUTORIAL_TERMS):
         return "tutorial_or_blog"
 
-    has_trusted_job_url = any(part in url_lower for part in JOB_SEARCH_POSITIVE_URLS)
-    has_generic_job_url = any(part in url_lower for part in JOB_SEARCH_GENERIC_JOB_URL_PARTS)
-    has_required_term = any(term.lower() in text_lower for term in JOB_SEARCH_REQUIRED_TERMS)
-
-    if has_trusted_job_url or (has_generic_job_url and has_required_term):
+    if has_generic_job_url and has_required_term:
         return "reliable"
 
     if not has_generic_job_url:
@@ -401,10 +403,13 @@ def _diagnostic_suggestion(
     if reliable_count > 0:
         return "已找到可靠岗位/JD来源，请点开来源核验招聘状态、城市和投递入口。"
 
-    if reject_reasons.get("tutorial_or_blog", 0) >= reject_reasons.get("interview_noise", 0):
-        return "当前结果多为教程、博客或学习资源，建议补充公司/城市/岗位关键词，或切换 Tavily 后重试。"
+    tutorial_count = reject_reasons.get("tutorial_or_blog", 0)
+    interview_count = reject_reasons.get("interview_noise", 0)
 
-    if reject_reasons.get("interview_noise"):
+    if tutorial_count > 0 and tutorial_count >= interview_count:
+        return "当前结果多为教程、博客或学习资源，也可能误命中 JD 中的经验词；建议补充公司/城市/岗位关键词，或切换 Tavily 后重试。"
+
+    if interview_count:
         return "当前结果偏面经或面试资料，建议加入“岗位详情、投递入口、招聘官网”等关键词后重试。"
 
     return "未发现可靠岗位/JD链接，建议切换搜索引擎，或使用 BOSS直聘、实习僧、校招官网等平台关键词。"

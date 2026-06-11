@@ -18,4 +18,4 @@ Start-Process powershell.exe -ArgumentList @(
     "-File", $FrontendScript
 )
 
-Write-Host "Done. Backend: http://127.0.0.1:8000  Frontend: http://localhost:5173"
+Write-Host "Done. Backend: http://127.0.0.1:8000  Frontend: http://127.0.0.1:5174"

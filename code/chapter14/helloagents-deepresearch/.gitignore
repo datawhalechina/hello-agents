@@ -15,6 +15,10 @@ backend/.env
 backend/.venv/
 backend/notes/
 backend/data/
+backend/memory/
+backend/src/notes/
+backend/src/data/
+backend/src/memory/
 frontend/node_modules/
 frontend/dist/
 

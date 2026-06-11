@@ -316,12 +316,18 @@ onMounted(() => {
   inset: 0;
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(125, 86, 255, 0.1));
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.35s ease;
   z-index: 0;
 }
 
 .panel:hover::before {
   opacity: 1;
+}
+
+.panel > * {
+  position: relative;
+  z-index: 1;
 }
 
 .layout-fullscreen .panel-result {

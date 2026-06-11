@@ -1,6 +1,6 @@
 # 找实习助手 Agent 开发进度
 
-更新时间：2026-06-05
+更新时间：2026-06-08
 
 ## 当前目标
 
@@ -90,6 +90,11 @@
   - 前端岗位工作台新增“保存岗位”“更新保存”“移除”、状态下拉、备注输入和“已保存岗位”清单。
   - 初始页会显示已保存岗位入口，刷新页面后可继续查看本地跟踪清单。
   - 新增 `test_applications.py`，覆盖保存、去重、状态更新、状态校验和删除。
+- 已完成前端拆分与流式恢复工程化收尾：
+  - `frontend/src/App.vue` 已拆分为页面 shell，保留布局切换、composables 组合和组件接线。
+  - 新增 `components/`、`composables/`、`types/`、`utils/` 分层，承接岗位工作台、任务工作区、报告块、保存岗位和复制逻辑。
+  - SSE 软恢复已迁移到 `useResearchWorkflow`：断线自动重试一次，支持手动“重新尝试”，用户取消和后端业务错误不自动重试。
+  - 本地岗位保存/投递状态管理已迁移到 `useSavedApplications`，复制报告/来源/笔记路径逻辑已迁移到 `useClipboardActions`。
 
 ## 当前状态
 
@@ -107,7 +112,8 @@
 - 输出已兼容新增 `search_diagnostics`，用于解释岗位清单质量和空结果原因。
 - 已新增 `JobItem`；暂未新增 `MatchResult`。
 - 岗位保存与投递状态已通过本地 JSON 和辅助 API 落地，不影响现有 `/research` 与 `/research/stream` 兼容性。
-- 后端 `.env` 已设置 `FETCH_FULL_PAGE=False` 和 `TASK_CONCURRENCY=1`，重启后生效。
+- 本地 `backend/.env` 已存在且已被 `.gitignore` 排除；真实 LLM/search 密钥仅保留在本机配置中，不提交仓库。
+- 端到端复测时使用真实 LLM 配置运行，进程环境覆盖 `FETCH_FULL_PAGE=False`、`TASK_CONCURRENCY=1` 和 `LLM_MIN_INTERVAL_SECONDS=2` 以保持稳定。
 - LLM 限流容错默认生效，可通过 `.env` 调整：
   - `LLM_RETRY_ATTEMPTS=2`
   - `LLM_RETRY_BASE_DELAY=5`
@@ -132,7 +138,7 @@ Ran 45 tests
 OK
 ```
 
-另已完成后端关键模块导入检查。
+另已完成后端关键模块导入检查。最近一次完整后端单元测试仍为 `Ran 45 tests OK`，测试日志中的 429/timeout/fallback 输出是兜底逻辑覆盖的预期现象。
 
 前端构建已通过：
 
@@ -148,35 +154,62 @@ vue-tsc --noEmit && vite build
 built successfully
 ```
 
-已确认当前 `.env` 会读取到：
+前端拆分后的行为回归 smoke 已完成：
+
+- 使用临时 mock 后端验证 `/healthz`、`/applications` 保存/更新/删除，以及 `/research/stream` 普通完成、断线恢复、手动重试和业务 error 事件形状。
+- 前端 dev server 在 `http://127.0.0.1:5174` 返回 200，入口 `#app` 存在。
+- 早期真实后端 smoke 已确认 `/healthz` 正常，`/research/stream` 能返回初始化状态和任务清单事件；后续完整 SSE 复测结果见下文。
+
+真实链路 SSE 复测已在真实 LLM 配置下完成，最近一轮结果如下：
+
+- 后端加载真实自定义 LLM 配置和 `TAVILY_API_KEY`，日志中 `api_key` 仅脱敏显示；本轮未发现 LLM `502`。
+- `tavily`：约 242 秒收到 `done`，包含 `search_diagnostics`、`job_items` 和 `final_report`；日志中出现 429，但重试和兜底摘要完成了 SSE。
+- `duckduckgo`：约 113 秒收到 `done`，包含 `search_diagnostics`、`job_items` 和 `final_report`；未出现 SSE `error`。
+- `advanced`：约 118 秒收到 `done`，包含 `search_diagnostics`、`job_items` 和 `final_report`；未出现 SSE `error`。
+- 最近三份诊断 JSON 已生成到 `backend/data/search_diagnostics/`：
+  - `tavily`：岗位搜索 5/1 可靠来源，JD 要求分析 5/3。
+  - `duckduckgo`：岗位搜索 5/2 可靠来源，JD 要求分析 5/2，简历优化建议 5/2。
+  - `advanced`：岗位搜索 10/5 可靠来源，JD 要求分析 5/0，简历优化建议 5/4。
+- 前端 dev server 在 `http://127.0.0.1:5174` 返回 200，入口 `#app` 存在。
+- 后端 `/applications` 替代 smoke 已通过：保存岗位、更新状态为 `Offer`、更新备注、删除岗位均成功，清单计数从 0 到 1 再回到 0。
+- 内置浏览器通道仍不可用，未完成真实页面点击、复制和保存岗位的交互级自动化验证。
+
+已确认本轮配置检查：
 
 ```text
-FETCH_FULL_PAGE=False
-TASK_CONCURRENCY=1
+backend/.env: exists locally
+LLM_PROVIDER/LLM_MODEL_ID/LLM_API_KEY/LLM_BASE_URL: configured locally
+TAVILY_API_KEY: configured locally
+runtime FETCH_FULL_PAGE=False
+runtime TASK_CONCURRENCY=1
+runtime LLM_MIN_INTERVAL_SECONDS=2
 ```
+
+本轮搜索质量小补丁已进入实现与验证：
+
+- 优先修复真实 JD 被误判为教程/博客的问题，可信招聘详情 URL 会优先保留。
+- 已移除“经验”作为硬负面词，避免 JD 中的“项目经验”“开发经验”导致岗位被误杀。
+- 二次平台定向搜索补充 `site:zhipin.com/job_detail`、`site:shixiseng.com/intern` 和 `site:jobs.bytedance.com`，但仍只在首轮无可靠来源时重试一次。
+- 搜索诊断建议已补充“可能误命中 JD 中的经验词”的提示；岗位清单为空时仍保持可靠空态，不生成伪岗位。
+- 真实 LLM 无 `502` 端到端验收已完成；后续若频繁触发 429，可继续提高 `LLM_MIN_INTERVAL_SECONDS`。
 
 未完成：
 
 - `ruff` 未运行，因为当前后端虚拟环境未安装 `ruff`。
-- 尚未进行搜索诊断面板的真实 LLM + 搜索 API 完整端到端复测。
-- 尚未用真实 429 场景完整复测前端流式展示；当前已由单元测试覆盖流式 Summarizer 429 兜底。
-- 尚未拆分前端大型 `App.vue`，该项作为后续工程化任务保留。
+- 尚未使用可用浏览器通道对真实链路页面面板做点击、复制、保存岗位等交互级复测；当前已完成 dev server 和 `/applications` API 替代 smoke。
+- 真实链路仍会触发 429 限流，但已确认重试和兜底摘要可完成 SSE；后续可按需调大调用间隔。
 - 尚未将岗位保存清单升级为 SQLite 或多用户存储；当前适合单机本地开发和演示。
 
 ## 下一步
 
 优先级建议：
 
-1. 重启后端，让 `FETCH_FULL_PAGE=False` 和 `TASK_CONCURRENCY=1` 生效。
-2. 启动前端，用真实求职输入重新跑一次完整流程。
-3. 检查任务清单、岗位/JD/渠道来源、岗位分析和最终报告是否仍正常展示。
-4. 检查“搜索质量诊断”是否显示搜索后端、可靠来源数量、过滤原因和建议操作。
-5. 检查 `backend/data/search_diagnostics/` 是否生成本次运行的 JSON 诊断文件。
-6. 检查“推荐岗位清单”是否只展示可靠招聘/JD来源；若为空，应显示诊断建议而不是伪岗位。
-7. 手动切换搜索引擎重跑，比较两次诊断 JSON 中的可靠来源数量。
-8. 检查“复制当前来源”和“复制报告”是否可用。
-9. 若仍频繁触发 429，可临时提高 `LLM_MIN_INTERVAL_SECONDS` 或降低搜索/总结频率后重启后端。
-10. 后续可考虑前端组件拆分、SSE 断线重连、简历上传匹配、模型切换配置或将岗位库升级为 SQLite。
+1. 在可用浏览器通道中检查“复制当前来源”“复制报告”“复制笔记路径”和岗位保存/状态/备注/移除是否可用。
+2. 启动前端，用真实求职输入人工检查任务清单、岗位/JD/渠道来源、岗位分析和最终报告是否正常展示。
+3. 检查“搜索质量诊断”是否显示搜索后端、可靠来源数量、过滤原因和建议操作。
+4. 检查“推荐岗位清单”是否只展示可靠招聘/JD来源；若为空，应显示诊断建议而不是伪岗位。
+5. 若仍频繁触发 429，可临时提高 `LLM_MIN_INTERVAL_SECONDS` 或降低搜索/总结频率后重启后端。
+6. 后续可考虑简历上传匹配、模型切换配置、真实浏览器自动化回归或将岗位库升级为 SQLite。
 
 推荐测试输入：
 
