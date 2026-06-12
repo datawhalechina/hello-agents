@@ -20,6 +20,9 @@ python-multipart>=0.0.9
 # 日志
 loguru>=0.7.0
 
+# RSA非对称加密（前端密码传输）
+cryptography>=41.0.0
+
 # MCP相关
 fastmcp>=2.0.0
 uv>=0.8.0

@@ -219,3 +219,104 @@ class ErrorResponse(BaseModel):
     message: str = Field(..., description="错误消息")
     error_code: Optional[str] = Field(default=None, description="错误代码")
 
+
+# ============ 认证模型 ============
+
+class RegisterRequest(BaseModel):
+    """注册请求（密码经RSA公钥加密，Base64编码）"""
+    username: str = Field(..., min_length=2, max_length=50, description="用户名")
+    encrypted_password: str = Field(..., description="RSA-OAEP加密后的密码(Base64)")
+
+
+class LoginRequest(BaseModel):
+    """登录请求（密码经RSA公钥加密，Base64编码）"""
+    username: str = Field(..., description="用户名")
+    encrypted_password: str = Field(..., description="RSA-OAEP加密后的密码(Base64)")
+
+
+# ============ 历史记录模型 ============
+
+class SaveHistoryRequest(BaseModel):
+    """保存历史记录请求"""
+    city: str = Field(..., description="城市")
+    start_date: str = Field(..., description="开始日期")
+    end_date: str = Field(..., description="结束日期")
+    travel_days: int = Field(..., description="旅行天数")
+    preferences: List[str] = Field(default=[], description="偏好标签")
+    traveler_group: str = Field(default="", description="出行人群")
+    plan_data: dict = Field(..., description="完整行程数据(JSON)")
+
+
+class HistoryItemResponse(BaseModel):
+    """保存历史记录响应"""
+    success: bool = Field(..., description="是否成功")
+    message: str = Field(default="", description="消息")
+    history_id: int = Field(default=0, description="历史记录ID")
+
+
+class HistoryListResponse(BaseModel):
+    """历史记录列表响应"""
+    success: bool = Field(..., description="是否成功")
+    records: list = Field(default=[], description="历史记录列表")
+
+
+class HistoryDetailResponse(BaseModel):
+    """历史记录详情响应"""
+    success: bool = Field(..., description="是否成功")
+    record: Optional[dict] = Field(default=None, description="历史记录详情")
+
+
+class DeleteResponse(BaseModel):
+    """删除响应"""
+    success: bool = Field(..., description="是否成功")
+    message: str = Field(default="", description="消息")
+
+
+# ============ 聊天模型 ============
+
+class ChatMessageSchema(BaseModel):
+    """聊天消息"""
+    id: int = Field(..., description="消息ID")
+    session_id: int = Field(..., description="会话ID")
+    role: str = Field(..., description="角色: user/assistant")
+    content: str = Field(..., description="消息内容")
+    created_at: str = Field(..., description="创建时间")
+
+
+class ChatSessionSchema(BaseModel):
+    """聊天会话"""
+    id: int = Field(..., description="会话ID")
+    user_id: int = Field(..., description="用户ID")
+    title: str = Field(..., description="会话标题")
+    created_at: str = Field(default="", description="创建时间")
+    updated_at: str = Field(default="", description="更新时间")
+
+
+class ChatSessionResponse(BaseModel):
+    """会话响应"""
+    success: bool = Field(..., description="是否成功")
+    session: Optional[ChatSessionSchema] = Field(default=None, description="会话信息")
+
+
+class ChatSessionListResponse(BaseModel):
+    """会话列表响应"""
+    success: bool = Field(..., description="是否成功")
+    sessions: list = Field(default=[], description="会话列表")
+
+
+class ChatMessagesResponse(BaseModel):
+    """消息列表响应"""
+    success: bool = Field(..., description="是否成功")
+    messages: list = Field(default=[], description="消息列表")
+
+
+class ChatSendMessageRequest(BaseModel):
+    """发送消息请求"""
+    content: str = Field(..., description="消息内容", min_length=1)
+
+
+class ChatDeleteResponse(BaseModel):
+    """聊天删除响应"""
+    success: bool = Field(..., description="是否成功")
+    message: str = Field(..., description="消息")
+

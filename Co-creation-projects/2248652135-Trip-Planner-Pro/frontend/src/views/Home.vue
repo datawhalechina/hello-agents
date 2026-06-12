@@ -294,6 +294,14 @@ const handleSubmit = async () => {
     return
   }
 
+  // 检查登录（通过cookie）
+  const loggedIn = localStorage.getItem('auth_username')
+  if (!loggedIn) {
+    message.warning('请先登录后再生成旅行计划')
+    router.push('/login')
+    return
+  }
+
   loading.value = true
   loadingProgress.value = 0
   loadingStatus.value = '正在初始化...'
@@ -341,6 +349,26 @@ const handleSubmit = async () => {
       sessionStorage.setItem('travelerGroup', formData.traveler_group)
 
       message.success('旅行计划生成成功!')
+
+      // 如果已登录，自动保存到历史记录
+      const loggedIn = localStorage.getItem('auth_username')
+      if (loggedIn) {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://localhost:8000'
+        fetch(`${baseUrl}/api/history`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            city: requestData.city,
+            start_date: requestData.start_date,
+            end_date: requestData.end_date,
+            travel_days: requestData.travel_days,
+            preferences: requestData.preferences,
+            traveler_group: requestData.traveler_group,
+            plan_data: response.data,
+          }),
+        }).catch(() => {}) // 静默保存，不阻塞跳转
+      }
 
       // 短暂延迟后跳转
       setTimeout(() => {

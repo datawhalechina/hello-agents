@@ -168,7 +168,6 @@
                   <div class="transport-content">
                     <div class="transport-header">
                       <a-tag :color="getTransportColor(seg.type)" class="transport-tag">{{ seg.type }}</a-tag>
-                      <span v-if="seg.departure_time" class="transport-time">{{ seg.departure_time }} 出发</span>
                     </div>
                     <div class="transport-instruction">{{ seg.instruction }}</div>
                     <div class="transport-meta">
@@ -517,7 +516,8 @@ const loadAttractionPhotos = async () => {
 
   tripPlan.value.days.forEach(day => {
     day.attractions.forEach(attraction => {
-      const promise = fetch(`http://localhost:8000/api/poi/photo?name=${encodeURIComponent(attraction.name)}`)
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://localhost:8000'
+      const promise = fetch(`${baseUrl}/api/poi/photo?name=${encodeURIComponent(attraction.name)}`)
         .then(res => res.json())
         .then(data => {
           if (data.success && data.data.photo_url) {

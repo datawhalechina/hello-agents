@@ -28,8 +28,13 @@ class Settings(BaseSettings):
     host: str = "localhost"
     port: int = 8000
 
+    # SSL/HTTPS配置
+    ssl_enabled: bool = False
+    ssl_certfile: str = ""
+    ssl_keyfile: str = ""
+
     # CORS配置 - 使用字符串,在代码中分割
-    cors_origins: str = "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:3000"
+    cors_origins: str = "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:3000,https://localhost:5173,https://localhost:3000,https://127.0.0.1:5173,https://127.0.0.1:3000"
 
     # 高德地图API配置
     amap_api_key: str = ""
@@ -54,6 +59,20 @@ class Settings(BaseSettings):
     def get_cors_origins_list(self) -> List[str]:
         """获取CORS origins列表"""
         return [origin.strip() for origin in self.cors_origins.split(',')]
+
+    def get_ssl_certfile(self) -> str:
+        """获取SSL证书路径（相对于项目根目录解析）"""
+        if not self.ssl_certfile:
+            return ""
+        path = Path(self.ssl_certfile)
+        return str(path) if path.is_absolute() else str(Path(__file__).parent.parent / self.ssl_certfile)
+
+    def get_ssl_keyfile(self) -> str:
+        """获取SSL密钥路径（相对于项目根目录解析）"""
+        if not self.ssl_keyfile:
+            return ""
+        path = Path(self.ssl_keyfile)
+        return str(path) if path.is_absolute() else str(Path(__file__).parent.parent / self.ssl_keyfile)
 
 
 # 创建全局配置实例
@@ -97,7 +116,10 @@ def print_config():
     print(f"应用名称: {settings.app_name}")
     print(f"版本: {settings.app_version}")
     print(f"服务器: {settings.host}:{settings.port}")
+    protocol = "https" if settings.ssl_enabled else "http"
     print(f"高德地图API Key: {'已配置' if settings.amap_api_key else '未配置'}")
+    print(f"SSL/HTTPS: {'已启用' if settings.ssl_enabled else '未启用'}")
+    print(f"协议: {protocol.upper()}")
 
     # 检查LLM配置
     llm_api_key = os.getenv("LLM_API_KEY") or os.getenv("OPENAI_API_KEY")

@@ -49,3 +49,10 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
+# SSL证书（本地自签名，部署时使用真实证书）
+certs/
+
+# RSA密钥（含私钥，禁止提交）
+data/rsa_private_key.pem
+data/rsa_public_key.pem
+
