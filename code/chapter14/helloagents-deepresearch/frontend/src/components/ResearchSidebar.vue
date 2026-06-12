@@ -36,7 +36,7 @@
             :style="{ width: `${(completedTasks / totalTasks) * 100}%` }"
           ></div>
         </div>
-        <p class="progress-text">{{ completedTasks }} / {{ totalTasks }} 任务完成</p>
+        <p class="progress-text">{{ completedTasks }} / {{ totalTasks }} 个任务完成</p>
       </div>
     </div>
 
@@ -157,13 +157,14 @@ const emit = defineEmits<{
 }
 
 .topic-display {
-  font-size: 16px !important;
+  font-size: 15px !important;
   font-weight: 600;
   color: #0f172a !important;
   padding: 12px;
   background: rgba(59, 130, 246, 0.05);
   border-radius: 8px;
   border-left: 3px solid #3b82f6;
+  white-space: pre-wrap;
 }
 
 .progress-bar {

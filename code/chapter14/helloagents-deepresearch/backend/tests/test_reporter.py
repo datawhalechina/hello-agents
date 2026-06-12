@@ -102,18 +102,30 @@ def make_state_with_jobs() -> SummaryState:
 
 
 class ReportingServiceTests(unittest.TestCase):
+    def assert_action_report_sections(self, report: str) -> None:
+        self.assertTrue(report.startswith("# 找实习行动报告"))
+        self.assertIn("## 1. 结论：今天优先投递", report)
+        self.assertIn("## 2. 推荐理由", report)
+        self.assertIn("## 3. 简历修改清单", report)
+        self.assertIn("## 4. 7 天投递计划", report)
+        self.assertIn("## 5. 风险与待确认项", report)
+        self.assertIn("## 6. 附录：来源与搜索诊断", report)
+
     def test_llm_failure_returns_fallback_report(self) -> None:
         agent = FakeReportAgent(exc=RuntimeError("timeout"))
         service = ReportingService(agent, test_config())
 
         report = service.generate_report(make_state_with_jobs())
 
-        self.assertTrue(report.startswith("# 找实习行动报告"))
-        self.assertIn("推荐岗位 Top 5", report)
+        self.assert_action_report_sections(report)
         self.assertIn("示例科技", report)
         self.assertIn("https://jobs.example.com/java", report)
         self.assertIn("城市和技术栈匹配", report)
         self.assertIn("突出 Spring Boot 项目", report)
+        self.assertIn("今天：", report)
+        self.assertIn("3 天内", report)
+        self.assertIn("7 天内", report)
+        self.assertIn("截止日期未确认", report)
         self.assertIn("可靠来源：1", report)
         self.assertIn("面经/面试 × 1", report)
         self.assertNotIn("后端兜底模板", report)
@@ -134,7 +146,7 @@ class ReportingServiceTests(unittest.TestCase):
 
         report = service.generate_report(make_state())
 
-        self.assertTrue(report.startswith("# 找实习行动报告"))
+        self.assert_action_report_sections(report)
         self.assertNotIn("报告生成失败", report)
         self.assertIn("暂无可靠岗位/JD链接", report)
 
@@ -144,6 +156,7 @@ class ReportingServiceTests(unittest.TestCase):
 
         report = service.generate_report(make_state())
 
+        self.assert_action_report_sections(report)
         self.assertIn("暂无可靠岗位/JD链接", report)
         self.assertIn("暂无可靠信息", report)
         self.assertNotIn("示例科技", report)
@@ -159,7 +172,17 @@ class ReportingServiceTests(unittest.TestCase):
 
         self.assertTrue(report.startswith("# 找实习行动报告"))
         self.assertIn("[已截断，保留关键摘要]", agent.prompt)
+        self.assertIn("结论：今天优先投递", agent.prompt)
         self.assertLess(len(agent.prompt), 2600)
+
+    def test_llm_report_missing_action_sections_uses_fallback(self) -> None:
+        agent = FakeReportAgent(response="# 找实习行动报告\n\nOK")
+        service = ReportingService(agent, test_config())
+
+        report = service.generate_report(make_state_with_jobs())
+
+        self.assert_action_report_sections(report)
+        self.assertIn("示例科技", report)
 
 
 if __name__ == "__main__":

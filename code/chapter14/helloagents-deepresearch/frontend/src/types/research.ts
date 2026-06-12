@@ -85,10 +85,18 @@ export type StreamStatus =
 
 export interface InternshipExample {
   label: string;
-  text: string;
+  form: Partial<ResearchFormState>;
 }
 
 export interface ResearchFormState {
   topic: string;
   searchApi: string;
+  targetRole: string;
+  cities: string;
+  season: string;
+  availability: string;
+  skills: string;
+  projectHighlights: string;
+  companyPreference: string;
+  extraNotes: string;
 }

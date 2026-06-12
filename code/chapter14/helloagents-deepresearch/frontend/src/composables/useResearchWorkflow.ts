@@ -34,11 +34,52 @@ interface ExecuteResearchOptions {
   allowAutoRetry?: boolean;
 }
 
-export function useResearchWorkflow(isExpanded: Ref<boolean>) {
-  const form = reactive<ResearchFormState>({
+const defaultSeason = "2026 暑期";
+
+function createDefaultForm(): ResearchFormState {
+  return {
     topic: "",
-    searchApi: ""
-  });
+    searchApi: "",
+    targetRole: "",
+    cities: "",
+    season: defaultSeason,
+    availability: "",
+    skills: "",
+    projectHighlights: "",
+    companyPreference: "",
+    extraNotes: ""
+  };
+}
+
+function cleanValue(value: string): string {
+  return value.trim();
+}
+
+export function buildResearchTopic(form: ResearchFormState): string {
+  const season = cleanValue(form.season) || defaultSeason;
+  const lines = [
+    `我想找${season}${cleanValue(form.targetRole)}，城市偏好是${cleanValue(form.cities)}。`,
+    cleanValue(form.availability)
+      ? `我的到岗与实习周期：${cleanValue(form.availability)}。`
+      : "",
+    `我的技术栈：${cleanValue(form.skills)}。`,
+    cleanValue(form.projectHighlights)
+      ? `我的项目亮点：${cleanValue(form.projectHighlights)}。`
+      : "",
+    cleanValue(form.companyPreference)
+      ? `公司偏好：${cleanValue(form.companyPreference)}。`
+      : "",
+    cleanValue(form.extraNotes)
+      ? `其他补充：${cleanValue(form.extraNotes)}。`
+      : "",
+    "请优先搜索真实招聘详情页、企业官网/校招官网、可信招聘平台公开页面，并输出岗位清单、JD 要求、投递渠道、搜索质量诊断和找实习行动报告。"
+  ];
+
+  return lines.filter(Boolean).join("\n");
+}
+
+export function useResearchWorkflow(isExpanded: Ref<boolean>) {
+  const form = reactive<ResearchFormState>(createDefaultForm());
 
   const loading = ref(false);
   const error = ref("");
@@ -79,15 +120,42 @@ export function useResearchWorkflow(isExpanded: Ref<boolean>) {
   const internshipExamples: InternshipExample[] = [
     {
       label: "Java 后端实习",
-      text: "我想找 2026 暑期 Java 后端实习，城市上海/杭州，会 Spring Boot、MySQL、Redis，有一个 RAG 项目。"
+      form: {
+        targetRole: "Java 后端实习",
+        cities: "上海 / 杭州",
+        season: defaultSeason,
+        availability: "可尽快到岗，每周 4 天以上，实习 3 个月以上",
+        skills: "Java、Spring Boot、MySQL、Redis、RESTful API",
+        projectHighlights: "做过一个 RAG 项目，熟悉后端接口开发和数据库设计",
+        companyPreference: "互联网公司、AI 应用团队、重视工程实践的团队",
+        extraNotes: "希望优先关注有明确 JD 和投递入口的岗位"
+      }
     },
     {
       label: "AI 应用实习",
-      text: "我想找 2026 暑期 AI 应用开发实习，城市北京/上海/远程，会 Python、FastAPI、LLM、RAG，有 Agent 项目经验。"
+      form: {
+        targetRole: "AI 应用开发实习",
+        cities: "北京 / 上海 / 远程",
+        season: defaultSeason,
+        availability: "暑期可全职实习，日常每周 3-4 天",
+        skills: "Python、FastAPI、LLM、RAG、Agent、向量数据库",
+        projectHighlights: "做过 Agent 项目和 RAG 问答系统，有调用大模型 API 的经验",
+        companyPreference: "AI 公司、模型应用团队、创新业务团队",
+        extraNotes: "希望岗位偏应用落地，不只做数据标注"
+      }
     },
     {
       label: "前端实习",
-      text: "我想找 2026 暑期前端开发实习，城市杭州/上海，会 Vue、TypeScript、Vite，做过一个后台管理系统项目。"
+      form: {
+        targetRole: "前端开发实习",
+        cities: "杭州 / 上海",
+        season: defaultSeason,
+        availability: "可暑期实习 2-3 个月，每周 4 天以上",
+        skills: "Vue、TypeScript、Vite、组件化开发、接口联调",
+        projectHighlights: "做过后台管理系统项目，熟悉表单、列表、状态管理和接口对接",
+        companyPreference: "有成熟前端工程体系的团队",
+        extraNotes: "希望优先关注 Vue 技术栈岗位"
+      }
     }
   ];
 
@@ -335,8 +403,8 @@ export function useResearchWorkflow(isExpanded: Ref<boolean>) {
           typeof item.id === "number"
             ? item.id
             : typeof item.id === "string"
-            ? Number(item.id)
-            : index + 1;
+              ? Number(item.id)
+              : index + 1;
         const id = Number.isFinite(rawId) ? Number(rawId) : index + 1;
         const existing = todoTasks.value.find((task) => task.id === id);
         const noteId =
@@ -357,7 +425,7 @@ export function useResearchWorkflow(isExpanded: Ref<boolean>) {
           intent:
             typeof item.intent === "string" && item.intent.trim()
               ? item.intent.trim()
-              : "探索与主题相关的关键信息",
+              : "探索与求职目标相关的关键信息",
           query:
             typeof item.query === "string" && item.query.trim()
               ? item.query.trim()
@@ -468,7 +536,6 @@ export function useResearchWorkflow(isExpanded: Ref<boolean>) {
       }
 
       applyNoteMetadata(task, payload);
-
       return;
     }
 
@@ -556,7 +623,10 @@ export function useResearchWorkflow(isExpanded: Ref<boolean>) {
 
     if (event.type === "job_items") {
       const payload = event as Record<string, unknown>;
-      applyJobPayload(payload.all_jobs || payload.jobs, Boolean(payload.all_jobs));
+      applyJobPayload(
+        payload.all_jobs || payload.jobs,
+        Boolean(payload.all_jobs)
+      );
       if (jobItems.value.length) {
         progressLogs.value.push(`已更新推荐岗位清单：${jobItems.value.length} 个`);
       }
@@ -668,8 +738,7 @@ export function useResearchWorkflow(isExpanded: Ref<boolean>) {
 
       if (!userCancelled && isRecoverableStreamError(err)) {
         streamStatus.value = "interrupted";
-        error.value =
-          "连接中断，已保留当前结果，可点击“重新尝试”。";
+        error.value = "连接中断，已保留当前结果，可点击“重新尝试”。";
         progressLogs.value.push(
           "连接中断，当前结果已保留，可手动重新尝试"
         );
@@ -687,15 +756,31 @@ export function useResearchWorkflow(isExpanded: Ref<boolean>) {
     }
   }
 
+  function validateProfile(): string | null {
+    const missing = [
+      cleanValue(form.targetRole) ? "" : "目标方向",
+      cleanValue(form.cities) ? "" : "城市偏好",
+      cleanValue(form.skills) ? "" : "技术栈"
+    ].filter(Boolean);
+
+    if (missing.length) {
+      return `请先填写：${missing.join("、")}`;
+    }
+    return null;
+  }
+
   const handleSubmit = async () => {
-    if (!form.topic.trim()) {
-      error.value = "请输入求职目标";
+    const validationError = validateProfile();
+    if (validationError) {
+      error.value = validationError;
       return;
     }
 
     userCancelled = false;
+    const topic = buildResearchTopic(form);
+    form.topic = topic;
     const payload: ResearchRequest = {
-      topic: form.topic.trim(),
+      topic,
       search_api: form.searchApi || undefined
     };
     lastResearchPayload.value = payload;
@@ -726,7 +811,7 @@ export function useResearchWorkflow(isExpanded: Ref<boolean>) {
       return;
     }
     userCancelled = true;
-    progressLogs.value.push("正在尝试取消当前研究任务...");
+    progressLogs.value.push("正在尝试取消当前找实习任务...");
     currentController.abort();
   };
 
@@ -745,15 +830,19 @@ export function useResearchWorkflow(isExpanded: Ref<boolean>) {
     lastResearchPayload.value = null;
     userCancelled = false;
     isExpanded.value = false;
-    form.topic = "";
-    form.searchApi = "";
+    Object.assign(form, createDefaultForm());
   };
 
-  function fillExample(text: string) {
+  function fillExample(exampleForm: Partial<ResearchFormState>) {
     if (loading.value) {
       return;
     }
-    form.topic = text;
+    const currentSearchApi = form.searchApi;
+    Object.assign(form, createDefaultForm(), exampleForm, {
+      searchApi: currentSearchApi
+    });
+    form.topic = buildResearchTopic(form);
+    error.value = "";
   }
 
   onBeforeUnmount(() => {

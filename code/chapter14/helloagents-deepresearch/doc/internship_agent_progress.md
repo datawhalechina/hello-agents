@@ -1,6 +1,6 @@
 # 找实习助手 Agent 开发进度
 
-更新时间：2026-06-08
+更新时间：2026-06-12
 
 ## 当前目标
 
@@ -95,6 +95,20 @@
   - 新增 `components/`、`composables/`、`types/`、`utils/` 分层，承接岗位工作台、任务工作区、报告块、保存岗位和复制逻辑。
   - SSE 软恢复已迁移到 `useResearchWorkflow`：断线自动重试一次，支持手动“重新尝试”，用户取消和后端业务错误不自动重试。
   - 本地岗位保存/投递状态管理已迁移到 `useSavedApplications`，复制报告/来源/笔记路径逻辑已迁移到 `useClipboardActions`。
+- 已完成 v2.0 第二步：岗位排序、筛选和可信度展示：
+  - 新增 `frontend/src/utils/jobDecision.ts`，在前端基于现有 `JobItemView` 派生来源类型、来源可信度、信息完整度、推荐优先级和待确认项。
+  - `JobWorkbench.vue` 新增排序能力：推荐优先、匹配分最高、风险最低、来源最可信、信息最完整。
+  - `JobWorkbench.vue` 新增组合筛选：城市关键词、来源可信度、投递状态、保存状态、来源链接状态、待确认项状态。
+  - 推荐岗位列表新增匹配分、推荐优先级、来源可信度、信息完整度和已保存状态标签，方便快速扫读。
+  - 岗位详情新增“决策提示”区域，展示来源类型、可信度、完整度、推荐理由、来源可信度解释和待确认项。
+  - 所有新增判断均为前端派生展示，不写入 `/research`、`/research/stream` 或 `/applications` payload，后端协议保持兼容。
+- 已完成 v2.0 第三步：行动报告结构升级：
+  - `backend/src/prompts.py` 已强化 Reporter prompt，要求最终报告固定使用 6 个章节：今天优先投递、推荐理由、简历修改清单、7 天投递计划、风险与待确认项、来源与搜索诊断。
+  - `backend/src/services/reporter.py` 的 fallback 报告已从汇总型模板升级为投递作战单，顶部优先列出今天建议人工确认并投递的岗位。
+  - LLM 正常返回若缺少固定行动章节，会自动降级为 deterministic fallback，避免输出结构漂移。
+  - fallback 会继续按 `match_score` 排序岗位，最多展示 5 个；无可靠岗位时明确提示“暂无可靠岗位/JD链接”，不生成伪岗位。
+  - 风险与待确认项会聚合岗位风险、未确认字段和搜索诊断建议；附录保留任务摘要、来源和搜索质量诊断，保证可追溯。
+  - 本次未修改 `/research`、`/research/stream`、`final_report` SSE 事件结构或 `/applications` 数据结构。
 
 ## 当前状态
 
@@ -112,6 +126,8 @@
 - 输出已兼容新增 `search_diagnostics`，用于解释岗位清单质量和空结果原因。
 - 已新增 `JobItem`；暂未新增 `MatchResult`。
 - 岗位保存与投递状态已通过本地 JSON 和辅助 API 落地，不影响现有 `/research` 与 `/research/stream` 兼容性。
+- 前端岗位工作台已支持基于现有岗位字段的排序、筛选、可信度标签、完整度标签、推荐优先级和待确认项展示；这些标签仅作为辅助决策，不代表录用概率。
+- 最终报告已升级为行动型结构，正常 LLM 输出和 fallback 输出都要求包含“今天优先投递、推荐理由、简历修改清单、7 天投递计划、风险与待确认项、来源与搜索诊断”。
 - 本地 `backend/.env` 已存在且已被 `.gitignore` 排除；真实 LLM/search 密钥仅保留在本机配置中，不提交仓库。
 - 端到端复测时使用真实 LLM 配置运行，进程环境覆盖 `FETCH_FULL_PAGE=False`、`TASK_CONCURRENCY=1` 和 `LLM_MIN_INTERVAL_SECONDS=2` 以保持稳定。
 - LLM 限流容错默认生效，可通过 `.env` 调整：
@@ -134,11 +150,11 @@ cd D:\1-school\agent\14\helloagents-deepresearch\backend
 结果：
 
 ```text
-Ran 45 tests
+Ran 51 tests
 OK
 ```
 
-另已完成后端关键模块导入检查。最近一次完整后端单元测试仍为 `Ran 45 tests OK`，测试日志中的 429/timeout/fallback 输出是兜底逻辑覆盖的预期现象。
+另已完成后端关键模块导入检查。最近一次完整后端单元测试为 `Ran 51 tests OK`，测试日志中的 429/timeout/fallback 输出是兜底逻辑覆盖的预期现象。
 
 前端构建已通过：
 
@@ -153,6 +169,46 @@ npm run build
 vue-tsc --noEmit && vite build
 built successfully
 ```
+
+v2.0 第二步前端增强验证已通过：
+
+- `npm run build` 已通过两次，覆盖 `vue-tsc --noEmit` 和 Vite 生产构建。
+- 前端 dev server 在 `http://127.0.0.1:5174` 返回 HTTP 200。
+- 新增岗位排序、筛选、可信度展示和详情“决策提示”均保持前端派生状态，未修改后端 API、SSE 协议或 `/applications` 写入结构。
+- 内置浏览器通道当前不可用，未完成截图级页面检查；本轮已完成构建和本地 HTTP 可访问性验证。
+
+v2.0 第三步行动报告结构升级验证已通过：
+
+- `backend/tests/test_reporter.py` 已覆盖新 6 章结构、高分岗位优先、无岗位不编造、简历修改、7 天计划、风险待确认、来源诊断和长材料截断。
+- 已单独运行 reporter 测试：
+
+```powershell
+cd D:\1-school\agent\14\helloagents-deepresearch\backend
+.\.venv\Scripts\python.exe -B -m unittest tests.test_reporter
+```
+
+结果：
+
+```text
+Ran 6 tests
+OK
+```
+
+- 已运行后端全量测试：
+
+```powershell
+cd D:\1-school\agent\14\helloagents-deepresearch\backend
+.\.venv\Scripts\python.exe -B -m unittest discover -s tests
+```
+
+结果：
+
+```text
+Ran 51 tests
+OK
+```
+
+- 本次只修改后端 Reporter、Reporter 测试和进度文档，未触及前端 UI，因此未重新运行前端构建。
 
 前端拆分后的行为回归 smoke 已完成：
 
@@ -204,12 +260,12 @@ runtime LLM_MIN_INTERVAL_SECONDS=2
 
 优先级建议：
 
-1. 在可用浏览器通道中检查“复制当前来源”“复制报告”“复制笔记路径”和岗位保存/状态/备注/移除是否可用。
-2. 启动前端，用真实求职输入人工检查任务清单、岗位/JD/渠道来源、岗位分析和最终报告是否正常展示。
-3. 检查“搜索质量诊断”是否显示搜索后端、可靠来源数量、过滤原因和建议操作。
-4. 检查“推荐岗位清单”是否只展示可靠招聘/JD来源；若为空，应显示诊断建议而不是伪岗位。
-5. 若仍频繁触发 429，可临时提高 `LLM_MIN_INTERVAL_SECONDS` 或降低搜索/总结频率后重启后端。
-6. 后续可考虑简历上传匹配、模型切换配置、真实浏览器自动化回归或将岗位库升级为 SQLite。
+1. 在可用浏览器通道中检查岗位排序、筛选、可信度标签、详情“决策提示”和筛选空态是否符合预期。
+2. 检查“复制当前来源”“复制报告”“复制笔记路径”和岗位保存/状态/备注/移除是否可用。
+3. 启动前端，用真实求职输入人工检查任务清单、岗位/JD/渠道来源、岗位分析和最终报告是否正常展示。
+4. 检查“搜索质量诊断”是否显示搜索后端、可靠来源数量、过滤原因和建议操作。
+5. 后续按 v2.0 推荐顺序推进“投递跟踪字段扩展”，增加投递渠道、投递日期、下一步动作和简历版本备注等可选字段。
+6. 若仍频繁触发 429，可临时提高 `LLM_MIN_INTERVAL_SECONDS` 或降低搜索/总结频率后重启后端。
 
 推荐测试输入：
 

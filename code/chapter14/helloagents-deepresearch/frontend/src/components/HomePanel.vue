@@ -10,36 +10,49 @@
       </div>
       <div>
         <h1>找实习助手</h1>
-        <p>搜索岗位和投递渠道，分析 JD 要求，生成可执行的投递建议。</p>
+        <p>填写求职画像，生成岗位清单、JD 分析、投递渠道和行动报告。</p>
       </div>
     </header>
 
-    <form class="form" @submit.prevent="emit('submit')">
-      <label class="field">
-        <span>求职目标</span>
-        <textarea
-          v-model="form.topic"
-          placeholder="例如：我想找 2026 暑期 Java 后端实习，城市上海/杭州，会 Spring Boot、MySQL、Redis，有一个 RAG 项目。"
-          rows="4"
-          required
-        ></textarea>
-      </label>
-
-      <section class="example-prompts" aria-label="求职目标示例">
+    <form class="form" novalidate @submit.prevent="emit('submit')">
+      <section class="example-prompts" aria-label="求职画像示例">
         <button
           v-for="example in internshipExamples"
           :key="example.label"
           type="button"
           class="example-chip"
           :disabled="loading"
-          @click="emit('fill-example', example.text)"
+          @click="emit('fill-example', example.form)"
         >
           {{ example.label }}
         </button>
       </section>
 
-      <section class="options">
-        <label class="field option">
+      <section class="profile-grid">
+        <label class="field">
+          <span>目标方向 <strong>必填</strong></span>
+          <input
+            v-model="form.targetRole"
+            placeholder="例如：Java 后端实习、AI 应用实习"
+            required
+          />
+        </label>
+
+        <label class="field">
+          <span>城市偏好 <strong>必填</strong></span>
+          <input
+            v-model="form.cities"
+            placeholder="例如：上海 / 杭州 / 远程"
+            required
+          />
+        </label>
+
+        <label class="field">
+          <span>实习时间</span>
+          <input v-model="form.season" placeholder="例如：2026 暑期" />
+        </label>
+
+        <label class="field">
           <span>搜索引擎</span>
           <select v-model="form.searchApi">
             <option value="">沿用后端配置</option>
@@ -53,6 +66,49 @@
           </select>
         </label>
       </section>
+
+      <label class="field">
+        <span>技术栈 <strong>必填</strong></span>
+        <input
+          v-model="form.skills"
+          placeholder="例如：Spring Boot、MySQL、Redis、RAG"
+          required
+        />
+      </label>
+
+      <label class="field">
+        <span>到岗与周期 <em>填写后匹配更准</em></span>
+        <input
+          v-model="form.availability"
+          placeholder="例如：可尽快到岗，每周 4 天，实习 3 个月以上"
+        />
+      </label>
+
+      <label class="field">
+        <span>项目亮点 <em>填写后匹配更准</em></span>
+        <textarea
+          v-model="form.projectHighlights"
+          placeholder="例如：做过 RAG 项目、后台管理系统、接口设计或数据分析项目"
+          rows="3"
+        ></textarea>
+      </label>
+
+      <label class="field">
+        <span>公司偏好</span>
+        <input
+          v-model="form.companyPreference"
+          placeholder="例如：大厂、AI 公司、创业团队、远程团队"
+        />
+      </label>
+
+      <label class="field">
+        <span>补充说明</span>
+        <textarea
+          v-model="form.extraNotes"
+          placeholder="例如：优先找有明确 JD 和投递入口的岗位；不考虑需要长期坐班的岗位"
+          rows="3"
+        ></textarea>
+      </label>
 
       <div class="form-actions">
         <button class="submit" type="submit" :disabled="loading">
@@ -126,7 +182,7 @@ defineProps<{
 
 const emit = defineEmits<{
   cancel: [];
-  "fill-example": [text: string];
+  "fill-example": [form: Partial<ResearchFormState>];
   "open-saved-applications": [];
   submit: [];
 }>();
@@ -134,20 +190,20 @@ const emit = defineEmits<{
 
 <style scoped>
 .panel-form {
-  max-width: 420px;
+  max-width: 760px;
 }
 
 .panel-centered {
   width: 100%;
-  max-width: 600px;
-  padding: 40px;
+  max-width: 760px;
+  padding: 34px;
   box-shadow: 0 32px 64px rgba(15, 23, 42, 0.15);
   transform: scale(1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .panel-centered:hover {
-  transform: scale(1.02);
+  transform: scale(1.01);
   box-shadow: 0 40px 80px rgba(15, 23, 42, 0.2);
 }
 
@@ -167,7 +223,7 @@ const emit = defineEmits<{
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 22px;
 }
 
 .logo {
@@ -178,6 +234,7 @@ const emit = defineEmits<{
   border-radius: 16px;
   background: linear-gradient(135deg, #2563eb, #7c3aed);
   box-shadow: 0 12px 28px rgba(59, 130, 246, 0.4);
+  flex: 0 0 auto;
 }
 
 .logo svg {
@@ -189,18 +246,40 @@ const emit = defineEmits<{
 .form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .field span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 600;
   color: #475569;
+}
+
+.field strong {
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.field em {
+  color: #64748b;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
 }
 
 .example-prompts {
@@ -230,17 +309,6 @@ const emit = defineEmits<{
 .example-chip:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-.options {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.option {
-  flex: 1;
-  min-width: 140px;
 }
 
 .form-actions {
@@ -333,9 +401,13 @@ const emit = defineEmits<{
   color: #64748b;
 }
 
-@media (max-width: 600px) {
-  .options {
-    flex-direction: column;
+@media (max-width: 700px) {
+  .panel-centered {
+    padding: 24px;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
   }
 
   .panel-head {

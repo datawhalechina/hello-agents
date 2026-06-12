@@ -8,7 +8,7 @@
         </p>
       </div>
       <div class="job-header-actions">
-        <span class="job-count">{{ jobItems.length }} 个岗位线索</span>
+        <span class="job-count">{{ filteredJobItems.length }} / {{ jobItems.length }} 个岗位线索</span>
         <span class="job-count saved">{{ savedApplicationCount }} 个已保存</span>
         <button
           type="button"
@@ -54,10 +54,78 @@
       </div>
     </section>
 
-    <div v-if="jobItems.length" class="job-workbench-grid">
+    <section v-if="jobItems.length" class="job-controls" aria-label="岗位筛选和排序">
+      <label>
+        <span>排序</span>
+        <select v-model="jobSortMode">
+          <option
+            v-for="option in sortOptions"
+            :key="option.value"
+            :value="option.value"
+          >
+            {{ option.label }}
+          </option>
+        </select>
+      </label>
+      <label class="control-wide">
+        <span>城市关键词</span>
+        <input
+          v-model.trim="jobFilters.cityKeyword"
+          placeholder="如 上海 / 远程"
+        />
+      </label>
+      <label>
+        <span>来源可信度</span>
+        <select v-model="jobFilters.sourceTrust">
+          <option value="all">全部</option>
+          <option value="high">高可信</option>
+          <option value="medium">中可信</option>
+          <option value="low">低可信</option>
+        </select>
+      </label>
+      <label>
+        <span>投递状态</span>
+        <select v-model="jobFilters.applicationStatus">
+          <option value="all">全部</option>
+          <option
+            v-for="status in applicationStatuses"
+            :key="status"
+            :value="status"
+          >
+            {{ status }}
+          </option>
+        </select>
+      </label>
+      <label>
+        <span>保存状态</span>
+        <select v-model="jobFilters.savedState">
+          <option value="all">全部</option>
+          <option value="saved">已保存</option>
+          <option value="unsaved">未保存</option>
+        </select>
+      </label>
+      <label>
+        <span>来源链接</span>
+        <select v-model="jobFilters.sourceState">
+          <option value="all">全部</option>
+          <option value="has">有明确来源</option>
+          <option value="missing">来源待确认</option>
+        </select>
+      </label>
+      <label>
+        <span>待确认项</span>
+        <select v-model="jobFilters.confirmState">
+          <option value="all">全部</option>
+          <option value="has">有待确认</option>
+          <option value="none">暂无待确认</option>
+        </select>
+      </label>
+    </section>
+
+    <div v-if="filteredJobItems.length" class="job-workbench-grid">
       <aside class="job-list" aria-label="推荐岗位列表">
         <button
-          v-for="job in jobItems"
+          v-for="job in filteredJobItems"
           :key="job.id"
           type="button"
           class="job-list-item"
@@ -68,14 +136,31 @@
           <span class="job-list-meta">
             {{ job.company }} · {{ job.location }}
           </span>
-          <span
-            class="score-badge"
-            :class="{ pending: job.matchScore === null }"
-          >
-            {{ formatMatchScore(job.matchScore) }}
-          </span>
-          <span v-if="findSavedJob(job)" class="application-badge">
-            {{ findSavedJob(job)?.applicationStatus }}
+          <span class="job-list-badges">
+            <span
+              class="score-badge"
+              :class="{ pending: job.matchScore === null }"
+            >
+              {{ formatMatchScore(job.matchScore) }}
+            </span>
+            <span
+              class="decision-badge"
+              :class="`priority-${getDecision(job).priority}`"
+            >
+              {{ getDecision(job).priorityLabel }}
+            </span>
+            <span
+              class="decision-badge"
+              :class="`trust-${getDecision(job).sourceTrust}`"
+            >
+              {{ getDecision(job).sourceTrustLabel }}
+            </span>
+            <span class="decision-badge completeness">
+              {{ getDecision(job).completenessScore }}%
+            </span>
+            <span v-if="findSavedJob(job)" class="application-badge">
+              {{ findSavedJob(job)?.applicationStatus }}
+            </span>
           </span>
         </button>
       </aside>
@@ -95,6 +180,58 @@
             {{ formatMatchScore(activeJob.matchScore) }}
           </span>
         </header>
+
+        <section class="decision-panel">
+          <div class="decision-panel-head">
+            <div>
+              <h5>决策提示</h5>
+              <p class="muted">
+                这些标签由前端基于现有岗位字段估算，只用于辅助排序和核验。
+              </p>
+            </div>
+            <span
+              class="decision-badge large"
+              :class="`priority-${activeDecision.priority}`"
+            >
+              {{ activeDecision.priorityLabel }}
+            </span>
+          </div>
+
+          <div class="decision-facts">
+            <span>
+              来源类型：{{ activeDecision.sourceTypeLabel }}
+            </span>
+            <span :class="`trust-${activeDecision.sourceTrust}`">
+              可信度：{{ activeDecision.sourceTrustLabel }}
+            </span>
+            <span>
+              信息完整度：{{ activeDecision.completenessLabel }} · {{ activeDecision.completenessScore }}%
+            </span>
+            <span>
+              待确认：{{ activeDecision.confirmationItems.length }} 项
+            </span>
+          </div>
+
+          <p class="decision-reason">
+            {{ activeDecision.priorityReason }}
+          </p>
+          <p class="decision-reason muted">
+            {{ activeDecision.sourceTrustReason }}
+          </p>
+
+          <div v-if="activeDecision.confirmationItems.length" class="confirmation-list">
+            <h5>待确认项</h5>
+            <ul>
+              <li
+                v-for="item in activeDecision.confirmationItems"
+                :key="item"
+              >
+                {{ item }}
+              </li>
+            </ul>
+          </div>
+          <p v-else class="muted">暂无明显待确认项，投递前仍建议打开来源做最终核验。</p>
+        </section>
 
         <section class="application-panel">
           <div class="application-panel-head">
@@ -225,6 +362,10 @@
       </article>
     </div>
 
+    <p v-else-if="jobItems.length" class="muted job-empty">
+      当前筛选条件下没有匹配岗位。可以放宽城市、可信度或待确认项筛选后再看。
+    </p>
+
     <p v-else-if="!savedJobItems.length" class="muted job-empty">
       暂未找到可靠岗位/JD链接。{{ latestSearchDiagnostics?.suggestion || "请调整求职目标或切换搜索引擎后重试。" }}
     </p>
@@ -288,17 +429,40 @@
 </template>
 
 <script setup lang="ts">
+import { computed, reactive, ref, watch } from "vue";
+
 import type {
   JobItemView,
   SearchDiagnosticsView
 } from "../types/research";
+import {
+  getJobDecisionMeta,
+  type JobDecisionMeta,
+  type SourceTrustLevel
+} from "../utils/jobDecision";
 import {
   formatMatchScore,
   formatRejectReason,
   validJobSourceUrl
 } from "../utils/researchFormatters";
 
-defineProps<{
+type SortMode =
+  | "recommended"
+  | "matchScore"
+  | "lowRisk"
+  | "sourceTrust"
+  | "completeness";
+
+interface JobFilters {
+  cityKeyword: string;
+  sourceTrust: "all" | SourceTrustLevel;
+  applicationStatus: string;
+  savedState: "all" | "saved" | "unsaved";
+  sourceState: "all" | "has" | "missing";
+  confirmState: "all" | "has" | "none";
+}
+
+const props = defineProps<{
   activeJob: JobItemView | null;
   activeJobId: string | null;
   activeJobStatus: string;
@@ -331,6 +495,181 @@ const emit = defineEmits<{
   "update-saved-job-status": [job: JobItemView, event: Event];
   "update:activeJobId": [value: string];
 }>();
+
+const sortOptions: Array<{ value: SortMode; label: string }> = [
+  { value: "recommended", label: "推荐优先" },
+  { value: "matchScore", label: "匹配分最高" },
+  { value: "lowRisk", label: "风险最低" },
+  { value: "sourceTrust", label: "来源最可信" },
+  { value: "completeness", label: "信息最完整" }
+];
+
+const jobSortMode = ref<SortMode>("recommended");
+const jobFilters = reactive<JobFilters>({
+  cityKeyword: "",
+  sourceTrust: "all",
+  applicationStatus: "all",
+  savedState: "all",
+  sourceState: "all",
+  confirmState: "all"
+});
+
+const emptyDecision: JobDecisionMeta = {
+  sourceTypeLabel: "未知来源",
+  sourceTrust: "low",
+  sourceTrustLabel: "低可信",
+  sourceTrustRank: 1,
+  sourceTrustReason: "缺少可用于判断来源可信度的岗位信息。",
+  completenessScore: 0,
+  completenessLabel: "待补全",
+  completenessMissing: [],
+  priority: "confirm",
+  priorityLabel: "待确认",
+  priorityRank: 2,
+  priorityReason: "岗位信息不足，需要先补充核验。",
+  confirmationItems: [],
+  hasSourceUrl: false,
+  riskCount: 0
+};
+
+const decisionById = computed(() => {
+  return new Map(
+    props.jobItems.map((job) => [job.id, getJobDecisionMeta(job)])
+  );
+});
+
+function getDecision(job: JobItemView): JobDecisionMeta {
+  return decisionById.value.get(job.id) ?? getJobDecisionMeta(job);
+}
+
+function getSavedStatus(job: JobItemView): string {
+  return props.findSavedJob(job)?.applicationStatus || "";
+}
+
+function getMatchScore(job: JobItemView): number {
+  return job.matchScore ?? -1;
+}
+
+function passesFilters(job: JobItemView): boolean {
+  const decision = getDecision(job);
+  const savedJob = props.findSavedJob(job);
+  const cityKeyword = jobFilters.cityKeyword.trim().toLowerCase();
+
+  if (
+    cityKeyword &&
+    !`${job.location} ${job.company} ${job.title}`
+      .toLowerCase()
+      .includes(cityKeyword)
+  ) {
+    return false;
+  }
+
+  if (
+    jobFilters.sourceTrust !== "all" &&
+    decision.sourceTrust !== jobFilters.sourceTrust
+  ) {
+    return false;
+  }
+
+  if (
+    jobFilters.applicationStatus !== "all" &&
+    getSavedStatus(job) !== jobFilters.applicationStatus
+  ) {
+    return false;
+  }
+
+  if (jobFilters.savedState === "saved" && !savedJob) {
+    return false;
+  }
+  if (jobFilters.savedState === "unsaved" && savedJob) {
+    return false;
+  }
+
+  if (jobFilters.sourceState === "has" && !decision.hasSourceUrl) {
+    return false;
+  }
+  if (jobFilters.sourceState === "missing" && decision.hasSourceUrl) {
+    return false;
+  }
+
+  if (
+    jobFilters.confirmState === "has" &&
+    !decision.confirmationItems.length
+  ) {
+    return false;
+  }
+  if (
+    jobFilters.confirmState === "none" &&
+    decision.confirmationItems.length
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+function compareJobs(a: JobItemView, b: JobItemView): number {
+  const aDecision = getDecision(a);
+  const bDecision = getDecision(b);
+  const scoreDiff = getMatchScore(b) - getMatchScore(a);
+
+  if (jobSortMode.value === "matchScore") {
+    return scoreDiff || bDecision.priorityRank - aDecision.priorityRank;
+  }
+  if (jobSortMode.value === "lowRisk") {
+    return (
+      aDecision.riskCount - bDecision.riskCount ||
+      bDecision.priorityRank - aDecision.priorityRank ||
+      scoreDiff
+    );
+  }
+  if (jobSortMode.value === "sourceTrust") {
+    return (
+      bDecision.sourceTrustRank - aDecision.sourceTrustRank ||
+      bDecision.priorityRank - aDecision.priorityRank ||
+      scoreDiff
+    );
+  }
+  if (jobSortMode.value === "completeness") {
+    return (
+      bDecision.completenessScore - aDecision.completenessScore ||
+      bDecision.priorityRank - aDecision.priorityRank ||
+      scoreDiff
+    );
+  }
+
+  return (
+    bDecision.priorityRank - aDecision.priorityRank ||
+    scoreDiff ||
+    bDecision.sourceTrustRank - aDecision.sourceTrustRank ||
+    bDecision.completenessScore - aDecision.completenessScore ||
+    aDecision.riskCount - bDecision.riskCount
+  );
+}
+
+const filteredJobItems = computed(() =>
+  props.jobItems.filter(passesFilters).slice().sort(compareJobs)
+);
+
+const activeDecision = computed(() => {
+  if (!props.activeJob) {
+    return emptyDecision;
+  }
+  return getDecision(props.activeJob);
+});
+
+watch(
+  filteredJobItems,
+  (jobs) => {
+    if (!jobs.length) {
+      return;
+    }
+    if (!props.activeJobId || !jobs.some((job) => job.id === props.activeJobId)) {
+      emit("update:activeJobId", jobs[0].id);
+    }
+  },
+  { flush: "post" }
+);
 </script>
 
 <style scoped>
@@ -433,6 +772,39 @@ const emit = defineEmits<{
   line-height: 1.7;
 }
 
+.job-controls {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 16px;
+  background: rgba(248, 250, 252, 0.76);
+}
+
+.job-controls label {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.job-controls .control-wide {
+  grid-column: span 2;
+}
+
+.job-controls input,
+.job-controls select {
+  width: 100%;
+  min-width: 0;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
 .job-workbench-grid {
   display: grid;
   grid-template-columns: 300px 1fr;
@@ -480,6 +852,14 @@ const emit = defineEmits<{
   line-height: 1.5;
 }
 
+.job-list-badges {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
 .score-badge {
   align-self: start;
   padding: 4px 9px;
@@ -489,6 +869,71 @@ const emit = defineEmits<{
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
+}
+
+.decision-badge {
+  align-self: start;
+  padding: 4px 9px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 999px;
+  background: rgba(248, 250, 252, 0.9);
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.decision-badge.large {
+  padding: 7px 12px;
+  font-size: 13px;
+}
+
+.priority-priority {
+  border-color: rgba(34, 197, 94, 0.3);
+  background: rgba(220, 252, 231, 0.72);
+  color: #15803d;
+}
+
+.priority-normal {
+  border-color: rgba(59, 130, 246, 0.28);
+  background: rgba(219, 234, 254, 0.7);
+  color: #1d4ed8;
+}
+
+.priority-confirm {
+  border-color: rgba(245, 158, 11, 0.32);
+  background: rgba(254, 243, 199, 0.8);
+  color: #92400e;
+}
+
+.priority-defer {
+  border-color: rgba(148, 163, 184, 0.32);
+  background: rgba(241, 245, 249, 0.9);
+  color: #475569;
+}
+
+.trust-high {
+  border-color: rgba(20, 184, 166, 0.3);
+  background: rgba(204, 251, 241, 0.64);
+  color: #0f766e;
+}
+
+.trust-medium {
+  border-color: rgba(59, 130, 246, 0.26);
+  background: rgba(219, 234, 254, 0.58);
+  color: #1d4ed8;
+}
+
+.trust-low {
+  border-color: rgba(248, 113, 113, 0.32);
+  background: rgba(254, 226, 226, 0.62);
+  color: #b91c1c;
+}
+
+.decision-badge.completeness {
+  border-color: rgba(129, 140, 248, 0.26);
+  background: rgba(224, 231, 255, 0.7);
+  color: #3730a3;
 }
 
 .score-badge.pending {
@@ -542,6 +987,83 @@ const emit = defineEmits<{
 .job-detail h5 {
   font-size: 14px;
   font-weight: 700;
+}
+
+.decision-panel {
+  padding: 14px;
+  border: 1px solid rgba(129, 140, 248, 0.2);
+  border-radius: 14px;
+  background: rgba(238, 242, 255, 0.54);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.decision-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.decision-panel h5,
+.decision-panel p {
+  margin: 0;
+}
+
+.decision-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.decision-facts span {
+  padding: 6px 10px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.decision-facts span.trust-high {
+  border-color: rgba(20, 184, 166, 0.3);
+  background: rgba(204, 251, 241, 0.64);
+  color: #0f766e;
+}
+
+.decision-facts span.trust-medium {
+  border-color: rgba(59, 130, 246, 0.26);
+  background: rgba(219, 234, 254, 0.58);
+  color: #1d4ed8;
+}
+
+.decision-facts span.trust-low {
+  border-color: rgba(248, 113, 113, 0.32);
+  background: rgba(254, 226, 226, 0.62);
+  color: #b91c1c;
+}
+
+.decision-reason {
+  color: #1f2937;
+  line-height: 1.7;
+}
+
+.confirmation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.confirmation-list ul {
+  margin: 0 0 0 18px;
+  padding: 0;
+  color: #1f2937;
+  line-height: 1.7;
 }
 
 .application-panel {
@@ -742,6 +1264,10 @@ const emit = defineEmits<{
 }
 
 @media (max-width: 960px) {
+  .job-controls {
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+  }
+
   .job-workbench-grid {
     grid-template-columns: 1fr;
   }
@@ -749,6 +1275,14 @@ const emit = defineEmits<{
   .application-controls,
   .saved-jobs-list li {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .job-controls,
+  .job-controls .control-wide {
+    grid-template-columns: 1fr;
+    grid-column: auto;
   }
 }
 </style>
