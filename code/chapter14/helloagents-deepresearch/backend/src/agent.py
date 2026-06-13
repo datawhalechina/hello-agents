@@ -48,7 +48,11 @@ from services.llm_client import (
     RealLLMClient,
     ReplayLLMClient,
 )
-from services.run_log import RunLogger, load_run_log
+from services.run_log import (
+    RunLogger,
+    load_run_log,
+    summarize_sensitive_payload,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -257,6 +261,16 @@ class DeepResearchAgent:
             raise
 
     def run_stream(self, topic: str) -> Iterator[dict[str, Any]]:
+        """Execute the streaming workflow and persist fatal errors."""
+
+        try:
+            yield from self._run_stream_impl(topic)
+        except Exception as exc:
+            if self._run_logger:
+                self._run_logger.set_error(exc)
+            raise
+
+    def _run_stream_impl(self, topic: str) -> Iterator[dict[str, Any]]:
         """Execute the workflow yielding incremental progress events."""
         state = self._create_state(topic)
         self._start_run_logger(state, topic)
@@ -348,6 +362,8 @@ class DeepResearchAgent:
                         enqueue(event, task=task)
             except Exception as exc:  # pragma: no cover - defensive guardrail
                 logger.exception("Task execution failed", exc_info=exc)
+                if self._run_logger:
+                    self._run_logger.set_error(f"Task {task.id} failed: {exc}")
                 enqueue(
                     {
                         "type": "task_status",
@@ -527,11 +543,21 @@ class DeepResearchAgent:
             self._replay_tool_cursor += 1
             if payload.get("tool_name") != tool_name:
                 continue
-            if self.config.llm_replay_strict and payload.get("input") != input_payload:
-                raise RuntimeError(
-                    f"Replay tool input mismatch for {tool_name}: "
-                    f"expected {payload.get('input')}, got {input_payload}"
+            if self.config.llm_replay_strict:
+                expected_input = payload.get("input")
+                expected_hash = payload.get("input_hash")
+                actual_summary = summarize_sensitive_payload(input_payload)
+                input_matches = (
+                    expected_hash == actual_summary["sha256"]
+                    if expected_hash
+                    else expected_input == input_payload
                 )
+                if not input_matches:
+                    expected = expected_hash or expected_input
+                    raise RuntimeError(
+                        f"Replay tool input mismatch for {tool_name}: "
+                        f"expected {expected}, got {actual_summary['sha256']}"
+                    )
             result = payload.get("result")
             if isinstance(result, dict):
                 self._record_tool_result(tool_name, input_payload, result)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 import tempfile
 import unittest
@@ -96,20 +97,37 @@ class FakeLLMRuntimeTests(unittest.TestCase):
 
     def test_replay_mode_uses_log_without_real_llm_or_search(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            source_config = Configuration(
+            base_config = Configuration(
                 llm_mode="fake",
+                llm_cache_enabled=True,
+                llm_cache_dir=str(Path(tmpdir) / "cache"),
                 enable_notes=False,
                 max_agent_steps=1,
-                llm_run_log_dir=tmpdir,
                 llm_retry_base_delay=0,
                 llm_retry_max_delay=0,
                 llm_min_interval_seconds=0,
             )
+            warmup_config = base_config.model_copy(
+                update={"llm_run_log_dir": str(Path(tmpdir) / "warmup")}
+            )
+            source_config = base_config.model_copy(
+                update={"llm_run_log_dir": str(Path(tmpdir) / "source")}
+            )
             with patch.object(agent_module, "dispatch_search", side_effect=fake_search_result):
+                DeepResearchAgent(config=warmup_config).run("replay Java 后端实习")
                 source_result = DeepResearchAgent(config=source_config).run("replay Java 后端实习")
 
-            logs = list(Path(tmpdir).glob("run_*.json"))
+            logs = list((Path(tmpdir) / "source").glob("run_*.json"))
             self.assertEqual(len(logs), 1)
+            source_log = json.loads(logs[0].read_text(encoding="utf-8"))
+            self.assertEqual(source_log["schema_version"], 2)
+            self.assertTrue(source_log["llm_response"])
+            self.assertTrue(
+                all(
+                    item.get("metadata", {}).get("cache_hit")
+                    for item in source_log["llm_response"]
+                )
+            )
 
             replay_config = Configuration(
                 llm_mode="replay",
@@ -130,6 +148,107 @@ class FakeLLMRuntimeTests(unittest.TestCase):
 
         self.assertEqual(replay_result.report_markdown, source_result.report_markdown)
         self.assertEqual(len(replay_result.job_items), len(source_result.job_items))
+
+    def test_stream_log_records_final_answer_and_step_limit_matches_sync(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            sync_config = Configuration(
+                llm_mode="dry_run",
+                dry_run_skip_search=True,
+                enable_notes=False,
+                max_agent_steps=1,
+                llm_run_log_dir=str(Path(tmpdir) / "sync"),
+                llm_retry_base_delay=0,
+                llm_retry_max_delay=0,
+                llm_min_interval_seconds=0,
+            )
+            stream_config = sync_config.model_copy(
+                update={"llm_run_log_dir": str(Path(tmpdir) / "stream")}
+            )
+
+            sync_result = DeepResearchAgent(config=sync_config).run("Java 后端实习")
+            events = list(
+                DeepResearchAgent(config=stream_config).run_stream("Java 后端实习")
+            )
+            stream_log_path = next((Path(tmpdir) / "stream").glob("run_*.json"))
+            stream_log = json.loads(stream_log_path.read_text(encoding="utf-8"))
+
+        sync_skipped = [item.id for item in sync_result.todo_items if item.status == "skipped"]
+        stream_skipped = [
+            event["task_id"]
+            for event in events
+            if event.get("type") == "task_status" and event.get("status") == "skipped"
+        ]
+        self.assertEqual(stream_skipped, sync_skipped)
+        self.assertTrue(stream_log["final_answer"].startswith("# 找实习行动报告"))
+        self.assertIsNone(stream_log["error"])
+
+    def test_stream_fatal_error_is_recorded(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = Configuration(
+                llm_mode="fake",
+                enable_notes=False,
+                llm_run_log_dir=tmpdir,
+                llm_min_interval_seconds=0,
+            )
+            agent = DeepResearchAgent(config=config)
+            agent.planner.plan_todo_list = lambda _state: (_ for _ in ()).throw(
+                RuntimeError("stream planner boom")
+            )
+
+            with self.assertRaisesRegex(RuntimeError, "stream planner boom"):
+                list(agent.run_stream("private@example.com"))
+
+            log_path = next(Path(tmpdir).glob("run_*.json"))
+            payload = json.loads(log_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(payload["error"], "stream planner boom")
+        self.assertIsNone(payload["final_answer"])
+
+    def test_stream_worker_error_is_recorded_but_report_completes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = Configuration(
+                llm_mode="fake",
+                enable_notes=False,
+                max_agent_steps=1,
+                llm_run_log_dir=tmpdir,
+                llm_min_interval_seconds=0,
+            )
+            agent = DeepResearchAgent(config=config)
+
+            def fail_task(*_args, **_kwargs):
+                raise RuntimeError("worker boom")
+                yield
+
+            agent._execute_task = fail_task
+            events = list(agent.run_stream("Java 后端实习"))
+            log_path = next(Path(tmpdir).glob("run_*.json"))
+            payload = json.loads(log_path.read_text(encoding="utf-8"))
+
+        self.assertTrue(any(event.get("type") == "final_report" for event in events))
+        self.assertEqual(payload["error"], "Task 1 failed: worker boom")
+        self.assertTrue(payload["final_answer"].startswith("# 找实习行动报告"))
+
+    def test_legacy_replay_tool_input_remains_supported(self) -> None:
+        coordinator = object.__new__(DeepResearchAgent)
+        coordinator.config = Configuration(llm_mode="replay", llm_replay_strict=True)
+        coordinator._replay_tool_cursor = 0
+        coordinator._run_logger = None
+        coordinator._replay_log_data = {
+            "tool_result": [
+                {
+                    "tool_name": "search",
+                    "input": {"query": "legacy query", "loop_count": 0},
+                    "result": {"backend": "legacy", "search_result": None},
+                }
+            ]
+        }
+
+        result = coordinator._next_replay_tool_result(
+            "search",
+            {"query": "legacy query", "loop_count": 0},
+        )
+
+        self.assertEqual(result["backend"], "legacy")
 
 
 if __name__ == "__main__":
