@@ -1,11 +1,15 @@
 .env
 *.env
+!AGENTS.md
+!PROGRESS.md
 .venv/
 venv/
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
+.llm_cache/
+logs/
 
 node_modules/
 dist/
@@ -13,6 +17,8 @@ dist/
 
 backend/.env
 backend/.venv/
+backend/.llm_cache/
+backend/logs/
 backend/notes/
 backend/data/
 backend/memory/

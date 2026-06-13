@@ -8,7 +8,7 @@ from contextlib import redirect_stdout
 from collections.abc import Iterator
 from typing import Any, Callable
 
-from hello_agents import HelloAgentsLLM, SimpleAgent
+from hello_agents import SimpleAgent
 from hello_agents.tools import ToolRegistry
 
 
@@ -18,7 +18,7 @@ class ToolAwareSimpleAgent(SimpleAgent):
     def __init__(
         self,
         name: str,
-        llm: HelloAgentsLLM,
+        llm: Any,
         system_prompt: str | None = None,
         tool_registry: ToolRegistry | None = None,
         enable_tool_calling: bool = True,

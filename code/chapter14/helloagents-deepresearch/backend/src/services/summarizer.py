@@ -37,7 +37,7 @@ class SummarizationService:
     def summarize_task(self, state: SummaryState, task: TodoItem, context: str) -> str:
         """Generate a task-specific summary using the summarizer agent."""
 
-        prompt = self._build_prompt(state, task, context)
+        prompt = self.build_prompt(state, task, context)
 
         agent = self._agent_factory()
         try:
@@ -70,7 +70,7 @@ class SummarizationService:
     ) -> Tuple[Iterator[str], Callable[[], str]]:
         """Stream the summary text for a task while collecting full output."""
 
-        prompt = self._build_prompt(state, task, context)
+        prompt = self.build_prompt(state, task, context)
         remove_thinking = self._config.strip_thinking_tokens
         raw_buffer = ""
         visible_output = ""
@@ -205,7 +205,7 @@ class SummarizationService:
             excerpt = f"{excerpt[:MAX_FALLBACK_CONTEXT_CHARS].rstrip()}\n- ...[已截断]"
         return excerpt
 
-    def _build_prompt(self, state: SummaryState, task: TodoItem, context: str) -> str:
+    def build_prompt(self, state: SummaryState, task: TodoItem, context: str) -> str:
         """Construct the summarization prompt shared by both modes."""
 
         return (
@@ -226,3 +226,8 @@ class SummarizationService:
             "保留可追溯来源线索；不要编造岗位、薪资、截止日期或链接；"
             "不要输出或残留 [TOOL_CALL:...] 指令。"
         )
+
+    def _build_prompt(self, state: SummaryState, task: TodoItem, context: str) -> str:
+        """Backward-compatible alias for older tests and callers."""
+
+        return self.build_prompt(state, task, context)

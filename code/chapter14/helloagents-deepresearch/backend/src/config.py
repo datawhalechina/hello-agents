@@ -130,6 +130,46 @@ class Configuration(BaseModel):
         title="LLM Min Interval",
         description="Minimum interval between process-local LLM calls",
     )
+    llm_mode: str = Field(
+        default="real",
+        title="LLM Mode",
+        description="LLM execution mode: real or fake",
+    )
+    llm_cache_enabled: bool = Field(
+        default=False,
+        title="LLM Cache Enabled",
+        description="Whether to cache LLM responses on disk",
+    )
+    llm_cache_dir: str = Field(
+        default=".llm_cache",
+        title="LLM Cache Directory",
+        description="Directory for local LLM response cache JSON files",
+    )
+    max_agent_steps: int = Field(
+        default=3,
+        title="Max Agent Steps",
+        description="Maximum number of research tasks to execute; 0 disables the limit",
+    )
+    dry_run_skip_search: bool = Field(
+        default=True,
+        title="Dry Run Skip Search",
+        description="Whether dry-run mode should avoid real search backends",
+    )
+    llm_run_log_dir: str = Field(
+        default="logs",
+        title="LLM Run Log Directory",
+        description="Directory for per-run JSON traces",
+    )
+    llm_replay_log: Optional[str] = Field(
+        default=None,
+        title="LLM Replay Log",
+        description="Run log JSON to replay when LLM_MODE=replay",
+    )
+    llm_replay_strict: bool = Field(
+        default=True,
+        title="LLM Replay Strict",
+        description="Whether replay mode should enforce request hash matching",
+    )
 
     @classmethod
     def from_env(cls, overrides: Optional[dict[str, Any]] = None) -> "Configuration":
@@ -155,6 +195,14 @@ class Configuration(BaseModel):
             "llm_retry_base_delay": os.getenv("LLM_RETRY_BASE_DELAY"),
             "llm_retry_max_delay": os.getenv("LLM_RETRY_MAX_DELAY"),
             "llm_min_interval_seconds": os.getenv("LLM_MIN_INTERVAL_SECONDS"),
+            "llm_mode": os.getenv("LLM_MODE"),
+            "llm_cache_enabled": os.getenv("LLM_CACHE_ENABLED"),
+            "llm_cache_dir": os.getenv("LLM_CACHE_DIR"),
+            "max_agent_steps": os.getenv("MAX_AGENT_STEPS"),
+            "dry_run_skip_search": os.getenv("DRY_RUN_SKIP_SEARCH"),
+            "llm_run_log_dir": os.getenv("LLM_RUN_LOG_DIR"),
+            "llm_replay_log": os.getenv("LLM_REPLAY_LOG"),
+            "llm_replay_strict": os.getenv("LLM_REPLAY_STRICT"),
             "lmstudio_base_url": os.getenv("LMSTUDIO_BASE_URL"),
             "ollama_base_url": os.getenv("OLLAMA_BASE_URL"),
             "max_web_research_loops": os.getenv("MAX_WEB_RESEARCH_LOOPS"),

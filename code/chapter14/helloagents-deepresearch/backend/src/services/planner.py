@@ -57,10 +57,7 @@ class PlanningService:
     def plan_todo_list(self, state: SummaryState) -> List[TodoItem]:
         """Ask the planner agent to break the topic into actionable tasks."""
 
-        prompt = todo_planner_instructions.format(
-            current_date=get_current_date(),
-            user_needs=state.research_topic,
-        )
+        prompt = self.build_prompt(state)
 
         try:
             response = run_with_llm_retry(
@@ -94,6 +91,14 @@ class PlanningService:
         titles = [task.title for task in todo_items]
         logger.info("Planner produced %d tasks: %s", len(todo_items), titles)
         return todo_items
+
+    def build_prompt(self, state: SummaryState) -> str:
+        """Build the user prompt sent to the planner LLM."""
+
+        return todo_planner_instructions.format(
+            current_date=get_current_date(),
+            user_needs=state.research_topic,
+        )
 
     @staticmethod
     def create_fallback_task(state: SummaryState) -> TodoItem:

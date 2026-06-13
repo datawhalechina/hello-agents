@@ -40,6 +40,15 @@ from services.search import (
 from services.search_diagnostics import persist_search_diagnostics
 from services.summarizer import SummarizationService
 from services.tool_events import ToolCallTracker
+from services.llm_client import (
+    CachedLLMClient,
+    DryRunLLMClient,
+    FakeLLMClient,
+    HelloAgentsCompatibleLLM,
+    RealLLMClient,
+    ReplayLLMClient,
+)
+from services.run_log import RunLogger, load_run_log
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +59,9 @@ class DeepResearchAgent:
     def __init__(self, config: Configuration | None = None) -> None:
         """Initialise the coordinator with configuration and shared tools."""
         self.config = config or Configuration.from_env()
+        self._run_logger: RunLogger | None = None
+        self._replay_log_data = self._load_replay_log_data()
+        self._replay_tool_cursor = 0
         self.llm = self._init_llm()
 
         self.note_tool = (
@@ -100,8 +112,34 @@ class DeepResearchAgent:
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
-    def _init_llm(self) -> HelloAgentsLLM:
-        """Instantiate HelloAgentsLLM following configuration preferences."""
+    def _init_llm(self) -> HelloAgentsCompatibleLLM:
+        """Instantiate the shared LLM adapter following configuration preferences."""
+        mode = (self.config.llm_mode or "real").strip().lower()
+        if mode == "fake":
+            client = FakeLLMClient()
+            if self.config.llm_cache_enabled:
+                client = CachedLLMClient(client, self.config.llm_cache_dir)
+            return HelloAgentsCompatibleLLM(
+                client,
+                model="fake-llm",
+                temperature=0.0,
+            )
+        if mode == "dry_run":
+            return HelloAgentsCompatibleLLM(
+                DryRunLLMClient(),
+                model="dry-run-llm",
+                temperature=0.0,
+            )
+        if mode == "replay":
+            return HelloAgentsCompatibleLLM(
+                ReplayLLMClient(
+                    self.config.llm_replay_log or "",
+                    strict=self.config.llm_replay_strict,
+                ),
+                model="replay-llm",
+                temperature=0.0,
+            )
+
         llm_kwargs: dict[str, Any] = {
             "temperature": 0.0,
             "timeout": self.config.llm_timeout,
@@ -131,7 +169,15 @@ class DeepResearchAgent:
             if self.config.llm_api_key:
                 llm_kwargs["api_key"] = self.config.llm_api_key
 
-        return HelloAgentsLLM(**llm_kwargs)
+        real_llm = HelloAgentsLLM(**llm_kwargs)
+        client = RealLLMClient(real_llm)
+        if self.config.llm_cache_enabled:
+            client = CachedLLMClient(client, self.config.llm_cache_dir)
+        return HelloAgentsCompatibleLLM(
+            client,
+            model=model_id or self.config.resolved_model() or "unknown",
+            temperature=0.0,
+        )
 
     def _create_tool_aware_agent(self, *, name: str, system_prompt: str) -> ToolAwareSimpleAgent:
         """Instantiate a ToolAwareSimpleAgent sharing tool registry and tracker."""
@@ -153,41 +199,67 @@ class DeepResearchAgent:
         """Create per-run state with a stable diagnostic run id."""
         return SummaryState(run_id=uuid4().hex[:12], research_topic=topic)
 
+    def _load_replay_log_data(self) -> dict[str, Any] | None:
+        if (self.config.llm_mode or "").strip().lower() != "replay":
+            return None
+        if not self.config.llm_replay_log:
+            return None
+        return load_run_log(self.config.llm_replay_log)
+
+    def _start_run_logger(self, state: SummaryState, topic: str) -> None:
+        self._run_logger = RunLogger(
+            run_id=state.run_id or uuid4().hex[:12],
+            log_dir=self.config.llm_run_log_dir,
+            user_input=topic,
+        )
+        if hasattr(self.llm, "set_run_logger"):
+            self.llm.set_run_logger(self._run_logger)
+
     def run(self, topic: str) -> SummaryStateOutput:
         """Execute the research workflow and return the final report."""
         state = self._create_state(topic)
-        state.todo_items = self.planner.plan_todo_list(state)
-        self._drain_tool_events(state)
-
-        if not state.todo_items:
-            logger.info("No TODO items generated; falling back to internship tasks")
-            state.todo_items = self.planner.create_fallback_tasks(state)
-
-        for task in state.todo_items:
-            for _ in self._execute_task(state, task, emit_stream=False):
-                pass
-
-        report = self.reporting.generate_report(state)
-        self._drain_tool_events(state)
-        state.structured_report = report
-        state.running_summary = report
+        self._start_run_logger(state, topic)
         try:
-            self._persist_final_report(state, report)
-        except Exception as exc:  # pragma: no cover - report should still return
-            logger.exception("Persisting final report note failed", exc_info=exc)
-        self._persist_search_diagnostics(state)
+            state.todo_items = self.planner.plan_todo_list(state)
+            self._drain_tool_events(state)
 
-        return SummaryStateOutput(
-            running_summary=report,
-            report_markdown=report,
-            todo_items=state.todo_items,
-            job_items=state.job_items,
-            search_diagnostics=state.search_diagnostics,
-        )
+            if not state.todo_items:
+                logger.info("No TODO items generated; falling back to internship tasks")
+                state.todo_items = self.planner.create_fallback_tasks(state)
+
+            executable_tasks, _skipped_tasks = self._split_tasks_by_step_limit(state.todo_items)
+            for task in executable_tasks:
+                for _ in self._execute_task(state, task, emit_stream=False):
+                    pass
+
+            report = self.reporting.generate_report(state)
+            self._drain_tool_events(state)
+            state.structured_report = report
+            state.running_summary = report
+            if self._run_logger:
+                self._run_logger.set_final_answer(report)
+            try:
+                self._persist_final_report(state, report)
+            except Exception as exc:  # pragma: no cover - report should still return
+                logger.exception("Persisting final report note failed", exc_info=exc)
+            self._persist_search_diagnostics(state)
+
+            return SummaryStateOutput(
+                running_summary=report,
+                report_markdown=report,
+                todo_items=state.todo_items,
+                job_items=state.job_items,
+                search_diagnostics=state.search_diagnostics,
+            )
+        except Exception as exc:
+            if self._run_logger:
+                self._run_logger.set_error(exc)
+            raise
 
     def run_stream(self, topic: str) -> Iterator[dict[str, Any]]:
         """Execute the workflow yielding incremental progress events."""
         state = self._create_state(topic)
+        self._start_run_logger(state, topic)
         logger.debug("Starting streaming research: topic=%s", topic)
         yield {"type": "status", "message": "初始化找实习流程"}
 
@@ -203,11 +275,28 @@ class DeepResearchAgent:
             task.stream_token = token
             channel_map[task.id] = {"step": index, "token": token}
 
+        executable_tasks, skipped_tasks = self._split_tasks_by_step_limit(state.todo_items)
+
         yield {
             "type": "todo_list",
             "tasks": [self._serialize_task(t) for t in state.todo_items],
             "step": 0,
         }
+
+        for task in skipped_tasks:
+            channel = channel_map.get(task.id, {})
+            yield {
+                "type": "task_status",
+                "task_id": task.id,
+                "status": task.status,
+                "summary": task.summary,
+                "title": task.title,
+                "intent": task.intent,
+                "note_id": task.note_id,
+                "note_path": task.note_path,
+                "step": channel.get("step", 0),
+                "stream_token": channel.get("token"),
+            }
 
         event_queue: Queue[dict[str, Any]] = Queue()
 
@@ -275,13 +364,13 @@ class DeepResearchAgent:
             finally:
                 enqueue({"type": "__task_done__", "task_id": task.id})
 
-        for task in state.todo_items:
+        for task in executable_tasks:
             step = channel_map.get(task.id, {}).get("step", 0)
             thread = Thread(target=worker, args=(task, step), daemon=True)
             threads.append(thread)
             thread.start()
 
-        active_workers = len(state.todo_items)
+        active_workers = len(executable_tasks)
         finished_workers = 0
 
         try:
@@ -310,6 +399,8 @@ class DeepResearchAgent:
             yield event
         state.structured_report = report
         state.running_summary = report
+        if self._run_logger:
+            self._run_logger.set_final_answer(report)
 
         try:
             note_event = self._persist_final_report(state, report)
@@ -335,6 +426,119 @@ class DeepResearchAgent:
     # ------------------------------------------------------------------
     # Execution helpers
     # ------------------------------------------------------------------
+    def _split_tasks_by_step_limit(
+        self,
+        tasks: list[TodoItem],
+    ) -> tuple[list[TodoItem], list[TodoItem]]:
+        """Apply the configured max task limit for low-cost development runs."""
+
+        max_steps = int(self.config.max_agent_steps)
+        if max_steps <= 0 or len(tasks) <= max_steps:
+            return tasks, []
+
+        executable = tasks[:max_steps]
+        skipped = tasks[max_steps:]
+        for task in skipped:
+            task.status = "skipped"
+            task.summary = (
+                f"已达到 MAX_AGENT_STEPS={max_steps}，开发阶段跳过该任务，"
+                "避免一次运行触发过多模型调用。"
+            )
+        return executable, skipped
+
+    def _dispatch_search(
+        self,
+        query: str,
+        loop_count: int,
+    ) -> tuple[dict[str, Any] | None, list[str], str | None, str]:
+        """Dispatch search or return deterministic dry-run data."""
+
+        if self._is_replay():
+            result = self._next_replay_tool_result("search", {"query": query, "loop_count": loop_count})
+            return (
+                result.get("search_result"),
+                list(result.get("notices") or []),
+                result.get("answer_text"),
+                str(result.get("backend") or "replay"),
+            )
+
+        if self._is_dry_run() and self.config.dry_run_skip_search:
+            payload = {
+                "results": [
+                    {
+                        "title": "Dry-run 示例科技 Java 后端实习生招聘",
+                        "url": "https://www.zhipin.com/job_detail/dry-run.html",
+                        "content": (
+                            "岗位职责 任职要求 投递入口 Spring Boot MySQL Redis。"
+                            "此结果为 dry-run 本地模拟，真实投递前必须点开来源核验。"
+                        ),
+                        "raw_content": "",
+                    }
+                ],
+                "backend": "dry_run",
+                "answer": None,
+                "notices": ["dry-run: skipped real search backend"],
+            }
+            result = (payload, list(payload["notices"]), None, "dry_run")
+        else:
+            result = dispatch_search(query, self.config, loop_count)
+
+        search_result, notices, answer_text, backend = result
+        self._record_tool_result(
+            "search",
+            {"query": query, "loop_count": loop_count},
+            {
+                "search_result": search_result,
+                "notices": notices,
+                "answer_text": answer_text,
+                "backend": backend,
+            },
+        )
+        return result
+
+    def _is_dry_run(self) -> bool:
+        return (self.config.llm_mode or "").strip().lower() == "dry_run"
+
+    def _is_replay(self) -> bool:
+        return (self.config.llm_mode or "").strip().lower() == "replay"
+
+    def _record_tool_result(
+        self,
+        tool_name: str,
+        input_payload: dict[str, Any],
+        result: dict[str, Any],
+    ) -> None:
+        run_logger = getattr(self, "_run_logger", None)
+        if run_logger:
+            run_logger.record_tool_result(
+                tool_name=tool_name,
+                input_payload=input_payload,
+                result=result,
+            )
+
+    def _next_replay_tool_result(
+        self,
+        tool_name: str,
+        input_payload: dict[str, Any],
+    ) -> dict[str, Any]:
+        tool_results = list((self._replay_log_data or {}).get("tool_result") or [])
+        while self._replay_tool_cursor < len(tool_results):
+            payload = tool_results[self._replay_tool_cursor]
+            self._replay_tool_cursor += 1
+            if payload.get("tool_name") != tool_name:
+                continue
+            if self.config.llm_replay_strict and payload.get("input") != input_payload:
+                raise RuntimeError(
+                    f"Replay tool input mismatch for {tool_name}: "
+                    f"expected {payload.get('input')}, got {input_payload}"
+                )
+            result = payload.get("result")
+            if isinstance(result, dict):
+                self._record_tool_result(tool_name, input_payload, result)
+                return result
+
+        raise RuntimeError(f"Replay log has no remaining {tool_name} tool results")
+
     def _execute_task(
         self,
         state: SummaryState,
@@ -351,9 +555,8 @@ class DeepResearchAgent:
         if is_job_search_task:
             task.query = build_strict_job_query(task.query)
 
-        search_result, notices, answer_text, backend = dispatch_search(
+        search_result, notices, answer_text, backend = self._dispatch_search(
             task.query,
-            self.config,
             state.research_loop_count,
         )
         raw_search_results = self._extract_search_results(search_result)
@@ -363,9 +566,8 @@ class DeepResearchAgent:
             search_result = prioritize_job_search_results(search_result)
             if not search_result or not search_result.get("results"):
                 retry_query = build_platform_job_query(original_query)
-                retry_result, retry_notices, retry_answer, retry_backend = dispatch_search(
+                retry_result, retry_notices, retry_answer, retry_backend = self._dispatch_search(
                     retry_query,
-                    self.config,
                     state.research_loop_count,
                 )
                 raw_search_results.extend(self._extract_search_results(retry_result))

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import contextvars
 import threading
 import time
 from collections.abc import Callable, Iterator
@@ -13,6 +14,10 @@ from config import Configuration
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
+_CURRENT_LLM_OPERATION: contextvars.ContextVar[str] = contextvars.ContextVar(
+    "current_llm_operation",
+    default="llm",
+)
 
 RATE_LIMIT_MARKERS = (
     "429",
@@ -47,23 +52,27 @@ def run_with_llm_retry(
 
     attempts = max(0, int(config.llm_retry_attempts))
 
-    for attempt_index in range(attempts + 1):
-        try:
-            _respect_min_interval(config)
-            return call()
-        except Exception as exc:
-            if not is_rate_limit_error(exc) or attempt_index >= attempts:
-                raise
+    token = _CURRENT_LLM_OPERATION.set(operation)
+    try:
+        for attempt_index in range(attempts + 1):
+            try:
+                _respect_min_interval(config)
+                return call()
+            except Exception as exc:
+                if not is_rate_limit_error(exc) or attempt_index >= attempts:
+                    raise
 
-            delay = _retry_delay(config, attempt_index + 1)
-            logger.warning(
-                "%s hit LLM rate limit; retrying in %.1fs (%d/%d)",
-                operation,
-                delay,
-                attempt_index + 1,
-                attempts,
-            )
-            _sleep(delay)
+                delay = _retry_delay(config, attempt_index + 1)
+                logger.warning(
+                    "%s hit LLM rate limit; retrying in %.1fs (%d/%d)",
+                    operation,
+                    delay,
+                    attempt_index + 1,
+                    attempts,
+                )
+                _sleep(delay)
+    finally:
+        _CURRENT_LLM_OPERATION.reset(token)
 
     raise RuntimeError("unreachable llm retry state")
 
@@ -78,31 +87,41 @@ def stream_with_llm_retry(
 
     attempts = max(0, int(config.llm_retry_attempts))
 
-    for attempt_index in range(attempts + 1):
-        emitted_any = False
-        try:
-            _respect_min_interval(config)
-            for chunk in stream_factory():
-                emitted_any = True
-                yield chunk
-            return
-        except Exception as exc:
-            if (
-                emitted_any
-                or not is_rate_limit_error(exc)
-                or attempt_index >= attempts
-            ):
-                raise
+    token = _CURRENT_LLM_OPERATION.set(operation)
+    try:
+        for attempt_index in range(attempts + 1):
+            emitted_any = False
+            try:
+                _respect_min_interval(config)
+                for chunk in stream_factory():
+                    emitted_any = True
+                    yield chunk
+                return
+            except Exception as exc:
+                if (
+                    emitted_any
+                    or not is_rate_limit_error(exc)
+                    or attempt_index >= attempts
+                ):
+                    raise
 
-            delay = _retry_delay(config, attempt_index + 1)
-            logger.warning(
-                "%s hit LLM rate limit before streaming; retrying in %.1fs (%d/%d)",
-                operation,
-                delay,
-                attempt_index + 1,
-                attempts,
-            )
-            _sleep(delay)
+                delay = _retry_delay(config, attempt_index + 1)
+                logger.warning(
+                    "%s hit LLM rate limit before streaming; retrying in %.1fs (%d/%d)",
+                    operation,
+                    delay,
+                    attempt_index + 1,
+                    attempts,
+                )
+                _sleep(delay)
+    finally:
+        _CURRENT_LLM_OPERATION.reset(token)
+
+
+def get_current_llm_operation() -> str:
+    """Return the operation name associated with the current LLM call."""
+
+    return _CURRENT_LLM_OPERATION.get()
 
 
 def _respect_min_interval(config: Configuration) -> None:

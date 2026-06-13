@@ -36,37 +36,7 @@ class ReportingService:
     def generate_report(self, state: SummaryState) -> str:
         """Generate a structured report based on completed tasks."""
 
-        tasks_block = []
-        for task in state.todo_items:
-            summary_block = self._truncate(task.summary or "暂无可用信息", MAX_SUMMARY_CHARS)
-            sources_block = self._truncate(task.sources_summary or "暂无来源", MAX_SOURCES_CHARS)
-            tasks_block.append(
-                f"### 任务 {task.id}: {task.title}\n"
-                f"- 任务目标：{task.intent}\n"
-                f"- 检索查询：{task.query}\n"
-                f"- 执行状态：{task.status}\n"
-                f"- 任务总结：\n{summary_block}\n"
-                f"- 来源概览：\n{sources_block}\n"
-            )
-
-        prompt = (
-            "<用户需求>\n"
-            f"{state.research_topic}\n"
-            "</用户需求>\n\n"
-            "<任务总结与来源>\n"
-            f"{''.join(tasks_block)}\n"
-            "</任务总结与来源>\n\n"
-            "请直接基于以上任务总结和来源概览撰写找实习行动报告。"
-            "报告必须以 `# 找实习行动报告` 开始，并严格包含："
-            "1. 结论：今天优先投递；2. 推荐理由；3. 简历修改清单；"
-            "4. 7 天投递计划；5. 风险与待确认项；6. 附录：来源与搜索诊断。"
-            "请先给 3-5 个今天优先人工投递的岗位，再解释推荐依据和待确认项。"
-            "7 天计划必须拆成今天、3 天内、7 天内。"
-            "保留来源标题和链接；缺失信息写“暂无可靠信息”或“未确认”；"
-            "不要编造具体岗位、薪资、截止日期、链接或用户经历；"
-            "不要生成自动投递、平台登录、批量联系 HR 或绕过平台规则的建议；"
-            "不要输出工具调用指令。"
-        )
+        prompt = self.build_prompt(state)
 
         try:
             response = run_with_llm_retry(
@@ -95,6 +65,41 @@ class ReportingService:
         if report_text:
             logger.warning("Report missing required action sections; using fallback report")
         return self._build_fallback_report(state)
+
+    def build_prompt(self, state: SummaryState) -> str:
+        """Build the final report prompt sent to the reporter LLM."""
+
+        tasks_block = []
+        for task in state.todo_items:
+            summary_block = self._truncate(task.summary or "暂无可用信息", MAX_SUMMARY_CHARS)
+            sources_block = self._truncate(task.sources_summary or "暂无来源", MAX_SOURCES_CHARS)
+            tasks_block.append(
+                f"### 任务 {task.id}: {task.title}\n"
+                f"- 任务目标：{task.intent}\n"
+                f"- 检索查询：{task.query}\n"
+                f"- 执行状态：{task.status}\n"
+                f"- 任务总结：\n{summary_block}\n"
+                f"- 来源概览：\n{sources_block}\n"
+            )
+
+        return (
+            "<用户需求>\n"
+            f"{state.research_topic}\n"
+            "</用户需求>\n\n"
+            "<任务总结与来源>\n"
+            f"{''.join(tasks_block)}\n"
+            "</任务总结与来源>\n\n"
+            "请直接基于以上任务总结和来源概览撰写找实习行动报告。"
+            "报告必须以 `# 找实习行动报告` 开始，并严格包含："
+            "1. 结论：今天优先投递；2. 推荐理由；3. 简历修改清单；"
+            "4. 7 天投递计划；5. 风险与待确认项；6. 附录：来源与搜索诊断。"
+            "请先给 3-5 个今天优先人工投递的岗位，再解释推荐依据和待确认项。"
+            "7 天计划必须拆成今天、3 天内、7 天内。"
+            "保留来源标题和链接；缺失信息写“暂无可靠信息”或“未确认”；"
+            "不要编造具体岗位、薪资、截止日期、链接或用户经历；"
+            "不要生成自动投递、平台登录、批量联系 HR 或绕过平台规则的建议；"
+            "不要输出工具调用指令。"
+        )
 
     @staticmethod
     def _truncate(text: str, max_chars: int) -> str:

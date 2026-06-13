@@ -43,7 +43,7 @@ class JobExtractionService:
     ) -> list[JobItem]:
         """Return structured jobs, falling back to source-only items on failure."""
 
-        prompt = self._build_prompt(state, task, context)
+        prompt = self.build_prompt(state, task, context)
         agent = self._agent_factory()
         try:
             response = run_with_llm_retry(
@@ -63,7 +63,9 @@ class JobExtractionService:
 
         return self._dedupe_and_sort(jobs)[:MAX_JOB_ITEMS]
 
-    def _build_prompt(self, state: SummaryState, task: TodoItem, context: str) -> str:
+    def build_prompt(self, state: SummaryState, task: TodoItem, context: str) -> str:
+        """Build the extraction prompt sent to the job extraction LLM."""
+
         return (
             "<用户求职目标>\n"
             f"{state.research_topic}\n"
@@ -81,6 +83,11 @@ class JobExtractionService:
             "信息不足时 match_score 使用 null；"
             "如果没有可靠招聘/JD/投递来源，请返回空 jobs 数组。"
         )
+
+    def _build_prompt(self, state: SummaryState, task: TodoItem, context: str) -> str:
+        """Backward-compatible alias for older tests and callers."""
+
+        return self.build_prompt(state, task, context)
 
     def _parse_response(self, response: str) -> list[JobItem]:
         text = response.strip()
