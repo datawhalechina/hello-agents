@@ -49,6 +49,12 @@ export interface JobItemView {
   risks: string[];
   applicationStatus: string | null;
   statusNote: string;
+  applicationChannel: string;
+  appliedAt: string;
+  nextAction: string;
+  nextActionAt: string;
+  resumeVersion: string;
+  withdrawalReason: string;
   savedAt: string;
   updatedAt: string;
 }

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from hashlib import sha1
 from pathlib import Path
 from threading import Lock
@@ -11,6 +11,14 @@ from typing import Any, Mapping
 
 
 APPLICATION_STATUSES = ("待投递", "已投递", "笔试", "面试", "拒绝", "Offer", "放弃")
+TRACKING_FIELDS = (
+    "application_channel",
+    "applied_at",
+    "next_action",
+    "next_action_at",
+    "resume_version",
+    "withdrawal_reason",
+)
 
 
 class ApplicationStore:
@@ -40,11 +48,28 @@ class ApplicationStore:
         *,
         application_status: str | None = None,
         status_note: str | None = None,
+        application_channel: str | None = None,
+        applied_at: str | None = None,
+        next_action: str | None = None,
+        next_action_at: str | None = None,
+        resume_version: str | None = None,
+        withdrawal_reason: str | None = None,
     ) -> dict[str, Any]:
         """Save or update a job while preserving an existing application status."""
 
         if application_status is not None:
             self._validate_status(application_status)
+        self._validate_date("applied_at", applied_at)
+        self._validate_date("next_action_at", next_action_at)
+
+        tracking_values = {
+            "application_channel": application_channel,
+            "applied_at": applied_at,
+            "next_action": next_action,
+            "next_action_at": next_action_at,
+            "resume_version": resume_version,
+            "withdrawal_reason": withdrawal_reason,
+        }
 
         now = self._now()
         normalized = self._normalize_job(job)
@@ -59,6 +84,10 @@ class ApplicationStore:
                     **normalized,
                     "application_status": application_status or APPLICATION_STATUSES[0],
                     "status_note": status_note or "",
+                    **{
+                        field: _string_value(tracking_values[field])
+                        for field in TRACKING_FIELDS
+                    },
                     "saved_at": now,
                     "updated_at": now,
                 }
@@ -78,6 +107,14 @@ class ApplicationStore:
                         if status_note is not None
                         else existing.get("status_note", "")
                     ),
+                    **{
+                        field: (
+                            _string_value(tracking_values[field])
+                            if tracking_values[field] is not None
+                            else existing.get(field, "")
+                        )
+                        for field in TRACKING_FIELDS
+                    },
                     "saved_at": existing.get("saved_at") or now,
                     "updated_at": now,
                 }
@@ -93,11 +130,28 @@ class ApplicationStore:
         *,
         application_status: str | None = None,
         status_note: str | None = None,
+        application_channel: str | None = None,
+        applied_at: str | None = None,
+        next_action: str | None = None,
+        next_action_at: str | None = None,
+        resume_version: str | None = None,
+        withdrawal_reason: str | None = None,
     ) -> dict[str, Any]:
         """Update mutable tracking fields for a saved application."""
 
         if application_status is not None:
             self._validate_status(application_status)
+        self._validate_date("applied_at", applied_at)
+        self._validate_date("next_action_at", next_action_at)
+
+        tracking_values = {
+            "application_channel": application_channel,
+            "applied_at": applied_at,
+            "next_action": next_action,
+            "next_action_at": next_action_at,
+            "resume_version": resume_version,
+            "withdrawal_reason": withdrawal_reason,
+        }
 
         with self._lock:
             items = self._read_items()
@@ -110,6 +164,9 @@ class ApplicationStore:
                 record["application_status"] = application_status
             if status_note is not None:
                 record["status_note"] = status_note
+            for field, value in tracking_values.items():
+                if value is not None:
+                    record[field] = _string_value(value)
             record["updated_at"] = self._now()
             items[existing_index] = record
             self._write_items(items)
@@ -141,7 +198,11 @@ class ApplicationStore:
         if not isinstance(items, list):
             return []
 
-        return [item for item in items if isinstance(item, dict)]
+        return [
+            self._with_tracking_defaults(item)
+            for item in items
+            if isinstance(item, dict)
+        ]
 
     def _write_items(self, items: list[dict[str, Any]]) -> None:
         self.base_dir.mkdir(parents=True, exist_ok=True)
@@ -164,6 +225,26 @@ class ApplicationStore:
     def _validate_status(status: str) -> None:
         if status not in APPLICATION_STATUSES:
             raise ValueError(f"Unsupported application status: {status}")
+
+    @staticmethod
+    def _validate_date(field_name: str, value: str | None) -> None:
+        if value in (None, ""):
+            return
+        if not isinstance(value, str):
+            raise ValueError(f"{field_name} must use YYYY-MM-DD")
+        try:
+            parsed = date.fromisoformat(value)
+        except ValueError as exc:
+            raise ValueError(f"{field_name} must use YYYY-MM-DD") from exc
+        if parsed.isoformat() != value:
+            raise ValueError(f"{field_name} must use YYYY-MM-DD")
+
+    @staticmethod
+    def _with_tracking_defaults(item: dict[str, Any]) -> dict[str, Any]:
+        return {
+            **item,
+            **{field: _string_value(item.get(field)) for field in TRACKING_FIELDS},
+        }
 
     @staticmethod
     def _normalize_job(job: Mapping[str, Any]) -> dict[str, Any]:

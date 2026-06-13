@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -36,6 +37,39 @@ def fake_search_result(_query, _config, _loop_count):
 
 
 class FakeLLMRuntimeTests(unittest.TestCase):
+    def test_internal_agents_disable_hello_agents_trace(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            original_cwd = Path.cwd()
+            os.chdir(tmpdir)
+            try:
+                for mode in ("fake", "dry_run"):
+                    config = Configuration(
+                        llm_mode=mode,
+                        enable_notes=False,
+                        dry_run_skip_search=True,
+                        llm_min_interval_seconds=0,
+                    )
+                    coordinator = DeepResearchAgent(config=config)
+                    agents = [
+                        coordinator.todo_agent,
+                        coordinator.report_agent,
+                        coordinator._summarizer_factory(),
+                        coordinator._job_extractor_factory(),
+                    ]
+                    self.assertTrue(
+                        all(agent.config.trace_enabled is False for agent in agents)
+                    )
+                    with patch.object(
+                        agent_module,
+                        "dispatch_search",
+                        side_effect=fake_search_result,
+                    ):
+                        coordinator.run(f"{mode} Java 后端实习")
+            finally:
+                os.chdir(original_cwd)
+
+            self.assertFalse((Path(tmpdir) / "memory" / "traces").exists())
+
     def test_fake_mode_runs_without_real_llm_initialization(self) -> None:
         config = Configuration(
             llm_mode="fake",

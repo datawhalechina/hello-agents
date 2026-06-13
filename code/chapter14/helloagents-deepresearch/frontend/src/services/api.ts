@@ -40,7 +40,30 @@ export interface JobApplicationPayload {
   risks: string[];
   application_status?: string | null;
   status_note?: string | null;
+  application_channel?: string | null;
+  applied_at?: string | null;
+  next_action?: string | null;
+  next_action_at?: string | null;
+  resume_version?: string | null;
+  withdrawal_reason?: string | null;
 }
+
+export type JobApplicationTrackingField =
+  | "application_channel"
+  | "applied_at"
+  | "next_action"
+  | "next_action_at"
+  | "resume_version"
+  | "withdrawal_reason";
+
+export type JobApplicationUpdatePayload = Partial<
+  Pick<
+    JobApplicationPayload,
+    | "application_status"
+    | "status_note"
+    | JobApplicationTrackingField
+  >
+>;
 
 export interface ApplicationListResponse {
   job_items: unknown[];
@@ -84,7 +107,7 @@ export async function saveApplication(
 
 export async function updateApplication(
   id: string,
-  payload: Pick<JobApplicationPayload, "application_status" | "status_note">
+  payload: JobApplicationUpdatePayload
 ): Promise<unknown> {
   return requestJson<unknown>(`/applications/${encodeURIComponent(id)}`, {
     method: "PATCH",

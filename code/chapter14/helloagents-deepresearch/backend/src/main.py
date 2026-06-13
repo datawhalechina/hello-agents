@@ -82,6 +82,12 @@ class JobApplicationPayload(BaseModel):
         default=None,
         description="Optional user note for this saved application",
     )
+    application_channel: Optional[str] = None
+    applied_at: Optional[str] = None
+    next_action: Optional[str] = None
+    next_action_at: Optional[str] = None
+    resume_version: Optional[str] = None
+    withdrawal_reason: Optional[str] = None
 
 
 class JobApplicationUpdate(BaseModel):
@@ -89,6 +95,12 @@ class JobApplicationUpdate(BaseModel):
 
     application_status: Optional[str] = None
     status_note: Optional[str] = None
+    application_channel: Optional[str] = None
+    applied_at: Optional[str] = None
+    next_action: Optional[str] = None
+    next_action_at: Optional[str] = None
+    resume_version: Optional[str] = None
+    withdrawal_reason: Optional[str] = None
 
 
 class JobApplicationListResponse(BaseModel):
@@ -118,10 +130,10 @@ def _build_config(payload: ResearchRequest) -> Configuration:
     return Configuration.from_env(overrides=overrides)
 
 
-def create_app() -> FastAPI:
+def create_app(application_store: ApplicationStore | None = None) -> FastAPI:
     app = FastAPI(title="HelloAgents Deep Researcher")
     config = Configuration.from_env()
-    application_store = ApplicationStore()
+    store = application_store or ApplicationStore()
 
     app.add_middleware(
         CORSMiddleware,
@@ -165,19 +177,34 @@ def create_app() -> FastAPI:
     @app.get("/applications", response_model=JobApplicationListResponse)
     def list_applications() -> JobApplicationListResponse:
         return JobApplicationListResponse(
-            job_items=application_store.list_applications(),
+            job_items=store.list_applications(),
             statuses=list(APPLICATION_STATUSES),
         )
 
     @app.post("/applications")
     def save_application(payload: JobApplicationPayload) -> dict[str, Any]:
         try:
-            return application_store.save_application(
+            return store.save_application(
                 payload.model_dump(
-                    exclude={"application_status", "status_note"},
+                    exclude={
+                        "application_status",
+                        "status_note",
+                        "application_channel",
+                        "applied_at",
+                        "next_action",
+                        "next_action_at",
+                        "resume_version",
+                        "withdrawal_reason",
+                    },
                 ),
                 application_status=payload.application_status,
                 status_note=payload.status_note,
+                application_channel=payload.application_channel,
+                applied_at=payload.applied_at,
+                next_action=payload.next_action,
+                next_action_at=payload.next_action_at,
+                resume_version=payload.resume_version,
+                withdrawal_reason=payload.withdrawal_reason,
             )
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -188,10 +215,16 @@ def create_app() -> FastAPI:
         payload: JobApplicationUpdate,
     ) -> dict[str, Any]:
         try:
-            return application_store.update_application(
+            return store.update_application(
                 item_id,
                 application_status=payload.application_status,
                 status_note=payload.status_note,
+                application_channel=payload.application_channel,
+                applied_at=payload.applied_at,
+                next_action=payload.next_action,
+                next_action_at=payload.next_action_at,
+                resume_version=payload.resume_version,
+                withdrawal_reason=payload.withdrawal_reason,
             )
         except KeyError as exc:
             raise HTTPException(status_code=404, detail="Saved job not found") from exc
@@ -200,7 +233,7 @@ def create_app() -> FastAPI:
 
     @app.delete("/applications/{item_id}")
     def delete_application(item_id: str) -> dict[str, bool]:
-        if not application_store.delete_application(item_id):
+        if not store.delete_application(item_id):
             raise HTTPException(status_code=404, detail="Saved job not found")
         return {"deleted": True}
 

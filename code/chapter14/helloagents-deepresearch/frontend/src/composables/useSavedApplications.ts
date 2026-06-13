@@ -5,7 +5,9 @@ import {
   listApplications,
   saveApplication,
   updateApplication,
-  type JobApplicationPayload
+  type JobApplicationPayload,
+  type JobApplicationTrackingField,
+  type JobApplicationUpdatePayload
 } from "../services/api";
 import type { JobItemView } from "../types/research";
 import {
@@ -111,6 +113,12 @@ export function useSavedApplications(options: UseSavedApplicationsOptions) {
       risks: job.risks,
       application_status: job.applicationStatus,
       status_note: job.statusNote,
+      application_channel: job.applicationChannel,
+      applied_at: job.appliedAt,
+      next_action: job.nextAction,
+      next_action_at: job.nextActionAt,
+      resume_version: job.resumeVersion,
+      withdrawal_reason: job.withdrawalReason,
       ...overrides
     };
   }
@@ -143,7 +151,13 @@ export function useSavedApplications(options: UseSavedApplicationsOptions) {
       const saved = await saveApplication(
         toApplicationPayload(job, {
           application_status: undefined,
-          status_note: undefined
+          status_note: undefined,
+          application_channel: undefined,
+          applied_at: undefined,
+          next_action: undefined,
+          next_action_at: undefined,
+          resume_version: undefined,
+          withdrawal_reason: undefined
         })
       );
       const parsed = normalizeSavedJobItem(
@@ -175,7 +189,7 @@ export function useSavedApplications(options: UseSavedApplicationsOptions) {
 
   async function updateSavedJob(
     job: JobItemView,
-    patch: Pick<JobApplicationPayload, "application_status" | "status_note">
+    patch: JobApplicationUpdatePayload
   ) {
     applicationsLoading.value = true;
     try {
@@ -224,6 +238,17 @@ export function useSavedApplications(options: UseSavedApplicationsOptions) {
       return;
     }
     await updateSavedJobNote(activeSavedJob.value, event);
+  }
+
+  async function updateActiveTrackingField(
+    field: JobApplicationTrackingField,
+    event: Event
+  ) {
+    if (!activeSavedJob.value) {
+      return;
+    }
+    const value = (event.target as HTMLInputElement | null)?.value ?? "";
+    await updateSavedJob(activeSavedJob.value, { [field]: value });
   }
 
   async function removeSavedJob(job: JobItemView) {
@@ -284,6 +309,7 @@ export function useSavedApplications(options: UseSavedApplicationsOptions) {
     savedJobItems,
     updateActiveJobNote,
     updateActiveJobStatus,
+    updateActiveTrackingField,
     updateSavedJobNote,
     updateSavedJobStatus
   };

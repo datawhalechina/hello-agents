@@ -8,7 +8,7 @@
 - 后端核心接口保持兼容：`/research`、`/research/stream`、`/applications`。
 - 前端支持结构化求职画像、岗位推荐清单、排序筛选、来源可信度、信息完整度、推荐优先级、待确认项、搜索质量诊断和本地投递状态管理。
 - 最终行动报告已升级为 6 章结构：今天优先投递、推荐理由、简历修改清单、7 天投递计划、风险与待确认项、来源与搜索诊断。
-- 最新一轮重点已完成：低成本、可测试、可回放 Agent 架构。
+- 最新一轮重点已完成：稳定性门槛和轻量投递行动管理。
 
 ## 已完成
 
@@ -32,6 +32,33 @@
 - 本地缓存、运行日志、运行数据和密钥全部通过 `.gitignore` 排除。
 
 ## 最近一次任务记录
+
+### 2026-06-13：稳定性门槛与轻量投递行动管理
+
+修改文件：
+
+- 更新 `backend/src/agent.py`：内部 HelloAgents Agent 显式使用 `Config(trace_enabled=False)`，避免重复 trace、敏感信息副本和文件句柄泄漏。
+- 更新 `backend/src/main.py`、`backend/src/services/applications.py`：保持三个核心路由兼容，为投递记录增加渠道、投递日期、下一步、待跟进日期、简历版本和放弃原因；日期严格使用 `YYYY-MM-DD`，旧 JSON 读取时自动补空字段。
+- 新增 `backend/tests/test_api_contracts.py` 并扩展存储和 fake runtime 测试：覆盖同步响应、SSE `done/error` 终态、配置错误、applications CRUD、部分更新、主动清空、旧数据兼容和 trace 关闭。
+- 更新前端 API 类型、normalizer、保存 composable 和 `JobWorkbench.vue`：增加完整投递行动表单，以及“今天待跟进”“已逾期”标签和汇总；拒绝、放弃状态不显示过期提醒。
+- 新增 `frontend/src/utils/applicationTracking.ts`：集中处理浏览器本地日期和跟进状态判断。
+
+验证结果：
+
+- 后端全量测试通过：`Ran 81 tests`，`OK`；未调用真实 LLM 或搜索。
+- 前端 `npm run build` 通过。
+- 固定日期用例已覆盖今天、逾期、未来、空日期、拒绝和放弃状态。
+- 本地前后端健康检查通过；内置浏览器当前不可用，未完成可视化点击核验。
+- 全量测试中不再出现 hello_agents trace 的 `ResourceWarning`。
+
+发现的问题与处理：
+
+- FastAPI `on_event` 和当前 Starlette `TestClient` 依赖仍输出弃用警告，不影响本轮功能与测试结果；后续可单独迁移 lifespan 并同步测试客户端依赖。
+- 跟进提示仅基于浏览器本地日期进行展示，不通知、不自动排序、不自动执行跟进。
+
+下一步计划：
+
+- 后续优先清理 FastAPI 启动事件与测试客户端的弃用警告，再考虑轻量导出或复盘能力。
 
 ### 2026-06-13：LLM 运行日志、严格回放与流式终态审查修复
 
@@ -120,16 +147,16 @@
 - 后端全量测试最近通过：
 
 ```text
-Ran 71 tests
+Ran 81 tests
 OK
 ```
 
-- 上述测试包含 fake/cache/dry-run/replay、日志隐私与并发写入、流式终态和旧日志兼容验证。
-- 前端本轮未修改；最近一次涉及前端的改动已通过 `npm run build`。
+- 上述测试包含 fake/cache/dry-run/replay、日志隐私与并发写入、流式终态、API 契约、投递行动字段和旧数据兼容验证。
+- 前端本轮已通过 `npm run build`，跟进日期状态已用固定日期脚本验证。
 
 ## 已知问题与风险
 
-- 测试过程中仍可见 hello_agents trace 文件相关 `ResourceWarning`，目前不影响测试通过。
+- FastAPI `on_event` 和当前 Starlette `TestClient` 依赖会输出弃用警告，后续应单独升级处理。
 - 运行日志已不保存原始用户输入、完整 prompt 和工具输入，但 LLM 响应、搜索结果和最终报告可能回显用户信息，仍需作为敏感本地数据保护。
 - 真实招聘信息更新较快，用户必须打开来源链接核验岗位、薪资、地点、截止日期和投递入口。
 - 真实 LLM/search 链路可能触发 429 或网络波动；开发阶段优先使用 fake、dry-run、cache 和 replay。
@@ -139,4 +166,4 @@ OK
 
 - 在后续功能或修复任务中持续补充 fake/cache/replay 覆盖。
 - 需要真实链路验证时，先用 dry-run 检查 prompt 和任务数量，再切到 real 模式。
-- 后续可考虑把运行日志中的敏感用户输入做脱敏处理。
+- 可在不引入自动任务的前提下，后续增加投递记录导出或阶段复盘视图。

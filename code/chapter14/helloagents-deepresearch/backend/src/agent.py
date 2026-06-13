@@ -12,6 +12,7 @@ from threading import Lock, Semaphore, Thread
 from typing import Any, Callable, Iterator
 from uuid import uuid4
 
+from hello_agents import Config as HelloAgentsConfig
 from hello_agents import HelloAgentsLLM
 from hello_agents.tools import ToolRegistry
 
@@ -189,6 +190,7 @@ class DeepResearchAgent:
             name=name,
             llm=self.llm,
             system_prompt=system_prompt,
+            config=HelloAgentsConfig(trace_enabled=False),
             enable_tool_calling=self.tools_registry is not None,
             tool_registry=self.tools_registry,
             tool_call_listener=self._tool_tracker.record,

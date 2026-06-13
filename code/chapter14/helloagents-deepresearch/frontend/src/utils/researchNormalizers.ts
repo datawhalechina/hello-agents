@@ -237,6 +237,12 @@ export function normalizeJobItem(
     risks: extractStringList(item.risks),
     applicationStatus: extractOptionalString(item.application_status),
     statusNote: extractOptionalString(item.status_note) || "",
+    applicationChannel: extractOptionalString(item.application_channel) || "",
+    appliedAt: extractOptionalString(item.applied_at) || "",
+    nextAction: extractOptionalString(item.next_action) || "",
+    nextActionAt: extractOptionalString(item.next_action_at) || "",
+    resumeVersion: extractOptionalString(item.resume_version) || "",
+    withdrawalReason: extractOptionalString(item.withdrawal_reason) || "",
     savedAt: extractOptionalString(item.saved_at) || "",
     updatedAt: extractOptionalString(item.updated_at) || ""
   };

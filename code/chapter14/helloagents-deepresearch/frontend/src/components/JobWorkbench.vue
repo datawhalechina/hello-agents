@@ -288,6 +288,63 @@
                 @change="emit('update-active-job-note', $event)"
               />
             </label>
+            <label>
+              <span>投递渠道</span>
+              <input
+                :value="activeSavedJob.applicationChannel"
+                :disabled="applicationsLoading"
+                placeholder="例如：官网、内推、招聘平台"
+                @change="emit('update-active-tracking-field', 'application_channel', $event)"
+              />
+            </label>
+            <label>
+              <span>投递日期</span>
+              <input
+                type="date"
+                :value="activeSavedJob.appliedAt"
+                :disabled="applicationsLoading"
+                @change="emit('update-active-tracking-field', 'applied_at', $event)"
+              />
+            </label>
+            <label class="application-field-wide">
+              <span>下一步</span>
+              <input
+                :value="activeSavedJob.nextAction"
+                :disabled="applicationsLoading"
+                placeholder="例如：准备笔试、周一礼貌跟进"
+                @change="emit('update-active-tracking-field', 'next_action', $event)"
+              />
+            </label>
+            <label>
+              <span>待跟进日期</span>
+              <input
+                type="date"
+                :value="activeSavedJob.nextActionAt"
+                :disabled="applicationsLoading"
+                @change="emit('update-active-tracking-field', 'next_action_at', $event)"
+              />
+            </label>
+            <label>
+              <span>简历版本</span>
+              <input
+                :value="activeSavedJob.resumeVersion"
+                :disabled="applicationsLoading"
+                placeholder="例如：后端-v3"
+                @change="emit('update-active-tracking-field', 'resume_version', $event)"
+              />
+            </label>
+            <label
+              v-if="activeJobStatus === '放弃'"
+              class="application-field-wide"
+            >
+              <span>放弃原因</span>
+              <input
+                :value="activeSavedJob.withdrawalReason"
+                :disabled="applicationsLoading"
+                placeholder="记录原因，便于复盘"
+                @change="emit('update-active-tracking-field', 'withdrawal_reason', $event)"
+              />
+            </label>
           </div>
         </section>
 
@@ -378,7 +435,15 @@
             本地保存的投递跟踪清单，刷新页面后仍会保留。
           </p>
         </div>
-        <span class="job-count saved">{{ savedApplicationCount }} 个</span>
+        <div class="saved-jobs-summary">
+          <span v-if="followUpSummary.today" class="follow-up-badge today">
+            今天待跟进 {{ followUpSummary.today }}
+          </span>
+          <span v-if="followUpSummary.overdue" class="follow-up-badge overdue">
+            已逾期 {{ followUpSummary.overdue }}
+          </span>
+          <span class="job-count saved">{{ savedApplicationCount }} 个</span>
+        </div>
       </div>
 
       <ul class="saved-jobs-list">
@@ -391,6 +456,13 @@
             <span class="saved-job-title">{{ job.title }}</span>
             <span class="saved-job-meta">
               {{ job.company }} · {{ job.location }}
+            </span>
+            <span
+              v-if="followUpState(job) === 'today' || followUpState(job) === 'overdue'"
+              class="saved-job-follow-up"
+              :class="followUpState(job)"
+            >
+              {{ followUpLabel(job) }}
             </span>
           </button>
           <select
@@ -431,10 +503,15 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
 
+import type { JobApplicationTrackingField } from "../services/api";
 import type {
   JobItemView,
   SearchDiagnosticsView
 } from "../types/research";
+import {
+  getFollowUpState,
+  type FollowUpState
+} from "../utils/applicationTracking";
 import {
   getJobDecisionMeta,
   type JobDecisionMeta,
@@ -491,6 +568,10 @@ const emit = defineEmits<{
   "save-active-job": [];
   "update-active-job-note": [event: Event];
   "update-active-job-status": [event: Event];
+  "update-active-tracking-field": [
+    field: JobApplicationTrackingField,
+    event: Event
+  ];
   "update-saved-job-note": [job: JobItemView, event: Event];
   "update-saved-job-status": [job: JobItemView, event: Event];
   "update:activeJobId": [value: string];
@@ -512,6 +593,19 @@ const jobFilters = reactive<JobFilters>({
   savedState: "all",
   sourceState: "all",
   confirmState: "all"
+});
+
+const followUpSummary = computed(() => {
+  return props.savedJobItems.reduce(
+    (summary, job) => {
+      const state = getFollowUpState(job);
+      if (state === "today" || state === "overdue") {
+        summary[state] += 1;
+      }
+      return summary;
+    },
+    { today: 0, overdue: 0 }
+  );
 });
 
 const emptyDecision: JobDecisionMeta = {
@@ -544,6 +638,15 @@ function getDecision(job: JobItemView): JobDecisionMeta {
 
 function getSavedStatus(job: JobItemView): string {
   return props.findSavedJob(job)?.applicationStatus || "";
+}
+
+function followUpState(job: JobItemView): FollowUpState {
+  return getFollowUpState(job);
+}
+
+function followUpLabel(job: JobItemView): string {
+  const prefix = followUpState(job) === "today" ? "今天待跟进" : "已逾期";
+  return job.nextAction ? `${prefix} · ${job.nextAction}` : prefix;
 }
 
 function getMatchScore(job: JobItemView): number {
@@ -1110,6 +1213,11 @@ watch(
   font-weight: 600;
 }
 
+.application-note-field,
+.application-field-wide {
+  grid-column: 1 / -1;
+}
+
 .application-controls select,
 .application-controls input,
 .saved-job-status,
@@ -1213,6 +1321,39 @@ watch(
   color: #1f2937;
 }
 
+.saved-jobs-summary {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.follow-up-badge,
+.saved-job-follow-up {
+  width: fit-content;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.follow-up-badge {
+  padding: 6px 9px;
+}
+
+.follow-up-badge.today,
+.saved-job-follow-up.today {
+  background: rgba(254, 243, 199, 0.88);
+  color: #92400e;
+}
+
+.follow-up-badge.overdue,
+.saved-job-follow-up.overdue {
+  background: rgba(254, 226, 226, 0.9);
+  color: #b91c1c;
+}
+
 .saved-jobs-list {
   list-style: none;
   margin: 0;
@@ -1263,6 +1404,14 @@ watch(
   font-size: 12px;
 }
 
+.saved-job-follow-up {
+  max-width: 100%;
+  padding: 5px 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (max-width: 960px) {
   .job-controls {
     grid-template-columns: repeat(2, minmax(150px, 1fr));
@@ -1275,6 +1424,11 @@ watch(
   .application-controls,
   .saved-jobs-list li {
     grid-template-columns: 1fr;
+  }
+
+  .application-note-field,
+  .application-field-wide {
+    grid-column: auto;
   }
 }
 

@@ -73,6 +73,7 @@
           @save-active-job="saveActiveJob"
           @update-active-job-note="updateActiveJobNote"
           @update-active-job-status="updateActiveJobStatus"
+          @update-active-tracking-field="updateActiveTrackingField"
           @update-saved-job-note="updateSavedJobNote"
           @update-saved-job-status="updateSavedJobStatus"
         />
@@ -185,6 +186,7 @@ const {
   savedJobItems,
   updateActiveJobNote,
   updateActiveJobStatus,
+  updateActiveTrackingField,
   updateSavedJobNote,
   updateSavedJobStatus
 } = useSavedApplications({
