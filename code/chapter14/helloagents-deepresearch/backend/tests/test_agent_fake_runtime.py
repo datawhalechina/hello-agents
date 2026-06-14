@@ -14,6 +14,7 @@ import agent as agent_module
 from agent import DeepResearchAgent
 from config import Configuration
 from models import TodoItem
+from services.run_log import RunLogger
 
 
 def fake_search_result(_query, _config, _loop_count):
@@ -113,6 +114,22 @@ class FakeLLMRuntimeTests(unittest.TestCase):
         self.assertTrue(result.search_diagnostics)
         self.assertEqual(result.search_diagnostics[0]["backend"], "dry_run")
 
+    def test_run_log_off_does_not_create_log_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = Configuration(
+                llm_mode="dry_run",
+                llm_run_log_level="off",
+                llm_run_log_dir=tmpdir,
+                dry_run_skip_search=True,
+                enable_notes=False,
+                max_agent_steps=1,
+                llm_min_interval_seconds=0,
+            )
+
+            DeepResearchAgent(config=config).run("private@example.com")
+
+            self.assertEqual(list(Path(tmpdir).glob("run_*.json")), [])
+
     def test_max_agent_steps_marks_extra_tasks_skipped(self) -> None:
         coordinator = object.__new__(DeepResearchAgent)
         coordinator.config = Configuration(max_agent_steps=2)
@@ -135,6 +152,7 @@ class FakeLLMRuntimeTests(unittest.TestCase):
                 llm_mode="fake",
                 llm_cache_enabled=True,
                 llm_cache_dir=str(Path(tmpdir) / "cache"),
+                llm_run_log_level="full",
                 enable_notes=False,
                 max_agent_steps=1,
                 llm_retry_base_delay=0,
@@ -154,7 +172,8 @@ class FakeLLMRuntimeTests(unittest.TestCase):
             logs = list((Path(tmpdir) / "source").glob("run_*.json"))
             self.assertEqual(len(logs), 1)
             source_log = json.loads(logs[0].read_text(encoding="utf-8"))
-            self.assertEqual(source_log["schema_version"], 2)
+            self.assertEqual(source_log["schema_version"], 3)
+            self.assertEqual(source_log["log_level"], "full")
             self.assertTrue(source_log["llm_response"])
             self.assertTrue(
                 all(
@@ -182,6 +201,34 @@ class FakeLLMRuntimeTests(unittest.TestCase):
 
         self.assertEqual(replay_result.report_markdown, source_result.report_markdown)
         self.assertEqual(len(replay_result.job_items), len(source_result.job_items))
+
+    def test_metadata_log_replay_fails_before_real_services(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            run_logger = RunLogger(
+                run_id="metadata",
+                log_dir=tmpdir,
+                user_input="private@example.com",
+            )
+            config = Configuration(
+                llm_mode="replay",
+                llm_replay_log=str(run_logger.path),
+                enable_notes=False,
+            )
+
+            with (
+                patch.object(
+                    agent_module,
+                    "HelloAgentsLLM",
+                    side_effect=AssertionError("real LLM called"),
+                ),
+                patch.object(
+                    agent_module,
+                    "dispatch_search",
+                    side_effect=AssertionError("real search called"),
+                ),
+                self.assertRaisesRegex(ValueError, "LLM_RUN_LOG_LEVEL=full"),
+            ):
+                DeepResearchAgent(config=config)
 
     def test_stream_log_records_final_answer_and_step_limit_matches_sync(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -213,7 +260,8 @@ class FakeLLMRuntimeTests(unittest.TestCase):
             if event.get("type") == "task_status" and event.get("status") == "skipped"
         ]
         self.assertEqual(stream_skipped, sync_skipped)
-        self.assertTrue(stream_log["final_answer"].startswith("# 找实习行动报告"))
+        self.assertEqual(stream_log["log_level"], "metadata")
+        self.assertEqual(len(stream_log["final_answer"]["sha256"]), 64)
         self.assertIsNone(stream_log["error"])
 
     def test_stream_fatal_error_is_recorded(self) -> None:
@@ -233,9 +281,13 @@ class FakeLLMRuntimeTests(unittest.TestCase):
                 list(agent.run_stream("private@example.com"))
 
             log_path = next(Path(tmpdir).glob("run_*.json"))
-            payload = json.loads(log_path.read_text(encoding="utf-8"))
+            raw_log = log_path.read_text(encoding="utf-8")
+            payload = json.loads(raw_log)
 
-        self.assertEqual(payload["error"], "stream planner boom")
+        self.assertNotIn("private@example.com", raw_log)
+        self.assertNotIn("stream planner boom", raw_log)
+        self.assertEqual(payload["error"]["type"], "RuntimeError")
+        self.assertEqual(len(payload["error"]["sha256"]), 64)
         self.assertIsNone(payload["final_answer"])
 
     def test_stream_worker_error_is_recorded_but_report_completes(self) -> None:
@@ -256,11 +308,14 @@ class FakeLLMRuntimeTests(unittest.TestCase):
             agent._execute_task = fail_task
             events = list(agent.run_stream("Java 后端实习"))
             log_path = next(Path(tmpdir).glob("run_*.json"))
-            payload = json.loads(log_path.read_text(encoding="utf-8"))
+            raw_log = log_path.read_text(encoding="utf-8")
+            payload = json.loads(raw_log)
 
         self.assertTrue(any(event.get("type") == "final_report" for event in events))
-        self.assertEqual(payload["error"], "Task 1 failed: worker boom")
-        self.assertTrue(payload["final_answer"].startswith("# 找实习行动报告"))
+        self.assertNotIn("worker boom", raw_log)
+        self.assertEqual(payload["error"]["type"], "error")
+        self.assertEqual(len(payload["error"]["sha256"]), 64)
+        self.assertEqual(len(payload["final_answer"]["sha256"]), 64)
 
     def test_legacy_replay_tool_input_remains_supported(self) -> None:
         coordinator = object.__new__(DeepResearchAgent)

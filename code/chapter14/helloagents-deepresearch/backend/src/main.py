@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import json
 import sys
+from contextlib import asynccontextmanager
 from dataclasses import asdict
-from typing import Any, Dict, Iterator, Optional
+from typing import Any, AsyncIterator, Dict, Iterator, Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -131,7 +132,39 @@ def _build_config(payload: ResearchRequest) -> Configuration:
 
 
 def create_app(application_store: ApplicationStore | None = None) -> FastAPI:
-    app = FastAPI(title="HelloAgents Deep Researcher")
+    @asynccontextmanager
+    async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+        startup_config = Configuration.from_env()
+
+        if startup_config.llm_provider == "ollama":
+            base_url = startup_config.sanitized_ollama_url()
+        elif startup_config.llm_provider == "lmstudio":
+            base_url = startup_config.lmstudio_base_url
+        else:
+            base_url = startup_config.llm_base_url or "unset"
+
+        logger.info(
+            "DeepResearch configuration loaded: provider={} model={} base_url={} search_api={} "
+            "max_loops={} fetch_full_page={} task_concurrency={} tool_calling={} "
+            "strip_thinking={} api_key={}",
+            startup_config.llm_provider,
+            startup_config.resolved_model() or "unset",
+            base_url,
+            (
+                startup_config.search_api.value
+                if isinstance(startup_config.search_api, SearchAPI)
+                else startup_config.search_api
+            ),
+            startup_config.max_web_research_loops,
+            startup_config.fetch_full_page,
+            startup_config.task_concurrency,
+            startup_config.use_tool_calling,
+            startup_config.strip_thinking_tokens,
+            _mask_secret(startup_config.llm_api_key),
+        )
+        yield
+
+    app = FastAPI(title="HelloAgents Deep Researcher", lifespan=lifespan)
     config = Configuration.from_env()
     store = application_store or ApplicationStore()
 
@@ -142,33 +175,6 @@ def create_app(application_store: ApplicationStore | None = None) -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-
-    @app.on_event("startup")
-    def log_startup_configuration() -> None:
-        config = Configuration.from_env()
-
-        if config.llm_provider == "ollama":
-            base_url = config.sanitized_ollama_url()
-        elif config.llm_provider == "lmstudio":
-            base_url = config.lmstudio_base_url
-        else:
-            base_url = config.llm_base_url or "unset"
-
-        logger.info(
-            "DeepResearch configuration loaded: provider={} model={} base_url={} search_api={} "
-            "max_loops={} fetch_full_page={} task_concurrency={} tool_calling={} "
-            "strip_thinking={} api_key={}",
-            config.llm_provider,
-            config.resolved_model() or "unset",
-            base_url,
-            (config.search_api.value if isinstance(config.search_api, SearchAPI) else config.search_api),
-            config.max_web_research_loops,
-            config.fetch_full_page,
-            config.task_concurrency,
-            config.use_tool_calling,
-            config.strip_thinking_tokens,
-            _mask_secret(config.llm_api_key),
-        )
 
     @app.get("/healthz")
     def health_check() -> Dict[str, str]:

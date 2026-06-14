@@ -6,6 +6,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from pydantic import ValidationError
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from config import Configuration
@@ -15,6 +17,16 @@ from search_tool import SearchTool
 
 
 class ConfigurationSecurityTests(unittest.TestCase):
+    def test_run_log_level_defaults_to_metadata(self) -> None:
+        self.assertEqual(Configuration().llm_run_log_level, "metadata")
+
+    def test_run_log_level_env_override_and_validation(self) -> None:
+        with patch.dict("os.environ", {"LLM_RUN_LOG_LEVEL": "full"}):
+            self.assertEqual(Configuration.from_env().llm_run_log_level, "full")
+
+        with self.assertRaises(ValidationError):
+            Configuration(llm_run_log_level="verbose")
+
     def test_default_cors_origins_cover_local_vite_ports(self) -> None:
         origins = Configuration().resolved_cors_origins()
 

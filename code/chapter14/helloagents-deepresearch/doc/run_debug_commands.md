@@ -132,6 +132,31 @@ http://127.0.0.1:5174
 
 ## 7. 常见注意事项
 
+### 运行日志隐私与 replay
+
+新运行默认使用：
+
+```text
+LLM_RUN_LOG_LEVEL=metadata
+```
+
+该模式只在 `backend/logs` 中保存请求哈希、模型、用量、耗时，以及敏感内容的长度和 SHA-256，不能用于 replay。
+
+需要生成可回放日志时，必须在 `.env` 中显式设置：
+
+```text
+LLM_RUN_LOG_LEVEL=full
+```
+
+`full` 日志会保留模型响应、解析结果、搜索结果、最终报告和错误信息原文，可能包含用户信息，应作为敏感本地数据保护。生成日志后，再配置：
+
+```text
+LLM_MODE=replay
+LLM_REPLAY_LOG=logs/run_xxx.json
+```
+
+旧 schema v2 日志仍可 replay。系统不会自动删除或改写已有日志。不需要运行日志时可设置 `LLM_RUN_LOG_LEVEL=off`。
+
 ### 修改后端代码
 
 如果使用：

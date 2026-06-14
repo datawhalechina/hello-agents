@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 import tempfile
 import unittest
@@ -9,7 +10,12 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from services.llm_client import BaseLLMClient, CachedLLMClient, LLMClientResponse
+from services.llm_client import (
+    BaseLLMClient,
+    CachedLLMClient,
+    LLMClientResponse,
+    ReplayLLMClient,
+)
 
 
 class CountingLLMClient(BaseLLMClient):
@@ -73,6 +79,34 @@ class CachedLLMClientTests(unittest.TestCase):
 
             self.assertEqual(wrapped.calls, 2)
             self.assertEqual(len(list(Path(tmpdir).glob("*.json"))), 2)
+
+    def test_schema_v2_log_remains_replayable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "legacy-run.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 2,
+                        "llm_response": [
+                            {
+                                "content": "legacy response",
+                                "model": "legacy-model",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            client = ReplayLLMClient(path, strict=False)
+
+            response = client.chat(
+                [{"role": "user", "content": "not persisted"}],
+                operation="legacy-test",
+            )
+
+        self.assertEqual(response.content, "legacy response")
+        self.assertEqual(response.model, "legacy-model")
+        self.assertTrue(response.metadata["replay"])
 
 
 if __name__ == "__main__":

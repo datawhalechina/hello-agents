@@ -1,6 +1,6 @@
 # 找实习助手 Agent 开发进度
 
-更新时间：2026-06-13
+更新时间：2026-06-14
 
 ## 当前状态
 
@@ -8,7 +8,7 @@
 - 后端核心接口保持兼容：`/research`、`/research/stream`、`/applications`。
 - 前端支持结构化求职画像、岗位推荐清单、排序筛选、来源可信度、信息完整度、推荐优先级、待确认项、搜索质量诊断和本地投递状态管理。
 - 最终行动报告已升级为 6 章结构：今天优先投递、推荐理由、简历修改清单、7 天投递计划、风险与待确认项、来源与搜索诊断。
-- 最新一轮重点已完成：稳定性门槛和轻量投递行动管理。
+- 最新一轮重点已完成：运行日志 schema v3 隐私分级与完整 replay 显式开启。
 
 ## 已完成
 
@@ -32,6 +32,45 @@
 - 本地缓存、运行日志、运行数据和密钥全部通过 `.gitignore` 排除。
 
 ## 最近一次任务记录
+
+### 2026-06-14：运行日志 schema v3 隐私分级
+
+修改文件：
+
+- 更新 `backend/src/config.py`、`.env.example`：新增 `LLM_RUN_LOG_LEVEL=metadata|full|off`，默认使用 `metadata`，非法值由配置校验直接拒绝。
+- 更新 `backend/src/services/run_log.py`：日志升级为 schema v3；metadata 模式将模型响应、解析结果、搜索结果、最终报告和错误信息全部保存为长度与 SHA-256，full 模式保留完整 replay 内容并写入敏感数据警告，off 模式不创建日志文件。
+- 更新 `backend/src/agent.py`、`backend/src/services/llm_client.py`：replay 仅接受旧 schema v2 或 schema v3 full 日志；metadata 日志在真实 LLM 或搜索初始化前明确失败。
+- 更新日志、配置、fake/replay 测试和 `doc/run_debug_commands.md`；已有 `backend/logs` 与历史 trace 不删除、不改写。
+
+验证结果：
+
+- 后端全量测试通过：`Ran 90 tests`，`OK`；覆盖默认 metadata 无原文泄露、full 严格 replay、off 不落盘、旧 schema v2 回放和并发完整性。
+- 前端 `npm run build` 通过；三个核心接口及 payload 未修改。
+- 未调用真实 LLM、搜索或招聘平台。
+
+发现的问题与下一步：
+
+- `LLM_RUN_LOG_LEVEL=full` 和 `.llm_cache` 会保存模型原文，仍属于敏感本地数据；默认 metadata 不具备 replay 能力。
+- 后续优先审查 LLM cache 的隐私开关和生命周期，不自动清理现有本地调试数据。
+
+### 2026-06-14：清理 FastAPI 生命周期与测试客户端弃用警告
+
+修改文件：
+
+- 更新 `backend/src/main.py`：将启动配置日志从 `@app.on_event("startup")` 迁移到 FastAPI lifespan，保留启动时重新读取配置和密钥脱敏行为。
+- 更新 `backend/tests/test_api_contracts.py`：改用 `httpx.AsyncClient`、`ASGITransport` 和异步 unittest，并显式进入应用 lifespan；三个核心接口的契约覆盖保持不变。
+- 未新增 `httpx2`、未升级依赖、未修改前端或接口 payload。
+
+验证结果：
+
+- 契约测试在 `DeprecationWarning` 视为错误时通过：`Ran 6 tests`，`OK`。
+- 后端全量测试通过：`Ran 81 tests`，`OK`；不再出现 FastAPI `on_event` 或 Starlette `TestClient` 弃用警告。
+- 前端 `npm run build` 通过；未调用真实 LLM、搜索或招聘平台。
+
+审查结论与下一步：
+
+- 上一轮提交 `f1d7914` 的投递行动字段、旧数据兼容、SSE 终态和 trace 关闭未发现阻断性回归。
+- 继续将运行日志视为敏感本地数据；后续优先做小范围稳定性和隐私改进，不增加自动投递等越界功能。
 
 ### 2026-06-13：稳定性门槛与轻量投递行动管理
 
@@ -147,17 +186,16 @@
 - 后端全量测试最近通过：
 
 ```text
-Ran 81 tests
+Ran 90 tests
 OK
 ```
 
-- 上述测试包含 fake/cache/dry-run/replay、日志隐私与并发写入、流式终态、API 契约、投递行动字段和旧数据兼容验证。
+- 上述测试包含 fake/cache/dry-run/replay、schema v3 日志隐私分级、旧 v2 回放、流式终态、API 契约、投递行动字段和旧数据兼容验证。
 - 前端本轮已通过 `npm run build`，跟进日期状态已用固定日期脚本验证。
 
 ## 已知问题与风险
 
-- FastAPI `on_event` 和当前 Starlette `TestClient` 依赖会输出弃用警告，后续应单独升级处理。
-- 运行日志已不保存原始用户输入、完整 prompt 和工具输入，但 LLM 响应、搜索结果和最终报告可能回显用户信息，仍需作为敏感本地数据保护。
+- 默认 metadata 日志不保存用户输入、prompt、工具输入、模型响应、搜索结果、最终报告或错误消息原文；显式 full 日志与 `.llm_cache` 仍需作为敏感本地数据保护。
 - 真实招聘信息更新较快，用户必须打开来源链接核验岗位、薪资、地点、截止日期和投递入口。
 - 真实 LLM/search 链路可能触发 429 或网络波动；开发阶段优先使用 fake、dry-run、cache 和 replay。
 - 仍不做自动投递、不登录招聘平台、不批量联系 HR、不绕过平台规则。
@@ -166,4 +204,4 @@ OK
 
 - 在后续功能或修复任务中持续补充 fake/cache/replay 覆盖。
 - 需要真实链路验证时，先用 dry-run 检查 prompt 和任务数量，再切到 real 模式。
-- 可在不引入自动任务的前提下，后续增加投递记录导出或阶段复盘视图。
+- 优先评估 `.llm_cache` 的隐私开关、保留周期和手动清理说明。

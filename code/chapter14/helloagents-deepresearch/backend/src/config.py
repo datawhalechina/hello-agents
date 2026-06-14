@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from enum import Enum
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
@@ -160,6 +160,11 @@ class Configuration(BaseModel):
         title="LLM Run Log Directory",
         description="Directory for per-run JSON traces",
     )
+    llm_run_log_level: Literal["metadata", "full", "off"] = Field(
+        default="metadata",
+        title="LLM Run Log Level",
+        description="Run log detail level: metadata, full, or off",
+    )
     llm_replay_log: Optional[str] = Field(
         default=None,
         title="LLM Replay Log",
@@ -201,6 +206,7 @@ class Configuration(BaseModel):
             "max_agent_steps": os.getenv("MAX_AGENT_STEPS"),
             "dry_run_skip_search": os.getenv("DRY_RUN_SKIP_SEARCH"),
             "llm_run_log_dir": os.getenv("LLM_RUN_LOG_DIR"),
+            "llm_run_log_level": os.getenv("LLM_RUN_LOG_LEVEL"),
             "llm_replay_log": os.getenv("LLM_REPLAY_LOG"),
             "llm_replay_strict": os.getenv("LLM_REPLAY_STRICT"),
             "lmstudio_base_url": os.getenv("LMSTUDIO_BASE_URL"),

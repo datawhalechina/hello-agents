@@ -339,7 +339,7 @@ class ReplayLLMClient(BaseLLMClient):
     def __init__(self, log_path: str | Path, *, strict: bool = True) -> None:
         if not log_path:
             raise ValueError("LLM_REPLAY_LOG is required when LLM_MODE=replay")
-        payload = load_run_log(log_path)
+        payload = load_run_log(log_path, require_replay=True)
         self._responses = list(payload.get("llm_response") or [])
         self._cursor = 0
         self.strict = strict

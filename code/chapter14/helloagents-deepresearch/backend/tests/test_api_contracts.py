@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from fastapi.testclient import TestClient
+import httpx
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -73,16 +73,29 @@ class FailingStreamAgent(SuccessfulAgent):
         raise RuntimeError("stream contract boom")
 
 
-class ApiContractTests(unittest.TestCase):
-    def setUp(self) -> None:
+class ApiContractTests(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
-        self.addCleanup(self.temp_dir.cleanup)
         store = ApplicationStore(base_dir=Path(self.temp_dir.name))
-        self.client = TestClient(main_module.create_app(application_store=store))
+        self.app = main_module.create_app(application_store=store)
+        self.lifespan = self.app.router.lifespan_context(self.app)
+        await self.lifespan.__aenter__()
+        self.client = httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=self.app),
+            base_url="http://testserver",
+        )
 
-    def test_research_response_contract(self) -> None:
+    async def asyncTearDown(self) -> None:
+        await self.client.aclose()
+        await self.lifespan.__aexit__(None, None, None)
+        self.temp_dir.cleanup()
+
+    async def test_research_response_contract(self) -> None:
         with patch.object(main_module, "DeepResearchAgent", SuccessfulAgent):
-            response = self.client.post("/research", json={"topic": "Java 后端实习"})
+            response = await self.client.post(
+                "/research",
+                json={"topic": "Java 后端实习"},
+            )
 
         self.assertEqual(response.status_code, 200)
         payload = response.json()
@@ -93,13 +106,13 @@ class ApiContractTests(unittest.TestCase):
         self.assertEqual(payload["todo_items"][0]["status"], "completed")
         self.assertEqual(payload["job_items"][0]["source_url"], "https://example.com/job/1")
 
-    def test_research_configuration_error_is_http_400(self) -> None:
+    async def test_research_configuration_error_is_http_400(self) -> None:
         with patch.object(
             main_module,
             "_build_config",
             side_effect=ValueError("unsupported test configuration"),
         ):
-            response = self.client.post("/research", json={"topic": "test"})
+            response = await self.client.post("/research", json={"topic": "test"})
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()["detail"], "unsupported test configuration")
@@ -109,7 +122,7 @@ class ApiContractTests(unittest.TestCase):
             "_build_config",
             side_effect=ValueError("unsupported stream configuration"),
         ):
-            stream_response = self.client.post(
+            stream_response = await self.client.post(
                 "/research/stream",
                 json={"topic": "test"},
             )
@@ -120,14 +133,14 @@ class ApiContractTests(unittest.TestCase):
             "unsupported stream configuration",
         )
 
-    def test_research_validation_error_is_http_422(self) -> None:
-        response = self.client.post("/research", json={})
+    async def test_research_validation_error_is_http_422(self) -> None:
+        response = await self.client.post("/research", json={})
 
         self.assertEqual(response.status_code, 422)
 
-    def test_stream_success_ends_with_done(self) -> None:
+    async def test_stream_success_ends_with_done(self) -> None:
         with patch.object(main_module, "DeepResearchAgent", SuccessfulAgent):
-            response = self.client.post(
+            response = await self.client.post(
                 "/research/stream",
                 json={"topic": "Java 后端实习"},
             )
@@ -138,9 +151,9 @@ class ApiContractTests(unittest.TestCase):
         self.assertEqual(events[-1]["type"], "done")
         self.assertTrue(any(event["type"] == "final_report" for event in events))
 
-    def test_stream_failure_ends_with_error(self) -> None:
+    async def test_stream_failure_ends_with_error(self) -> None:
         with patch.object(main_module, "DeepResearchAgent", FailingStreamAgent):
-            response = self.client.post(
+            response = await self.client.post(
                 "/research/stream",
                 json={"topic": "Java 后端实习"},
             )
@@ -150,8 +163,8 @@ class ApiContractTests(unittest.TestCase):
         self.assertEqual(events[-1]["type"], "error")
         self.assertEqual(events[-1]["detail"], "stream contract boom")
 
-    def test_applications_crud_and_tracking_contract(self) -> None:
-        create_response = self.client.post(
+    async def test_applications_crud_and_tracking_contract(self) -> None:
+        create_response = await self.client.post(
             "/applications",
             json={
                 "company": "示例公司",
@@ -173,7 +186,7 @@ class ApiContractTests(unittest.TestCase):
         self.assertEqual(created["application_channel"], "内推")
         self.assertEqual(created["next_action_at"], "2026-06-16")
 
-        patch_response = self.client.patch(
+        patch_response = await self.client.patch(
             f"/applications/{created['id']}",
             json={"next_action": "", "resume_version": "resume-v3"},
         )
@@ -183,18 +196,18 @@ class ApiContractTests(unittest.TestCase):
         self.assertEqual(updated["resume_version"], "resume-v3")
         self.assertEqual(updated["application_channel"], "内推")
 
-        list_response = self.client.get("/applications")
+        list_response = await self.client.get("/applications")
         self.assertEqual(list_response.status_code, 200)
         self.assertEqual(list_response.json()["job_items"][0]["id"], created["id"])
 
-        invalid_date = self.client.patch(
+        invalid_date = await self.client.patch(
             f"/applications/{created['id']}",
             json={"next_action_at": "2026/06/16"},
         )
         self.assertEqual(invalid_date.status_code, 400)
         self.assertIn("YYYY-MM-DD", invalid_date.json()["detail"])
 
-        invalid_create = self.client.post(
+        invalid_create = await self.client.post(
             "/applications",
             json={
                 "company": "另一家公司",
@@ -205,10 +218,11 @@ class ApiContractTests(unittest.TestCase):
         )
         self.assertEqual(invalid_create.status_code, 400)
 
-        delete_response = self.client.delete(f"/applications/{created['id']}")
+        delete_response = await self.client.delete(f"/applications/{created['id']}")
         self.assertEqual(delete_response.status_code, 200)
         self.assertEqual(delete_response.json(), {"deleted": True})
-        self.assertEqual(self.client.get("/applications").json()["job_items"], [])
+        list_after_delete = await self.client.get("/applications")
+        self.assertEqual(list_after_delete.json()["job_items"], [])
 
 
 if __name__ == "__main__":

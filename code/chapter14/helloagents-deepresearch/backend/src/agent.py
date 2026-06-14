@@ -210,13 +210,19 @@ class DeepResearchAgent:
             return None
         if not self.config.llm_replay_log:
             return None
-        return load_run_log(self.config.llm_replay_log)
+        return load_run_log(self.config.llm_replay_log, require_replay=True)
 
     def _start_run_logger(self, state: SummaryState, topic: str) -> None:
+        if self.config.llm_run_log_level == "off":
+            self._run_logger = None
+            if hasattr(self.llm, "set_run_logger"):
+                self.llm.set_run_logger(None)
+            return
         self._run_logger = RunLogger(
             run_id=state.run_id or uuid4().hex[:12],
             log_dir=self.config.llm_run_log_dir,
             user_input=topic,
+            level=self.config.llm_run_log_level,
         )
         if hasattr(self.llm, "set_run_logger"):
             self.llm.set_run_logger(self._run_logger)
