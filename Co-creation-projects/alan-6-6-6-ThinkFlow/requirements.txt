@@ -1,0 +1,16 @@
+# 核心依赖
+hello-agents[all]>=0.2.7
+
+# 环境变量管理
+python-dotenv>=1.0.0
+
+# 数据处理
+numpy>=1.24.0
+pandas>=2.0.0
+
+# 可视化（可选）
+matplotlib>=3.7.0
+plotly>=5.14.0
+
+# Jupyter Notebook
+jupyterlab>=4.0.0
