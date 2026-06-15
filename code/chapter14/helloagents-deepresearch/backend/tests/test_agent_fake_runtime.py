@@ -14,6 +14,12 @@ import agent as agent_module
 from agent import DeepResearchAgent
 from config import Configuration
 from models import TodoItem
+from services.llm_client import (
+    CachedLLMClient,
+    DryRunLLMClient,
+    FakeLLMClient,
+    RealLLMClient,
+)
 from services.run_log import RunLogger
 
 
@@ -93,21 +99,63 @@ class FakeLLMRuntimeTests(unittest.TestCase):
         self.assertTrue(result.job_items)
         self.assertEqual(result.job_items[0].company, "示例科技")
 
-    def test_dry_run_mode_skips_real_llm_and_search(self) -> None:
-        config = Configuration(
-            llm_mode="dry_run",
-            enable_notes=False,
-            dry_run_skip_search=True,
-            llm_retry_base_delay=0,
-            llm_retry_max_delay=0,
-            llm_min_interval_seconds=0,
-        )
+    def test_fake_mode_applies_configured_cache_mode(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = Configuration(
+                llm_mode="fake",
+                llm_cache_mode="read_only",
+                llm_cache_dir=str(Path(tmpdir) / "cache"),
+                enable_notes=False,
+            )
 
-        with (
-            patch.object(agent_module, "HelloAgentsLLM", side_effect=AssertionError("real LLM called")),
-            patch.object(agent_module, "dispatch_search", side_effect=AssertionError("real search called")),
-        ):
-            result = DeepResearchAgent(config=config).run("dry-run Java 后端实习")
+            coordinator = DeepResearchAgent(config=config)
+
+            self.assertIsInstance(coordinator.llm.client, CachedLLMClient)
+            self.assertEqual(coordinator.llm.client.mode, "read_only")
+            self.assertIsInstance(coordinator.llm.client._wrapped, FakeLLMClient)
+            self.assertFalse((Path(tmpdir) / "cache").exists())
+
+    def test_real_mode_applies_configured_cache_mode_without_calling_model(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = Configuration(
+                llm_mode="real",
+                llm_cache_mode="read_only",
+                llm_cache_dir=str(Path(tmpdir) / "cache"),
+                enable_notes=False,
+            )
+
+            llm_stub = type("LLMStub", (), {"model": "stub-model"})()
+            with patch.object(agent_module, "HelloAgentsLLM", return_value=llm_stub):
+                coordinator = DeepResearchAgent(config=config)
+
+            self.assertIsInstance(coordinator.llm.client, CachedLLMClient)
+            self.assertEqual(coordinator.llm.client.mode, "read_only")
+            self.assertIsInstance(coordinator.llm.client._wrapped, RealLLMClient)
+            self.assertFalse((Path(tmpdir) / "cache").exists())
+
+    def test_dry_run_mode_skips_real_llm_and_search(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cache_dir = Path(tmpdir) / "cache"
+            config = Configuration(
+                llm_mode="dry_run",
+                llm_cache_mode="read_write",
+                llm_cache_dir=str(cache_dir),
+                enable_notes=False,
+                dry_run_skip_search=True,
+                llm_retry_base_delay=0,
+                llm_retry_max_delay=0,
+                llm_min_interval_seconds=0,
+            )
+
+            with (
+                patch.object(agent_module, "HelloAgentsLLM", side_effect=AssertionError("real LLM called")),
+                patch.object(agent_module, "dispatch_search", side_effect=AssertionError("real search called")),
+            ):
+                coordinator = DeepResearchAgent(config=config)
+                result = coordinator.run("dry-run Java 后端实习")
+
+            self.assertIsInstance(coordinator.llm.client, DryRunLLMClient)
+            self.assertFalse(cache_dir.exists())
 
         self.assertTrue(result.report_markdown.startswith("# 找实习行动报告"))
         self.assertIn("Dry-run 模式", result.report_markdown)
@@ -184,6 +232,8 @@ class FakeLLMRuntimeTests(unittest.TestCase):
 
             replay_config = Configuration(
                 llm_mode="replay",
+                llm_cache_mode="read_write",
+                llm_cache_dir=str(Path(tmpdir) / "replay-cache"),
                 llm_replay_log=str(logs[0]),
                 llm_replay_strict=True,
                 enable_notes=False,
@@ -198,6 +248,8 @@ class FakeLLMRuntimeTests(unittest.TestCase):
                 patch.object(agent_module, "dispatch_search", side_effect=AssertionError("real search called")),
             ):
                 replay_result = DeepResearchAgent(config=replay_config).run("replay Java 后端实习")
+
+            self.assertFalse((Path(tmpdir) / "replay-cache").exists())
 
         self.assertEqual(replay_result.report_markdown, source_result.report_markdown)
         self.assertEqual(len(replay_result.job_items), len(source_result.job_items))

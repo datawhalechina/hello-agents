@@ -80,6 +80,52 @@ class CachedLLMClientTests(unittest.TestCase):
             self.assertEqual(wrapped.calls, 2)
             self.assertEqual(len(list(Path(tmpdir).glob("*.json"))), 2)
 
+    def test_read_only_cache_hit_reuses_existing_response(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            messages = [{"role": "user", "content": "private prompt"}]
+            writer = CountingLLMClient()
+            CachedLLMClient(writer, tmpdir).chat(messages, operation="unit-test")
+            reader = CountingLLMClient()
+
+            response = CachedLLMClient(
+                reader,
+                tmpdir,
+                mode="read_only",
+            ).chat(messages, operation="unit-test")
+
+            self.assertEqual(response.content, "response 1")
+            self.assertEqual(reader.calls, 0)
+            self.assertTrue(response.metadata["cache_hit"])
+
+    def test_read_only_cache_miss_does_not_create_directory_or_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cache_dir = Path(tmpdir) / "missing-cache"
+            wrapped = CountingLLMClient()
+            client = CachedLLMClient(wrapped, cache_dir, mode="read_only")
+
+            response = client.chat(
+                [{"role": "user", "content": "private prompt"}],
+                operation="unit-test",
+            )
+
+            self.assertEqual(response.content, "response 1")
+            self.assertEqual(wrapped.calls, 1)
+            self.assertFalse(response.metadata["cache_hit"])
+            self.assertFalse(cache_dir.exists())
+
+    def test_read_write_cache_persists_full_response_content(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            client = CachedLLMClient(CountingLLMClient(), tmpdir)
+
+            client.chat(
+                [{"role": "user", "content": "private prompt"}],
+                operation="unit-test",
+            )
+
+            cache_path = next(Path(tmpdir).glob("*.json"))
+            payload = json.loads(cache_path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["content"], "response 1")
+
     def test_schema_v2_log_remains_replayable(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             path = Path(tmpdir) / "legacy-run.json"

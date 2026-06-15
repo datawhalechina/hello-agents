@@ -138,7 +138,12 @@ class Configuration(BaseModel):
     llm_cache_enabled: bool = Field(
         default=False,
         title="LLM Cache Enabled",
-        description="Whether to cache LLM responses on disk",
+        description="Legacy switch that enables read-write LLM caching",
+    )
+    llm_cache_mode: Literal["off", "read_only", "read_write"] = Field(
+        default="off",
+        title="LLM Cache Mode",
+        description="LLM response cache mode: off, read_only, or read_write",
     )
     llm_cache_dir: str = Field(
         default=".llm_cache",
@@ -202,6 +207,7 @@ class Configuration(BaseModel):
             "llm_min_interval_seconds": os.getenv("LLM_MIN_INTERVAL_SECONDS"),
             "llm_mode": os.getenv("LLM_MODE"),
             "llm_cache_enabled": os.getenv("LLM_CACHE_ENABLED"),
+            "llm_cache_mode": os.getenv("LLM_CACHE_MODE"),
             "llm_cache_dir": os.getenv("LLM_CACHE_DIR"),
             "max_agent_steps": os.getenv("MAX_AGENT_STEPS"),
             "dry_run_skip_search": os.getenv("DRY_RUN_SKIP_SEARCH"),
@@ -232,6 +238,15 @@ class Configuration(BaseModel):
                     raw_values[key] = value
 
         return cls(**raw_values)
+
+    def resolved_llm_cache_mode(self) -> Literal["off", "read_only", "read_write"]:
+        """Resolve the new cache mode while preserving the legacy boolean switch."""
+
+        if "llm_cache_mode" in self.model_fields_set:
+            return self.llm_cache_mode
+        if self.llm_cache_enabled:
+            return "read_write"
+        return self.llm_cache_mode
 
     def sanitized_ollama_url(self) -> str:
         """Ensure Ollama base URL includes the /v1 suffix required by OpenAI clients."""

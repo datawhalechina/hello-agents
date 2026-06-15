@@ -157,6 +157,61 @@ LLM_REPLAY_LOG=logs/run_xxx.json
 
 旧 schema v2 日志仍可 replay。系统不会自动删除或改写已有日志。不需要运行日志时可设置 `LLM_RUN_LOG_LEVEL=off`。
 
+### LLM 响应缓存隐私
+
+LLM 缓存与运行日志是两套独立机制。即使使用默认的：
+
+```text
+LLM_RUN_LOG_LEVEL=metadata
+```
+
+只要启用了可写缓存，`backend/.llm_cache` 仍会保存完整模型响应，包括响应正文、reasoning、tool calls 和相关元数据。缓存文件应作为敏感本地数据保护。
+
+推荐默认关闭缓存：
+
+```text
+LLM_CACHE_MODE=off
+```
+
+需要复用已有缓存但不希望产生新文件时使用：
+
+```text
+LLM_CACHE_MODE=read_only
+```
+
+仅在明确接受响应原文落盘时使用：
+
+```text
+LLM_CACHE_MODE=read_write
+LLM_CACHE_DIR=.llm_cache
+```
+
+三种模式的行为：
+
+- `off`：不读取、不创建缓存目录、不写入缓存。
+- `read_only`：命中已有缓存时复用；未命中时正常调用底层模型，但不创建目录或写文件。
+- `read_write`：读取已有缓存，并将未命中的完整模型响应写入 JSON。
+
+缓存只应用于 `LLM_MODE=real` 和 `LLM_MODE=fake`。`dry_run` 与 `replay` 始终绕过缓存。缓存不能替代 replay；`LLM_MODE=replay` 仍只读取旧 schema v2 或 `LLM_RUN_LOG_LEVEL=full` 生成的 schema v3 运行日志。
+
+旧配置 `LLM_CACHE_ENABLED=true` 仍受支持，并在未设置 `LLM_CACHE_MODE` 时等价于 `read_write`。如果两者同时设置，以 `LLM_CACHE_MODE` 为准。
+
+项目不会自动删除或改写已有缓存。建议调试任务结束后立即手动清理；确需跨日调试时，建议最长保留 7 天。先在 `backend` 目录预览缓存路径和文件：
+
+```powershell
+Set-Location D:\1-school\agent\14\hello-agents-gitee\code\chapter14\helloagents-deepresearch\backend
+$cachePath = Join-Path (Get-Location) ".llm_cache"
+$cachePath
+Get-ChildItem -LiteralPath $cachePath -File -ErrorAction SilentlyContinue |
+    Select-Object Name, Length, LastWriteTime
+```
+
+确认 `$cachePath` 指向当前项目的 `backend\.llm_cache` 后，再手动清理：
+
+```powershell
+Remove-Item -LiteralPath $cachePath -Recurse -Force
+```
+
 ### 修改后端代码
 
 如果使用：

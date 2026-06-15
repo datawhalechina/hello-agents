@@ -17,6 +17,40 @@ from search_tool import SearchTool
 
 
 class ConfigurationSecurityTests(unittest.TestCase):
+    def test_cache_mode_defaults_to_off(self) -> None:
+        config = Configuration()
+
+        self.assertEqual(config.llm_cache_mode, "off")
+        self.assertEqual(config.resolved_llm_cache_mode(), "off")
+
+    def test_cache_mode_validation_and_legacy_compatibility(self) -> None:
+        self.assertEqual(
+            Configuration(llm_cache_enabled=True).resolved_llm_cache_mode(),
+            "read_write",
+        )
+        with self.assertRaises(ValidationError):
+            Configuration(llm_cache_mode="write_only")
+
+    def test_explicit_cache_mode_takes_priority_over_legacy_switch(self) -> None:
+        with patch.dict(
+            "os.environ",
+            {"LLM_CACHE_MODE": "read_only", "LLM_CACHE_ENABLED": "true"},
+            clear=True,
+        ):
+            config = Configuration.from_env()
+
+        self.assertEqual(config.resolved_llm_cache_mode(), "read_only")
+
+    def test_legacy_cache_env_enables_read_write_when_mode_is_absent(self) -> None:
+        with patch.dict(
+            "os.environ",
+            {"LLM_CACHE_ENABLED": "true"},
+            clear=True,
+        ):
+            config = Configuration.from_env()
+
+        self.assertEqual(config.resolved_llm_cache_mode(), "read_write")
+
     def test_run_log_level_defaults_to_metadata(self) -> None:
         self.assertEqual(Configuration().llm_run_log_level, "metadata")
 

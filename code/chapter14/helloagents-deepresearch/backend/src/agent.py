@@ -42,6 +42,7 @@ from services.search_diagnostics import persist_search_diagnostics
 from services.summarizer import SummarizationService
 from services.tool_events import ToolCallTracker
 from services.llm_client import (
+    BaseLLMClient,
     CachedLLMClient,
     DryRunLLMClient,
     FakeLLMClient,
@@ -121,9 +122,7 @@ class DeepResearchAgent:
         """Instantiate the shared LLM adapter following configuration preferences."""
         mode = (self.config.llm_mode or "real").strip().lower()
         if mode == "fake":
-            client = FakeLLMClient()
-            if self.config.llm_cache_enabled:
-                client = CachedLLMClient(client, self.config.llm_cache_dir)
+            client = self._wrap_with_cache(FakeLLMClient())
             return HelloAgentsCompatibleLLM(
                 client,
                 model="fake-llm",
@@ -175,13 +174,23 @@ class DeepResearchAgent:
                 llm_kwargs["api_key"] = self.config.llm_api_key
 
         real_llm = HelloAgentsLLM(**llm_kwargs)
-        client = RealLLMClient(real_llm)
-        if self.config.llm_cache_enabled:
-            client = CachedLLMClient(client, self.config.llm_cache_dir)
+        client = self._wrap_with_cache(RealLLMClient(real_llm))
         return HelloAgentsCompatibleLLM(
             client,
             model=model_id or self.config.resolved_model() or "unknown",
             temperature=0.0,
+        )
+
+    def _wrap_with_cache(self, client: BaseLLMClient) -> BaseLLMClient:
+        """Apply the configured disk cache to real and fake clients only."""
+
+        cache_mode = self.config.resolved_llm_cache_mode()
+        if cache_mode == "off":
+            return client
+        return CachedLLMClient(
+            client,
+            self.config.llm_cache_dir,
+            mode=cache_mode,
         )
 
     def _create_tool_aware_agent(self, *, name: str, system_prompt: str) -> ToolAwareSimpleAgent:

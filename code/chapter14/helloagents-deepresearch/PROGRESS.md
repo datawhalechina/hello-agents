@@ -1,6 +1,6 @@
 # 找实习助手 Agent 开发进度
 
-更新时间：2026-06-14
+更新时间：2026-06-15
 
 ## 当前状态
 
@@ -8,7 +8,7 @@
 - 后端核心接口保持兼容：`/research`、`/research/stream`、`/applications`。
 - 前端支持结构化求职画像、岗位推荐清单、排序筛选、来源可信度、信息完整度、推荐优先级、待确认项、搜索质量诊断和本地投递状态管理。
 - 最终行动报告已升级为 6 章结构：今天优先投递、推荐理由、简历修改清单、7 天投递计划、风险与待确认项、来源与搜索诊断。
-- 最新一轮重点已完成：运行日志 schema v3 隐私分级与完整 replay 显式开启。
+- 最新一轮重点已完成：`.llm_cache` 三态隐私策略、旧配置兼容与生命周期说明。
 
 ## 已完成
 
@@ -18,7 +18,7 @@
 - 本地岗位保存与投递状态管理已落地。
 - LLM 调用已统一通过 `BaseLLMClient` 入口，真实模型由 `RealLLMClient` 和 `HelloAgentsCompatibleLLM` 适配。
 - 已支持 `LLM_MODE=real|fake|dry_run|replay`。
-- 已支持 `.llm_cache/` 本地 LLM 调用缓存。
+- 已支持 `.llm_cache/` 的 `off|read_only|read_write` 三态本地 LLM 调用缓存。
 - 已支持 dry-run 模式和 `MAX_AGENT_STEPS` 最大步数限制。
 - 已支持运行日志 `logs/run_{run_id}.json` 和 replay 模式。
 - 已新增基础测试覆盖 prompt 构造、fake LLM、cache、dry-run、parser 和 replay。
@@ -32,6 +32,33 @@
 - 本地缓存、运行日志、运行数据和密钥全部通过 `.gitignore` 排除。
 
 ## 最近一次任务记录
+
+### 2026-06-15：`.llm_cache` 隐私策略改进
+
+修改文件：
+
+- 更新 `backend/src/config.py`、`backend/.env.example`：新增 `LLM_CACHE_MODE=off|read_only|read_write`，默认 `off`；显式新模式优先，旧 `LLM_CACHE_ENABLED=true` 在未设置新模式时仍等价于可读写缓存。
+- 更新 `backend/src/services/llm_client.py`、`backend/src/agent.py`：`read_only` 仅复用已有缓存且 miss 不创建目录或写文件，`read_write` 保持完整响应落盘；缓存仅装配到 real/fake，dry-run/replay 始终绕过。
+- 更新缓存配置、client 和 Agent 测试，以及 `doc/run_debug_commands.md`；明确缓存独立于 metadata 日志、不能替代 replay、完整响应属于敏感数据，建议任务后即删且跨日最长保留 7 天，仅提供手动清理说明。
+
+验证结果：
+
+- 后端定向测试通过：`Ran 30 tests`，`OK`；后端全量测试通过：`Ran 99 tests`，`OK`。
+- 前端 `npm run build` 通过；三个核心接口及 payload 未修改，未新增依赖。
+- 使用临时 `LLM_MODE=dry_run`、`DRY_RUN_SKIP_SEARCH=true`、`LLM_RUN_LOG_LEVEL=metadata` 验证，未调用真实 LLM、搜索或招聘平台；未删除或改写任何现有 cache、logs、trace。
+
+发现的问题与下一步：
+
+- `read_write` 仍会保存模型响应、reasoning 和 tool calls 原文，必须显式启用并按敏感本地数据管理；项目继续不自动清理缓存。
+- 当前虚拟环境未安装 `ruff`，本轮未新增该依赖；后续如统一引入 lint 流程，应单独评估并更新开发依赖。
+
+### 2026-06-15：准备新对话开发交接 Prompt
+
+- 当前分支为 `internship-agent`，工作树干净，最新提交为 `3c76f6d`。
+- 当前后端与前端均未运行；本次未修改业务代码，未调用真实 LLM、搜索或招聘平台。
+- 已整理新对话交接要求：先读取 `AGENTS.md` 和 `PROGRESS.md`，审查分支、结构与未提交改动，再在现有基础上继续开发。
+- 建议下一阶段优先评估 `.llm_cache` 的隐私开关、保留周期和手动清理说明，同时保持核心接口及产品边界不变。
+- 本次仅更新交接进度文档，未重复运行后端测试或前端构建；最近完整验证仍为后端 90 项测试通过、前端构建通过。
 
 ### 2026-06-14：无真实 LLM/搜索的本地运行验证
 

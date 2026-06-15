@@ -9,7 +9,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any
+from typing import Any, Literal
 
 from hello_agents import HelloAgentsLLM
 from hello_agents.core.llm_response import LLMResponse
@@ -241,10 +241,18 @@ class DryRunLLMClient(FakeLLMClient):
 class CachedLLMClient(BaseLLMClient):
     """Local JSON cache wrapper for repeated LLM prompts."""
 
-    def __init__(self, wrapped: BaseLLMClient, cache_dir: str | Path) -> None:
+    def __init__(
+        self,
+        wrapped: BaseLLMClient,
+        cache_dir: str | Path,
+        *,
+        mode: Literal["read_only", "read_write"] = "read_write",
+    ) -> None:
         self._wrapped = wrapped
         self.cache_dir = Path(cache_dir)
-        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.mode = mode
+        if self.mode == "read_write":
+            self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.model = getattr(wrapped, "model", "cached-llm")
 
     def chat(
@@ -277,7 +285,8 @@ class CachedLLMClient(BaseLLMClient):
             **kwargs,
         )
         response.metadata.update({"cache_hit": False, "request_hash": request_hash})
-        self._write_cached(request_hash, response)
+        if self.mode == "read_write":
+            self._write_cached(request_hash, response)
         return response
 
     def stream_chat(
@@ -309,7 +318,8 @@ class CachedLLMClient(BaseLLMClient):
             model=str(getattr(self._wrapped, "model", self.model)),
             metadata={"cache_hit": False, "request_hash": request_hash},
         )
-        self._write_cached(request_hash, response)
+        if self.mode == "read_write":
+            self._write_cached(request_hash, response)
 
     def _read_cached(self, request_hash: str) -> LLMClientResponse | None:
         path = self.cache_dir / f"{request_hash}.json"
