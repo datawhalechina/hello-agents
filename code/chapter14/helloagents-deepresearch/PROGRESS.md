@@ -33,6 +33,12 @@
 
 ## 最近一次任务记录
 
+### 2026-06-14：无真实 LLM/搜索的本地运行验证
+
+- 使用临时环境变量以 `LLM_MODE=dry_run`、`DRY_RUN_SKIP_SEARCH=true`、`LLM_RUN_LOG_LEVEL=metadata` 启动后端，未修改 `.env`。
+- 后端 `/healthz` 返回正常，前端 `http://127.0.0.1:5174` 返回 200。
+- 最小 `/research` 验证返回 Dry-run 报告、3 个任务、1 个模拟岗位，搜索诊断 backend 为 `dry_run`；未调用真实 LLM 或搜索。
+
 ### 2026-06-14：运行日志 schema v3 隐私分级
 
 修改文件：
