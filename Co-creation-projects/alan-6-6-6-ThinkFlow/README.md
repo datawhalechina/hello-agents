@@ -56,8 +56,12 @@ cp .env.example .env
 ### 运行项目
 
 ```bash
+# 方式1: Python脚本运行（推荐）
+python main.py
+
+# 方式2: Jupyter Notebook运行
 jupyter lab
-# 打开 main.ipynb 并运行所有单元格
+# 打开 main.ipynb 并运行所有单元格（如有）
 ```
 
 ## 📖 核心设计
