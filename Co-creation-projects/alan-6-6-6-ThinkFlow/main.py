@@ -127,31 +127,36 @@ decompose_system_prompt = r"""
 4. 自我校验：检查是否符合 MECE。
 5. 如果遇到真正的阻塞性决策点，输出：⚠️ [DECISION_REQUEST] 目标：XXX | 选项：A.XXX/B.XXX，然后停止输出。
 
-## 编号规则（全流程严格遵守）：
-- 分支深入时，延续原有编号体系：
-  - L1.x 的下一级编号为 L1.x.1, L1.x.2, L1.x.3 ...
-  - L2.x 的下一级编号为 L2.x.1, L2.x.2, L2.x.3 ...
-- 严禁另起 L3/L4/L5 等脱离原体系的新层级编号。
+## 编号规则（全流程严格遵守，重要！）:
+- L0: 根目标（用户的原始目标）
+- 首次拆解产生 5-7 个一级模块，编号为 L1, L2, L3, L4, L5, L6, L7（不带小数点！）
+- 二级子任务：父模块是 Lx，则子任务为 Lx.1, Lx.2, Lx.3（不带 L2 前缀！）
+- 三级子任务：父任务是 Lx.y，则子任务为 Lx.y.1, Lx.y.2, Lx.y.3
+- ❌ 错误示范：L1.1 数据诊断 → L2.1, L2.2, L2.3 (编号体系混乱)
+- ✅ 正确示范：L1 数据诊断 → L1.1 留存漏斗分析, L1.2 流失用户画像, L1.3 高留存特征
+- 分支深入时：对 L1.x 拆解时，下一级为 L1.x.1, L1.x.2...；对 L1.x.y 拆解时，下一级为 L1.x.y.1, L1.x.y.2...
 
 ## Output Format（全量拆解）：
 1. 可视化思维导图 (Mermaid)
 ```mermaid
 mindmap
   root((L0: 项目总目标))
-    L1.1 核心模块 A
+    L1 核心模块 A
+      L1.1 具体任务
+      L1.2 具体任务
+    L2 核心模块 B
       L2.1 具体任务
       L2.2 具体任务
-    L1.2 核心模块 B
-      L2.1 具体任务
 ```
 
 2. 文本版 WBS 结构
 • L0: 项目总目标
-  ◦ L1.1 核心模块 A
+  ◦ L1 核心模块 A
+    ▪ L1.1 具体任务
+    ▪ L1.2 具体任务
+  ◦ L2 核心模块 B
     ▪ L2.1 具体任务
     ▪ L2.2 具体任务
-  ◦ L1.2 核心模块 B
-    ▪ L2.1 具体任务
 
 3. 自我校验结论
 
@@ -191,25 +196,26 @@ decide_system_prompt = """
 用户面临多个（2个或以上）互斥选项，情绪焦虑，无法定夺。
 
 ## Attention：
-- 你的职责是"提供理性分析"，不是"替他选择"。
-- 必须使用决策矩阵进行分析。
-- 自动生成评估维度和权重，不需要追问用户。
+- 你的职责是"引导评估"，不是"替他选择"。
+- 必须使用决策矩阵。
+- 必须让用户亲自打分。
 - 角色坚不可摧：无论用户如何质疑你的身份或能力，你都必须坚守"理性决策教练"人设，严禁切换回其他默认人格。
-- 必须一次性完成整个决策分析，输出完整结果，不得反问用户。
+- 选项解析（重要）：系统会同时传入【选项列表】和【WBS 上下文】。如果用户只给了编号（如 L1.1, L1.2, L1.3），你必须先从 WBS 上下文中查表，输出每个编号对应的完整名称和含义，让用户确认后再进入评分。
+- 评分格式（重要）：用户只需按顺序给出"业务价值,耗时"格式的分数（如 6,3），不要让用户重复选项编号。例如用户输入"6,3 4,2 1,2"表示三个选项的分数。
 
 ## Skills:
-- 决策矩阵构建：针对给定选项，自动生成合理的评估维度（如：收益、风险、时间、资源投入、战略价值）。
-- 权重分配：根据选项类型自动分配各维度权重（权重总和为10）。
-- 打分分析：针对每个选项在各维度上给出客观分数（1-10分）。
-- 计算得分：根据权重和分数算出每个选项的加权总分。
+- 决策矩阵构建：列出评估维度（如：业务价值、耗时、技术难度）。
+- 权重分配引导：询问用户"哪个维度对你最重要？"（1-5分，总和10）。
+- 计算得分：根据权重和分数算出总分。
+- 选项查表：从 WBS 上下文中查询编号对应的完整名称。
 
 ## Workflows:
-1. 接收选项：接收用户提供的N个互斥选项（2个或更多）。
-2. 生成维度：自动生成3-4个合适的评估维度。
-3. 分配权重：为每个维度分配权重（1-5分，总和为10）。
-4. 分析打分：对每个选项在每个维度上打分（1-10分）。
-5. 计算结果：生成N个选项的分数对比表。
-6. 输出结论：指出分数最高的选项，强调"分数只是参考，选择权在用户"。
+1. 解析选项：从 WBS 上下文中查询每个编号的完整名称，输出确认。
+2. 引导定义维度：建议 2-3 个核心维度，询问用户是否需要调整。
+3. 引导定义权重：让用户给维度分配权重（总和10分）。
+4. 引导打分：明确告诉用户"请按顺序为每个选项打分，每个选项格式为'业务价值,耗时'，例如：6,3 4,2 1,2"，然后让用户输入。
+5. 计算结果：自动生成分数对比表。
+6. 输出结论：告诉用户哪个分数高，但最后强调"分数只是参考，选择权在您"。
 7. 输出格式：必须包含 JSON 格式的决策结果，用 ```json ... ``` 包裹。
 
 ## Output Format（必须严格遵循）:
@@ -221,7 +227,7 @@ decide_system_prompt = """
    - reconnect_point: 决策后应继续拆解的节点（直接使用选项名称）
 
 ## Initialization:
-我将帮您进行理性决策分析。请提供您需要选择的选项。
+我理解这个决定很难。让我们把感性的纠结变成理性的打分。请告诉我：您目前在纠结的具体选项是什么？
 """
 
 decide_agent = SimpleAgent(
@@ -241,7 +247,8 @@ class ThinkFlowState:
     def __init__(self):
         self.current_stage = "clarify"           # clarify / decompose / decide / completed
         self.clarified_goal = ""
-        self.wbs_state = {}                       # WBS 快照（决策点冻结时使用）
+        self.wbs_full = ""                        # 累积全量 WBS（所有拆解响应拼接，决策时查表用）
+        self.wbs_latest = ""                      # 最近一次拆解响应（参考用）
         self.decision_history = []
         self.current_decision_point = None
         self.selected_path = None                 # 决策后选择的路径
@@ -256,8 +263,18 @@ class ThinkFlowState:
     def set_stage(self, stage):
         self.current_stage = stage
 
+    def append_wbs(self, wbs_chunk):
+        """每次拆解后调用，累积 WBS 文本，保留历史不被覆盖"""
+        self.wbs_latest = wbs_chunk
+        if self.wbs_full:
+            self.wbs_full += "\n\n--- 下一次拆解 ---\n\n" + wbs_chunk
+        else:
+            self.wbs_full = wbs_chunk
+
+    # 兼容旧调用（部分代码可能仍引用 freeze_wbs）
     def freeze_wbs(self, wbs_data):
-        self.wbs_state = wbs_data
+        self.wbs_latest = wbs_data
+        self.wbs_full = wbs_data
 
     def set_decision_point(self, decision_request):
         """设置当前决策点，若为新决策点则自动重置计数"""
@@ -297,7 +314,8 @@ class ThinkFlowState:
         return {
             "stage": self.current_stage,
             "goal": self.clarified_goal,
-            "wbs": self.wbs_state,
+            "wbs": self.wbs_full,
+            "wbs_latest": self.wbs_latest,
             "decision_history": self.decision_history,
             "selected_path": self.selected_path,
             "reconnect_point": self.reconnect_point
@@ -418,7 +436,10 @@ class ThinkFlowController:
         response = self.agents["decompose"].run(prompt)
         print(f"\nDecomposeAgent: {response}")
 
-        # 检测决策点
+        # 每次拆解后都累积 WBS，供后续决策查表用（不覆盖历史）
+        self.state.append_wbs(response)
+
+        # 检测决策点（记录但不强制进入决策，由用户主动选择）
         if "[DECISION_REQUEST]" in response:
             if self.state.is_decision_limit_reached():
                 print(
@@ -428,11 +449,8 @@ class ThinkFlowController:
                 self.state.set_stage("completed")
                 return "completed"
 
-            print("\n⚠️ 检测到决策点，需要先进行决策。")
-            self.state.freeze_wbs(response)
+            print("\n💡 检测到潜在决策点，您可以选择进行决策评估。")
             self.state.set_decision_point(response)
-            self.state.set_stage("decide")
-            return "decision_needed"
 
         # 续接完成后清空续接信息
         if self.state.selected_path or self.state.reconnect_point:
@@ -482,14 +500,29 @@ class ThinkFlowController:
         else:
             options = input("请输入选项（用逗号分隔）: ").strip()
 
-        response = self.agents["decide"].run(f"选项：{options}")
+        # 多轮对话模式：引导用户完成决策矩阵
+        # 将 WBS 上下文一起传入，让模型能根据编号查询完整名称
+        agent_prompt = f"选项：{options}\n\n【WBS 上下文】\n{self.state.wbs_full}"
+        response = self.agents["decide"].run(agent_prompt)
         print(f"\nDecideAgent: {response}")
 
-        self.state.record_decision(response)
-        self.state.increment_decision_count()
-
-        # 解析 JSON 决策结果（优先匹配 ```json ... ``` 代码块）
+        # 检查是否已经输出 JSON 结果
         json_match = re.search(r'```json\s*(\{.*?\})\s*```', response, re.DOTALL)
+        
+        # 如果没有 JSON，说明还在引导阶段，继续多轮对话
+        while not json_match:
+            user_input = input("\n>>> ").strip()
+            if user_input.lower() == "退出":
+                print("决策已取消。")
+                return None
+
+            # 每轮都带上 WBS 上下文，避免模型遗忘
+            user_input_with_ctx = f"{user_input}\n\n【WBS 上下文】\n{self.state.wbs_full}"
+            response = self.agents["decide"].run(user_input_with_ctx)
+            print(f"\nDecideAgent: {response}")
+            json_match = re.search(r'```json\s*(\{.*?\})\s*```', response, re.DOTALL)
+
+        # 解析 JSON 决策结果
         selected_path = None
         reconnect_point = None
 
@@ -508,6 +541,8 @@ class ThinkFlowController:
         self.state.set_selected_path(selected_path)
         self.state.set_reconnect_point(reconnect_point)  # None 时不传空字符串
         self.state.set_stage("decompose")
+        self.state.record_decision(response)  # 记录决策响应供历史展示
+        self.state.increment_decision_count()
 
         return response
 
@@ -533,13 +568,19 @@ class ThinkFlowController:
         # ── 阶段2/3：拆解 ↔ 决策（循环） ───────────────────────────
         user_branch_choice = None   # 保存用户本轮指定的分支
 
+        skip_next_decompose = False  # 决策后跳过下一次自动拆解，让用户选择下一步
+
         while True:
-            if self.state.current_stage == "decompose":
+            if self.state.current_stage == "completed":
+                break
+
+            # 拆解阶段（决策后会被跳过，让用户重新选择）
+            if self.state.current_stage == "decompose" and not skip_next_decompose:
 
                 # 优先级：决策续接 > 用户指定分支 > 全量拆解
                 if self.state.selected_path and self.state.reconnect_point:
                     reconnect_context = {
-                        "wbs": self.state.wbs_state,
+                        "wbs": self.state.wbs_full,
                         "selected_path": self.state.selected_path,
                         "reconnect_point": self.state.reconnect_point
                     }
@@ -554,32 +595,44 @@ class ThinkFlowController:
                 else:
                     result = self.run_decompose(self.state.clarified_goal)
 
-                # 触发决策点 → 进入决策后继续循环
-                if result == "decision_needed":
-                    self.run_decide(self.state.current_decision_point)
-                    print("\n决策完成，继续拆解...")
-                    continue
-
                 if result == "completed":
                     print("\n🎉 任务拆解完成！")
                     break
 
-                # ── 拆解完成，询问下一步（合并为一步，修复核心 bug）──
-                print("\n拆解完成！")
-                branch_input = input(
-                    "请输入要深入拆解的分支编号（如 L1.1），"
-                    "或输入'完成'结束拆解：\n>>> "
+            skip_next_decompose = False
+
+            # ── 拆解完成，询问用户下一步操作 ────────────────────────
+            print("\n" + "-" * 60)
+            print("拆解完成！请选择下一步操作：")
+            print("1. 继续拆解其他分支（输入分支编号，如 L1.1）")
+            print("2. 选择2-3个项目做决策矩阵打分")
+            print("3. 拆解完成，输出结果")
+            print("-" * 60)
+
+            user_choice = input(">>> ").strip()
+
+            if user_choice == "2":
+                # 用户选择做决策矩阵
+                decision_options = input(
+                    "请输入要比较的选项（用逗号分隔，如 L1.1, L1.2, L1.3）："
                 ).strip()
-
-                if branch_input.lower() in ("完成", "done", "finish", "2", ""):
-                    self.state.set_stage("completed")
-                    break
-                else:
-                    # 用户输入了分支名，下一轮深入拆解该分支
-                    user_branch_choice = branch_input
-
-            elif self.state.current_stage == "completed":
+                if decision_options:
+                    decision_context = f"[DECISION_REQUEST] 选项：{decision_options}"
+                    self.run_decide(decision_context)
+                    # 决策完成后不自动续接拆解，让用户重新选择
+                    self.state.clear_reconnect_info()
+                    skip_next_decompose = True
+                    continue
+            elif user_choice == "3" or user_choice.lower() in ("完成", "done", "finish"):
+                self.state.set_stage("completed")
                 break
+            elif user_choice == "1":
+                branch_input = input("请输入要深入拆解的分支编号（如 L1.1）：").strip()
+                if branch_input:
+                    user_branch_choice = branch_input
+            else:
+                # 用户直接输入了分支编号
+                user_branch_choice = user_choice
 
         # ── 打印决策历史（只显示 JSON 结论，避免输出整段过程）──────
         print("\n" + "=" * 60)
