@@ -617,7 +617,7 @@ SimpleAgent is the most basic Agent implementation, demonstrating how to build a
 ```python
 # my_simple_agent.py
 from typing import Optional, Iterator
-from hello_agents import SimpleAgent, HelloAgentsLLM, Config, Message
+from hello_agents import SimpleAgent, HelloAgentsLLM, Config, Message, ToolRegistry
 
 class MySimpleAgent(SimpleAgent):
     """
