@@ -9,6 +9,7 @@
     <meta name="viewport"
         content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@latest/lib/themes/vue.css">
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
     <style>
         /* --- 1. 原有样式 (保留) --- */
         /* 语言切换按钮样式 */
@@ -193,6 +194,261 @@
             background-color: var(--theme-color);
             color: white;
         }
+
+        /* --- 4. 书签功能样式 --- */
+        /* 标题旁的书签小按钮 */
+        .section-bm-btn {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 1px 7px;
+            font-size: 0.6em;
+            vertical-align: middle;
+            background: transparent;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            color: #bbb;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            font-weight: normal;
+            white-space: nowrap;
+        }
+        .section-bm-btn:hover {
+            border-color: #42b983;
+            color: #42b983;
+        }
+        .section-bm-btn.active {
+            background: #e67e22;
+            border-color: #e67e22;
+            color: white;
+        }
+        body.dark-mode .section-bm-btn {
+            border-color: #555;
+            color: #666;
+        }
+        body.dark-mode .section-bm-btn:hover {
+            border-color: var(--theme-color);
+            color: var(--theme-color);
+        }
+        body.dark-mode .section-bm-btn.active {
+            background: #e67e22;
+            border-color: #e67e22;
+            color: white;
+        }
+
+        /* --- 5. 习题答案按钮与弹窗 --- */
+        .ha-settings-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 999;
+            background: transparent;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 16px;
+            color: #888;
+            transition: all 0.2s;
+        }
+        .ha-settings-btn:hover { border-color: #42b983; color: #42b983; }
+        body.dark-mode .ha-settings-btn { border-color: #444; color: #666; }
+
+        .answer-btn {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 1px 8px;
+            font-size: 0.75em;
+            vertical-align: middle;
+            background: #f0f7ff;
+            border: 1px solid #4a9eff;
+            border-radius: 3px;
+            color: #4a9eff;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            user-select: none;
+        }
+        .answer-btn:hover { background: #4a9eff; color: white; }
+        .answer-btn.has-answer {
+            background: #fff7e6;
+            border-color: #e67e22;
+            color: #e67e22;
+        }
+        .answer-btn.has-answer:hover { background: #e67e22; color: white; }
+
+        /* 弹窗 */
+        .answer-popup {
+            position: fixed;
+            z-index: 9999;
+            width: 480px;
+            background: #fffef0;
+            border: 1px solid #d4b84a;
+            border-radius: 6px;
+            box-shadow: 4px 6px 20px rgba(0,0,0,0.2);
+            display: none;
+            font-size: 14px;
+        }
+        .answer-popup.visible { display: block; }
+        .answer-popup-header {
+            background: #ffd966;
+            padding: 7px 12px;
+            border-radius: 5px 5px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            color: #5a4000;
+            cursor: move;
+            user-select: none;
+        }
+        .answer-popup-header-left { display: flex; align-items: center; gap: 8px; }
+        .answer-popup-status { font-size: 0.8em; font-weight: normal; color: #8a6000; }
+        .answer-popup-close {
+            cursor: pointer;
+            font-size: 18px;
+            color: #888;
+            line-height: 1;
+            padding: 0 2px;
+        }
+        .answer-popup-close:hover { color: #e74c3c; }
+        .answer-popup-body { padding: 0; }
+
+        /* Quill 编辑器样式覆盖 */
+        .answer-popup .ql-toolbar {
+            border: none;
+            border-bottom: 1px solid #e8d89a;
+            background: #fffce8;
+            border-radius: 0;
+            padding: 6px 8px;
+        }
+        .answer-popup .ql-container {
+            border: none;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .answer-popup .ql-editor {
+            min-height: 140px;
+            max-height: 300px;
+            padding: 10px 14px;
+            line-height: 1.7;
+        }
+        .answer-popup .ql-editor.ql-blank::before {
+            color: #bbb;
+            font-style: normal;
+        }
+
+        .answer-popup-footer {
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e8d89a;
+            background: #fffce8;
+            border-radius: 0 0 5px 5px;
+        }
+        .answer-popup-footer-right { display: flex; gap: 8px; }
+        .answer-popup .ap-save {
+            padding: 5px 14px;
+            background: #42b983;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .answer-popup .ap-save:hover { background: #33a06f; }
+        .answer-popup .ap-save:disabled { background: #aaa; cursor: not-allowed; }
+        .answer-popup .ap-clear {
+            padding: 5px 10px;
+            background: transparent;
+            color: #aaa;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .answer-popup .ap-clear:hover { color: #e74c3c; border-color: #e74c3c; }
+
+        /* 暗色模式 */
+        body.dark-mode .answer-popup { background: #2a2a2a; border-color: #555; }
+        body.dark-mode .answer-popup-header { background: #5a4800; color: #ffd; }
+        body.dark-mode .answer-popup-status { color: #cc9; }
+        body.dark-mode .answer-popup .ql-toolbar { background: #222; border-bottom-color: #444; }
+        body.dark-mode .answer-popup .ql-toolbar button { color: #ccc; filter: invert(0.8); }
+        body.dark-mode .answer-popup .ql-container { color: #ccc; }
+        body.dark-mode .answer-popup .ql-editor { background: #1e1e1e; }
+        body.dark-mode .answer-popup-footer { background: #222; border-top-color: #444; }
+        body.dark-mode .answer-btn {
+            background: rgba(74,158,255,0.1);
+            border-color: #4a9eff;
+            color: #4a9eff;
+        }
+        body.dark-mode .answer-btn.has-answer {
+            background: rgba(230,126,34,0.1);
+            border-color: #e67e22;
+            color: #e67e22;
+        }
+
+        .bookmark-panel {
+            margin: 0 15px 12px 15px;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            font-size: 13px;
+        }
+        .bookmark-panel-header {
+            padding: 8px 12px;
+            background: rgba(0,0,0,0.04);
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        .bookmark-panel-list {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        .bookmark-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            gap: 6px;
+        }
+        .bookmark-item a {
+            flex: 1;
+            color: #505d6b;
+            text-decoration: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .bookmark-item a:hover { color: #42b983; }
+        .bookmark-remove {
+            color: #ccc;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .bookmark-remove:hover { color: #e74c3c; }
+        .bookmark-empty {
+            padding: 10px 12px;
+            color: #999;
+            text-align: center;
+        }
+
+        body.dark-mode .bookmark-panel { border-color: var(--dark-border); }
+        body.dark-mode .bookmark-panel-header {
+            background: rgba(255,255,255,0.05);
+            color: #ccc;
+        }
+        body.dark-mode .bookmark-item { border-top-color: var(--dark-border); }
+        body.dark-mode .bookmark-item a { color: #999; }
+        body.dark-mode .bookmark-item a:hover { color: var(--theme-color); }
     </style>
 </head>
 
@@ -201,6 +457,7 @@
     <div class="lang-switch">
         <button id="langBtn" onclick="switchLanguage()">English</button>
     </div>
+    <button class="ha-settings-btn" onclick="haShowTokenDialog()" title="设置 GitHub Token（用于保存答案到仓库）">⚙️</button>
     <div id="app"></div>
     <script src="//cdn.jsdelivr.net/npm/mermaid@8.0.0-rc.8/dist/mermaid.min.js"></script>
     <script>
@@ -240,6 +497,425 @@
             },
             // 使用钩子动态处理侧边栏
             plugins: [
+                // --- 书签插件 ---
+                function(hook, vm) {
+                    var STORAGE_KEY = 'ha-bookmarks';
+
+                    function getBookmarks() {
+                        try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+                        catch(e) { return []; }
+                    }
+                    function saveBookmarks(bms) {
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(bms));
+                    }
+                    function isBookmarked(path) {
+                        return getBookmarks().some(function(b) { return b.path === path; });
+                    }
+
+                    // 刷新当前页所有标题按钮的状态
+                    function updateSectionButtons() {
+                        var article = document.querySelector('article.markdown-section');
+                        if (!article) return;
+                        article.querySelectorAll('.section-bm-btn').forEach(function(btn) {
+                            var path = vm.route.path + '?id=' + btn.dataset.id;
+                            var marked = isBookmarked(path);
+                            btn.classList.toggle('active', marked);
+                            btn.textContent = marked ? '✓ 已加入书签' : '加入书签';
+                        });
+                    }
+
+                    function renderBookmarkPanel() {
+                        var panel = document.getElementById('ha-bookmark-panel');
+                        if (!panel) return;
+                        var bms = getBookmarks();
+                        var list = panel.querySelector('.bookmark-panel-list');
+                        if (bms.length === 0) {
+                            list.innerHTML = '<div class="bookmark-empty">暂无书签</div>';
+                        } else {
+                            list.innerHTML = bms.map(function(b) {
+                                return '<div class="bookmark-item">'
+                                    + '<a href="#' + b.path + '" title="' + b.title + '">' + b.title + '</a>'
+                                    + '<span class="bookmark-remove" data-path="' + b.path + '">×</span>'
+                                    + '</div>';
+                            }).join('');
+                            list.querySelectorAll('.bookmark-remove').forEach(function(el) {
+                                el.onclick = function(e) {
+                                    e.stopPropagation();
+                                    var newBms = getBookmarks().filter(function(b) { return b.path !== el.dataset.path; });
+                                    saveBookmarks(newBms);
+                                    renderBookmarkPanel();
+                                    updateSectionButtons();
+                                };
+                            });
+                        }
+                    }
+
+                    // 为每个 h2/h3 标题追加书签按钮
+                    function insertSectionButtons() {
+                        var article = document.querySelector('article.markdown-section');
+                        if (!article) return;
+
+                        // 清除旧按钮，避免重复
+                        article.querySelectorAll('.section-bm-btn').forEach(function(b) { b.remove(); });
+
+                        article.querySelectorAll('h2[id], h3[id]').forEach(function(h) {
+                            var sectionId = h.id;
+                            var path = vm.route.path + '?id=' + sectionId;
+                            // 取标题纯文字（不含任何子元素里的按钮文字）
+                            var titleText = Array.from(h.childNodes)
+                                .filter(function(n) { return n.nodeType === Node.TEXT_NODE || n.nodeName !== 'SPAN'; })
+                                .map(function(n) { return n.textContent; })
+                                .join('').trim();
+
+                            var btn = document.createElement('span');
+                            btn.className = 'section-bm-btn';
+                            btn.dataset.id = sectionId;
+                            var marked = isBookmarked(path);
+                            btn.classList.toggle('active', marked);
+                            btn.textContent = marked ? '✓ 已加入书签' : '加入书签';
+
+                            btn.onclick = function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                // 移除此章节已有的所有书签，替换为当前小节
+                                var basePath = vm.route.path;
+                                var newBms = getBookmarks().filter(function(b) {
+                                    return b.path.split('?')[0] !== basePath;
+                                });
+                                newBms.unshift({ path: path, title: titleText });
+                                saveBookmarks(newBms);
+                                updateSectionButtons();
+                                renderBookmarkPanel();
+                            };
+
+                            h.appendChild(btn);
+                        });
+                    }
+
+                    hook.doneEach(function() {
+                        insertSectionButtons();
+
+                        // 导航到新页面后，滚动侧边栏使当前章节可见
+                        setTimeout(function() {
+                            var sidebar = document.querySelector('.sidebar');
+                            var activeLink = document.querySelector('.sidebar-nav .active > a');
+                            if (sidebar && activeLink) {
+                                var sidebarRect = sidebar.getBoundingClientRect();
+                                var linkRect = activeLink.getBoundingClientRect();
+                                // 如果激活项不在侧边栏可视区内，滚动过去
+                                if (linkRect.top < sidebarRect.top || linkRect.bottom > sidebarRect.bottom) {
+                                    activeLink.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                                }
+                            }
+                        }, 150);
+
+                        if (!document.getElementById('ha-bookmark-panel')) {
+                            var sidebar = document.querySelector('.sidebar-nav');
+                            if (!sidebar) return;
+                            var panel = document.createElement('div');
+                            panel.id = 'ha-bookmark-panel';
+                            panel.className = 'bookmark-panel';
+                            panel.innerHTML = '<div class="bookmark-panel-header">🔖 书签 <span class="bm-icon">▼</span></div>'
+                                + '<div class="bookmark-panel-list"></div>';
+
+                            var expanded = true;
+                            panel.querySelector('.bookmark-panel-header').onclick = function() {
+                                expanded = !expanded;
+                                panel.querySelector('.bookmark-panel-list').style.display = expanded ? '' : 'none';
+                                panel.querySelector('.bm-icon').textContent = expanded ? '▼' : '▶';
+                            };
+                            sidebar.insertBefore(panel, sidebar.firstChild);
+                        }
+                        renderBookmarkPanel();
+                    });
+                },
+
+                // --- 习题答案插件（Quill 富文本 + GitHub API 持久化）---
+                function(hook, vm) {
+                    var OWNER = 'songchunliang1985';
+                    var REPO  = 'agent-study';
+                    var BASE  = 'docs/answers';
+                    var BRANCH = 'main';
+
+                    var popup = null;
+                    var quill = null;
+                    var currentFilePath = null;
+                    var currentSha = null;
+                    var currentBtn = null;
+
+                    // ---- GitHub API ----
+                    function getToken() { return localStorage.getItem('ha-github-token') || ''; }
+
+                    function apiUrl(path) {
+                        return 'https://api.github.com/repos/' + OWNER + '/' + REPO + '/contents/' + path;
+                    }
+
+                    function toBase64(str) {
+                        return btoa(unescape(encodeURIComponent(str)));
+                    }
+                    function fromBase64(b64) {
+                        return decodeURIComponent(escape(atob(b64.replace(/\s/g, ''))));
+                    }
+
+                    async function ghGet(path) {
+                        try {
+                            var r = await fetch(apiUrl(path), {
+                                headers: { 'Accept': 'application/vnd.github.v3+json' }
+                            });
+                            if (!r.ok) return null;
+                            var d = await r.json();
+                            return { data: JSON.parse(fromBase64(d.content)), sha: d.sha };
+                        } catch(e) { return null; }
+                    }
+
+                    async function ghPut(path, data, sha) {
+                        var token = getToken();
+                        if (!token) { haShowTokenDialog(); return false; }
+                        var body = {
+                            message: 'Update exercise answer: ' + path,
+                            content: toBase64(JSON.stringify(data, null, 2)),
+                            branch: BRANCH
+                        };
+                        if (sha) body.sha = sha;
+                        var r = await fetch(apiUrl(path), {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': 'token ' + token,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(body)
+                        });
+                        if (r.ok) {
+                            var d = await r.json();
+                            return d.content ? d.content.sha || true : true;
+                        }
+                        return false;
+                    }
+
+                    // ---- 文件路径 ----
+                    function answerFilePath(pagePath, idx) {
+                        var m = pagePath.match(/\/(chapter\d+)\//i);
+                        var chapter = m ? m[1] : pagePath.replace(/[^a-zA-Z0-9]/g, '_').replace(/^_+|_+$/g, '');
+                        return BASE + '/' + chapter + '-q' + idx + '.json';
+                    }
+
+                    // ---- 弹窗 ----
+                    function getOrCreatePopup() {
+                        if (popup) return popup;
+                        popup = document.createElement('div');
+                        popup.className = 'answer-popup';
+                        popup.innerHTML =
+                            '<div class="answer-popup-header">'
+                            + '<div class="answer-popup-header-left">'
+                            + '<span>✏️ 我的答案</span>'
+                            + '<span class="answer-popup-status"></span>'
+                            + '</div>'
+                            + '<span class="answer-popup-close" title="关闭">×</span>'
+                            + '</div>'
+                            + '<div class="answer-popup-body">'
+                            + '<div id="ha-quill-editor"></div>'
+                            + '</div>'
+                            + '<div class="answer-popup-footer">'
+                            + '<button class="ap-clear">清除</button>'
+                            + '<div class="answer-popup-footer-right">'
+                            + '<button class="ap-save">💾 保存到仓库</button>'
+                            + '</div>'
+                            + '</div>';
+                        document.body.appendChild(popup);
+
+                        // 初始化 Quill
+                        quill = new Quill('#ha-quill-editor', {
+                            theme: 'snow',
+                            placeholder: '在此输入你的答案...',
+                            modules: {
+                                toolbar: [
+                                    ['bold', 'italic', 'underline', 'strike'],
+                                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                    ['code-block', 'blockquote'],
+                                    ['clean']
+                                ]
+                            }
+                        });
+
+                        popup.querySelector('.answer-popup-close').onclick = hidePopup;
+
+                        popup.querySelector('.ap-save').onclick = async function() {
+                            if (!currentFilePath) return;
+                            var html = quill.root.innerHTML;
+                            var saveBtn = this;
+                            var status = popup.querySelector('.answer-popup-status');
+                            saveBtn.disabled = true;
+                            saveBtn.textContent = '保存中...';
+                            status.textContent = '';
+
+                            var result = await ghPut(
+                                currentFilePath,
+                                { html: html, updatedAt: new Date().toISOString() },
+                                currentSha
+                            );
+
+                            if (result) {
+                                // 更新 sha 以便下次覆盖
+                                var latest = await ghGet(currentFilePath);
+                                if (latest) currentSha = latest.sha;
+                                saveBtn.textContent = '✓ 已保存';
+                                status.textContent = '已同步到仓库';
+                                if (currentBtn) {
+                                    var hasContent = html && html.trim() !== '' && html !== '<p><br></p>';
+                                    currentBtn.classList.toggle('has-answer', hasContent);
+                                    currentBtn.textContent = hasContent ? '查看答案' : '答案';
+                                }
+                            } else {
+                                saveBtn.textContent = '❌ 失败';
+                                status.textContent = '请检查 Token 是否正确';
+                            }
+
+                            setTimeout(function() {
+                                saveBtn.textContent = '💾 保存到仓库';
+                                saveBtn.disabled = false;
+                                status.textContent = '';
+                            }, 3000);
+                        };
+
+                        popup.querySelector('.ap-clear').onclick = async function() {
+                            quill.setText('');
+                            if (currentFilePath) {
+                                await ghPut(currentFilePath, { html: '', updatedAt: new Date().toISOString() }, currentSha);
+                            }
+                            if (currentBtn) {
+                                currentBtn.classList.remove('has-answer');
+                                currentBtn.textContent = '答案';
+                            }
+                            hidePopup();
+                        };
+
+                        // 可拖拽
+                        var header = popup.querySelector('.answer-popup-header');
+                        var dragging = false, ox = 0, oy = 0;
+                        header.addEventListener('mousedown', function(e) {
+                            if (e.target.classList.contains('answer-popup-close')) return;
+                            dragging = true;
+                            ox = e.clientX - popup.offsetLeft;
+                            oy = e.clientY - popup.offsetTop;
+                        });
+                        document.addEventListener('mousemove', function(e) {
+                            if (!dragging) return;
+                            popup.style.left = (e.clientX - ox) + 'px';
+                            popup.style.top  = (e.clientY - oy) + 'px';
+                        });
+                        document.addEventListener('mouseup', function() { dragging = false; });
+
+                        document.addEventListener('click', function(e) {
+                            if (!popup.classList.contains('visible')) return;
+                            if (!popup.contains(e.target) && !e.target.classList.contains('answer-btn')) hidePopup();
+                        });
+                        document.addEventListener('keydown', function(e) {
+                            if (e.key === 'Escape') hidePopup();
+                        });
+
+                        return popup;
+                    }
+
+                    function hidePopup() {
+                        if (popup) popup.classList.remove('visible');
+                        currentFilePath = null;
+                        currentSha = null;
+                        currentBtn = null;
+                    }
+
+                    async function showPopup(btn, filePath) {
+                        var p = getOrCreatePopup();
+                        currentFilePath = filePath;
+                        currentBtn = btn;
+                        currentSha = null;
+
+                        var rect = btn.getBoundingClientRect();
+                        var pw = 480, ph = 360;
+                        var left = rect.left;
+                        var top  = rect.bottom + 8;
+                        if (left + pw > window.innerWidth - 16) left = window.innerWidth - pw - 16;
+                        if (top  + ph > window.innerHeight - 16) top = rect.top - ph - 8;
+                        if (left < 8) left = 8;
+                        if (top  < 8) top  = 8;
+                        p.style.left = left + 'px';
+                        p.style.top  = top  + 'px';
+                        p.classList.add('visible');
+
+                        var status = p.querySelector('.answer-popup-status');
+                        status.textContent = '加载中...';
+                        quill.root.innerHTML = '';
+                        quill.disable();
+
+                        var result = await ghGet(filePath);
+                        quill.enable();
+                        if (result && result.data && result.data.html) {
+                            quill.root.innerHTML = result.data.html;
+                            currentSha = result.sha;
+                            status.textContent = '上次更新: ' + (result.data.updatedAt ? result.data.updatedAt.slice(0, 10) : '');
+                        } else {
+                            status.textContent = '暂无答案';
+                        }
+                        setTimeout(function() { status.textContent = ''; }, 2000);
+                        quill.focus();
+                    }
+
+                    // ---- 插入按钮 ----
+                    function insertAnswerButtons() {
+                        var article = document.querySelector('article.markdown-section');
+                        if (!article) return;
+                        article.querySelectorAll('.answer-btn').forEach(function(b) { b.remove(); });
+
+                        var qIndex = 0;
+                        var btns = [];
+
+                        article.querySelectorAll('h2, h3').forEach(function(h) {
+                            if (!h.textContent.includes('习题')) return;
+                            var sibling = h.nextElementSibling;
+                            while (sibling && sibling.tagName !== 'H2') {
+                                if (sibling.tagName === 'OL') {
+                                    sibling.querySelectorAll(':scope > li').forEach(function(li) {
+                                        var fp = answerFilePath(vm.route.path, qIndex++);
+                                        var btn = document.createElement('span');
+                                        btn.className = 'answer-btn';
+                                        btn.dataset.fp = fp;
+                                        btn.textContent = '答案';
+
+                                        btn.onclick = function(e) {
+                                            e.stopPropagation();
+                                            if (popup && popup.classList.contains('visible') && currentFilePath === fp) {
+                                                hidePopup();
+                                            } else {
+                                                showPopup(btn, fp);
+                                            }
+                                        };
+
+                                        var firstP = li.querySelector('p');
+                                        if (firstP) firstP.appendChild(btn);
+                                        else li.insertBefore(btn, li.firstChild);
+                                        btns.push(btn);
+                                    });
+                                }
+                                sibling = sibling.nextElementSibling;
+                            }
+                        });
+
+                        // 异步更新按钮状态（检查 GitHub 是否已有答案）
+                        btns.forEach(async function(btn) {
+                            var result = await ghGet(btn.dataset.fp);
+                            var has = result && result.data && result.data.html
+                                && result.data.html.trim() !== '' && result.data.html !== '<p><br></p>';
+                            if (has) {
+                                btn.classList.add('has-answer');
+                                btn.textContent = '查看答案';
+                            }
+                        });
+                    }
+
+                    hook.doneEach(function() {
+                        insertAnswerButtons();
+                    });
+                },
+
                 // --- 新增：暗黑模式开关插件 ---
                 function(hook, vm) {
                     hook.doneEach(function() {
@@ -591,6 +1267,33 @@
                 langBtn.textContent = 'English';
             }
         });
+    </script>
+
+    <!-- Quill 富文本编辑器 -->
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+
+    <!-- GitHub Token 设置 -->
+    <script>
+        function haShowTokenDialog() {
+            var current = localStorage.getItem('ha-github-token') || '';
+            var msg = '设置 GitHub Personal Access Token\n\n'
+                + '用途：保存习题答案到仓库 docs/answers/ 目录\n'
+                + '权限：需要勾选 Contents → Read and write\n'
+                + '生成地址：https://github.com/settings/tokens\n\n'
+                + '（Token 仅存储在你的浏览器本地，不会上传到任何服务器）\n\n'
+                + '当前状态：' + (current ? '✅ 已设置' : '❌ 未设置');
+            var token = prompt(msg, current);
+            if (token !== null) {
+                token = token.trim();
+                if (token) {
+                    localStorage.setItem('ha-github-token', token);
+                    alert('✅ Token 已保存！现在可以保存答案到仓库了。');
+                } else {
+                    localStorage.removeItem('ha-github-token');
+                    alert('Token 已清除。');
+                }
+            }
+        }
     </script>
 </body>
 
