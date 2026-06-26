@@ -557,7 +557,7 @@ Unlike workflows, agents based on large language models are **autonomous, goal-o
 
 In this process, there are no hard-coded rules like `if weather=sunny then recommend Summer Palace`. If the weather is "rainy," the agent will autonomously reason and recommend indoor venues such as the National Museum or Capital Museum. **This ability to dynamically reason and make decisions based on real-time information is the core value of agents.**
 
-## 1.4 Chapter Summary
+## 1.5 Chapter Summary
 
 In this chapter, we embarked on an introductory journey to explore agents. Our journey began with the most fundamental questions:
 

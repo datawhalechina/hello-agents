@@ -89,6 +89,7 @@
 | [10-Agent Self-Evolution智能体自进化](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra10-Agent自进化.md) | Agent 自进化四类闭环与代表项目 |
 | [11-WebAgent科普与实战](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra11-WebAgent科普与实战.md) | Web Agent 原理、反爬实战与 HelloAgents 集成 |
 | [12-旅行助手后训练实战](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra12-旅行助手后训练实战.md) | 把旅行助手 Demo 打磨成能用的 Planner |
+| [13-Hello-Agents视频课录制共创](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra13-Hello-Agents视频课录制共创.md) | 视频课程共创录制资源 |
 
 ### PDF 版本下载
 
@@ -137,6 +138,7 @@
 - [姜舒凡-联合发起者](https://github.com/Tsumugii24)（Datawhale 成员, 章节习题设计和校对）
 - [黄佩林-Datawhale意向成员](https://github.com/HeteroCat) (Agent 开发工程师, 第五章内容贡献者)
 - [曾鑫民-Agent工程师](https://github.com/fancyboi999) (牛客科技, 第十四章案例开发)
+- [胡昊-运营组织者](https://github.com/ACGpp) (Datawhale成员)
 - [朱信忠-指导专家](https://xinzhongzhu.github.io/) (Datawhale首席科学家-浙江师范大学杭州人工智能研究院教授)
 
 ### Extra-Chapter 贡献者
@@ -163,7 +165,7 @@
 ## Star History
 
 <div align='center'>
-    <img src="./images/datawhalechina-hello-agents-stats-20260516.png" alt="Datawhale" width="90%">
+    <img src="./images/star-history-2026618.png" alt="Datawhale" width="90%">
 </div>
 
 <div align="center">

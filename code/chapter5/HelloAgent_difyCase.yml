@@ -2,6 +2,7 @@ app:
   description: ''
   icon: 🤖
   icon_background: '#FFEAD5'
+  icon_type: emoji
   mode: advanced-chat
   name: 超级智能个人助手
   use_icon_as_answer_icon: false
@@ -9,22 +10,25 @@ dependencies:
 - current_identifier: null
   type: marketplace
   value:
-    marketplace_plugin_unique_identifier: langgenius/deepseek:0.0.5@fd6efd37c2a931911de8ab9ca3ba2da303bef146d45ee87ad896b04b36d09403
-    version: null
-- current_identifier: null
-  type: package
-  value:
-    plugin_unique_identifier: allenwriter/doubao_image:0.0.1@d9cb638d96848452b8fc2296c61ce93082a5ffa6968a114c15d008cbd4b3730b
+    marketplace_plugin_unique_identifier: agimaster/justwait:0.0.2@1cc2d5e7fbd6a829396c8a51947924f799f9566071bf8499c4e2a9f75ad3330f
     version: null
 - current_identifier: null
   type: marketplace
   value:
-    marketplace_plugin_unique_identifier: jaguarliuu/rookie_text2data:0.3.0@59a0ef957f535edcc661369a3edc3894ce4cd8b8063b296b699ff55c5f6d262d
+    marketplace_plugin_unique_identifier: langgenius/deepseek:0.0.5@fd6efd37c2a931911de8ab9ca3ba2da303bef146d45ee87ad896b04b36d09403
     version: null
 kind: app
-version: 0.4.0
+version: 0.6.0
 workflow:
-  conversation_variables: []
+  conversation_variables:
+  - description: ''
+    id: c2859e62-972b-435a-9dda-a65906629670
+    name: video
+    selector:
+    - conversation
+    - video
+    value: []
+    value_type: array[object]
   environment_variables: []
   features:
     file_upload:
@@ -43,10 +47,14 @@ workflow:
       - local_file
       enabled: true
       fileUploadConfig:
+        attachment_image_file_size_limit: 2
         audio_file_size_limit: 50
         batch_count_limit: 5
         file_size_limit: 15
+        file_upload_limit: 50
+        image_file_batch_limit: 10
         image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
         video_file_size_limit: 100
         workflow_file_upload_limit: 10
       image:
@@ -69,8 +77,8 @@ workflow:
     - 今日食谱推荐
     - 帮我生成图片：玫瑰咖啡
     - 帮我生成视频：一个漂亮的亚洲网红美女手拿着一束鲜花站在街头
-    - 帮我查一下熊大几岁了？
-    - 帮我分析一下数据表的男女比例
+    - 帮我查数据：熊大几岁了？
+    - 帮我分析数据：学科分布情况
     suggested_questions_after_answer:
       enabled: false
     text_to_speech:
@@ -136,55 +144,6 @@ workflow:
       source: '1753154086254'
       sourceHandle: source
       target: '1753154108444'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: question-classifier
-        targetType: tool
-      id: 1753153103332-1753153696571-1753154139461-target
-      source: '1753153103332'
-      sourceHandle: '1753153696571'
-      target: '1753154139461'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: tool
-        targetType: answer
-      id: 1753154139461-source-1753154145581-target
-      source: '1753154139461'
-      sourceHandle: source
-      target: '1753154145581'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: question-classifier
-        targetType: tool
-      id: 1753153103332-1753153698444-1753154158652-target
-      selected: false
-      source: '1753153103332'
-      sourceHandle: '1753153698444'
-      target: '1753154158652'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: tool
-        targetType: answer
-      id: 1753154158652-source-1753154170227-target
-      source: '1753154158652'
-      sourceHandle: source
-      target: '1753154170227'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -289,6 +248,7 @@ workflow:
         sourceType: question-classifier
         targetType: tool
       id: 1753153103332-1753153699708-1760526587346-target
+      selected: false
       source: '1753153103332'
       sourceHandle: '1753153699708'
       target: '1760526587346'
@@ -301,6 +261,7 @@ workflow:
         sourceType: tool
         targetType: tool
       id: 1760526587346-source-1760526609582-target
+      selected: false
       source: '1760526587346'
       sourceHandle: source
       target: '1760526609582'
@@ -320,34 +281,158 @@ workflow:
       zIndex: 0
     - data:
         isInLoop: false
-        sourceType: tool
-        targetType: agent
-      id: 17605266460270-source-1753154218820-target
-      source: '17605266460270'
-      sourceHandle: source
-      target: '1753154218820'
+        sourceType: question-classifier
+        targetType: tool
+      id: 1753153103332-1753153696571-1779006596264-target
+      source: '1753153103332'
+      sourceHandle: '1753153696571'
+      target: '1779006596264'
       targetHandle: target
       type: custom
       zIndex: 0
     - data:
         isInLoop: false
         sourceType: tool
-        targetType: tool
-      id: 17605266432700-source-17605266460270-target
-      source: '17605266432700'
+        targetType: answer
+      id: 1779006596264-source-1753154145581-target
+      source: '1779006596264'
       sourceHandle: source
-      target: '17605266460270'
+      target: '1753154145581'
       targetHandle: target
       type: custom
       zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: true
+        loop_id: '1779006892347'
+        sourceType: parameter-extractor
+        targetType: tool
+      id: 1779007225212-source-1779007244895-target
+      source: '1779007225212'
+      sourceHandle: source
+      target: '1779007244895'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: false
+        isInLoop: true
+        loop_id: '1779006892347'
+        sourceType: tool
+        targetType: if-else
+      id: 1779007244895-source-1779007348928-target
+      source: '1779007244895'
+      sourceHandle: source
+      target: '1779007348928'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: false
+        isInLoop: true
+        loop_id: '1779006892347'
+        sourceType: if-else
+        targetType: tool
+      id: 1779007348928-true-1779007601560-target
+      source: '1779007348928'
+      sourceHandle: 'true'
+      target: '1779007601560'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: false
+        isInLoop: true
+        loop_id: '1779006892347'
+        sourceType: loop-start
+        targetType: parameter-extractor
+      id: 1779006892347start-source-1779007225212-target
+      source: 1779006892347start
+      sourceHandle: source
+      target: '1779007225212'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: question-classifier
+        targetType: tool
+      id: 1753153103332-1753153698444-1779007966523-target
+      source: '1753153103332'
+      sourceHandle: '1753153698444'
+      target: '1779007966523'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: tool
+        targetType: loop
+      id: 1779007966523-source-1779006892347-target
+      source: '1779007966523'
+      sourceHandle: source
+      target: '1779006892347'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: true
+        loop_id: '1779006892347'
+        sourceType: if-else
+        targetType: answer
+      id: 1779007348928-false-1779010190488-target
+      source: '1779007348928'
+      sourceHandle: 'false'
+      target: '1779010190488'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: false
+        isInLoop: true
+        loop_id: '1779006892347'
+        sourceType: answer
+        targetType: loop-end
+      id: 1779010190488-source-1779007370527-target
+      source: '1779010190488'
+      sourceHandle: source
+      target: '1779007370527'
+      targetHandle: target
+      type: custom
+      zIndex: 1002
     - data:
         isInLoop: false
         sourceType: question-classifier
         targetType: tool
-      id: 1753153103332-1753153700308-17605266432700-target
+      id: 1753153103332-1753153700308-17790186317020-target
       source: '1753153103332'
       sourceHandle: '1753153700308'
-      target: '17605266432700'
+      target: '17790186317020'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: tool
+        targetType: tool
+      id: 17790186317020-source-17790186381000-target
+      source: '17790186317020'
+      sourceHandle: source
+      target: '17790186381000'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: tool
+        targetType: agent
+      id: 17790186381000-source-1753154218820-target
+      source: '17790186381000'
+      sourceHandle: source
+      target: '1753154218820'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -358,14 +443,14 @@ workflow:
         title: 开始
         type: start
         variables: []
-      height: 52
+      height: 73
       id: '1748520080338'
       position:
-        x: 30
-        y: 476.5
+        x: 0
+        y: 1084.5438596491226
       positionAbsolute:
-        x: 30
-        y: 476.5
+        x: 0
+        y: 1084.5438596491226
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -408,14 +493,14 @@ workflow:
         type: question-classifier
         vision:
           enabled: false
-      height: 500
+      height: 472
       id: '1753153103332'
       position:
-        x: 331
-        y: 476.5
+        x: 342
+        y: 897.2105263157891
       positionAbsolute:
-        x: 331
-        y: 476.5
+        x: 342
+        y: 897.2105263157891
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -755,14 +840,14 @@ workflow:
         title: 日常助手
         type: agent
         version: '2'
-      height: 196
+      height: 188
       id: '1753153789740'
       position:
-        x: 632
-        y: 476.5
+        x: 704
+        y: 0
       positionAbsolute:
-        x: 632
-        y: 476.5
+        x: 704
+        y: 0
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -778,11 +863,11 @@ workflow:
       height: 103
       id: '1753154074644'
       position:
-        x: 933
-        y: 476.5
+        x: 1046
+        y: 73.83333333333326
       positionAbsolute:
-        x: 933
-        y: 476.5
+        x: 1046
+        y: 73.83333333333326
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -859,11 +944,11 @@ workflow:
       height: 88
       id: '1753154086254'
       position:
-        x: 632
-        y: 711.5
+        x: 704
+        y: 268
       positionAbsolute:
-        x: 632
-        y: 711.5
+        x: 704
+        y: 268
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -879,164 +964,17 @@ workflow:
       height: 103
       id: '1753154108444'
       position:
-        x: 933
-        y: 657.5
+        x: 1046
+        y: 275.1666666666665
       positionAbsolute:
-        x: 933
-        y: 657.5
+        x: 1046
+        y: 275.1666666666665
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
     - data:
-        desc: ''
-        is_team_authorization: true
-        output_schema: null
-        paramSchemas:
-        - auto_generate: null
-          default: null
-          form: llm
-          human_description:
-            en_US: The text prompt used to generate the image. Doubao will generate
-              an image based on this prompt.
-            ja_JP: The text prompt used to generate the image. Doubao will generate
-              an image based on this prompt.
-            pt_BR: The text prompt used to generate the image. Doubao will generate
-              an image based on this prompt.
-            zh_Hans: The text prompt used to generate the image. Doubao will generate
-              an image based on this prompt.
-          label:
-            en_US: Prompt
-            ja_JP: Prompt
-            pt_BR: Prompt
-            zh_Hans: Prompt
-          llm_description: This prompt text will be used to generate image.
-          max: null
-          min: null
-          name: prompt
-          options: []
-          placeholder: null
-          precision: null
-          required: true
-          scope: null
-          template: null
-          type: string
-        - auto_generate: null
-          default: 1024x1024
-          form: form
-          human_description:
-            en_US: The size of the generated image.
-            ja_JP: The size of the generated image.
-            pt_BR: The size of the generated image.
-            zh_Hans: The size of the generated image.
-          label:
-            en_US: Image Size
-            ja_JP: Image Size
-            pt_BR: Image Size
-            zh_Hans: Image Size
-          llm_description: ''
-          max: null
-          min: null
-          name: size
-          options:
-          - icon: ''
-            label:
-              en_US: 1024x1024 (Square)
-              ja_JP: 1024x1024 (Square)
-              pt_BR: 1024x1024 (Square)
-              zh_Hans: 1024x1024 (Square)
-            value: 1024x1024
-          - icon: ''
-            label:
-              en_US: 1024x1792 (Portrait)
-              ja_JP: 1024x1792 (Portrait)
-              pt_BR: 1024x1792 (Portrait)
-              zh_Hans: 1024x1792 (Portrait)
-            value: 1024x1792
-          - icon: ''
-            label:
-              en_US: 1792x1024 (Landscape)
-              ja_JP: 1792x1024 (Landscape)
-              pt_BR: 1792x1024 (Landscape)
-              zh_Hans: 1792x1024 (Landscape)
-            value: 1792x1024
-          placeholder: null
-          precision: null
-          required: false
-          scope: null
-          template: null
-          type: select
-        - auto_generate: null
-          default: doubao-seedream-3-0-t2i-250415
-          form: form
-          human_description:
-            en_US: Model version to use for image generation.
-            ja_JP: Model version to use for image generation.
-            pt_BR: Model version to use for image generation.
-            zh_Hans: Model version to use for image generation.
-          label:
-            en_US: Model Version
-            ja_JP: Model Version
-            pt_BR: Model Version
-            zh_Hans: Model Version
-          llm_description: ''
-          max: null
-          min: null
-          name: model
-          options:
-          - icon: ''
-            label:
-              en_US: Doubao Seedream 3.0
-              ja_JP: Doubao Seedream 3.0
-              pt_BR: Doubao Seedream 3.0
-              zh_Hans: Doubao Seedream 3.0
-            value: doubao-seedream-3-0-t2i-250415
-          placeholder: null
-          precision: null
-          required: false
-          scope: null
-          template: null
-          type: select
-        params:
-          model: ''
-          prompt: ''
-          size: ''
-        provider_id: allenwriter/doubao_image/doubao
-        provider_name: allenwriter/doubao_image/doubao
-        provider_type: builtin
-        selected: false
-        title: 豆包生图
-        tool_configurations:
-          model:
-            type: constant
-            value: doubao-seedream-3-0-t2i-250415
-          size:
-            type: constant
-            value: 1024x1024
-        tool_description: Generate images with Doubao (豆包) AI.
-        tool_label: Text to Image
-        tool_name: text2image
-        tool_parameters:
-          prompt:
-            type: mixed
-            value: '{{#sys.query#}}'
-        type: tool
-        version: '2'
-      height: 114
-      id: '1753154139461'
-      position:
-        x: 642.8265469036457
-        y: 841.5826546903645
-      positionAbsolute:
-        x: 642.8265469036457
-        y: 841.5826546903645
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        answer: '{{#1753154139461.files#}}'
+        answer: '{{#1779006596264.files#}}'
         desc: ''
         selected: false
         title: 直接回复 3
@@ -1045,234 +983,11 @@ workflow:
       height: 103
       id: '1753154145581'
       position:
-        x: 940.7700246066445
-        y: 835.5708713006331
+        x: 1113.087636594246
+        y: 421.3384814644945
       positionAbsolute:
-        x: 940.7700246066445
-        y: 835.5708713006331
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        desc: ''
-        is_team_authorization: true
-        output_schema: null
-        paramSchemas:
-        - auto_generate: null
-          default: null
-          form: llm
-          human_description:
-            en_US: The text prompt used to generate the video. Doubao will generate
-              a video based on this prompt.
-            ja_JP: The text prompt used to generate the video. Doubao will generate
-              a video based on this prompt.
-            pt_BR: The text prompt used to generate the video. Doubao will generate
-              a video based on this prompt.
-            zh_Hans: The text prompt used to generate the video. Doubao will generate
-              a video based on this prompt.
-          label:
-            en_US: Prompt
-            ja_JP: Prompt
-            pt_BR: Prompt
-            zh_Hans: Prompt
-          llm_description: This prompt text will be used to generate a video.
-          max: null
-          min: null
-          name: prompt
-          options: []
-          placeholder: null
-          precision: null
-          required: true
-          scope: null
-          template: null
-          type: string
-        - auto_generate: null
-          default: '16:9'
-          form: form
-          human_description:
-            en_US: The aspect ratio of the generated video.
-            ja_JP: The aspect ratio of the generated video.
-            pt_BR: The aspect ratio of the generated video.
-            zh_Hans: The aspect ratio of the generated video.
-          label:
-            en_US: Aspect Ratio
-            ja_JP: Aspect Ratio
-            pt_BR: Aspect Ratio
-            zh_Hans: Aspect Ratio
-          llm_description: ''
-          max: null
-          min: null
-          name: ratio
-          options:
-          - icon: ''
-            label:
-              en_US: 16:9 (Landscape)
-              ja_JP: 16:9 (Landscape)
-              pt_BR: 16:9 (Landscape)
-              zh_Hans: 16:9 (Landscape)
-            value: '16:9'
-          - icon: ''
-            label:
-              en_US: 9:16 (Portrait)
-              ja_JP: 9:16 (Portrait)
-              pt_BR: 9:16 (Portrait)
-              zh_Hans: 9:16 (Portrait)
-            value: '9:16'
-          - icon: ''
-            label:
-              en_US: 4:3 (Classic)
-              ja_JP: 4:3 (Classic)
-              pt_BR: 4:3 (Classic)
-              zh_Hans: 4:3 (Classic)
-            value: '4:3'
-          - icon: ''
-            label:
-              en_US: 1:1 (Square)
-              ja_JP: 1:1 (Square)
-              pt_BR: 1:1 (Square)
-              zh_Hans: 1:1 (Square)
-            value: '1:1'
-          placeholder: null
-          precision: null
-          required: false
-          scope: null
-          template: null
-          type: select
-        - auto_generate: null
-          default: '5'
-          form: form
-          human_description:
-            en_US: The duration of the generated video in seconds.
-            ja_JP: The duration of the generated video in seconds.
-            pt_BR: The duration of the generated video in seconds.
-            zh_Hans: The duration of the generated video in seconds.
-          label:
-            en_US: Duration (seconds)
-            ja_JP: Duration (seconds)
-            pt_BR: Duration (seconds)
-            zh_Hans: Duration (seconds)
-          llm_description: ''
-          max: null
-          min: null
-          name: duration
-          options:
-          - icon: ''
-            label:
-              en_US: 5 seconds
-              ja_JP: 5 seconds
-              pt_BR: 5 seconds
-              zh_Hans: 5 seconds
-            value: '5'
-          - icon: ''
-            label:
-              en_US: 10 seconds
-              ja_JP: 10 seconds
-              pt_BR: 10 seconds
-              zh_Hans: 10 seconds
-            value: '10'
-          placeholder: null
-          precision: null
-          required: false
-          scope: null
-          template: null
-          type: select
-        - auto_generate: null
-          default: doubao-seedance-1-0-lite-t2v-250428
-          form: form
-          human_description:
-            en_US: Model version to use for video generation.
-            ja_JP: Model version to use for video generation.
-            pt_BR: Model version to use for video generation.
-            zh_Hans: Model version to use for video generation.
-          label:
-            en_US: Model Version
-            ja_JP: Model Version
-            pt_BR: Model Version
-            zh_Hans: Model Version
-          llm_description: ''
-          max: null
-          min: null
-          name: model
-          options:
-          - icon: ''
-            label:
-              en_US: Doubao Seedance 1.0 Lite
-              ja_JP: Doubao Seedance 1.0 Lite
-              pt_BR: Doubao Seedance 1.0 Lite
-              zh_Hans: Doubao Seedance 1.0 Lite
-            value: doubao-seedance-1-0-lite-t2v-250428
-          - icon: ''
-            label:
-              en_US: Doubao Seaweed
-              ja_JP: Doubao Seaweed
-              pt_BR: Doubao Seaweed
-              zh_Hans: Doubao Seaweed
-            value: doubao-seaweed-241128
-          placeholder: null
-          precision: null
-          required: false
-          scope: null
-          template: null
-          type: select
-        params:
-          duration: ''
-          model: ''
-          prompt: ''
-          ratio: ''
-        provider_id: allenwriter/doubao_image/doubao
-        provider_name: allenwriter/doubao_image/doubao
-        provider_type: builtin
-        selected: false
-        title: 豆包生成视频
-        tool_configurations:
-          duration:
-            type: constant
-            value: '5'
-          model:
-            type: constant
-            value: doubao-seedance-1-0-lite-t2v-250428
-          ratio:
-            type: constant
-            value: '16:9'
-        tool_description: Generate videos with Doubao (豆包) AI.
-        tool_label: Text to Video
-        tool_name: text2video
-        tool_parameters:
-          prompt:
-            type: mixed
-            value: '{{#sys.query#}}'
-        type: tool
-        version: '2'
-      height: 140
-      id: '1753154158652'
-      position:
-        x: 632
-        y: 994.5826546903645
-      positionAbsolute:
-        x: 632
-        y: 994.5826546903645
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        answer: '{{#1753154158652.text#}}'
-        desc: ''
-        selected: false
-        title: 直接回复 4
-        type: answer
-        variables: []
-      height: 103
-      id: '1753154170227'
-      position:
-        x: 940.7700246066445
-        y: 994.5826546903645
-      positionAbsolute:
-        x: 940.7700246066445
-        y: 994.5826546903645
+        x: 1113.087636594246
+        y: 421.3384814644945
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1341,7 +1056,7 @@ workflow:
               type: model-selector
           query:
             type: constant
-            value: 数据：{{#17605266460270.text#}}
+            value: 数据：{{#17790186381000.text#}}
           tools:
             type: constant
             value:
@@ -2072,14 +1787,14 @@ workflow:
         title: 数据可视化分析
         type: agent
         version: '2'
-      height: 196
+      height: 188
       id: '1753154218820'
       position:
-        x: 1234
-        y: 2385.0458165598843
+        x: 1388
+        y: 1647.3333333333333
       positionAbsolute:
-        x: 1234
-        y: 2385.0458165598843
+        x: 1388
+        y: 1647.3333333333333
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2092,14 +1807,14 @@ workflow:
             value: 根据用户输入{{#sys.query#}}，使用amap-maps实现查询
           mcp_servers_config:
             type: constant
-            value: "{\n    \"amap-maps\": {\n      \"url\": \"https://mcp.api-inference.modelscope.net/6e6db4950c6549/sse\"\
+            value: "{\n    \"amap-maps\": {\n      \"url\": \"https://mcp.api-inference.modelscope.net/6fd368bb25904d/sse\"\
               \n    }\n}"
           model:
             type: constant
             value:
               completion_params: {}
               mode: chat
-              model: deepseek-chat
+              model: deepseek-reasoner
               model_type: llm
               provider: langgenius/deepseek/deepseek
               type: model-selector
@@ -2188,14 +1903,14 @@ workflow:
         title: 高德MCP
         type: agent
         version: '2'
-      height: 196
+      height: 188
       id: '1753154221988'
       position:
-        x: 632
-        y: 1172.5
+        x: 704
+        y: 1888
       positionAbsolute:
-        x: 632
-        y: 1172.5
+        x: 704
+        y: 1888
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2209,7 +1924,7 @@ workflow:
           mcp_servers_config:
             type: constant
             value: "{\n    \"howtocook-mcp\": {\n      \"type\": \"sse\",\n      \"\
-              url\": \"https://mcp.api-inference.modelscope.net/40d796f446eb46/sse\"\
+              url\": \"https://mcp.api-inference.modelscope.net/63605ee5d97744/sse\"\
               \n  }\n}"
           model:
             type: constant
@@ -2304,14 +2019,14 @@ workflow:
         title: 吃什么MCP
         type: agent
         version: '2'
-      height: 196
+      height: 188
       id: '1753154224236'
       position:
-        x: 632
-        y: 1407.5
+        x: 704
+        y: 2154.075725241399
       positionAbsolute:
-        x: 632
-        y: 1407.5
+        x: 704
+        y: 2154.075725241399
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2321,7 +2036,7 @@ workflow:
         agent_parameters:
           instruction:
             type: constant
-            value: 根据用户输入{{#sys.query#}}，使用mcp-trends-hub实现查询，并用中文回答
+            value: 根据用户输入{{#sys.query#}}，使用tavily-mcp实现查询，并用中文回答
           mcp_servers_config:
             type: constant
             value: "{\n    \"tavily-mcp\": {\n      \"type\": \"sse\",\n      \"url\"\
@@ -2416,18 +2131,18 @@ workflow:
           minimum_dify_version: null
           version: 0.0.1
         plugin_unique_identifier: junjiem/mcp_see_agent:0.1.10@d20423ac731734c9332b2833f66d01f3f8146cf753c327d2e650ea6e559ed0cf
-        selected: true
+        selected: false
         title: 新闻MCP
         type: agent
         version: '2'
-      height: 196
+      height: 188
       id: '1753154226323'
       position:
-        x: 632
-        y: 1642.5
+        x: 704
+        y: 2424
       positionAbsolute:
-        x: 632
-        y: 1642.5
+        x: 704
+        y: 2424
       selected: true
       sourcePosition: right
       targetPosition: left
@@ -2443,11 +2158,11 @@ workflow:
       height: 103
       id: '1753155122875'
       position:
-        x: 1535
-        y: 2432.5
+        x: 1730
+        y: 1721.1666666666665
       positionAbsolute:
-        x: 1535
-        y: 2432.5
+        x: 1730
+        y: 1721.1666666666665
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2463,11 +2178,11 @@ workflow:
       height: 103
       id: '1753155179315'
       position:
-        x: 933
-        y: 1172.5
+        x: 1046
+        y: 1961.8333333333333
       positionAbsolute:
-        x: 933
-        y: 1172.5
+        x: 1046
+        y: 1961.8333333333333
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2483,11 +2198,11 @@ workflow:
       height: 103
       id: '1753155220091'
       position:
-        x: 933
-        y: 1407.5
+        x: 1046
+        y: 2229.8333333333335
       positionAbsolute:
-        x: 933
-        y: 1407.5
+        x: 1046
+        y: 2229.8333333333335
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2503,11 +2218,11 @@ workflow:
       height: 103
       id: '1753155255572'
       position:
-        x: 933
-        y: 1642.5
+        x: 1046
+        y: 2497.833333333333
       positionAbsolute:
-        x: 933
-        y: 1642.5
+        x: 1046
+        y: 2497.833333333333
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2522,11 +2237,11 @@ workflow:
       height: 103
       id: '1760357292867'
       position:
-        x: 1535
-        y: 1940.5
+        x: 1730
+        y: 1302.5
       positionAbsolute:
-        x: 1535
-        y: 1940.5
+        x: 1730
+        y: 1302.5
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2564,11 +2279,11 @@ workflow:
       height: 88
       id: '1760358668209'
       position:
-        x: 1234
-        y: 1940.5
+        x: 1388
+        y: 1295.3333333333333
       positionAbsolute:
-        x: 1234
-        y: 1940.5
+        x: 1388
+        y: 1295.3333333333333
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2964,27 +2679,28 @@ workflow:
         tool_configurations:
           db_name:
             type: mixed
-            value: data01
+            value: heterocat
           db_type:
             type: constant
             value: mysql
           host:
             type: mixed
-            value: 47.107.185.248
+            value: 39.102.59.90
           limit:
             type: constant
             value: null
           model:
             type: constant
             value:
-              completion_params: {}
+              completion_params:
+                temperature: 0
               mode: chat
-              model: deepseek-chat
+              model: deepseek-coder
               model_type: llm
               provider: langgenius/deepseek/deepseek
           password:
             type: mixed
-            value: EbTNr4Pz4CwJKd4G
+            value: WddkTs2Le3f3HELB
           port:
             type: constant
             value: 3306
@@ -2993,10 +2709,10 @@ workflow:
             value: text
           username:
             type: mixed
-            value: data01
+            value: heterocat
           with_comment:
             type: constant
-            value: null
+            value: true
         tool_description: 使用自然语言从MySQL获取数据
         tool_label: rookie_text2data
         tool_name: rookie_text2data
@@ -3004,28 +2720,48 @@ workflow:
         tool_parameters:
           custom_prompt:
             type: mixed
-            value: "表结构：CREATE TABLE `student` (\n  `id` int(11) NOT NULL COMMENT\
-              \ 'id标识',\n  `name` varchar(255) NOT NULL COMMENT '名字',\n  `age` int(11)\
-              \ NOT NULL COMMENT '年龄',\n  `sex` char(1) NOT NULL COMMENT '性别',\n \
-              \ PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
+            value: "表结构：CREATE TABLE `test01` (\n  `name` varchar(255) DEFAULT NULL,\n\
+              \  `age` int(11) DEFAULT NULL,\n  `sex` varchar(255) DEFAULT NULL\n\
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
+          db_name:
+            type: mixed
+            value: heterocat
+          db_type:
+            type: constant
+            value: mysql
+          host:
+            type: mixed
+            value: 39.102.59.90
+          password:
+            type: mixed
+            value: '020104'
+          port:
+            type: constant
+            value: 3306
           query:
             type: mixed
             value: '{{#sys.query#}}'
+          result_format:
+            type: constant
+            value: text
           schema_name:
             type: mixed
             value: null
           table_names:
             type: mixed
-            value: student
+            value: test01
+          username:
+            type: mixed
+            value: heterocat
         type: tool
       height: 322
       id: '1760526587346'
       position:
-        x: 632
-        y: 1877.5
+        x: 704
+        y: 1084
       positionAbsolute:
-        x: 632
-        y: 1877.5
+        x: 704
+        y: 1084
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3303,16 +3039,16 @@ workflow:
         tool_configurations:
           db_name:
             type: mixed
-            value: data01
+            value: heterocat
           db_type:
             type: constant
             value: mysql
           host:
             type: mixed
-            value: 47.107.185.248
+            value: 39.102.59.90
           password:
             type: mixed
-            value: EbTNr4Pz4CwJKd4G
+            value: WddkTs2Le3f3HELB
           port:
             type: constant
             value: 3306
@@ -3321,33 +3057,1192 @@ workflow:
             value: text
           username:
             type: mixed
-            value: data01
+            value: heterocat
         tool_description: sql 执行器
         tool_label: rookie_excute_sql
         tool_name: rookie_excute_sql
         tool_node_version: '2'
         tool_parameters:
+          db_name:
+            type: mixed
+            value: heterocat
+          db_type:
+            type: constant
+            value: mysql
+          host:
+            type: mixed
+            value: 39.102.59.90
+          password:
+            type: mixed
+            value: '020104'
+          port:
+            type: constant
+            value: 3306
           schema:
             type: mixed
             value: null
           sql:
             type: mixed
             value: '{{#1760526587346.text#}}'
+          username:
+            type: mixed
+            value: heterocat
         type: tool
       height: 244
       id: '1760526609582'
       position:
-        x: 933
-        y: 1870
+        x: 1046
+        y: 1176.6666666666665
       positionAbsolute:
-        x: 933
-        y: 1870
+        x: 1046
+        y: 1176.6666666666665
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
     - data:
+        is_team_authorization: false
+        paramSchemas:
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: Text description of the image you want to generate
+            ja_JP: Text description of the image you want to generate
+            pt_BR: Text description of the image you want to generate
+            zh_Hans: 您想要生成的图像的文本描述
+          label:
+            en_US: Prompt
+            ja_JP: Prompt
+            pt_BR: Prompt
+            zh_Hans: 提示词
+          llm_description: Text description of the image to generate
+          max: null
+          min: null
+          name: prompt
+          options: []
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: 2048x2048
+          form: form
+          human_description:
+            en_US: Size of the generated image
+            ja_JP: Size of the generated image
+            pt_BR: Size of the generated image
+            zh_Hans: 生成图像的尺寸
+          label:
+            en_US: Image Size
+            ja_JP: Image Size
+            pt_BR: Image Size
+            zh_Hans: 图像尺寸
+          llm_description: Size of the generated image
+          max: null
+          min: null
+          name: size
+          options:
+          - icon: ''
+            label:
+              en_US: 1:1 (2048x2048)
+              ja_JP: 1:1 (2048x2048)
+              pt_BR: 1:1 (2048x2048)
+              zh_Hans: 1:1 (2048x2048)
+            value: 2048x2048
+          - icon: ''
+            label:
+              en_US: 4:3 (2304x1728)
+              ja_JP: 4:3 (2304x1728)
+              pt_BR: 4:3 (2304x1728)
+              zh_Hans: 4:3 (2304x1728)
+            value: 2304x1728
+          - icon: ''
+            label:
+              en_US: 3:4 (1728x2304)
+              ja_JP: 3:4 (1728x2304)
+              pt_BR: 3:4 (1728x2304)
+              zh_Hans: 3:4 (1728x2304)
+            value: 1728x2304
+          - icon: ''
+            label:
+              en_US: 16:9 (2560x1440)
+              ja_JP: 16:9 (2560x1440)
+              pt_BR: 16:9 (2560x1440)
+              zh_Hans: 16:9 (2560x1440)
+            value: 2560x1440
+          - icon: ''
+            label:
+              en_US: 9:16 (1440x2560)
+              ja_JP: 9:16 (1440x2560)
+              pt_BR: 9:16 (1440x2560)
+              zh_Hans: 9:16 (1440x2560)
+            value: 1440x2560
+          - icon: ''
+            label:
+              en_US: 3:2 (2496x1664)
+              ja_JP: 3:2 (2496x1664)
+              pt_BR: 3:2 (2496x1664)
+              zh_Hans: 3:2 (2496x1664)
+            value: 2496x1664
+          - icon: ''
+            label:
+              en_US: 2:3 (1664x2496)
+              ja_JP: 2:3 (1664x2496)
+              pt_BR: 2:3 (1664x2496)
+              zh_Hans: 2:3 (1664x2496)
+            value: 1664x2496
+          - icon: ''
+            label:
+              en_US: 21:9 (3024x1296)
+              ja_JP: 21:9 (3024x1296)
+              pt_BR: 21:9 (3024x1296)
+              zh_Hans: 21:9 (3024x1296)
+            value: 3024x1296
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: select
+        - auto_generate: null
+          default: 'true'
+          form: form
+          human_description:
+            en_US: Whether to add 'AI Generated' watermark to the image
+            ja_JP: Whether to add 'AI Generated' watermark to the image
+            pt_BR: Whether to add 'AI Generated' watermark to the image
+            zh_Hans: 是否在图像上添加'AI生成'水印
+          label:
+            en_US: Watermark
+            ja_JP: Watermark
+            pt_BR: Watermark
+            zh_Hans: 水印
+          llm_description: Whether to add 'AI Generated' watermark to the image
+          max: null
+          min: null
+          name: watermark
+          options:
+          - icon: ''
+            label:
+              en_US: Enabled
+              ja_JP: Enabled
+              pt_BR: Enabled
+              zh_Hans: 启用
+            value: 'true'
+          - icon: ''
+            label:
+              en_US: Disabled
+              ja_JP: Disabled
+              pt_BR: Disabled
+              zh_Hans: 禁用
+            value: 'false'
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: select
+        - auto_generate: null
+          default: doubao-seedream-4-5-251128
+          form: form
+          human_description:
+            en_US: Choose the Seedream model version to use
+            ja_JP: Choose the Seedream model version to use
+            pt_BR: Choose the Seedream model version to use
+            zh_Hans: 选择要使用的Seedream模型版本
+          label:
+            en_US: Model Version
+            ja_JP: Model Version
+            pt_BR: Model Version
+            zh_Hans: 模型版本
+          llm_description: Choose the Seedream model version to use
+          max: null
+          min: null
+          name: model
+          options:
+          - icon: ''
+            label:
+              en_US: Seedream4.0
+              ja_JP: Seedream4.0
+              pt_BR: Seedream4.0
+              zh_Hans: Seedream4.0
+            value: doubao-seedream-4-0-250828
+          - icon: ''
+            label:
+              en_US: Seedream4.5
+              ja_JP: Seedream4.5
+              pt_BR: Seedream4.5
+              zh_Hans: Seedream4.5
+            value: doubao-seedream-4-5-251128
+          - icon: ''
+            label:
+              en_US: Seedream5.0 Lite
+              ja_JP: Seedream5.0 Lite
+              pt_BR: Seedream5.0 Lite
+              zh_Hans: Seedream5.0 Lite
+            value: doubao-seedream-5-0-260128
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: select
+        params:
+          model: ''
+          prompt: ''
+          size: ''
+          watermark: ''
+        plugin_id: sawyer-shi/seedream_aigc
+        plugin_unique_identifier: sawyer-shi/seedream_aigc:0.0.2@5d7eceb101e80337ac5885d1c6214bad7cb9989edbfc7174f97abedd2489f465
+        provider_icon: https://cloud.dify.ai/console/api/workspaces/current/plugin/icon?tenant_id=f76af51f-6d95-4ac2-b0d8-010ce5496e31&filename=9638639a259e524d8a12d8fa29d692c7b226cc88124ff4fb1eb2d31d0c9f88d3.svg
+        provider_id: sawyer-shi/seedream_aigc/seedream_aigc
+        provider_name: sawyer-shi/seedream_aigc/seedream_aigc
+        provider_type: builtin
+        selected: false
+        title: Seedream-文生图
+        tool_configurations:
+          model:
+            type: constant
+            value: doubao-seedream-4-5-251128
+          size:
+            type: constant
+            value: 2048x2048
+          watermark:
+            type: constant
+            value: 'true'
+        tool_description: 使用Seedream模型根据文本描述生成图像
+        tool_label: Seedream-文生图
+        tool_name: text2image
+        tool_node_version: '2'
+        tool_parameters:
+          prompt:
+            type: mixed
+            value: '{{#sys.query#}}'
+        type: tool
+      height: 140
+      id: '1779006596264'
+      position:
+        x: 704
+        y: 436
+      positionAbsolute:
+        x: 704
+        y: 436
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        break_conditions: []
+        error_handle_mode: terminated
+        height: 559
+        logical_operator: and
+        loop_count: 20
+        loop_variables: []
+        selected: false
+        start_node_id: 1779006892347start
+        title: 循环
+        type: loop
+        width: 1892.363376839256
+      height: 559
+      id: '1779006892347'
+      position:
+        x: 1098.2868453936708
+        y: 556.800641101935
+      positionAbsolute:
+        x: 1098.2868453936708
+        y: 556.800641101935
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 1892
+      zIndex: 1
+    - data:
+        desc: ''
+        isInLoop: true
+        selected: false
+        title: ''
+        type: loop-start
+      draggable: false
+      height: 48
+      id: 1779006892347start
+      parentId: '1779006892347'
+      position:
+        x: 24
+        y: 68
+      positionAbsolute:
+        x: 1122.2868453936708
+        y: 624.800641101935
+      selectable: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-loop-start
+      width: 44
+      zIndex: 1002
+    - data:
+        instruction: 从输入的内容中提取任务 ID
+        isInIteration: false
+        isInLoop: true
+        loop_id: '1779006892347'
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: deepseek-chat
+          provider: langgenius/deepseek/deepseek
+        parameters:
+        - description: '任务 ID '
+          name: task_id
+          required: true
+          type: string
+        query:
+        - '1779007966523'
+        - text
+        reasoning_mode: prompt
+        selected: false
+        title: 参数提取器 2
+        type: parameter-extractor
+        vision:
+          enabled: false
+      height: 88
+      id: '1779007225212'
+      parentId: '1779006892347'
+      position:
+        x: 202.71105245352533
+        y: 65
+      positionAbsolute:
+        x: 1300.997897847196
+        y: 621.800641101935
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 1002
+    - data:
+        isInIteration: false
+        isInLoop: true
+        is_team_authorization: true
+        loop_id: '1779006892347'
+        paramSchemas:
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: The ID of the video generation task to query
+            ja_JP: The ID of the video generation task to query
+            pt_BR: The ID of the video generation task to query
+            zh_Hans: 要查询的视频生成任务的ID
+          label:
+            en_US: Task ID
+            ja_JP: Task ID
+            pt_BR: Task ID
+            zh_Hans: 任务ID
+          llm_description: The ID of the video generation task to query
+          max: null
+          min: null
+          name: task_id
+          options: []
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: 'true'
+          form: form
+          human_description:
+            en_US: Download the video file when available
+            ja_JP: Download the video file when available
+            pt_BR: Download the video file when available
+            zh_Hans: 当视频可用时下载视频文件
+          label:
+            en_US: Download Video
+            ja_JP: Download Video
+            pt_BR: Download Video
+            zh_Hans: 下载视频
+          llm_description: Download the video file when available
+          max: null
+          min: null
+          name: download_video
+          options:
+          - icon: ''
+            label:
+              en_US: Enabled
+              ja_JP: Enabled
+              pt_BR: Enabled
+              zh_Hans: 启用
+            value: 'true'
+          - icon: ''
+            label:
+              en_US: Disabled
+              ja_JP: Disabled
+              pt_BR: Disabled
+              zh_Hans: 禁用
+            value: 'false'
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: select
+        params:
+          download_video: ''
+          task_id: ''
+        plugin_id: sawyer-shi/seedream_aigc
+        plugin_unique_identifier: sawyer-shi/seedream_aigc:0.0.2@5d7eceb101e80337ac5885d1c6214bad7cb9989edbfc7174f97abedd2489f465
+        provider_icon: https://cloud.dify.ai/console/api/workspaces/current/plugin/icon?tenant_id=f76af51f-6d95-4ac2-b0d8-010ce5496e31&filename=9638639a259e524d8a12d8fa29d692c7b226cc88124ff4fb1eb2d31d0c9f88d3.svg
+        provider_id: sawyer-shi/seedream_aigc/seedream_aigc
+        provider_name: sawyer-shi/seedream_aigc/seedream_aigc
+        provider_type: builtin
+        selected: false
+        title: Seedance-视频结果查询
+        tool_configurations:
+          download_video:
+            type: constant
+            value: 'true'
+        tool_description: 使用Seedance模型查询视频生成任务的状态和结果
+        tool_label: Seedance-视频结果查询
+        tool_name: video_query
+        tool_node_version: '2'
+        tool_parameters:
+          task_id:
+            type: mixed
+            value: '{{#1779007225212.task_id#}}'
+        type: tool
+      height: 88
+      id: '1779007244895'
+      parentId: '1779006892347'
+      position:
+        x: 484.70962506943556
+        y: 68
+      positionAbsolute:
+        x: 1582.9964704631063
+        y: 624.800641101935
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 1002
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: empty
+            id: d9959e63-4f66-4822-8ffc-0cc5b1e4fcf6
+            value: ''
+            varType: array[file]
+            variable_selector:
+            - '1779007244895'
+            - files
+          id: 'true'
+          logical_operator: and
+        isInIteration: false
+        isInLoop: true
+        loop_id: '1779006892347'
+        selected: false
+        title: 条件分支
+        type: if-else
+      height: 124
+      id: '1779007348928'
+      parentId: '1779006892347'
+      position:
+        x: 793.9828713909228
+        y: 68
+      positionAbsolute:
+        x: 1892.2697167845936
+        y: 624.800641101935
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 1002
+    - data:
+        isInIteration: false
+        isInLoop: true
+        loop_id: '1779006892347'
+        selected: false
+        title: 退出循环
+        type: loop-end
+      height: 54
+      id: '1779007370527'
+      parentId: '1779006892347'
+      position:
+        x: 1603.2918023146544
+        y: 231.64804223346164
+      positionAbsolute:
+        x: 2701.578647708325
+        y: 788.4486833353966
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-simple
+      width: 244
+      zIndex: 1002
+    - data:
+        isInIteration: false
+        isInLoop: true
+        is_team_authorization: true
+        loop_id: '1779006892347'
+        paramSchemas:
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: The number of seconds to wait
+            ja_JP: The number of seconds to wait
+            pt_BR: The number of seconds to wait
+            zh_Hans: 等待的秒数
+          label:
+            en_US: Seconds
+            ja_JP: Seconds
+            pt_BR: Seconds
+            zh_Hans: 秒数
+          llm_description: The number of seconds to pause execution
+          max: null
+          min: null
+          name: seconds
+          options: []
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: number
+        params:
+          seconds: ''
+        plugin_id: agimaster/justwait
+        plugin_unique_identifier: agimaster/justwait:0.0.2@1cc2d5e7fbd6a829396c8a51947924f799f9566071bf8499c4e2a9f75ad3330f
+        provider_icon: https://cloud.dify.ai/console/api/workspaces/current/plugin/icon?tenant_id=f76af51f-6d95-4ac2-b0d8-010ce5496e31&filename=a260a47b34be7b6bca428d8e8617d3ad9389cde761097b839c16a4e3ff378fbc.svg
+        provider_id: agimaster/justwait/justwait
+        provider_name: agimaster/justwait/justwait
+        provider_type: builtin
+        selected: false
+        title: 等待
+        tool_configurations: {}
+        tool_description: 等待指定的秒数，类似于Python的time.sleep()函数
+        tool_label: 等待
+        tool_name: wait
+        tool_node_version: '2'
+        tool_parameters:
+          seconds:
+            type: constant
+            value: 10
+        type: tool
+      height: 52
+      id: '1779007601560'
+      parentId: '1779006892347'
+      position:
+        x: 1332.363376839256
+        y: 99.17740626735895
+      positionAbsolute:
+        x: 2430.650222232927
+        y: 655.9780473692939
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 1002
+    - data:
+        is_team_authorization: true
+        paramSchemas:
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: Text description of the video you want to generate (max 500 chars)
+            ja_JP: Text description of the video you want to generate (max 500 chars)
+            pt_BR: Text description of the video you want to generate (max 500 chars)
+            zh_Hans: 您想要生成的视频的文本描述（最多500字）
+          label:
+            en_US: Prompt
+            ja_JP: Prompt
+            pt_BR: Prompt
+            zh_Hans: 提示词
+          llm_description: Text description of the video to generate (max 500 chars)
+          max: null
+          min: null
+          name: prompt
+          options: []
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: doubao-seedance-1-5-pro-251215
+          form: form
+          human_description:
+            en_US: Model for video generation
+            ja_JP: Model for video generation
+            pt_BR: Model for video generation
+            zh_Hans: 视频生成模型
+          label:
+            en_US: Model
+            ja_JP: Model
+            pt_BR: Model
+            zh_Hans: 模型
+          llm_description: Model for video generation
+          max: null
+          min: null
+          name: model
+          options:
+          - icon: ''
+            label:
+              en_US: Seedance 1.0 Pro
+              ja_JP: Seedance 1.0 Pro
+              pt_BR: Seedance 1.0 Pro
+              zh_Hans: Seedance 1.0 Pro
+            value: doubao-seedance-1-0-pro-250528
+          - icon: ''
+            label:
+              en_US: Seedance 1.0 Pro Fast
+              ja_JP: Seedance 1.0 Pro Fast
+              pt_BR: Seedance 1.0 Pro Fast
+              zh_Hans: Seedance 1.0 Pro Fast
+            value: doubao-seedance-1-0-pro-fast-251015
+          - icon: ''
+            label:
+              en_US: Seedance 1.5 Pro
+              ja_JP: Seedance 1.5 Pro
+              pt_BR: Seedance 1.5 Pro
+              zh_Hans: Seedance 1.5 Pro
+            value: doubao-seedance-1-5-pro-251215
+          - icon: ''
+            label:
+              en_US: Seedance 2.0
+              ja_JP: Seedance 2.0
+              pt_BR: Seedance 2.0
+              zh_Hans: Seedance 2.0
+            value: doubao-seedance-2-0-260128
+          - icon: ''
+            label:
+              en_US: Seedance 2.0 Fast
+              ja_JP: Seedance 2.0 Fast
+              pt_BR: Seedance 2.0 Fast
+              zh_Hans: Seedance 2.0 Fast
+            value: doubao-seedance-2-0-fast-260128
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: select
+        - auto_generate: null
+          default: 720p
+          form: form
+          human_description:
+            en_US: Video resolution
+            ja_JP: Video resolution
+            pt_BR: Video resolution
+            zh_Hans: 视频分辨率
+          label:
+            en_US: Resolution
+            ja_JP: Resolution
+            pt_BR: Resolution
+            zh_Hans: 分辨率
+          llm_description: Video resolution
+          max: null
+          min: null
+          name: resolution
+          options:
+          - icon: ''
+            label:
+              en_US: 480p
+              ja_JP: 480p
+              pt_BR: 480p
+              zh_Hans: 480p
+            value: 480p
+          - icon: ''
+            label:
+              en_US: 720p
+              ja_JP: 720p
+              pt_BR: 720p
+              zh_Hans: 720p
+            value: 720p
+          - icon: ''
+            label:
+              en_US: 1080p
+              ja_JP: 1080p
+              pt_BR: 1080p
+              zh_Hans: 1080p
+            value: 1080p
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: select
+        - auto_generate: null
+          default: '16:9'
+          form: form
+          human_description:
+            en_US: Video aspect ratio
+            ja_JP: Video aspect ratio
+            pt_BR: Video aspect ratio
+            zh_Hans: 视频宽高比
+          label:
+            en_US: Aspect Ratio
+            ja_JP: Aspect Ratio
+            pt_BR: Aspect Ratio
+            zh_Hans: 宽高比
+          llm_description: Video aspect ratio
+          max: null
+          min: null
+          name: ratio
+          options:
+          - icon: ''
+            label:
+              en_US: '16:9'
+              ja_JP: '16:9'
+              pt_BR: '16:9'
+              zh_Hans: '16:9'
+            value: '16:9'
+          - icon: ''
+            label:
+              en_US: '4:3'
+              ja_JP: '4:3'
+              pt_BR: '4:3'
+              zh_Hans: '4:3'
+            value: '4:3'
+          - icon: ''
+            label:
+              en_US: '1:1'
+              ja_JP: '1:1'
+              pt_BR: '1:1'
+              zh_Hans: '1:1'
+            value: '1:1'
+          - icon: ''
+            label:
+              en_US: '3:4'
+              ja_JP: '3:4'
+              pt_BR: '3:4'
+              zh_Hans: '3:4'
+            value: '3:4'
+          - icon: ''
+            label:
+              en_US: '9:16'
+              ja_JP: '9:16'
+              pt_BR: '9:16'
+              zh_Hans: '9:16'
+            value: '9:16'
+          - icon: ''
+            label:
+              en_US: '21:9'
+              ja_JP: '21:9'
+              pt_BR: '21:9'
+              zh_Hans: '21:9'
+            value: '21:9'
+          - icon: ''
+            label:
+              en_US: Adaptive
+              ja_JP: Adaptive
+              pt_BR: Adaptive
+              zh_Hans: 自适应
+            value: adaptive
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: select
+        - auto_generate: null
+          default: 5
+          form: form
+          human_description:
+            en_US: Video duration in seconds (2-15, -1 only for Seedance 1.5/2.0 series)
+            ja_JP: Video duration in seconds (2-15, -1 only for Seedance 1.5/2.0 series)
+            pt_BR: Video duration in seconds (2-15, -1 only for Seedance 1.5/2.0 series)
+            zh_Hans: 视频时长(2-15秒，-1 仅支持 Seedance 1.5/2.0 系列)
+          label:
+            en_US: Duration (seconds)
+            ja_JP: Duration (seconds)
+            pt_BR: Duration (seconds)
+            zh_Hans: 时长(秒)
+          llm_description: Video duration in seconds (2-15, -1 only for Seedance 1.5/2.0
+            series)
+          max: 15
+          min: -1
+          name: duration
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: number
+        - auto_generate: null
+          default: -1
+          form: form
+          human_description:
+            en_US: Random seed for reproducible results (-1 for random)
+            ja_JP: Random seed for reproducible results (-1 for random)
+            pt_BR: Random seed for reproducible results (-1 for random)
+            zh_Hans: 随机种子，用于生成可重复的结果(-1为随机)
+          label:
+            en_US: Seed
+            ja_JP: Seed
+            pt_BR: Seed
+            zh_Hans: 种子
+          llm_description: Random seed for reproducible results (-1 for random)
+          max: 4294967295
+          min: -1
+          name: seed
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: number
+        - auto_generate: null
+          default: 'false'
+          form: form
+          human_description:
+            en_US: Whether to fix camera position
+            ja_JP: Whether to fix camera position
+            pt_BR: Whether to fix camera position
+            zh_Hans: 是否固定摄像头位置
+          label:
+            en_US: Fixed Camera
+            ja_JP: Fixed Camera
+            pt_BR: Fixed Camera
+            zh_Hans: 固定摄像头
+          llm_description: Whether to fix camera position
+          max: null
+          min: null
+          name: camera_fixed
+          options:
+          - icon: ''
+            label:
+              en_US: Enabled
+              ja_JP: Enabled
+              pt_BR: Enabled
+              zh_Hans: 启用
+            value: 'true'
+          - icon: ''
+            label:
+              en_US: Disabled
+              ja_JP: Disabled
+              pt_BR: Disabled
+              zh_Hans: 禁用
+            value: 'false'
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: select
+        - auto_generate: null
+          default: 'true'
+          form: form
+          human_description:
+            en_US: Whether to add watermark to the video
+            ja_JP: Whether to add watermark to the video
+            pt_BR: Whether to add watermark to the video
+            zh_Hans: 是否在视频中添加水印
+          label:
+            en_US: Watermark
+            ja_JP: Watermark
+            pt_BR: Watermark
+            zh_Hans: 水印
+          llm_description: Whether to add watermark to the video
+          max: null
+          min: null
+          name: watermark
+          options:
+          - icon: ''
+            label:
+              en_US: Enabled
+              ja_JP: Enabled
+              pt_BR: Enabled
+              zh_Hans: 启用
+            value: 'true'
+          - icon: ''
+            label:
+              en_US: Disabled
+              ja_JP: Disabled
+              pt_BR: Disabled
+              zh_Hans: 禁用
+            value: 'false'
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: select
+        - auto_generate: null
+          default: 'true'
+          form: form
+          human_description:
+            en_US: Whether to generate synchronized audio (Seedance 1.5 Pro / 2.0
+              / 2.0 Fast)
+            ja_JP: Whether to generate synchronized audio (Seedance 1.5 Pro / 2.0
+              / 2.0 Fast)
+            pt_BR: Whether to generate synchronized audio (Seedance 1.5 Pro / 2.0
+              / 2.0 Fast)
+            zh_Hans: 是否生成同步音频（Seedance 1.5 Pro / 2.0 / 2.0 Fast）
+          label:
+            en_US: Audio
+            ja_JP: Audio
+            pt_BR: Audio
+            zh_Hans: 音频
+          llm_description: Whether to generate synchronized audio
+          max: null
+          min: null
+          name: generate_audio
+          options:
+          - icon: ''
+            label:
+              en_US: Enabled
+              ja_JP: Enabled
+              pt_BR: Enabled
+              zh_Hans: 启用
+            value: 'true'
+          - icon: ''
+            label:
+              en_US: Disabled
+              ja_JP: Disabled
+              pt_BR: Disabled
+              zh_Hans: 禁用
+            value: 'false'
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: select
+        - auto_generate: null
+          default: 'false'
+          form: form
+          human_description:
+            en_US: Generate draft video (Seedance 1.5 pro only)
+            ja_JP: Generate draft video (Seedance 1.5 pro only)
+            pt_BR: Generate draft video (Seedance 1.5 pro only)
+            zh_Hans: 生成样片视频（仅Seedance 1.5 pro）
+          label:
+            en_US: Draft Mode
+            ja_JP: Draft Mode
+            pt_BR: Draft Mode
+            zh_Hans: 样片模式
+          llm_description: Generate draft video
+          max: null
+          min: null
+          name: draft
+          options:
+          - icon: ''
+            label:
+              en_US: Enabled
+              ja_JP: Enabled
+              pt_BR: Enabled
+              zh_Hans: 启用
+            value: 'true'
+          - icon: ''
+            label:
+              en_US: Disabled
+              ja_JP: Disabled
+              pt_BR: Disabled
+              zh_Hans: 禁用
+            value: 'false'
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: select
+        - auto_generate: null
+          default: 'false'
+          form: form
+          human_description:
+            en_US: Return last frame image in query
+            ja_JP: Return last frame image in query
+            pt_BR: Return last frame image in query
+            zh_Hans: 查询结果返回尾帧图像
+          label:
+            en_US: Return Last Frame
+            ja_JP: Return Last Frame
+            pt_BR: Return Last Frame
+            zh_Hans: 返回尾帧
+          llm_description: Return last frame image
+          max: null
+          min: null
+          name: return_last_frame
+          options:
+          - icon: ''
+            label:
+              en_US: Enabled
+              ja_JP: Enabled
+              pt_BR: Enabled
+              zh_Hans: 启用
+            value: 'true'
+          - icon: ''
+            label:
+              en_US: Disabled
+              ja_JP: Disabled
+              pt_BR: Disabled
+              zh_Hans: 禁用
+            value: 'false'
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: select
+        - auto_generate: null
+          default: default
+          form: form
+          human_description:
+            en_US: 'Service tier: default or flex (Seedance 2.0 series supports default
+              only)'
+            ja_JP: 'Service tier: default or flex (Seedance 2.0 series supports default
+              only)'
+            pt_BR: 'Service tier: default or flex (Seedance 2.0 series supports default
+              only)'
+            zh_Hans: 服务等级：default 或 flex（Seedance 2.0 系列仅支持 default）
+          label:
+            en_US: Service Tier
+            ja_JP: Service Tier
+            pt_BR: Service Tier
+            zh_Hans: 服务等级
+          llm_description: Service tier
+          max: null
+          min: null
+          name: service_tier
+          options:
+          - icon: ''
+            label:
+              en_US: Default
+              ja_JP: Default
+              pt_BR: Default
+              zh_Hans: 默认
+            value: default
+          - icon: ''
+            label:
+              en_US: Flex
+              ja_JP: Flex
+              pt_BR: Flex
+              zh_Hans: 离线
+            value: flex
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: select
+        params:
+          camera_fixed: ''
+          draft: ''
+          duration: ''
+          generate_audio: ''
+          model: ''
+          prompt: ''
+          ratio: ''
+          resolution: ''
+          return_last_frame: ''
+          seed: ''
+          service_tier: ''
+          watermark: ''
+        plugin_id: sawyer-shi/seedream_aigc
+        plugin_unique_identifier: sawyer-shi/seedream_aigc:0.0.2@5d7eceb101e80337ac5885d1c6214bad7cb9989edbfc7174f97abedd2489f465
+        provider_icon: https://cloud.dify.ai/console/api/workspaces/current/plugin/icon?tenant_id=f76af51f-6d95-4ac2-b0d8-010ce5496e31&filename=9638639a259e524d8a12d8fa29d692c7b226cc88124ff4fb1eb2d31d0c9f88d3.svg
+        provider_id: sawyer-shi/seedream_aigc/seedream_aigc
+        provider_name: sawyer-shi/seedream_aigc/seedream_aigc
+        provider_type: builtin
+        selected: false
+        title: Seedance-文生视频
+        tool_configurations:
+          camera_fixed:
+            type: constant
+            value: 'false'
+          draft:
+            type: constant
+            value: 'false'
+          duration:
+            type: constant
+            value: 5
+          generate_audio:
+            type: constant
+            value: 'true'
+          model:
+            type: constant
+            value: doubao-seedance-1-5-pro-251215
+          ratio:
+            type: constant
+            value: '16:9'
+          resolution:
+            type: constant
+            value: 720p
+          return_last_frame:
+            type: constant
+            value: 'false'
+          seed:
+            type: constant
+            value: -1
+          service_tier:
+            type: constant
+            value: default
+          watermark:
+            type: constant
+            value: 'true'
+        tool_description: 使用Seedance模型根据文本描述生成视频
+        tool_label: Seedance-文生视频
+        tool_name: text_2_video
+        tool_node_version: '2'
+        tool_parameters:
+          prompt:
+            type: mixed
+            value: '{{#sys.query#}}'
+        type: tool
+      height: 348
+      id: '1779007966523'
+      position:
+        x: 722.3405386938202
+        y: 613.5539197777887
+      positionAbsolute:
+        x: 722.3405386938202
+        y: 613.5539197777887
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#1779007244895.files#}}'
+        isInIteration: false
+        isInLoop: true
+        loop_id: '1779006892347'
+        selected: false
+        title: 直接回复 9
+        type: answer
+        variables: []
+      height: 103
+      id: '1779010190488'
+      parentId: '1779006892347'
+      position:
+        x: 1192.9151214236745
+        y: 220.18852346121207
+      positionAbsolute:
+        x: 2291.2019668173452
+        y: 776.989164563147
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 1002
+    - data:
+        desc: ''
+        isInIteration: false
+        isInLoop: false
         is_team_authorization: true
         paramSchemas:
         - auto_generate: null
@@ -3737,27 +4632,28 @@ workflow:
         tool_configurations:
           db_name:
             type: mixed
-            value: data01
+            value: heterocat
           db_type:
             type: constant
             value: mysql
           host:
             type: mixed
-            value: 47.107.185.248
+            value: 39.102.59.90
           limit:
             type: constant
             value: null
           model:
             type: constant
             value:
-              completion_params: {}
+              completion_params:
+                temperature: 0
               mode: chat
               model: deepseek-chat
               model_type: llm
               provider: langgenius/deepseek/deepseek
           password:
             type: mixed
-            value: EbTNr4Pz4CwJKd4G
+            value: WddkTs2Le3f3HELB
           port:
             type: constant
             value: 3306
@@ -3766,10 +4662,10 @@ workflow:
             value: text
           username:
             type: mixed
-            value: data01
+            value: heterocat
           with_comment:
             type: constant
-            value: null
+            value: false
         tool_description: 使用自然语言从MySQL获取数据
         tool_label: rookie_text2data
         tool_name: rookie_text2data
@@ -3777,34 +4673,61 @@ workflow:
         tool_parameters:
           custom_prompt:
             type: mixed
-            value: "表结构：CREATE TABLE `student` (\n  `id` int(11) NOT NULL COMMENT\
-              \ 'id标识',\n  `name` varchar(255) NOT NULL COMMENT '名字',\n  `age` int(11)\
-              \ NOT NULL COMMENT '年龄',\n  `sex` char(1) NOT NULL COMMENT '性别',\n \
-              \ PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
+            value: "表结构：CREATE TABLE `test02` (\n  `ID` int(11) NOT NULL COMMENT 'id',\n\
+              \  `subject` varchar(255) DEFAULT NULL COMMENT '科目',\n  `name` varchar(255)\
+              \ DEFAULT NULL COMMENT '名称',\n  `type` varchar(255) DEFAULT NULL COMMENT\
+              \ '获奖类型',\n  `title` varchar(255) DEFAULT NULL COMMENT '获奖项目',\n  `level`\
+              \ varchar(255) DEFAULT NULL COMMENT '获奖级别',\n  `time` varchar(255) DEFAULT\
+              \ NULL COMMENT '获奖时间',\n  `department` varchar(255) DEFAULT NULL COMMENT\
+              \ '主办单位',\n  PRIMARY KEY (`ID`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
+          db_name:
+            type: mixed
+            value: heterocat
+          db_type:
+            type: constant
+            value: mysql
+          host:
+            type: mixed
+            value: 39.102.59.90
+          password:
+            type: mixed
+            value: '020104'
+          port:
+            type: constant
+            value: 3306
           query:
             type: mixed
             value: '{{#sys.query#}}'
+          result_format:
+            type: constant
+            value: text
           schema_name:
             type: mixed
             value: null
           table_names:
             type: mixed
-            value: student
+            value: test02
+          username:
+            type: mixed
+            value: heterocat
         type: tool
       height: 322
-      id: '17605266432700'
+      id: '17790186317020'
       position:
-        x: 632
-        y: 2371.987287323703
+        x: 753.1830020471918
+        y: 1471.5538555329997
       positionAbsolute:
-        x: 632
-        y: 2371.987287323703
+        x: 753.1830020471918
+        y: 1471.5538555329997
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
     - data:
+        desc: ''
+        isInIteration: false
+        isInLoop: false
         is_team_authorization: true
         paramSchemas:
         - auto_generate: null
@@ -4076,16 +4999,16 @@ workflow:
         tool_configurations:
           db_name:
             type: mixed
-            value: data01
+            value: heterocat
           db_type:
             type: constant
             value: mysql
           host:
             type: mixed
-            value: 47.107.185.248
+            value: 39.102.59.90
           password:
             type: mixed
-            value: EbTNr4Pz4CwJKd4G
+            value: WddkTs2Le3f3HELB
           port:
             type: constant
             value: 3306
@@ -4094,34 +5017,52 @@ workflow:
             value: text
           username:
             type: mixed
-            value: data01
+            value: heterocat
         tool_description: sql 执行器
         tool_label: rookie_excute_sql
         tool_name: rookie_excute_sql
         tool_node_version: '2'
         tool_parameters:
+          db_name:
+            type: mixed
+            value: heterocat
+          db_type:
+            type: constant
+            value: mysql
+          host:
+            type: mixed
+            value: 39.102.59.90
+          password:
+            type: mixed
+            value: '020104'
+          port:
+            type: constant
+            value: 3306
           schema:
             type: mixed
             value: null
           sql:
             type: mixed
-            value: '{{#17605266432700.text#}}'
+            value: '{{#17790186317020.text#}}'
+          username:
+            type: mixed
+            value: heterocat
         type: tool
       height: 244
-      id: '17605266460270'
+      id: '17790186381000'
       position:
-        x: 933
-        y: 2362
+        x: 1066.0122704903813
+        y: 1496.8133616805862
       positionAbsolute:
-        x: 933
-        y: 2362
+        x: 1066.0122704903813
+        y: 1496.8133616805862
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
     viewport:
-      x: 493.86303424052
-      y: 36.41623827269086
-      zoom: 0.28431440122374074
+      x: 323.7733577927164
+      y: 62.6597102490054
+      zoom: 0.25
   rag_pipeline_variables: []

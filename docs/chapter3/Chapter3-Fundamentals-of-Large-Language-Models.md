@@ -489,11 +489,13 @@ The working mode of the Decoder-Only architecture is called **Autoregressive**. 
 
 The model is like playing a "word chain" game, constantly "reviewing" the content it has already written, then thinking about what the next word should be.
 
-You might ask, how does the decoder ensure that when predicting the `t`-th word, it doesn't "peek" at the answer of the `t+1`-th word?
+You might ask: during training, the model is often given the complete text sequence at once, so how does it ensure that when learning to predict the next token, it does not "peek" at later answers?
 
 The answer is **Masked Self-Attention**. In the Decoder-Only architecture, this mechanism becomes crucial. Its working principle is very clever:
 
-After the self-attention mechanism calculates the attention score matrix (i.e., each word's attention score to all other words), but before performing Softmax normalization, the model applies a "mask." This mask replaces the scores corresponding to all tokens located after the current position (i.e., not yet observed) with a very large negative number. When this matrix with negative infinity scores goes through the Softmax function, the probabilities at these positions become 0. This way, when the model calculates the output at any position, it is mathematically prevented from attending to information after it. This mechanism ensures that when predicting the next word, the model can and only can rely on all information it has already seen, located before the current position, thereby ensuring fairness of prediction and coherence of logic.
+During training, although a whole text sequence can be fed into the model in parallel, after the self-attention mechanism calculates the attention score matrix (i.e., each word's attention score to all other words) and before Softmax normalization, the model applies a causal mask. This mask replaces the scores corresponding to all tokens after the current position with a very large negative number. When this matrix goes through Softmax, the probabilities at those positions become 0. In this way, when the model calculates the representation at any position, it is mathematically prevented from attending to information after that position.
+
+During generation, the situation is even more direct: future tokens have not been generated yet, so the model can only use the already generated content as context and predict the next token step by step. Masked self-attention keeps the training objective consistent with autoregressive generation, ensuring that the model always relies only on information before the current position.
 
 **Advantages of Decoder-Only Architecture**
 

@@ -51,10 +51,13 @@ agent = SimpleAgent(name="Learning Assistant", llm=HelloAgentsLLM())
 response1 = agent.run("My name is Zhang San, I'm learning Python and have mastered basic syntax")
 print(response1)  # "Great! Python basic syntax is an important foundation for programming..."
  
-# Second conversation (new session)
+# Second conversation (new session, such as after restarting the program and creating a new Agent)
+agent = SimpleAgent(name="Learning Assistant", llm=HelloAgentsLLM())
 response2 = agent.run("Do you remember my learning progress?")
 print(response2)  # "Sorry, I don't know your learning progress..."
 ```
+
+Note that the `SimpleAgent` from Chapter 7 temporarily stores the current dialogue in `_history` within the same instance, so consecutive turns in the same process and instance can carry recent context. However, this history is only a temporary message list. It is not persisted across sessions and does not support long-term retrieval, forgetting, or consolidation.
 
 To solve this problem, our framework needs to introduce a memory system.
 

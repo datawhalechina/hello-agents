@@ -93,6 +93,7 @@
 | [10-Agent Self-Evolution智能体自进化](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra10-Agent自进化.md) | Agent 自进化四类闭环与代表项目 |
 | [11-WebAgent科普与实战](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra11-WebAgent科普与实战.md) | Web Agent 原理、反爬实战与 HelloAgents 集成 |
 | [12-旅行助手后训练实战](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra12-旅行助手后训练实战.md) | 把旅行助手 Demo 打磨成能用的 Planner |
+| [13-Hello-Agents视频课录制共创](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra13-Hello-Agents视频课录制共创.md) | 视频课程共创录制资源 |
 
 ### PDF 版本下载
 
@@ -129,7 +130,7 @@
 - 视频课程陆续放出（将会更加细致，实践课带领大家从设计思路到实施，授人以鱼也授人以渔）
 - HelloAgents框架已经更新V1.0.0版本，将会继续完善，增加更多好用，轻量化的工具和特性，兼容学习版本。
 - 2026年5月更新智能体最新学习路线, [点击](https://github.com/datawhalechina/Agent-Learning-Hub) 查询
-- 感谢大家助力4W Star! 现在提供调查问卷，供大家填写自己需要学习的智能体内容。后续作品《从零开始训练智能体》，帮助每一个学习者掌握从零到一训练自定义场景智能体模型的能力。
+- 感谢大家助力6W Star! 现在提供调查问卷，供大家填写自己需要学习的智能体内容。后续作品《从零开始训练智能体》，帮助每一个学习者掌握从零到一训练自定义场景智能体模型的能力。
 <div align='center'>
     <img src="./读者反馈问卷.png" alt="读者反馈问卷" width="30%">
     <p>扫描二维码填写反馈意见，助力新项目共同成长</p>
@@ -152,6 +153,7 @@
 - [姜舒凡-联合发起者](https://github.com/Tsumugii24)（Datawhale 成员, 章节习题设计和校对）
 - [黄佩林-Datawhale意向成员](https://github.com/HeteroCat) (Agent 开发工程师, 第五章内容贡献者)
 - [曾鑫民-Agent工程师](https://github.com/fancyboi999) (牛客科技, 第十四章案例开发)
+- [胡昊-运营组织者](https://github.com/ACGpp) (Datawhale成员)
 - [朱信忠-指导专家](https://xinzhongzhu.github.io/) (Datawhale首席科学家-浙江师范大学杭州人工智能研究院教授)
 ### Extra-Chapter 贡献者
 - [WH](https://github.com/WHQAQ11) (内容贡献者)
@@ -177,7 +179,7 @@
 ## Star History
 
 <div align='center'>
-    <img src="./docs/images/datawhalechina-hello-agents-stats-20260516.png" alt="Datawhale" width="90%">
+    <img src="./docs/images/star-history-2026618.png" alt="Datawhale" width="90%">
 </div>
 
 <div align="center">

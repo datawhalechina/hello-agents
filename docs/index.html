@@ -215,10 +215,12 @@
                 // 英文路径映射
                 '/en/README.md': '/README_EN.md',
                 '/en/_sidebar.md': '/_sidebar_en.md',
+                '/en/.*/_sidebar.md': '/_sidebar_en.md',
                 '/en/chapter(\\d+)/Chapter(.*)': '/chapter$1/Chapter$2',
 
                 // 默认中文侧边栏
-                '/_sidebar.md': '/_sidebar.md'
+                '/_sidebar.md': '/_sidebar.md',
+                '/.*/_sidebar.md': '/_sidebar.md'
             },
             pagination: {
                 previousText: '上一章节',

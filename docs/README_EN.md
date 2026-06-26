@@ -85,6 +85,7 @@
 | [10-Agent Self-Evolution](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra10-Agent自进化.md) | Four closed loops of agent self-evolution and representative projects |
 | [11-Web Agent: Principles and Practice](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra11-WebAgent科普与实战.md) | Web Agent principles, anti-bot practice, and HelloAgents integration |
 | [12-Trip Planner Post-Training in Practice](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra12-旅行助手后训练实战.md) | Turning a trip-planner demo into a usable planner |
+| [13-Hello-Agents Video Course Co-creation](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra13-Hello-Agents视频课录制共创.md) | Video course co-creation recording resources |
 
 ### PDF Version Download
 
@@ -132,6 +133,7 @@ We are an open-source community and welcome any form of contribution!
 - [Jiang Shufan - Co-sponsor](https://github.com/Tsumugii24) (Datawhale member, chapter exercise design and proofreading)
 - [Huang Peilin - Datawhale Prospective Member](https://github.com/HeteroCat) (Agent Development Engineer, Chapter 5 content contributor)
 - [Zeng Xinmin - Agent Engineer](https://github.com/fancyboi999) (Niuke Technology, Chapter 14 case development)
+- [Hu Hao - Operations Organizer](https://github.com/ACGpp) (Datawhale member)
 - [Zhu Xinzhong - Advisory Expert](https://xinzhongzhu.github.io/) (Chief Scientist of Datawhale, Professor at Hangzhou Institute of Artificial Intelligence, Zhejiang Normal University)
 
 ### Extra-Chapter Contributors
@@ -158,7 +160,7 @@ We are an open-source community and welcome any form of contribution!
 ## Star History
 
 <div align='center'>
-    <img src="./images/datawhalechina-hello-agents-stats-20260516.png" alt="Datawhale" width="90%">
+    <img src="./images/star-history-2026618.png" alt="Datawhale" width="90%">
 </div>
 
 <div align="center">

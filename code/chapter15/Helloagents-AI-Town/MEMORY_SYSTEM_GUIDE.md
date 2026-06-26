@@ -233,9 +233,9 @@ memory_config = MemoryConfig(
     storage_path=f"./memory_data/{npc_name}",  # 存储路径
     working_memory_capacity=10,                # 工作记忆容量
     working_memory_tokens=2000,                # 工作记忆token限制
-    episodic_memory_capacity=100,              # 情景记忆容量
-    enable_forgetting=True,                    # 启用遗忘机制
-    forgetting_threshold=0.3                   # 遗忘阈值
+    max_capacity=100,                          # 记忆总容量
+    importance_threshold=0.3,                  # 重要性阈值
+    decay_factor=0.95                          # 时间衰减系数
 )
 ```
 
@@ -245,8 +245,9 @@ memory_config = MemoryConfig(
 |------|--------|----------|------|
 | working_memory_capacity | 10 | 5-20 | 工作记忆容量,越大越占内存 |
 | working_memory_tokens | 2000 | 1000-4000 | Token限制,影响上下文长度 |
-| episodic_memory_capacity | 100 | 50-500 | 长期记忆容量,越大越占磁盘 |
-| forgetting_threshold | 0.3 | 0.1-0.5 | 遗忘阈值,越低越容易遗忘 |
+| max_capacity | 100 | 50-500 | 记忆总容量,越大越占磁盘 |
+| importance_threshold | 0.3 | 0.1-0.5 | 重要性阈值,越高越偏向保留重要记忆 |
+| decay_factor | 0.95 | 0.8-0.99 | 时间衰减系数,越低越强调近期记忆 |
 
 ---
 
@@ -319,7 +320,7 @@ rm -rf backend/memory_data/张三
 **解决方法:**
 - 检查日志中是否有"记忆系统已初始化"
 - 检查memory_data目录是否存在
-- 调高forgetting_threshold参数
+- 降低importance_threshold参数
 
 ### Q2: 记忆检索不准确?
 
@@ -335,8 +336,8 @@ rm -rf backend/memory_data/张三
 ### Q3: 记忆占用空间太大?
 
 **解决方法:**
-- 降低episodic_memory_capacity
-- 提高forgetting_threshold
+- 降低max_capacity
+- 提高importance_threshold
 - 定期清理旧记忆
 
 ---
