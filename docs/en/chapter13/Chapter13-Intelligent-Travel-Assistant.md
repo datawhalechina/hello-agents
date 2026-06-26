@@ -31,7 +31,7 @@ This is the intelligent travel assistant we want to build. It's not just a techn
 The system adopts the classic **front-end and back-end separation architecture**, divided into four layers, as shown in Figure 13.1:
 
 <div align="center">
-  <img src="../images/13-figures/13-1.png" alt="Intelligent Travel Assistant Technical Architecture" width="85%"/>
+  <img src="../../images/13-figures/13-1.png" alt="Intelligent Travel Assistant Technical Architecture" width="85%"/>
   <p>Figure 13.1 Intelligent Travel Assistant Technical Architecture</p>
 </div>
 
@@ -129,26 +129,26 @@ Experience core functions:
 First, fill in the destination city, travel dates, preferences, budget, transportation and accommodation types in the homepage form. After clicking the "Start Planning" button, the system will display a loading progress bar and quickly generate a result page, as shown in Figure 13.2.
 
 <div align="center">
-  <img src="../images/13-figures/13-2.png" alt="Travel Assistant Planning Progress Page" width="85%"/>
+  <img src="../../images/13-figures/13-2.png" alt="Travel Assistant Planning Progress Page" width="85%"/>
   <p>Figure 13.2 Travel Assistant Planning Progress Page</p>
 </div>
 
 After successful loading, the page will clearly display itinerary overview, budget details, attraction map, daily itinerary details and weather information, as shown in Figures 13.3 and 13.4.
 
 <div align="center">
-  <img src="../images/13-figures/13-3.png" alt="Travel Assistant Planning Completion Page" width="85%"/>
+  <img src="../../images/13-figures/13-3.png" alt="Travel Assistant Planning Completion Page" width="85%"/>
   <p>Figure 13.3 Travel Assistant Planning Completion Page</p>
 </div>
 
 <div align="center">
-  <img src="../images/13-figures/13-4.png" alt="Travel Assistant Itinerary Display Page" width="85%"/>
+  <img src="../../images/13-figures/13-4.png" alt="Travel Assistant Itinerary Display Page" width="85%"/>
   <p>Figure 13.4 Travel Assistant Planning Completion Page</p>
 </div>
 
 If users need personalized adjustments, they can click the "Edit Itinerary" button to freely adjust the order of attractions or delete certain attractions, as shown in Figure 13.5. After planning is complete, through the "Export Itinerary" dropdown menu, the final plan can be easily saved as an image or PDF file for convenient reference at any time.
 
 <div align="center">
-  <img src="../images/13-figures/13-5.png" alt="Travel Assistant Map Display Page" width="85%"/>
+  <img src="../../images/13-figures/13-5.png" alt="Travel Assistant Map Display Page" width="85%"/>
   <p>Figure 13.5 Travel Assistant Planning Completion Page</p>
 </div>
 
@@ -470,7 +470,7 @@ Imagine a travel agency in the real world. When you go to a travel agency to con
 Based on the task decomposition principle, we designed four specialized Agents, as shown in Figure 13.6:
 
 <div align="center">
-  <img src="../images/13-figures/13-6.png" alt="Multi-Agent Collaboration Flow" width="85%"/>
+  <img src="../../images/13-figures/13-6.png" alt="Multi-Agent Collaboration Flow" width="85%"/>
   <p>Figure 13.6 Multi-Agent Collaboration Flow</p>
 </div>
 
@@ -675,7 +675,7 @@ Finally is **chaotic tool management**. Amap provides more than a dozen differen
 MCP (Model Context Protocol) is a standardized protocol proposed by Anthropic for connecting LLMs and external tools. This section will introduce how to integrate the Amap MCP server in the project. Our project uses `amap-mcp-server`, which is an MCP server implemented in Node.js:
 
 <div align="center">
-  <img src="../images/13-figures/13-7.png" alt="Amap MCP Server Tools" width="85%"/>
+  <img src="../../images/13-figures/13-7.png" alt="Amap MCP Server Tools" width="85%"/>
   <p>Figure 13.7 amap-mcp-server Tools</p>
 </div>
 
@@ -683,7 +683,7 @@ The Amap MCP server provides various tools, mainly divided into the following ca
 
 <div align="center">
   <p>Table 13.1 Amap MCP Tool Categories</p>
-  <img src="../images/13-figures/13-table-1.png" alt="Amap MCP Tool Categories" width="85%"/>
+  <img src="../../images/13-figures/13-table-1.png" alt="Amap MCP Tool Categories" width="85%"/>
 </div>
 
 Through the MCP protocol, we can easily integrate in HelloAgents:
@@ -725,7 +725,7 @@ print(list(agent.tools.keys()))
 As shown in Figure 13.8, suppose the user wants to search for attractions in Beijing. AttractionSearchAgent receives the query "Please search for historical and cultural attractions in Beijing". The Agent analyzes this query and decides to call the `amap_maps_text_search` tool with parameters `keywords=attraction, city=Beijing`.
 
 <div align="center">
-  <img src="../images/13-figures/13-8.png" alt="MCP Tool Call Flow" width="85%"/>
+  <img src="../../images/13-figures/13-8.png" alt="MCP Tool Call Flow" width="85%"/>
   <p>Figure 13.8 MCP Tool Call Flow</p>
 </div>
 
@@ -918,7 +918,7 @@ The choice of front-end technology stack needs to consider several factors: deve
 
 <div align="center">
   <p>Table 13.2 Front-End Technology Stack</p>
-  <img src="../images/13-figures/13-table-2.png" alt="Front-End Technology Stack" width="85%"/>
+  <img src="../../images/13-figures/13-table-2.png" alt="Front-End Technology Stack" width="85%"/>
 </div>
 
 The project's directory structure is as follows:

@@ -1,0 +1,31 @@
+{
+  "name": "hello-agents",
+  "version": "1.0.0",
+  "description": "从零开始构建智能体 - Datawhale社区系统性智能体学习教程",
+  "type": "module",
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tonydeng/hello-agents.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tonydeng/hello-agents/issues"
+  },
+  "homepage": "https://github.com/tonydeng/hello-agents#readme",
+  "devDependencies": {
+    "@types/katex": "^0.16.8",
+    "katex": "^0.17.0",
+    "markdown-it": "^14.2.0",
+    "markdown-it-katex": "^2.0.3",
+    "mermaid": "^11.16.0",
+    "vitepress": "^1.6.4",
+    "vitepress-plugin-mermaid": "^2.0.17"
+  }
+}

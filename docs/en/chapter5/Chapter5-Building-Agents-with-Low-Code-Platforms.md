@@ -59,7 +59,7 @@ Coze is a super cool AI agent creation tool! It is also currently the most widel
 Overall layout introduction: Recently, Coze has updated its UI interface again, as shown in Figure 5.1. Now the leftmost sidebar is the development workspace of the Coze platform homepage, including core project development, resource library, effect evaluation, and space configuration. The area below is the supporting material space for Coze development, including official templates for one-click copying, Coze's biggest advantage - a rich and diverse plugin store, the largest agent community with a dazzling array, API management for API testing, as well as detailed tutorial documentation and general management for enterprises. On the right side, there are four templates. At the top is Coze's latest update announcement, telling you about Coze's latest progress so you can learn about the latest tools and features. Below that is the beginner tutorial. Click on it and you'll find the beginner tutorial documentation, and you can start building agents in minutes. Next are your follows and agent recommendations. Here you can also follow your favorite AI developers and bookmark their agents for your own use.
 
 <div align="center">
-  <img src="../images/5-figures/coze-01.png" alt="Coze Agent Platform Overview" width="90%"/>
+  <img src="../../images/5-figures/coze-01.png" alt="Coze Agent Platform Overview" width="90%"/>
   <p>Figure 5.1 Overall Schematic of Coze Agent Platform</p>
 </div>
 
@@ -67,22 +67,22 @@ Overall layout introduction: Recently, Coze has updated its UI interface again, 
 
 First, we click the plus sign on the left sidebar to see the entry point for creating agents. Currently, there are two types of AI applications: one is to create agents, and the other is called applications. Among them, agents are divided into single-agent autonomous planning mode, single-agent dialogue flow mode, and multi-agent mode. AI applications are also divided into two types: not only can you design user interfaces for desktop and web, but you can also easily build interfaces for mini-programs and H5, as shown in Figure 5.2.
 <div align="center">
-  <img src="../images/5-figures/coze-02.png" alt="Coze Agent Creation Entry" width="90%"/>
+  <img src="../../images/5-figures/coze-02.png" alt="Coze Agent Creation Entry" width="90%"/>
   <p>Figure 5.2 Coze Agent Creation Entry</p>
 </div>
 The project space is your agent repository, where all the agents or applications you have developed or copied are stored. It is also the place you will visit most often when developing agents in Coze, as shown in Figure 5.3.
 <div align="center">
-  <img src="../images/5-figures/coze-03.png" alt="Coze Agent Project Space" width="90%"/>
+  <img src="../../images/5-figures/coze-03.png" alt="Coze Agent Project Space" width="90%"/>
   <p>Figure 5.3 Coze Agent Project Space</p>
 </div>
 The resource library is your core arsenal for developing Coze agents. The resource library stores your workflows, knowledge bases, cards, prompt libraries, and a series of other tools for developing agents. What kind of agent you can make depends first on the model's capabilities, but most importantly, it depends on how you equip the agent with "equipment and skills." The model determines the lower limit of the agent, but the Coze resource library gives you infinite upper limits for the agent's capabilities, allowing you to develop according to your own ideas, imagination, and creativity, as shown in Figure 5.4.
 <div align="center">
-  <img src="../images/5-figures/coze-04.png" alt="Coze Agent Resource Library" width="90%"/>
+  <img src="../../images/5-figures/coze-04.png" alt="Coze Agent Resource Library" width="90%"/>
   <p>Figure 5.4 Coze Agent Resource Library</p>
 </div>
 Space configuration includes a unified management channel for agents, plugins, workflows, and publishing channels, as well as model management where you can see the various large models you call, as shown in Figure 5.5.
 <div align="center">
-  <img src="../images/5-figures/coze-05.png" alt="Coze Agent Publishing Channels" width="90%"/>
+  <img src="../../images/5-figures/coze-05.png" alt="Coze Agent Publishing Channels" width="90%"/>
   <p>Figure 5.5 Coze Agent Publishing Channels</p>
 </div>
 If I were to make a simple summary of Coze's agent development, I would compare it to the various components of a game. The combination of each part to create wonderful agents is very much like playing a "game." Every time you complete an agent, it's like defeating a boss and gaining a lot, whether it's "experience" or "equipment."
@@ -120,15 +120,15 @@ The primary task of building a "Daily AI Brief" agent is to connect it to rich a
 1.  **Plugin Integration:** In Coze's plugin library, search for and add the required plugins. For example, subscribe to RSS feeds from media platforms through the **RSS** plugin (as shown in Figure 5.6), track open-source projects through the **GitHub** plugin (as shown in Figure 5.7), and obtain the latest academic research results through the **arXiv** plugin (as shown in Figure 5.8).
 
 <div align="center">
-  <img src="../images/5-figures/coze-06.png" alt="RSS Feed Plugin for Media Platforms" width="90%"/>
+  <img src="../../images/5-figures/coze-06.png" alt="RSS Feed Plugin for Media Platforms" width="90%"/>
   <p>Figure 5.6 RSS Source Plugin for Media Platforms</p>
 </div>
 <div align="center">
-  <img src="../images/5-figures/coze-07.png" alt="GitHub Plugin" width="90%"/>
+  <img src="../../images/5-figures/coze-07.png" alt="GitHub Plugin" width="90%"/>
   <p>Figure 5.7 GitHub Plugin</p>
 </div>
 <div align="center">
-  <img src="../images/5-figures/coze-08.png" alt="Arxiv Plugin" width="90%"/>
+  <img src="../../images/5-figures/coze-08.png" alt="Arxiv Plugin" width="90%"/>
   <p>Figure 5.8 Arxiv Plugin</p>
 </div>
 
@@ -157,7 +157,7 @@ Arxiv Plugin Configuration
 
 3.  **Orchestration and Connection:** In the agent's visual orchestration interface, use these configured information source plugins (such as `rss_24Hbj`, `searchRepository`, `arxiv`, etc.) as data input nodes and connect them to subsequent logical processing modules (such as the **Large Model** module) to build a complete data processing path, as shown in Figure 5.9.
 <div align="center">
-  <img src="../images/5-figures/coze-09.png" alt="Daily AI Briefing Workflow" width="90%"/>
+  <img src="../../images/5-figures/coze-09.png" alt="Daily AI Briefing Workflow" width="90%"/>
   <p>Figure 5.9 Daily AI Brief Orchestration Flowchart</p>
 </div>
 
@@ -255,30 +255,30 @@ Carefully check the content accuracy, format completeness, and language style of
 Multi-Channel Publishing: Coze provides the ability to publish agents to multiple mainstream application platforms (such as WeChat, Doubao, Feishu, etc.) with one click, greatly expanding the application scenarios of agents, as shown in Figure 5.10.
 
 <div align="center">
-  <img src="../images/5-figures/coze-10.png" alt="Coze Multi-Channel Publishing" width="90%"/>
+  <img src="../../images/5-figures/coze-10.png" alt="Coze Multi-Channel Publishing" width="90%"/>
   <p>Figure 5.10 Diverse Publishing Channels of Coze Platform</p>
 </div>
 
 After the agent is published, we can see the AI agent we created in the Coze store, and it can also be integrated into AI applications to provide services to users, as shown in Figures 5.11 and 5.12. Here is also the [Daily AI News Agent Experience Link](https://www.coze.cn/store/agent/7506052197071962153?bot_id=true&bid=6hkt3je8o2g16)
 
 <div align="center">
-  <img src="../images/5-figures/coze-11.png" alt="AI Agent Daily AI News" width="90%"/>
+  <img src="../../images/5-figures/coze-11.png" alt="AI Agent Daily AI News" width="90%"/>
   <p>Figure 5.11 AI Agent - Daily AI News</p>
 </div>
 
 Furthermore, we can click this [experience link](https://www.coze.cn/store/project/7458678213078777893?from=store_search_suggestion&bid=6gu3cmr7k5g1i) to view Daily AI News in the AI application.
 <div align="center">
-  <img src="../images/5-figures/coze-12.png" alt="Daily AI News in AI Application" width="90%"/>
+  <img src="../../images/5-figures/coze-12.png" alt="Daily AI News in AI Application" width="90%"/>
   <p>Figure 5.12 Daily AI News in AI Application</p>
 </div>
 **Publishing Configuration:** If you want to publish your own agent, you also need to configure an appropriate name, avatar, and welcome message for the agent before publishing to provide a more friendly user experience, as shown in Figures 5.13 and 5.14.
 
 <div align="center">
-  <img src="../images/5-figures/coze-13.png" alt="Configuring Basic Agent Information" width="90%"/>
+  <img src="../../images/5-figures/coze-13.png" alt="Configuring Basic Agent Information" width="90%"/>
   <p>Figure 5.13 Configure Basic Information for Agent</p>
 </div>
 <div align="center">
-  <img src="../images/5-figures/coze-14.png" alt="Configuring Agent Opening Message and Preset Questions" width="90%"/>
+  <img src="../../images/5-figures/coze-14.png" alt="Configuring Agent Opening Message and Preset Questions" width="90%"/>
   <p>Figure 5.14 Configure Opening Remarks and Preset Questions for Agent</p>
 </div>
 
@@ -309,14 +309,14 @@ Dify is highly model-neutral and compatible: whether open-source or commercial m
 At the same time, Dify supports local deployment (official Docker Compose one-click startup) and cloud deployment. Users can choose to self-deploy Dify in local/private environments (ensuring data privacy) or use the official SaaS cloud service (detailed in the business model section below). This deployment flexibility makes it suitable for enterprise intranet environments with security requirements or developer groups with operational convenience requirements.
 
 <div align="center">
-  <img src="../images/5-figures/dify-01.png" alt="Dify Official Website" width="90%"/>
+  <img src="../../images/5-figures/dify-01.png" alt="Dify Official Website" width="90%"/>
   <p>Figure 5.15 Dify Official Website</p>
 </div>
 
 Marketplace Plugin Ecosystem: Dify Marketplace provides one-stop plugin management and one-click deployment functionality, enabling developers to discover, extend, or submit plugins, bringing more possibilities to the community, as shown in Figure 5.16.
 
 <div align="center">
-  <img src="../images/5-figures/dify-02.png" alt="Dify Marketplace Plugin Ecosystem" width="90%"/>
+  <img src="../../images/5-figures/dify-02.png" alt="Dify Marketplace Plugin Ecosystem" width="90%"/>
   <p>Figure 5.16 Dify Marketplace Plugin Ecosystem</p>
 </div>
 Marketplace includes:
@@ -343,23 +343,23 @@ Dify provides powerful development support for plugin developers, including remo
 In the previous Coze case, we built a daily AI brief agent. Although its function is clear, its single brief generation capability is somewhat limited. This section will use Dify to build a fully functional super agent personal assistant, covering multiple scenarios such as daily Q&A, copywriting optimization, multimodal generation, and data analysis. Before starting, let's briefly understand Dify's main interface and functional modules.
 
 <div align="center">
-  <img src="../images/5-figures/dify-14.png" alt="Dify Agent Building Homepage" width="90%"/>
+  <img src="../../images/5-figures/dify-14.png" alt="Dify Agent Building Homepage" width="90%"/>
   <p>Figure 5.17 Dify Agent Building Homepage</p>
 </div>
 <div align="center">
-  <img src="../images/5-figures/dify-18.png" alt="Dify Official Template Library" width="90%"/>
+  <img src="../../images/5-figures/dify-18.png" alt="Dify Official Template Library" width="90%"/>
   <p>Figure 5.18 Dify Official Template Library</p>
 </div>
 <div align="center">
-  <img src="../images/5-figures/dify-15.png" alt="Dify Knowledge Base" width="90%"/>
+  <img src="../../images/5-figures/dify-15.png" alt="Dify Knowledge Base" width="90%"/>
   <p>Figure 5.19 Dify Knowledge Base</p>
 </div>
 <div align="center">
-  <img src="../images/5-figures/dify-16.png" alt="Dify Plugin Marketplace" width="90%"/>
+  <img src="../../images/5-figures/dify-16.png" alt="Dify Plugin Marketplace" width="90%"/>
   <p>Figure 5.20 Dify Plugin Market</p>
 </div>
 <div align="center">
-  <img src="../images/5-figures/dify-17.png" alt="Dify LLM Configuration" width="90%"/>
+  <img src="../../images/5-figures/dify-17.png" alt="Dify LLM Configuration" width="90%"/>
   <p>Figure 5.21 Dify Large Model Configuration</p>
 </div>
 
@@ -368,7 +368,7 @@ In the previous Coze case, we built a daily AI brief agent. Although its functio
 Before building the agent, necessary plugin installation and MCP configuration must be completed first. As shown in Figure 5.22, these are the core plugins required for this case.
 
 <div align="center">
-  <img src="../images/5-figures/dify-19.png" alt="Dify Plugin Installation Configuration" width="90%"/>
+  <img src="../../images/5-figures/dify-19.png" alt="Dify Plugin Installation Configuration" width="90%"/>
   <p>Figure 5.22 Dify Plugin Installation Configuration</p>
 </div>
 
@@ -377,14 +377,14 @@ The plugins marked with red boxes in the figure need to be searched for and inst
 Next, configure MCP (Model Context Protocol). We won't expand on the detailed principles of MCP here; we'll focus on demonstrating how to use cloud-deployed MCP services. This case uses the domestic ModelScope community MCP market for demonstration, as shown in Figure 5.23.
 
 <div align="center">
-  <img src="../images/5-figures/dify-20.png" alt="ModelScope MCP Marketplace" width="90%"/>
+  <img src="../../images/5-figures/dify-20.png" alt="ModelScope MCP Marketplace" width="90%"/>
   <p>Figure 5.23 ModelScope Community MCP Market</p>
 </div>
 
 Open the ModelScope community MCP market and select the hosted type. Taking Amap MCP as an example, after entering its homepage, select SSE mode on the right side and click connection configuration to generate a dedicated MCP configuration JSON, as shown in Figure 5.24. MCP supports multiple communication modes, but using SSE mode communication in Dify is smoother and more stable, so SSE mode is recommended.
 
 <div align="center">
-  <img src="../images/5-figures/dify-21.png" alt="Amap MCP Configuration Example" width="90%"/>
+  <img src="../../images/5-figures/dify-21.png" alt="Amap MCP Configuration Example" width="90%"/>
   <p>Figure 5.24 Amap MCP Configuration Example</p>
 </div>
 
@@ -401,7 +401,7 @@ This case will create a comprehensive personal assistant covering the following 
 The overall agent orchestration architecture is shown in Figure 5.25.
 
 <div align="center">
-  <img src="../images/5-figures/dify-12.png" alt="Agent Orchestration Architecture" width="90%"/>
+  <img src="../../images/5-figures/dify-12.png" alt="Agent Orchestration Architecture" width="90%"/>
   <p>Figure 5.25 Agent Orchestration</p>
 </div>
 
@@ -475,7 +475,7 @@ As a daily question consultation expert, you must abide by the above Rules and e
 The effect demonstration is shown in Figure 5.26:
 
 <div align="center">
-  <img src="../images/5-figures/dify-03.png" alt="Daily Assistant Demo" width="90%"/>
+  <img src="../../images/5-figures/dify-03.png" alt="Daily Assistant Demo" width="90%"/>
   <p>Figure 5.26 Daily Assistant</p>
 </div>
 
@@ -515,7 +515,7 @@ Now, let us prove everything with action. A truly good product does not need too
 The effect demonstration is shown in Figure 5.27:
 
 <div align="center">
-  <img src="../images/5-figures/dify-04.png" alt="Copywriting Optimization Assistant Demo" width="90%"/>
+  <img src="../../images/5-figures/dify-04.png" alt="Copywriting Optimization Assistant Demo" width="90%"/>
   <p>Figure 5.27 Copywriting Assistant</p>
 </div>
 
@@ -534,18 +534,18 @@ Here we use Jimeng's plugin to call the latest models, namely seedream5.0 and se
 Image generation configuration and effects are shown in Figures 5.28 and 5.29.
 
 <div align="center">
-  <img src="../images/5-figures/dify-13.png" alt="Doubao Image Generation Configuration" width="90%"/>
+  <img src="../../images/5-figures/dify-13.png" alt="Doubao Image Generation Configuration" width="90%"/>
   <p>Figure 5.28 Image Generation Settings</p>
 </div>
 <div align="center">
-  <img src="../images/5-figures/dify-05.png" alt="Image Generation Assistant Demo" width="90%"/>
+  <img src="../../images/5-figures/dify-05.png" alt="Image Generation Assistant Demo" width="90%"/>
   <p>Figure 5.29 Image Generation Assistant</p>
 </div>
 
 The video generation effect is shown in Figure 5.30.
 
 <div align="center">
-  <img src="../images/5-figures/dify-06.png" alt="Video Generation Assistant Demo" width="90%"/>
+  <img src="../../images/5-figures/dify-06.png" alt="Video Generation Assistant Demo" width="90%"/>
   <p>Figure 5.30 Video Assistant</p>
 
   <p><a href="https://pub-f5ed2046361c4244878e5984bdb564de.r2.dev/9af7c33d-5c82-4b14-8fb3-a4e426e8ee5a.mp4">Click to watch video demo</a></p>
@@ -563,7 +563,7 @@ First, install the data query tool plugin; this case uses the `rookie-text2data`
 Configure database connection information (IP address, database name, port, account, password, etc.), as shown in Figure 5.31. Query results need to be organized through a large model node and converted into easy-to-understand natural language output.
 
 <div align="center">
-  <img src="../images/5-figures/dify-22.png" alt="Database Connection Configuration" width="90%"/>
+  <img src="../../images/5-figures/dify-22.png" alt="Database Connection Configuration" width="90%"/>
   <p>Figure 5.31 Database Configuration</p>
 </div>
 
@@ -596,7 +596,7 @@ The user has provided raw data queried from the database. This data may have iss
 The effect display is shown in Figure 5.32:
 
 <div align="center">
-  <img src="../images/5-figures/dify-07.png" alt="Data Query Assistant Demo" width="90%"/>
+  <img src="../../images/5-figures/dify-07.png" alt="Data Query Assistant Demo" width="90%"/>
   <p>Figure 5.32 Data Query Assistant</p>
 </div>
 
@@ -631,7 +631,7 @@ Please output in the following format:
 ```
 
 <div align="center">
-  <img src="../images/5-figures/dify-08.png" alt="Data Analysis Assistant Demo" width="90%"/>
+  <img src="../../images/5-figures/dify-08.png" alt="Data Analysis Assistant Demo" width="90%"/>
   <p>Figure 5.33 Data Analysis Assistant</p>
 </div>
 
@@ -649,24 +649,24 @@ Finally, the integration application of MCP tools. We have already completed the
 The configuration interface is shown in Figure 5.34.
 
 <div align="center">
-  <img src="../images/5-figures/dify-23.png" alt="Agent MCP Configuration" width="90%"/>
+  <img src="../../images/5-figures/dify-23.png" alt="Agent MCP Configuration" width="90%"/>
   <p>Figure 5.34 Agent MCP Configuration</p>
 </div>
 
 The effects of Amap assistant, dietary assistant, and news assistant are shown in Figures 5.35, 5.36, and 5.37 respectively.
 
 <div align="center">
-  <img src="../images/5-figures/dify-09.png" alt="Amap Assistant Demo" width="90%"/>
+  <img src="../../images/5-figures/dify-09.png" alt="Amap Assistant Demo" width="90%"/>
   <p>Figure 5.35 Amap Assistant</p>
 </div>
 
 <div align="center">
-  <img src="../images/5-figures/dify-10.png" alt="Food Recommendation Assistant Demo" width="90%"/>
+  <img src="../../images/5-figures/dify-10.png" alt="Food Recommendation Assistant Demo" width="90%"/>
   <p>Figure 5.36 Dietary Assistant</p>
 </div>
 
 <div align="center">
-  <img src="../images/5-figures/dify-11.png" alt="News Assistant Demo" width="90%"/>
+  <img src="../../images/5-figures/dify-11.png" alt="News Assistant Demo" width="90%"/>
   <p>Figure 5.37 News Assistant</p>
 </div>
 
@@ -915,7 +915,7 @@ Regarding n8n's environment configuration and most basic usage, documentation ha
 The entire process simulates a more advanced decision logic: `Receive -> AI Agent (Think -> Decide -> Tool Call) -> Reply`, as shown in Figure 5.52.
 
 <div align="center">
-  <img src="../images/5-figures/n8n-01.png" alt="Integrated Smart Email Agent Architecture" width="90%"/>
+  <img src="../../images/5-figures/n8n-01.png" alt="Integrated Smart Email Agent Architecture" width="90%"/>
   <p>Figure 5.38 Integrated Intelligent Email Agent Architecture Diagram</p>
 </div>
 
@@ -940,7 +940,7 @@ First, we use the `Code` node to store our raw knowledge text. This is a simple 
 - **Content**: Write your knowledge in JSON format.
 
 <div align="center">
-  <img src="../images/5-figures/n8n-02.png" alt="Knowledge base JSON text filled in Code node" width="90%"/>
+  <img src="../../images/5-figures/n8n-02.png" alt="Knowledge base JSON text filled in Code node" width="90%"/>
   <p>Figure 5.39 Defining Knowledge Source in Code Node</p>
 </div>
 
@@ -969,7 +969,7 @@ Computers cannot directly understand text and need to convert it into vectors. W
 - **Configuration**: Connect it after the `Code` node, and it will automatically convert the text passed from upstream into vector data.
 
 <div align="center">
-  <img src="../images/5-figures/n8n-03.png" alt="Vectorizing Knowledge Source Text" width="90%"/>
+  <img src="../../images/5-figures/n8n-03.png" alt="Vectorizing Knowledge Source Text" width="90%"/>
   <p>Figure 5.40 Vectorizing Data in Code</p>
 </div>
 
@@ -983,14 +983,14 @@ Finally, we store the vectorized knowledge in an in-memory database, as shown in
   - **Memory Key**: Give this knowledge base a unique name, for example `my-dailytime`. This Key is equivalent to the "table name" of the database, and the Agent will use it to find information later.
 
 <div align="center">
-  <img src="../images/5-figures/n8n-04.png" alt="Storing Vector Data in Vector Store" width="90%"/>
+  <img src="../../images/5-figures/n8n-04.png" alt="Storing Vector Data in Vector Store" width="90%"/>
   <p>Figure 5.41 Storing Data from Code into Vector Storage</p>
 </div>
 
 After completing the configuration, **manually execute this process once**. After success, your private knowledge is loaded into n8n's memory, as shown in Figure 5.56.
 
 <div align="center">
-  <img src="../images/5-figures/n8n-05.png" alt="Complete Knowledge Base Loading Workflow" width="90%"/>
+  <img src="../../images/5-figures/n8n-05.png" alt="Complete Knowledge Base Loading Workflow" width="90%"/>
   <p>Figure 5.42 Complete Knowledge Base Loading Workflow</p>
 </div>
 
@@ -1003,21 +1003,21 @@ With the tools ready, we now start building the Agent's main process. It will be
 Create a new workflow named `Agent: Customer Support`. Use the `Gmail` node as a trigger, set its **Event** to `Message Received`, and configure your email account. This way, whenever a new email enters the inbox, the workflow will be automatically triggered, as shown in Figure 5.57.
 
 <div align="center">
-  <img src="../images/5-figures/n8n-06.png" alt="New Gmail Trigger Node" width="90%"/>
+  <img src="../../images/5-figures/n8n-06.png" alt="New Gmail Trigger Node" width="90%"/>
   <p>Figure 5.43 Creating Gmail Node</p>
 </div>
 
 The configuration process can refer to [n8n official documentation](https://docs.n8n.io/integrations/builtin/credentials/google/oauth-single-service/?utm_source=n8n_app&utm_medium=credential_settings&utm_campaign=create_new_credentials_modal#enable-apis). Gmail's API is configured [here](https://console.cloud.google.com/apis/library/gmail.googleapis.com?project=apt-entropy-471905-b9). You need to create credentials, select Web application type, and finally get the required client ID and client secret. You also need to add the OAuth Redirect URL given by n8n to the authorized redirect URIs. At the same time, you also need to add your own email address in Add users in [Audience](https://console.cloud.google.com/auth/audience?project=apt-entropy-471905-b9). The final configured page is shown in Figure 5.58.
 
 <div align="center">
-  <img src="../images/5-figures/n8n-07.png" alt="Gmail Account Configuration Success" width="90%"/>
+  <img src="../../images/5-figures/n8n-07.png" alt="Gmail Account Configuration Success" width="90%"/>
   <p>Figure 5.44 Gmail Account Successfully Loaded</p>
 </div>
 
 Now we can click `Fetch Test Event` to get emails, as shown in Figure 5.59!
 
 <div align="center">
-  <img src="../images/5-figures/n8n-08.png" alt="Fetching Real-time Email" width="90%"/>
+  <img src="../../images/5-figures/n8n-08.png" alt="Fetching Real-time Email" width="90%"/>
   <p>Figure 5.45 Getting Real-time Emails</p>
 </div>
 
@@ -1032,7 +1032,7 @@ This is the brain of the entire workflow. Drag an `AI Agent` node from the node 
   2. `Simple Vector Store`: Gives the Agent the ability to query the private knowledge base we created in the first part.
 
 <div align="center">
-  <img src="../images/5-figures/n8n-09.png" alt="AI Agent Node Configuration" width="90%"/>
+  <img src="../../images/5-figures/n8n-09.png" alt="AI Agent Node Configuration" width="90%"/>
   <p>Figure 5.46 AI Agent Node Settings</p>
 </div>
 
@@ -1041,7 +1041,7 @@ This is the first step of Agent "thinking." Add a `Gemini` node (or other LLM no
 For the AI Agent node, we mainly need to fill in the `User Message` and `System Message` sections, as shown in Figure 5.61.
 
 <div align="center">
-  <img src="../images/5-figures/n8n-10.png" alt="AI Agent Node Prompt Configuration Details" width="90%"/>
+  <img src="../../images/5-figures/n8n-10.png" alt="AI Agent Node Prompt Configuration Details" width="90%"/>
   <p>Figure 5.47 AI Agent Node Details</p>
 </div>
 
@@ -1109,7 +1109,7 @@ For the `Simple Vector Store` tool, we need to perform key configurations to ens
 Only when the `Memory Key` and `Embeddings` model are completely consistent can the Agent use the correct "key" and "language" to access the knowledge base, as shown in Figure 5.62.
 
 <div align="center">
-  <img src="../images/5-figures/n8n-11.png" alt="Simple Vector Store Tool Configuration" width="90%"/>
+  <img src="../../images/5-figures/n8n-11.png" alt="Simple Vector Store Tool Configuration" width="90%"/>
   <p>Figure 5.48 Simple Vector Store Tool Configuration</p>
 </div>
 
@@ -1132,14 +1132,14 @@ The last step is execution. Connect the output of the `AI Agent` node to a `Gmai
 - **Message**: `{{ $json.output }}`
 
 <div align="center">
-  <img src="../images/5-figures/n8n-12.png" alt="Gmail Send Reply Node Configuration" width="90%"/>
+  <img src="../../images/5-figures/n8n-12.png" alt="Gmail Send Reply Node Configuration" width="90%"/>
   <p>Figure 5.49 Final Reply Tool Diagram</p>
 </div>
 
 And when the sending is successful, you can also receive real return email information in your personal mailbox, as shown in Figure 5.64.
 
 <div align="center">
-  <img src="../images/5-figures/n8n-13.png" alt="Reply Email Received in Personal Inbox" width="90%"/>
+  <img src="../../images/5-figures/n8n-13.png" alt="Reply Email Received in Personal Inbox" width="90%"/>
   <p>Figure 5.50 Personal Mailbox Return Email Format</p>
 </div>
 
@@ -1151,7 +1151,7 @@ Through the practice of building an intelligent email assistant from scratch, we
 
 <div align="center">
   <p>Table 5.1 Summary of n8n Platform's Advantages and Limitations</p>
-  <img src="../images/5-figures/n8n-14.png" alt="n8n Platform Advantages and Limitations Summary Table" width="90%"/>
+  <img src="../../images/5-figures/n8n-14.png" alt="n8n Platform Advantages and Limitations Summary Table" width="90%"/>
 </div>
 
 First, n8n's most significant advantage lies in its **development efficiency**. It abstracts complex logic into intuitive visual workflows. Whether it's email reception, AI decision-making, tool invocation, or final reply, the entire data flow and processing chain are clear at a glance on the canvas. This low-code characteristic greatly lowers the technical threshold, allowing developers to quickly build and verify the core logic of Agents, greatly shortening the distance from idea to prototype.

@@ -29,7 +29,7 @@ This is the new possibility that AI technology brings to games. By combining lar
 Cyber Town adopts a **game engine + back-end service** separation architecture, divided into four layers, as shown in Figure 15.1.
 
 <div align="center">
-  <img src="../images/15-figures/15-1.png" alt="Cyber Town Technical Architecture" width="85%"/>
+  <img src="../../images/15-figures/15-1.png" alt="Cyber Town Technical Architecture" width="85%"/>
   <p>Figure 15.1 Cyber Town Technical Architecture</p>
 </div>
 
@@ -38,7 +38,7 @@ The front-end layer uses the Godot 4.5 game engine, responsible for game renderi
 The data flow process is shown in Figure 15.2:
 
 <div align="center">
-  <img src="../images/15-figures/15-2.png" alt="Data Flow Process" width="85%"/>
+  <img src="../../images/15-figures/15-2.png" alt="Data Flow Process" width="85%"/>
   <p>Figure 15.2 Data Flow Process</p>
 </div>
 
@@ -136,14 +136,14 @@ Open the Godot engine, click the "Import" button, browse to `Helloagents-AI-Town
 After the game starts, you will see a pixel-style Datawhale office scene, as shown in Figure 15.3.
 
 <div align="center">
-  <img src="../images/15-figures/15-3.png" alt="Cyber Town Game Scene" width="85%"/>
+  <img src="../../images/15-figures/15-3.png" alt="Cyber Town Game Scene" width="85%"/>
   <p>Figure 15.3 Cyber Town Game Scene</p>
 </div>
 
 Use WASD keys to move the player character. When you walk near an NPC, the screen will display a "Press E to interact" prompt. After pressing the E key, a dialogue box will pop up, and you can enter anything you want to say, as shown in Figure 15.4.
 
 <div align="center">
-  <img src="../images/15-figures/15-4.png" alt="Dialogue Interface with NPC" width="85%"/>
+  <img src="../../images/15-figures/15-4.png" alt="Dialogue Interface with NPC" width="85%"/>
   <p>Figure 15.4 Dialogue Interface with NPC</p>
 </div>
 
@@ -213,7 +213,7 @@ This code demonstrates how to create an NPC Agent. The system prompt defines the
 The workflow of NPC Agent is shown in Figure 15.5:
 
 <div align="center">
-  <img src="../images/15-figures/15-5.png" alt="NPC Agent Workflow" width="85%"/>
+  <img src="../../images/15-figures/15-5.png" alt="NPC Agent Workflow" width="85%"/>
   <p>Figure 15.5 NPC Agent Workflow</p>
 </div>
 
@@ -273,7 +273,7 @@ Long-term memory stores all conversation history, using vector databases for sem
 The architecture of the memory system is shown in Figure 15.6:
 
 <div align="center">
-  <img src="../images/15-figures/15-6.png" alt="Memory System Architecture" width="85%"/>
+  <img src="../../images/15-figures/15-6.png" alt="Memory System Architecture" width="85%"/>
   <p>Figure 15.6 Memory System Architecture</p>
 </div>
 
@@ -317,7 +317,7 @@ To solve this problem, we designed a **batch dialogue generation system**. The c
 The workflow of batch generation is shown in Figure 15.7:
 
 <div align="center">
-  <img src="../images/15-figures/15-7.png" alt="Batch Generation vs Traditional Mode" width="85%"/>
+  <img src="../../images/15-figures/15-7.png" alt="Batch Generation vs Traditional Mode" width="85%"/>
   <p>Figure 15.7 Batch Generation vs Traditional Mode</p>
 </div>
 
@@ -483,7 +483,7 @@ The core idea of the affection system is: by quantifying the relationship betwee
 We divide affection into five levels, each corresponding to a score range, as shown in Figure 15.8:
 
 <div align="center">
-  <img src="../images/15-figures/15-8.png" alt="Affection Level Classification" width="85%"/>
+  <img src="../../images/15-figures/15-8.png" alt="Affection Level Classification" width="85%"/>
   <p>Figure 15.8 Affection Level Classification</p>
 </div>
 
@@ -508,7 +508,7 @@ In Cyber Town, we use LLM to analyze conversation content, judging whether the p
 The affection calculation process is shown in Figure 15.9:
 
 <div align="center">
-  <img src="../images/15-figures/15-9.png" alt="Affection Calculation Process" width="85%"/>
+  <img src="../../images/15-figures/15-9.png" alt="Affection Calculation Process" width="85%"/>
   <p>Figure 15.9 Affection Calculation Process</p>
 </div>
 
@@ -640,7 +640,7 @@ The back-end of Cyber Town is built using the FastAPI framework, responsible for
 Our FastAPI application adopts a modular design, separating different functions into different files, as shown in Figure 15.10:
 
 <div align="center">
-  <img src="../images/15-figures/15-10.png" alt="Back-End Application Structure" width="85%"/>
+  <img src="../../images/15-figures/15-10.png" alt="Back-End Application Structure" width="85%"/>
   <p>Figure 15.10 Back-End Application Structure</p>
 </div>
 
@@ -828,7 +828,7 @@ async def get_affinity(npc_id: str, player_name: str):
 The API route call flow is shown in Figure 15.11:
 
 <div align="center">
-  <img src="../images/15-figures/15-11.png" alt="API Call Flow" width="85%"/>
+  <img src="../../images/15-figures/15-11.png" alt="API Call Flow" width="85%"/>
   <p>Figure 15.11 API Call Flow</p>
 </div>
 
@@ -1037,7 +1037,7 @@ Cyber Town's scene organization adopts a modular design. We first create three b
 Let's first look at the structure of the four core scenes, as shown in Figure 15.12:
 
 <div align="center">
-  <img src="../images/15-figures/15-12.png" alt="Four Core Scenes of Cyber Town" width="85%"/>
+  <img src="../../images/15-figures/15-12.png" alt="Four Core Scenes of Cyber Town" width="85%"/>
   <p>Figure 15.12 Four Core Scenes of Cyber Town</p>
 </div>
 
@@ -1588,7 +1588,7 @@ The dialogue UI is the interface for player-NPC interaction. We need to design a
 The dialogue UI structure is shown in Figure 15.13:
 
 <div align="center">
-  <img src="../images/15-figures/15-13.png" alt="Dialogue UI Structure" width="85%"/>
+  <img src="../../images/15-figures/15-13.png" alt="Dialogue UI Structure" width="85%"/>
   <p>Figure 15.13 Dialogue UI Structure</p>
 </div>
 
@@ -1799,7 +1799,7 @@ The core function of the main scene script is to periodically obtain NPC status 
 The complete front-end and back-end communication process is shown in Figure 15.14:
 
 <div align="center">
-  <img src="../images/15-figures/15-14.png" alt="Complete Front-End and Back-End Communication Process" width="85%"/>
+  <img src="../../images/15-figures/15-14.png" alt="Complete Front-End and Back-End Communication Process" width="85%"/>
   <p>Figure 15.14 Complete Front-End and Back-End Communication Process</p>
 </div>
 
@@ -1834,7 +1834,7 @@ We used HTTP REST API to implement communication between the Godot front-end and
 The project's technology stack is shown in Figure 15.15:
 
 <div align="center">
-  <img src="../images/15-figures/15-15.png" alt="Cyber Town Technology Stack" width="85%"/>
+  <img src="../../images/15-figures/15-15.png" alt="Cyber Town Technology Stack" width="85%"/>
   <p>Figure 15.15 Cyber Town Technology Stack</p>
 </div>
 

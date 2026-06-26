@@ -17,7 +17,7 @@ $$P(S)=P(w_1,w_2,…,w_m)=P(w_1)⋅P(w_2∣w_1)⋅P(w_3∣w_1,w_2)⋯P(w_m∣w_1
 This formula is called the chain rule of probability. However, directly calculating this formula is almost impossible because conditional probabilities like $P(w_m∣w_1,\cdots,w_{m−1})$ are too difficult to estimate from a corpus, as the word sequence $w_1,\cdots,w_{m−1}$ may have never appeared in the training data.
 
 <div align="center">
-  <img src="../images/3-figures/1757249275674-0.png" alt="Markov assumption schematic diagram" width="90%"/>
+  <img src="../../images/3-figures/1757249275674-0.png" alt="Markov assumption schematic diagram" width="90%"/>
   <p>Figure 3.1 Schematic diagram of Markov assumption</p>
 </div>
 
@@ -114,7 +114,7 @@ Its core idea can be divided into two steps:
 2. **Learn the mapping from context to the next word**: Utilize the powerful fitting ability of neural networks to learn a function. The input of this function is the word vectors of the previous $n−1$ words, and the output is the probability distribution of each word in the vocabulary appearing after the current context.
 
 <div align="center">
-  <img src="../images/3-figures/1757249275674-1.png" alt="Neural network language model architecture schematic diagram" width="90%"/>
+  <img src="../../images/3-figures/1757249275674-1.png" alt="Neural network language model architecture schematic diagram" width="90%"/>
   <p>Figure 3.2 Schematic diagram of neural network language model architecture</p>
 </div>
 
@@ -171,7 +171,7 @@ Although the neural network language model in the previous section introduced wo
 As shown in Figure 3.3, RNN's design introduces a **hidden state** vector, which we can understand as the network's short-term memory. At each step of processing the sequence, the network reads the current input word and combines it with its memory from the previous moment (i.e., the hidden state from the previous time step), then generates a new memory (i.e., the hidden state of the current time step) to pass to the next moment. This cyclical process allows information to continuously propagate backward through the sequence.
 
 <div align="center">
-  <img src="../images/3-figures/1757249275674-2.png" alt="RNN structure schematic diagram" width="90%"/>
+  <img src="../../images/3-figures/1757249275674-2.png" alt="RNN structure schematic diagram" width="90%"/>
   <p>Figure 3.3 Schematic diagram of RNN structure</p>
 </div>
 
@@ -192,7 +192,7 @@ In the previous section, we saw that RNNs and LSTMs process sequential data by i
 The original Transformer model was designed for the end-to-end task of machine translation. As shown in Figure 3.4, it follows a classic **Encoder-Decoder** architecture at the macro level.
 
 <div align="center">
-  <img src="../images/3-figures/1757249275674-3.png" alt="Transformer architecture diagram" width="50%"/>
+  <img src="../../images/3-figures/1757249275674-3.png" alt="Transformer architecture diagram" width="50%"/>
   <p>Figure 3.4 Overall Transformer architecture diagram</p>
 </div>
 
@@ -311,7 +311,7 @@ If only one attention calculation is performed (i.e., single-head), the model ma
 It splits the original Q, K, V vectors into h parts along the dimension (h is the number of "heads"), and each part independently performs a single-head attention calculation. This is like having h different "experts" examine the sentence from different perspectives, with each expert capturing a different feature relationship. Finally, the "opinions" (i.e., output vectors) of these h experts are concatenated, then integrated through a linear transformation to obtain the final output.
 
 <div align="center">
-  <img src="../images/3-figures/1757249275674-4.png" alt="Multi-head attention mechanism diagram" width="50%"/>
+  <img src="../../images/3-figures/1757249275674-4.png" alt="Multi-head attention mechanism diagram" width="50%"/>
   <p>Figure 3.5 Multi-head attention mechanism</p>
 </div>
 
@@ -685,7 +685,7 @@ Byte-Pair Encoding (BPE) is one of the most mainstream subword tokenization algo
 
 <div align="center">
   <p>Table 3.1 Example of BPE Algorithm Merging Process</p>
-  <img src="../images/3-figures/1757249275674-5.png" alt="BPE algorithm merging process example" width="90%"/>
+  <img src="../../images/3-figures/1757249275674-5.png" alt="BPE algorithm merging process example" width="90%"/>
 </div>
 
 After training ends, when the vocabulary size reaches 10, we get new tokenization rules. Now, for an unseen word "bug," the tokenizer will first check if "bug" is in the vocabulary and find it's not; then check "bu" and find it's not; finally check "b" and "ug," find both are in, and thus split it into `['b', 'ug']`.

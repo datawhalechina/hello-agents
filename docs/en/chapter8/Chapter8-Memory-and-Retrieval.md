@@ -12,7 +12,7 @@ This chapter will add two core capabilities to HelloAgents based on the framewor
 Before building an agent's memory system, let's first understand from a cognitive science perspective how humans process and store information. Human memory is a multi-level cognitive system that not only stores information but also classifies and organizes information based on importance, time, and context. Cognitive psychology provides a classic theoretical framework for understanding the structure and processes of memory<sup>[1]</sup>, as shown in Figure 8.1.
 
 <div align="center">
-  <img src="../images/8-figures/8-1.png" alt="Human Memory System Structure" width="85%"/>
+  <img src="../../images/8-figures/8-1.png" alt="Human Memory System Structure" width="85%"/>
   <p>Figure 8.1 Hierarchical Structure of Human Memory System</p>
 </div>
 
@@ -77,7 +77,7 @@ To overcome this limitation, RAG technology emerged. Its core idea is to retriev
 Based on the framework foundation established in Chapter 7 and inspiration from cognitive science, we designed a layered memory and RAG system architecture, as shown in Figure 8.2. This architecture not only draws on the hierarchical structure of human memory systems but also fully considers the scalability of engineering implementation. In implementation, we design memory and RAG as two independent tools: `memory_tool` is responsible for storing and maintaining interaction information during conversations, while `rag_tool` is responsible for retrieving relevant information from user-provided knowledge bases as context and can automatically store important retrieval results in the memory system.
 
 <div align="center">
-  <img src="../images/8-figures/8-2.png" alt="HelloAgents Memory and RAG System Architecture" width="95%"/>
+  <img src="../../images/8-figures/8-2.png" alt="HelloAgents Memory and RAG System Architecture" width="95%"/>
   <p>Figure 8.2 Overall Architecture of HelloAgents Memory and RAG System</p>
 </div>
 
@@ -289,7 +289,7 @@ Hello, Zhang San! Nice to meet you. As a Python developer, you must be passionat
 Before entering the code implementation phase, we need to first define the workflow of the memory system. This workflow references the memory model in cognitive science and maps each cognitive stage to specific technical components and operations. Understanding this mapping relationship will help us with subsequent code implementation.
 
 <div align="center">
-  <img src="../images/8-figures/8-3.png" alt="Memory Formation Process" width="90%"/>
+  <img src="../../images/8-figures/8-3.png" alt="Memory Formation Process" width="90%"/>
   <p>Figure 8.3 Cognitive Process of Memory Formation</p>
 </div>
 
@@ -304,7 +304,7 @@ As shown in Figure 8.3, according to cognitive science research, the formation o
 Based on this inspiration, we designed a complete memory system for HelloAgents. Its core idea is to mimic how the human brain processes different types of information, dividing memory into multiple specialized modules and establishing an intelligent management mechanism. Figure 8.4 shows in detail the workflow of this system, including key links such as memory addition, retrieval, consolidation, and forgetting.
 
 <div align="center">
-  <img src="../images/8-figures/8-4.png" alt="Memory System Workflow" width="95%"/>
+  <img src="../../images/8-figures/8-4.png" alt="Memory System Workflow" width="95%"/>
   <p>Figure 8.4 Complete Workflow of HelloAgents Memory System</p>
 </div>
 
@@ -1118,7 +1118,7 @@ Third stage: Modular RAG (2023-present). Building on advanced RAG, modern RAG sy
 Before diving into implementation details, we can use a flowchart to outline the complete workflow of HelloAgents' RAG system:
 
 <div align="center">
-  <img src="../images/8-figures/8-5.png" alt="RAG System Core Principle" width="85%"/>
+  <img src="../../images/8-figures/8-5.png" alt="RAG System Core Principle" width="85%"/>
   <p>Figure 8.5 Core Working Principle of RAG System</p>
 </div>
 
@@ -1679,7 +1679,7 @@ We hope to implement the following functions:
 To more clearly demonstrate the workflow of the entire system, Figure 8.6 shows the relationships and data flow between the five steps. The five steps form a complete closed loop: Step 1 records information from processed PDF documents to the memory system, Step 2's retrieval results are also recorded to the memory system, Step 3 demonstrates the complete functions of the memory system (add, retrieve, consolidate, forget), Step 4 integrates RAG and Memory to provide intelligent routing, and Step 5 collects all statistical information to generate learning reports.
 
 <div align="center">
-  <img src="../images/8-figures/8-6.png" alt="Five-step Execution Workflow of Intelligent Q&A Assistant" width="85%"/>
+  <img src="../../images/8-figures/8-6.png" alt="Five-step Execution Workflow of Intelligent Q&A Assistant" width="85%"/>
   <p>Figure 8.6 Five-step Execution Workflow of Intelligent Q&A Assistant</p>
 </div>
 
@@ -1979,28 +1979,28 @@ These methods respectively implement:
 Next is the running effect demonstration. As shown in Figure 8.7, after entering the main page, you need to first initialize the assistant, which is to load our database, model, API and other loading operations. Then pass in the PDF document and click to load the document.
 
 <div align="center">
-  <img src="../images/8-figures/8-7.png" alt="Q&A Assistant Initialization and Document Loading Interface" width="85%"/>
+  <img src="../../images/8-figures/8-7.png" alt="Q&A Assistant Initialization and Document Loading Interface" width="85%"/>
   <p>Figure 8.7 Q&A Assistant Main Page</p>
 </div>
 
 The first function is intelligent Q&A, which can retrieve based on uploaded documents and return reference sources and similarity calculations of related materials. This is a demonstration of RAG tool capabilities, as shown in Figure 8.8.
 
 <div align="center">
-  <img src="../images/8-figures/8-8.png" alt="Intelligent Q&A Function Interface" width="85%"/>
+  <img src="../../images/8-figures/8-8.png" alt="Intelligent Q&A Function Interface" width="85%"/>
   <p>Figure 8.8 Q&A Assistant Main Page</p>
 </div>
 
 The second function is learning notes. As shown in Figure 8.9, you can select related concepts and write note content. This part uses Memory tool and will store your personal notes in the database for easy statistics and subsequent return of overall learning reports.
 
 <div align="center">
-  <img src="../images/8-figures/8-9.png" alt="Learning Notes Function Interface" width="85%"/>
+  <img src="../../images/8-figures/8-9.png" alt="Learning Notes Function Interface" width="85%"/>
   <p>Figure 8.9 Q&A Assistant Main Page</p>
 </div>
 
 Finally, there are statistics on learning progress and report generation. As shown in Figure 8.10, we can see the number of documents loaded, number of questions asked, and number of notes during the use of the assistant. Finally, our Q&A results and notes are organized into a JSON document and returned.
 
 <div align="center">
-  <img src="../images/8-figures/8-10.png" alt="Learning Progress Statistics Interface" width="85%"/>
+  <img src="../../images/8-figures/8-10.png" alt="Learning Progress Statistics Interface" width="85%"/>
   <p>Figure 8.10 Q&A Assistant Main Page</p>
 </div>
 
@@ -2031,7 +2031,7 @@ Through the study of this chapter, you have not only mastered the implementation
 Finally, let's summarize the complete knowledge system of this chapter through a mind map, as shown in Figure 8.11:
 
 <div align="center">
-  <img src="../images/8-figures/8-11.png" alt="Chapter 8 Knowledge Summary Mind Map" width="85%"/>
+  <img src="../../images/8-figures/8-11.png" alt="Chapter 8 Knowledge Summary Mind Map" width="85%"/>
   <p>Figure 8.11 Hello-agents Chapter 8 Knowledge Summary</p>
 </div>
 
