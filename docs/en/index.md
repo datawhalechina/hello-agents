@@ -1,5 +1,14 @@
+---
+title: Hello-Agents
+description: Building Agent Systems from Scratch - A Systematic Agent Learning Tutorial from Datawhale Community
+---
+
+<div align="right">
+  English | <a href="/">中文</a>
+</div>
+
 <div align='center'>
-  <img src="./images/hello-agents.png" alt="Hello-Agents project cover" width="100%">
+  <img src="../images/hello-agents.png" alt="Hello-Agents project cover" width="100%">
   <h1>Hello-Agents</h1>
   <h3>🤖 "Building Agent Systems from Scratch"</h3>
   <div align="center">
@@ -160,7 +169,7 @@ We are an open-source community and welcome any form of contribution!
 ## Star History
 
 <div align='center'>
-    <img src="./images/star-history-2026618.png" alt="Datawhale" width="90%">
+    <img src="../images/star-history-2026618.png" alt="Datawhale" width="90%">
 </div>
 
 <div align="center">
@@ -170,14 +179,14 @@ We are an open-source community and welcome any form of contribution!
 ## Reader Community Group
 
 <div align='center'>
-	<img src="../读者群二维码.png" alt="Reader community QR code" width="30%">
+	<img src="../../读者群二维码.png" alt="Reader community QR code" width="30%">
 	<p>Scan the QR code to join the reader community group and discuss with more learners</p>
 </div>
 
 ## About Datawhale
 
 <div align='center'>
-    <img src="./images/datawhale.png" alt="Datawhale" width="30%">
+    <img src="../images/datawhale.png" alt="Datawhale" width="30%">
     <p>Scan the QR code to follow the Datawhale official account and get more quality open-source content</p>
 </div>
 

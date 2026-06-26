@@ -1,5 +1,10 @@
+---
+title: Hello-Agents
+description: 从零开始构建智能体 - Datawhale社区系统性智能体学习教程
+---
+
 <div align="right">
-  <a href="./README_EN.md">English</a> | 中文
+  <a href="/en/">English</a> | 中文
 </div>
 <div align='center'>
   <img src="./images/hello-agents.png" alt="Hello-Agents 项目封面" width="100%">

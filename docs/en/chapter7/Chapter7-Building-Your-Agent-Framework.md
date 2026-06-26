@@ -449,7 +449,7 @@ Compared to the basic implementation in Section 4.1.3, the current HelloAgentsLL
 
 <div align="center">
   <p>Table 7.1 Comparison of HelloAgentLLM Different Version Features</p>
-  <img src="../images/7-figures/table-01.png" alt="Comparison Table of HelloAgentLLM Different Version Features" width="90%"/>
+  <img src="../../images/7-figures/table-01.png" alt="Comparison Table of HelloAgentLLM Different Version Features" width="90%"/>
 </div>
 
 As shown in Table 7.1 above, this evolution embodies an important principle of framework design: **start simple, gradually improve**. We enhanced functional completeness while maintaining interface simplicity.
@@ -1277,7 +1277,7 @@ As shown in Table 7.2, through this framework refactoring, we not only maintaine
 
 <div align="center">
   <p>Table 7.2 Comparison of Agent Implementations Across Chapters</p>
-  <img src="../images/7-figures/table-02.png" alt="Comparison Table of Agent Implementations Across Chapters" width="90%"/>
+  <img src="../../images/7-figures/table-02.png" alt="Comparison Table of Agent Implementations Across Chapters" width="90%"/>
 </div>
 
 ### 7.4.5 FunctionCallAgent
@@ -1607,7 +1607,7 @@ if __name__ == "__main__":
 Through this simplified mathematical calculation tool case, we learned how to quickly develop custom tools: write a simple calculation function, register it through ToolRegistry, and then integrate it with SimpleAgent. For more intuitive observation, Figure 7.1 is provided here to clearly understand the code's running logic.
 
 <div align="center">
-  <img src="../images/7-figures/01.png" alt="SimpleAgent Workflow Based on HelloAgents" width="90%"/>
+  <img src="../../images/7-figures/01.png" alt="SimpleAgent Workflow Based on HelloAgents" width="90%"/>
   <p>Figure 7.1 SimpleAgent Workflow Based on HelloAgents</p>
 </div>
 
@@ -2111,7 +2111,7 @@ Next, we will explore together how to add RAG systems and Memory mechanisms to t
 
 1. This chapter built the `HelloAgents` framework and explained "why we need to build our own Agent framework." Please analyze:
 
-   - Section 7.1.1 mentioned four main limitations of current mainstream frameworks. Combined with your actual experience using a framework in [Chapter 6 exercises](../chapter6/第六章%20框架开发实践.md#习题) or actual projects, explain how these problems affect development efficiency.
+   - Section 7.1.1 mentioned four main limitations of current mainstream frameworks. Combined with your actual experience using a framework in [Chapter 6 exercises](../../chapter6/第六章%20框架开发实践.md#习题) or actual projects, explain how these problems affect development efficiency.
    - `HelloAgents` proposes the design philosophy of "everything is a tool," abstracting modules like `Memory`, `RAG`, and `MCP` as tools. What are the advantages of this design? Are there any limitations? Please provide examples.
    - Comparing the agent code implemented from scratch in Chapter 4 with the framework implementation in this chapter, what specific improvements does the framework bring? If you were to design a framework, what design principles would you prioritize?
 

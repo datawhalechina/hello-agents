@@ -2297,11 +2297,11 @@ accelerate launch --config_file multi_gpu_ddp.yaml train_script.py
 accelerate launch --num_processes 4 --mixed_precision fp16 train_script.py
 ```
 
-</strong>（3）使用 DeepSpeed ZeRO 训练</strong>
+<strong>（3）使用 DeepSpeed ZeRO 训练</strong>
 
-</strong>DeepSpeed ZeRO</strong>通过分片优化器状态、梯度和模型参数，大幅降低显存占用，支持更大的模型和 batch size。
+<strong>DeepSpeed ZeRO</strong>通过分片优化器状态、梯度和模型参数，大幅降低显存占用，支持更大的模型和 batch size。
 
-</strong>ZeRO-2 配置文件</strong> (`deepspeed_zero2.yaml`):
+<strong>ZeRO-2 配置文件</strong> (`deepspeed_zero2.yaml`):
 
 ```yaml
 compute_environment: LOCAL_MACHINE
@@ -2320,7 +2320,7 @@ deepspeed_config:
   zero_stage: 2  # ZeRO-2
 ```
 
-</strong>ZeRO-3 配置文件</strong> (`deepspeed_zero3.yaml`):
+<strong>ZeRO-3 配置文件</strong> (`deepspeed_zero3.yaml`):
 
 ```yaml
 compute_environment: LOCAL_MACHINE

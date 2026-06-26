@@ -108,7 +108,7 @@ Considering learning curve and practicality, this chapter will focus on the foll
 Through these three evaluation scenarios, we will build a complete evaluation system. Figure 12.1 shows our evaluation system construction approach.
 
 <div align="center">
-  <img src="../images/12-figures/12-1.png" alt="HelloAgents Evaluation System Architecture" width="85%"/>
+  <img src="../../images/12-figures/12-1.png" alt="HelloAgents Evaluation System Architecture" width="85%"/>
   <p>Figure 12.1 HelloAgents Evaluation System Architecture</p>
 </div>
 
@@ -173,13 +173,13 @@ The BFCL benchmark contains four evaluation categories with increasing difficult
 
 <div align="center">
   <p>Table 12.1 Four Evaluation Categories in BFCL Benchmark</p>
-  <img src="../images/12-figures/12-table-1.png" alt="BFCL Benchmark Four Evaluation Categories" width="85%"/>
+  <img src="../../images/12-figures/12-table-1.png" alt="BFCL Benchmark Four Evaluation Categories" width="85%"/>
 </div>
 
 The BFCL evaluation process follows standard benchmark testing procedures: first load dataset and select evaluation category, then run agent to obtain prediction results, next parse prediction results into Abstract Syntax Tree (AST), and finally judge whether predictions are correct through AST matching algorithm. The entire process traverses all test samples, ultimately calculating evaluation metrics like accuracy and generating evaluation reports. The complete evaluation process is shown in Figure 12.2:
 
 <div align="center">
-  <img src="../images/12-figures/12-2.png" alt="BFCL Evaluation Process Diagram" width="85%"/>
+  <img src="../../images/12-figures/12-2.png" alt="BFCL Evaluation Process Diagram" width="85%"/>
   <p>Figure 12.2 BFCL Evaluation Process Diagram</p>
 </div>
 
@@ -407,7 +407,7 @@ The working principle of this loader is: first load test data from `bfcl_eval/da
 
 <div align="center">
   <p>Table 12.2 Four Evaluation Categories in BFCL Benchmark</p>
-  <img src="../images/12-figures/12-table-2.png" alt="BFCL Benchmark Evaluation Categories Details" width="85%"/>
+  <img src="../../images/12-figures/12-table-2.png" alt="BFCL Benchmark Evaluation Categories Details" width="85%"/>
 </div>
 
 You can also view available categories through code:
@@ -621,7 +621,7 @@ Previously we learned how to use HelloAgents' built-in evaluation functionality.
 The entire evaluation process includes four steps: first load test data from BFCL v4 dataset, then use HelloAgents to run evaluation and obtain agent prediction results, next export results to BFCL official format (JSONL), and finally use official evaluation script to calculate final scores. This process ensures evaluation results are completely consistent with BFCL leaderboard, as shown in Figure 12.3:
 
 <div align="center">
-  <img src="../images/12-figures/12-3.png" alt="HelloAgents Loading BFCL Evaluation Process" width="85%"/>
+  <img src="../../images/12-figures/12-3.png" alt="HelloAgents Loading BFCL Evaluation Process" width="85%"/>
   <p>Figure 12.3 HelloAgents Loading BFCL Evaluation Process</p>
 </div>
 
@@ -1010,7 +1010,7 @@ After understanding GAIA's evaluation philosophy, let's dive into the specific s
 
 <div align="center">
   <p>Table 12.3 GAIA Dataset Difficulty Level Distribution</p>
-  <img src="../images/12-figures/12-table-3.png" alt="GAIA Dataset Difficulty Level Distribution" width="85%"/>
+  <img src="../../images/12-figures/12-table-3.png" alt="GAIA Dataset Difficulty Level Distribution" width="85%"/>
 </div>
 
 For GAIA dataset sample examples, refer to the code snippet below:
@@ -1138,7 +1138,7 @@ Suppose we evaluated 10 samples, results can be referenced in Table 12.4:
 
 <div align="center">
   <p>Table 12.4 GAIA Dataset Difficulty Level Distribution</p>
-  <img src="../images/12-figures/12-table-4.png" alt="GAIA Evaluation Results Example" width="85%"/>
+  <img src="../../images/12-figures/12-table-4.png" alt="GAIA Evaluation Results Example" width="85%"/>
 </div>
 
 To calculate metrics for this case, refer to the Python script below:
@@ -1500,7 +1500,7 @@ https://huggingface.co/spaces/gaia-benchmark/leaderboard
 As shown in Figure 12.4, fill in information in submission form:
 
 <div align="center">
-  <img src="../images/12-figures/12-4.png" alt="GAIA Leaderboard Submission Page" width="85%"/>
+  <img src="../../images/12-figures/12-4.png" alt="GAIA Leaderboard Submission Page" width="85%"/>
   <p>Figure 12.4 BFCL Evaluation Process Diagram</p>
 </div>
 
@@ -1853,7 +1853,7 @@ In data generation quality evaluation, we adopt three complementary evaluation m
 Below we introduce the specific implementation of these three evaluation methods in detail. The implementation flow of the entire case is shown in Figure 12.5:
 
 <div align="center">
-  <img src="../images/12-figures/12-5.png" alt="Data Generation Quality Evaluation Flow Diagram" width="85%"/>
+  <img src="../../images/12-figures/12-5.png" alt="Data Generation Quality Evaluation Flow Diagram" width="85%"/>
   <p>Figure 12.5 Data Generation Quality Evaluation Flow Diagram</p>
 </div>
 
@@ -1865,7 +1865,7 @@ In our implementation, LLM Judge evaluates AIME problem quality from four key di
 
 <div align="center">
   <p>Table 12.5 LLM Judge Evaluation Dimensions for AIME Problems</p>
-  <img src="../images/12-figures/12-table-5.png" alt="LLM Judge Evaluation Dimensions for AIME Problems" width="85%"/>
+  <img src="../../images/12-figures/12-table-5.png" alt="LLM Judge Evaluation Dimensions for AIME Problems" width="85%"/>
 </div>
 
 After obtaining scores from four dimensions, we need to aggregate these scores into overall evaluation metrics. We define three key metrics to measure the quality level of generated problems:
@@ -1903,7 +1903,7 @@ These three metrics reflect generation quality from different angles: average sc
 In our implementation, Win Rate evaluation is conducted through the flow shown in Figure 12.6:
 
 <div align="center">
-  <img src="../images/12-figures/12-6.png" alt="Win Rate Evaluation Flow Diagram" width="85%"/>
+  <img src="../../images/12-figures/12-6.png" alt="Win Rate Evaluation Flow Diagram" width="85%"/>
   <p>Figure 12.6 Data Generation Quality Evaluation Flow Diagram</p>
 </div>
 
@@ -2386,7 +2386,7 @@ http://127.0.0.1:7860
 The final effect can be referenced in Figure 12.7. For problem correctness, manual review is best:
 
 <div align="center">
-  <img src="../images/12-figures/12-7.png" alt="AIME Problem Manual Verification Page" width="85%"/>
+  <img src="../../images/12-figures/12-7.png" alt="AIME Problem Manual Verification Page" width="85%"/>
   <p>Figure 12.7 AIME Problem Manual Verification Page</p>
 </div>
 

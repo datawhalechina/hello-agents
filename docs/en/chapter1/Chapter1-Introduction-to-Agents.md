@@ -5,7 +5,7 @@ Welcome to the world of agents! In today's era where the wave of artificial inte
 Therefore, in this chapter, let's return to the fundamentals and explore several questions together: What is an agent? What are its main types? How does it interact with the world we live in? Through these discussions, we hope to lay a solid foundation for your future learning and exploration.
 
 <div align="center">
-  <img src="../images/1-figures/1757242319667-0.png" alt="Basic interaction loop between agent and environment" width="90%"/>
+  <img src="../../images/1-figures/1757242319667-0.png" alt="Basic interaction loop between agent and environment" width="90%"/>
   <p>Figure 1.1 Basic interaction loop between agent and environment</p>
 </div>
 
@@ -28,7 +28,7 @@ The starting point of this evolution is the structurally simplest **Simple Refle
 This type of agent relies entirely on current perceptual input and has no memory or predictive capability. It's like a digitized instinct—reliable and efficient, but therefore unable to handle complex tasks that require understanding context. Its limitations raise a key question: What should an agent do if the current state of the environment is insufficient as the sole basis for decision-making?
 
 <div align="center">
-  <img src="../images/1-figures/1757242319667-1.png" alt="Decision logic diagram of a simple reflex agent" width="90%"/>
+  <img src="../../images/1-figures/1757242319667-1.png" alt="Decision logic diagram of a simple reflex agent" width="90%"/>
   <p>Figure 1.2 Decision logic diagram of a simple reflex agent</p>
 </div>
 
@@ -54,7 +54,7 @@ This transformation can be clearly seen from the comparison of the two in multip
 
 <div align="center">
   <p>Table 1.1 Core comparison between traditional agents and LLM-driven agents</p>
-  <img src="../images/1-figures/1757242319667-2.png" alt="Core comparison between traditional agents and LLM-driven agents" width="90%"/>
+  <img src="../../images/1-figures/1757242319667-2.png" alt="Core comparison between traditional agents and LLM-driven agents" width="90%"/>
 </div>
 
 This difference enables LLM agents to directly process high-level, ambiguous, and context-rich natural language instructions. Let's use an "intelligent travel assistant" as an example to illustrate.
@@ -80,7 +80,7 @@ The first classification dimension is based on the complexity of the agent's int
 In addition to the complexity of internal architecture, agents can also be classified from the time dimension of decision-making processing. This perspective focuses on whether an agent acts immediately after receiving information or acts after deliberate planning. This reveals a core trade-off in agent design: the balance between **Reactivity**, which pursues speed, and **Deliberation**, which pursues optimal solutions, as shown in Figure 1.3.
 
 <div align="center">
-  <img src="../images/1-figures/1757242319667-3.png" alt="Relationship between agent decision time and quality" width="90%"/>
+  <img src="../../images/1-figures/1757242319667-3.png" alt="Relationship between agent decision time and quality" width="90%"/>
   <p>Figure 1.3 Relationship between agent decision time and quality</p>
 </div>
 
@@ -133,7 +133,7 @@ For a long time, the two camps of symbolism and sub-symbolism developed like two
 - **System 2** is slow, methodical, logic-based deliberative thinking, just like the reasoning process of symbolic AI.
 
 <div align="center">
-  <img src="../images/1-figures/1757242319667-4.png" alt="Knowledge representation paradigms of symbolism, sub-symbolism, and neuro-symbolic hybrid" width="90%"/>
+  <img src="../../images/1-figures/1757242319667-4.png" alt="Knowledge representation paradigms of symbolism, sub-symbolism, and neuro-symbolic hybrid" width="90%"/>
   <p>Figure 1.4 Knowledge representation paradigms of symbolism, sub-symbolism, and neuro-symbolic hybrid</p>
 </div>
 
@@ -147,7 +147,7 @@ To understand how an agent operates, we must first understand the **task environ
 
 <div align="center">
   <p>Table 1.2 PEAS description of intelligent travel assistant</p>
-  <img src="../images/1-figures/1757242319667-6.png" alt="PEAS description of intelligent travel assistant" width="90%"/>
+  <img src="../../images/1-figures/1757242319667-6.png" alt="PEAS description of intelligent travel assistant" width="90%"/>
 </div>
 
 In practice, the digital environment in which LLM agents operate exhibits several complex characteristics that directly affect agent design.
@@ -165,7 +165,7 @@ Finally, almost all tasks occur in **sequential** and **dynamic** environments. 
 After defining the task environment in which an agent operates, let's explore its core operating mechanism. An agent does not complete tasks in one go but interacts with the environment through a continuous loop. This core mechanism is called the **Agent Loop**. As shown in Figure 1.5, this loop describes the dynamic interaction process between the agent and the environment, forming the foundation of its autonomous behavior.
 
 <div align="center">
-  <img src="../images/1-figures/1757242319667-5.png" alt="Basic loop of agent-environment interaction" width="90%"/>
+  <img src="../../images/1-figures/1757242319667-5.png" alt="Basic loop of agent-environment interaction" width="90%"/>
   <p>Figure 1.5 Basic loop of agent-environment interaction</p>
 </div>
 
@@ -543,7 +543,7 @@ After understanding the two modes of agents as "tools" and "collaborators," it i
 Simply put, **Workflow makes AI execute instructions step by step, while Agent gives AI freedom to autonomously achieve goals.**
 
 <div align="center">
-  <img src="../images/1-figures/1757242319667-18.png" alt="Differences between Workflow and Agent" width="90%"/>
+  <img src="../../images/1-figures/1757242319667-18.png" alt="Differences between Workflow and Agent" width="90%"/>
   <p>Figure 1.6 Differences between Workflow and Agent</p>
 </div>
 

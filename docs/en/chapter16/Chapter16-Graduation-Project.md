@@ -144,7 +144,7 @@ jupyter lab
 3. Select your GitHub account and create the Fork
 
 <div align="center">
-  <img src="../images/16-figures/16-1.png" alt="Fork Repository Steps" width="85%"/>
+  <img src="../../images/16-figures/16-1.png" alt="Fork Repository Steps" width="85%"/>
   <p>Figure 16.1 Fork Repository Steps</p>
 </div>
 
@@ -165,7 +165,7 @@ git remote -v
 ```
 
 <div align="center">
-  <img src="../images/16-figures/16-2.png" alt="Clone Repository to Local" width="85%"/>
+  <img src="../../images/16-figures/16-2.png" alt="Clone Repository to Local" width="85%"/>
   <p>Figure 16.2 Clone Repository to Local</p>
 </div>
 
@@ -624,7 +624,7 @@ git push origin feature/your-project-name
 3. Click the "New pull request" button
 
 <div align="center">
-  <img src="../images/16-figures/16-3.png" alt="Creating Pull Request" width="85%"/>
+  <img src="../../images/16-figures/16-3.png" alt="Creating Pull Request" width="85%"/>
   <p>Figure 16.3 Creating Pull Request</p>
 </div>
 
@@ -697,7 +697,7 @@ Brief description of your project (2-3 sentences)
 As shown in Figure 16.4, click the "Create pull request" button to submit.
 
 <div align="center">
-  <img src="../images/16-figures/16-4.png" alt="Submit Pull Request" width="85%"/>
+  <img src="../../images/16-figures/16-4.png" alt="Submit Pull Request" width="85%"/>
   <p>Figure 16.4 Submit Pull Request</p>
 </div>
 

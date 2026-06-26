@@ -167,3 +167,13 @@ test_*.py
 !test_tools.py
 .workbuddy/
 memory/
+
+# Node.js
+node_modules/
+
+# VitePress build output
+docs/.vitepress/cache/
+
+# Temporary debug / diagnostics
+debug-*
+invalid_close_tags*

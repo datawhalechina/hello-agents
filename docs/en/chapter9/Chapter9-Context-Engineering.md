@@ -27,7 +27,7 @@ After years of Prompt Engineering becoming the focus of applied AI, a new term h
 The so-called "context" refers to the set of tokens included when sampling a large language model (LLM). The engineering problem at hand is to **optimize the utility of these tokens** under the inherent constraints of the LLM, in order to stably obtain expected results. To effectively harness LLMs, it is often necessary to "think in context"—that is: at any call, examine the overall state visible to the LLM and predict the behavior this state might induce.
 
 <div align="center">
-  <img src="../images/9-figures/9-1.webp" alt="Prompt Engineering vs Context Engineering" width="85%"/>
+  <img src="../../images/9-figures/9-1.webp" alt="Prompt Engineering vs Context Engineering" width="85%"/>
   <p>Figure 9.1 Prompt engineering vs Context engineering</p>
 </div>
 
@@ -60,7 +60,7 @@ Under the constraint of "limited attention budget", the goal of excellent contex
 - **System Prompt**: Clear and straightforward language, with information hierarchy at "just right" height. Common pitfalls at two extremes:
   - Over-hardcoding: Writing complex, fragile if-else logic in prompts, with high long-term maintenance costs and fragility.
   - Too vague: Only providing macro goals and generalized guidance, lacking **specific signals** for expected output or assuming incorrect "shared context".
-  It is recommended to organize prompts into sections (such as <background_information>, <instructions>, tool guidance, output description, etc.), separated by XML/Markdown. Regardless of format, the pursuit is the **"minimum necessary information set" that can fully outline expected behavior** ("minimum" does not equal "shortest"). First run with the best model on the minimum prompt, then add clear instructions and examples based on failure modes.
+  It is recommended to organize prompts into sections (such as &lt;background_information&gt;, &lt;instructions&gt;, tool guidance, output description, etc.), separated by XML/Markdown. Regardless of format, the pursuit is the **"minimum necessary information set" that can fully outline expected behavior** ("minimum" does not equal "shortest"). First run with the best model on the minimum prompt, then add clear instructions and examples based on failure modes.
 
 - **Tools**: Tools define the contract between the agent and the information/action space, and must promote efficiency: they must return **token-friendly** information while encouraging efficient agent behavior. Tools should:
   - Have single responsibilities with low overlap, clear interface semantics;
@@ -73,7 +73,7 @@ Under the constraint of "limited attention budget", the goal of excellent contex
 The overall guiding principle is: **sufficient but compact information**. As shown in Figure 9.2, this is dynamic retrieval entering runtime.
 
 <div align="center">
-  <img src="../images/9-figures/9-2.webp" alt="Calibrating the System Prompt" width="85%"/>
+  <img src="../../images/9-figures/9-2.webp" alt="Calibrating the System Prompt" width="85%"/>
   <p>Figure 9.2 Calibrating the system prompt</p>
 </div>
 
@@ -2045,7 +2045,7 @@ This scenario faces several typical long-horizon task challenges. First is the p
 Our codebase maintenance assistant adopts a three-layer architecture, as shown in Figure 9.3:
 
 <div align="center">
-  <img src="../images/9-figures/9-3.png" alt="Three-Layer Architecture of Codebase Maintenance Assistant" width="85%"/>
+  <img src="../../images/9-figures/9-3.png" alt="Three-Layer Architecture of Codebase Maintenance Assistant" width="85%"/>
   <p>Figure 9.3 Three-layer architecture of codebase maintenance assistant</p>
 </div>
 
