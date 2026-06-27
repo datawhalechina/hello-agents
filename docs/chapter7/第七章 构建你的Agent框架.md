@@ -449,7 +449,7 @@ for chunk in llm.think(messages):
 
 <div align="center">
   <p>表 7.1 HelloAgentLLM不同版本特性对比</p>
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/7-figures/table-01.png" alt="" width="90%"/>
+  <img src="../images/7-figures/table-01.png" alt="HelloAgentLLM不同版本特性对比表" width="90%"/>
 </div>
 
 如上表7.1所示，这种演进体现了框架设计的重要原则：**从简单开始，逐步完善**。我们在保持接口简洁的同时，增强了功能的完整性。
@@ -1277,7 +1277,7 @@ print(f"数学专用Agent结果: {math_result}")
 
 <div align="center">
   <p>表 7.2 Agent不同章节实现对比</p>
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/7-figures/table-02.png" alt="" width="90%"/>
+  <img src="../images/7-figures/table-02.png" alt="Agent不同章节实现对比表" width="90%"/>
 </div>
 
 ### 7.4.5 FunctionCallAgent
@@ -1657,7 +1657,7 @@ if __name__ == "__main__":
 通过这个简化的数学计算工具案例，我们学会了如何快速开发自定义工具：编写一个简单的计算函数，通过ToolRegistry注册，然后与SimpleAgent集成使用。为了更直观的观察，这里提供了图7.1，可以清晰理解代码的运行逻辑。
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/7-figures/01.png" alt="" width="90%"/>
+  <img src="../images/7-figures/01.png" alt="基于HelloAgents的SimpleAgent运行工作流" width="90%"/>
   <p>图 7.1 基于Helloagents的SimpleAgent运行工作流</p>
 </div>
 
