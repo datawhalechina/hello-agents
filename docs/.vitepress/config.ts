@@ -7,6 +7,9 @@ import fs from 'fs'
 
 export default withMermaid(
   defineConfig({
+    // Site title
+    title: 'Hello-Agents',
+
     // GitHub Pages subpath deployment
     base: '/hello-agents/',
 
