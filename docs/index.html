@@ -441,6 +441,29 @@
 
     <!-- 语言切换脚本 (保留原样) -->
     <script>
+        // 英文文档正文中的相对链接(./chapterN/ChapterX...)会丢失 /en/ 路由前缀,
+        // 导致 docsify 按中文路由加载 _sidebar.md。这里检测到无前缀的英文路由时补回 /en/。
+        function normalizeEnRoute() {
+            const hash = decodeURIComponent(window.location.hash);
+            const m = hash.match(/^#\/(?:\.\/)?(chapter\d+\/Chapter[^?]*|Preface(?:\.md)?)(\?.*)?$/);
+            if (m) {
+                window.location.hash = '#/en/' + m[1] + (m[2] || '');
+                return true;
+            }
+            return false;
+        }
+        window.addEventListener('hashchange', normalizeEnRoute);
+        normalizeEnRoute();
+
+        // docsify 路由是 URL 编码且不带 .md 后缀的,查映射表前需要还原
+        function extractFilename(path) {
+            let filename = path.split('/').pop().split('?')[0];
+            if (filename && !filename.endsWith('.md')) {
+                filename += '.md';
+            }
+            return filename;
+        }
+
         // 章节文件名映射
         const chapterMapping = {
             // 中文 -> 英文
@@ -488,7 +511,7 @@
         };
 
         function switchLanguage() {
-            const currentHash = window.location.hash;
+            const currentHash = decodeURIComponent(window.location.hash);
             const langBtn = document.getElementById('langBtn');
 
             // 检测当前语言
@@ -500,7 +523,7 @@
 
                 // 提取文件名
                 const parts = newHash.split('/');
-                const filename = parts[parts.length - 1];
+                const filename = extractFilename(newHash);
 
                 // 查找对应的中文文件名
                 if (chapterMapping.en2zh[filename]) {
@@ -526,7 +549,7 @@
                 } else {
                     // 提取文件名
                     const parts = path.split('/');
-                    const filename = parts[parts.length - 1];
+                    const filename = extractFilename(path);
 
                     // 查找对应的英文文件名
                     if (chapterMapping.zh2en[filename]) {
@@ -548,7 +571,7 @@
 
         // 页面加载时设置按钮文本和检查语言偏好
         window.addEventListener('load', function() {
-            const currentHash = window.location.hash;
+            const currentHash = decodeURIComponent(window.location.hash);
             const langBtn = document.getElementById('langBtn');
             const preferredLang = localStorage.getItem('preferredLanguage');
 
@@ -564,7 +587,7 @@
                         window.location.hash = '#/en/README_EN.md';
                     } else {
                         const parts = path.split('/');
-                        const filename = parts[parts.length - 1];
+                        const filename = extractFilename(path);
 
                         if (chapterMapping.zh2en[filename]) {
                             parts[parts.length - 1] = chapterMapping.zh2en[filename];
@@ -575,7 +598,7 @@
                     // 用户偏好中文,但当前是英文页面
                     let newHash = currentHash.replace('#/', '').replace('en/', '');
                     const parts = newHash.split('/');
-                    const filename = parts[parts.length - 1];
+                    const filename = extractFilename(newHash);
 
                     if (chapterMapping.en2zh[filename]) {
                         parts[parts.length - 1] = chapterMapping.en2zh[filename];

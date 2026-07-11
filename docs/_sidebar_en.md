@@ -1,5 +1,5 @@
 - [Hello-Agents](/en/README_EN.md)
-  - [Preface](./Preface.md)
+  - [Preface](/en/Preface.md)
 
 - <strong>Part I: Fundamentals of Agents and Language Models</strong>
   - [Chapter 1 Introduction to Agents](/en/chapter1/Chapter1-Introduction-to-Agents.md)
