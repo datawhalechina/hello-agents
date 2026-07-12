@@ -179,27 +179,7 @@ npm run dev
 
 ## 演示效果
 
-### 文献搜索与结果召回
-
-![文献搜索结果](./screenshots/search-agent-results.png)
-
-### 每日论文推荐
-
-![每日论文推荐](./screenshots/daily-recommendations.png)
-
-### 我的文献库
-
-![我的文献库](./screenshots/library-management.png)
-
-### 论文阅读助手
-
-在 **我的文献库** 中点击论文的“阅读”入口，即可进入论文阅读助手页面，进行 PDF 阅读、AI 导读和基于当前论文的问答。
-
-![论文阅读助手](./screenshots/paper-reader-assistant.png)
-
-### 知识图谱
-
-![知识图谱](./screenshots/knowledge-graph.png)
+文献搜索、每日论文推荐、文献库、论文阅读助手和知识图谱等界面截图，请参见 [毕业设计提交 PR #614](https://github.com/datawhalechina/hello-agents/pull/614)。
 
 ## 技术栈
 
@@ -236,7 +216,6 @@ npm run dev
 │  ├─ src/components/       # 论文卡片、搜索结果、工具轨迹、阅读日历等组件
 │  ├─ src/composables/      # 搜索对话、历史记录、标题关键词等组合逻辑
 │  └─ src/services/         # API 客户端与接口封装
-├─ screenshots/             # README 演示截图
 ├─ ports.env                # 本地端口配置
 ├─ start.sh                 # 一键启动脚本
 └─ README.md
