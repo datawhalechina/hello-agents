@@ -1243,7 +1243,7 @@ These tasks cover the basic information and core projects of the Datawhale organ
 
 # Extract JSON
 tasks1 = service._extract_tasks(response1)
-# Result: [{"title": "Basic information about Datawhale", ...}, ...]
+# Result: [{"title": "What is a multimodal model", ...}, ...]
 
 # Agent response example 2: Pure JSON
 response2 = """
@@ -1255,7 +1255,7 @@ response2 = """
 
 # Extract JSON
 tasks2 = service._extract_tasks(response2)
-# Result: [{"title": "What is a multimodal model", ...}, ...]
+# Result: [{"title": "Basic information about Datawhale", ...}, ...]
 ```
 
 **(3) Planning Quality Assessment**
