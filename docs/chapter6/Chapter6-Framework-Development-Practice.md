@@ -446,12 +446,12 @@ Using messages as the basic unit of interaction brings several key advantages:
 
 (3) Agent Lifecycle Management
 
-In AgentScope, each agent has a clear lifecycle (initialization, running, pausing, destruction, etc.) and is implemented based on a unified base class `AgentBase`. Developers usually only need to focus on its core `reply` method.
+In AgentScope, each agent has a clear lifecycle (initialization, running, pausing, destruction, etc.) and is implemented based on a unified base class `Agent`. Developers usually only need to focus on its core `reply` method.
 
 ```python
-from agentscope.agents import AgentBase
+from agentscope.agent import Agent
 
-class CustomAgent(AgentBase):
+class CustomAgent(Agent):
     def __init__(self, name: str, **kwargs):
         super().__init__(name=name, **kwargs)
         # Agent initialization logic

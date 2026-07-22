@@ -39,7 +39,7 @@ flowchart TD
     end
     
     subgraph HelloAgents框架[HelloAgents框架]
-        AgentBase[Agent基类]
+        Agent[Agent基类]
         LLM[HelloAgentsLLM]
         Config[Config配置]
         Message[Message消息]
@@ -75,7 +75,7 @@ flowchart TD
     PlanGenerator --> Design
     PlanGenerator --> Notes
     
-    CodePlanAgent -.->|继承| AgentBase
+    CodePlanAgent -.->|继承| Agent
     CodePlanAgent -->|使用| Config
     CodePlanAgent -->|使用| Message
     CodePlanAgent -->|可选| ToolRegistry

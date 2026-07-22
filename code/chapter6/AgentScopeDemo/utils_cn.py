@@ -5,7 +5,7 @@ import random
 from typing import List, Dict, Optional, Any
 from collections import Counter
 
-from agentscope.agent import AgentBase
+from agentscope.agent import Agent
 from agentscope.message import Msg
 
 # 游戏常量
@@ -26,7 +26,7 @@ def get_chinese_name(character: str = None) -> str:
     return random.choice(CHINESE_NAMES)
 
 
-def format_player_list(players: List[AgentBase], show_roles: bool = False) -> str:
+def format_player_list(players: List[Agent], show_roles: bool = False) -> str:
     """格式化玩家列表为中文显示"""
     if not players:
         return "无玩家"
@@ -48,7 +48,7 @@ def majority_vote_cn(votes: Dict[str, str]) -> tuple[str, int]:
     return most_voted[0], most_voted[1]
 
 
-def check_winning_cn(alive_players: List[AgentBase], roles: Dict[str, str]) -> Optional[str]:
+def check_winning_cn(alive_players: List[Agent], roles: Dict[str, str]) -> Optional[str]:
     """检查中文版游戏胜利条件"""
     alive_roles = [roles.get(p.name, "村民") for p in alive_players]
     werewolf_count = alive_roles.count("狼人")
@@ -94,7 +94,7 @@ def analyze_speech_pattern(speech: str) -> Dict[str, Any]:
     return analysis
 
 
-class GameModerator(AgentBase):
+class GameModerator(Agent):
     """中文版游戏主持人"""
     
     def __init__(self) -> None:

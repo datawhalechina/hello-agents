@@ -2,7 +2,7 @@
 """三国狼人杀游戏的结构化输出模型"""
 from typing import Literal, Optional, List
 from pydantic import BaseModel, Field
-from agentscope.agent import AgentBase
+from agentscope.agent import Agent
 
 
 class DiscussionModelCN(BaseModel):
@@ -21,7 +21,7 @@ class DiscussionModelCN(BaseModel):
     )
 
 
-def get_vote_model_cn(agents: list[AgentBase]) -> type[BaseModel]:
+def get_vote_model_cn(agents: list[Agent]) -> type[BaseModel]:
     """获取中文版投票模型"""
     
     class VoteModelCN(BaseModel):
@@ -62,7 +62,7 @@ class WitchActionModelCN(BaseModel):
     )
 
 
-def get_seer_model_cn(agents: list[AgentBase]) -> type[BaseModel]:
+def get_seer_model_cn(agents: list[Agent]) -> type[BaseModel]:
     """获取中文版预言家模型"""
     
     class SeerModelCN(BaseModel):
@@ -82,7 +82,7 @@ def get_seer_model_cn(agents: list[AgentBase]) -> type[BaseModel]:
     return SeerModelCN
 
 
-def get_hunter_model_cn(agents: list[AgentBase]) -> type[BaseModel]:
+def get_hunter_model_cn(agents: list[Agent]) -> type[BaseModel]:
     """获取中文版猎人模型"""
     
     class HunterModelCN(BaseModel):
