@@ -3,6 +3,7 @@ import os
 from typing import Optional
 from openai import OpenAI
 from hello_agents import HelloAgentsLLM
+from hello_agents.core.llm_adapters import create_adapter
 
 class MyLLM(HelloAgentsLLM):
     def __init__(
@@ -31,6 +32,13 @@ class MyLLM(HelloAgentsLLM):
             self.temperature = kwargs.get('temperature', 0.7)
             self.max_tokens = kwargs.get('max_tokens')
             self.timeout = kwargs.get('timeout', 60)
+
+            self._adapter = create_adapter(
+                api_key=self.api_key,
+                base_url=self.base_url,
+                timeout=self.timeout,
+                model=self.model
+            )
             
             # 使用获取的参数创建OpenAI客户端实例
             self._client = OpenAI(api_key=self.api_key, base_url=self.base_url, timeout=self.timeout)
