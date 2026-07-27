@@ -3,6 +3,7 @@ from typing import Optional, Iterator
 from hello_agents import SimpleAgent, HelloAgentsLLM, Config, Message
 import re
 
+
 class MySimpleAgent(SimpleAgent):
     """
     重写的简单对话Agent
@@ -10,19 +11,19 @@ class MySimpleAgent(SimpleAgent):
     """
 
     def __init__(
-        self,
-        name: str,
-        llm: HelloAgentsLLM,
-        system_prompt: Optional[str] = None,
-        config: Optional[Config] = None,
-        tool_registry: Optional['ToolRegistry'] = None,
-        enable_tool_calling: bool = True
+            self,
+            name: str,
+            llm: HelloAgentsLLM,
+            system_prompt: Optional[str] = None,
+            config: Optional[Config] = None,
+            tool_registry: Optional['ToolRegistry'] = None,
+            enable_tool_calling: bool = True
     ):
         super().__init__(name, llm, system_prompt, config)
         self.tool_registry = tool_registry
         self.enable_tool_calling = enable_tool_calling and tool_registry is not None
         print(f"✅ {name} 初始化完成，工具调用: {'启用' if self.enable_tool_calling else '禁用'}")
-    
+
     def run(self, input_text: str, max_tool_iterations: int = 3, **kwargs) -> str:
         """
         重写的运行方法 - 实现简单对话逻辑，支持可选工具调用
@@ -46,8 +47,9 @@ class MySimpleAgent(SimpleAgent):
         # 如果没有启用工具调用，使用简单对话逻辑
         if not self.enable_tool_calling:
             response = self.llm.invoke(messages, **kwargs)
+            response_text = self._extract_content(response)
             self.add_message(Message(input_text, "user"))
-            self.add_message(Message(response, "assistant"))
+            self.add_message(Message(response_text, "assistant"))
             print(f"✅ {self.name} 响应完成")
             return response
 
@@ -77,7 +79,7 @@ class MySimpleAgent(SimpleAgent):
         tools_section += "工具调用结果会自动插入到对话中，然后你可以基于结果继续回答。\n"
 
         return base_prompt + tools_section
-    
+
     def _run_with_tools(self, messages: list, input_text: str, max_tool_iterations: int, **kwargs) -> str:
         """支持工具调用的运行逻辑"""
         current_iteration = 0
@@ -87,14 +89,16 @@ class MySimpleAgent(SimpleAgent):
             # 调用LLM
             response = self.llm.invoke(messages, **kwargs)
 
+            response_text = self._extract_content(response)
+
             # 检查是否有工具调用
-            tool_calls = self._parse_tool_calls(response)
+            tool_calls = self._parse_tool_calls(response_text)
 
             if tool_calls:
                 print(f"🔧 检测到 {len(tool_calls)} 个工具调用")
                 # 执行所有工具调用并收集结果
                 tool_results = []
-                clean_response = response
+                clean_response = response_text
 
                 for call in tool_calls:
                     result = self._execute_tool_call(call['tool_name'], call['parameters'])
@@ -107,18 +111,20 @@ class MySimpleAgent(SimpleAgent):
 
                 # 添加工具结果
                 tool_results_text = "\n\n".join(tool_results)
-                messages.append({"role": "user", "content": f"工具执行结果：\n{tool_results_text}\n\n请基于这些结果给出完整的回答。"})
+                messages.append(
+                    {"role": "user", "content": f"工具执行结果：\n{tool_results_text}\n\n请基于这些结果给出完整的回答。"})
 
                 current_iteration += 1
                 continue
 
             # 没有工具调用，这是最终回答
-            final_response = response
+            final_response = response_text
             break
 
         # 如果超过最大迭代次数，获取最后一次回答
         if current_iteration >= max_tool_iterations and not final_response:
-            final_response = self.llm.invoke(messages, **kwargs)
+            response = self.llm.invoke(messages, **kwargs)
+            final_response = self._extract_content(response)
 
         # 保存到历史记录
         self.add_message(Message(input_text, "user"))
@@ -130,6 +136,7 @@ class MySimpleAgent(SimpleAgent):
     def _parse_tool_calls(self, text: str) -> list:
         """解析文本中的工具调用"""
         pattern = r'\[TOOL_CALL:([^:]+):([^\]]+)\]'
+        # 全文扫描，找到所有满足规则的内容
         matches = re.findall(pattern, text)
 
         tool_calls = []
@@ -192,7 +199,7 @@ class MySimpleAgent(SimpleAgent):
                 param_dict = {'input': parameters}
 
         return param_dict
-    
+
     def stream_run(self, input_text: str, **kwargs) -> Iterator[str]:
         """
         自定义的流式运行方法
@@ -214,7 +221,9 @@ class MySimpleAgent(SimpleAgent):
         print("📝 实时响应: ", end="")
         for chunk in self.llm.stream_invoke(messages, **kwargs):
             full_response += chunk
+            # print默认end="\n"会换行，flush为true代表立马刷新缓冲区马上显示
             print(chunk, end="", flush=True)
+            # 函数变为生成器，向外传递，返回分段文本
             yield chunk
 
         print()  # 换行
@@ -237,16 +246,25 @@ class MySimpleAgent(SimpleAgent):
     def has_tools(self) -> bool:
         """检查是否有可用工具"""
         return self.enable_tool_calling and self.tool_registry is not None
-    
+
     def remove_tool(self, tool_name: str) -> bool:
         """移除工具（便利方法）"""
         if self.tool_registry:
             self.tool_registry.unregister(tool_name)
             return True
         return False
-    
+
     def list_tools(self) -> list:
         """列出所有可用工具"""
         if self.tool_registry:
             return self.tool_registry.list_tools()
         return []
+
+    def _extract_content(self, response):
+        """
+        兼容不同LLM返回格式
+        """
+        if hasattr(response, "content"):
+            return response.content
+
+        return response
