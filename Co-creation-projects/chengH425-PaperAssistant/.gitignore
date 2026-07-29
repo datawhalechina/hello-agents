@@ -1,0 +1,18 @@
+# Environment
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Outputs
+outputs/*.md
+data/*.pdf
+
+# IDE
+.vscode/
+.idea/
