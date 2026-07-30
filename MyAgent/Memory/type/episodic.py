@@ -1,6 +1,7 @@
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, List, Tuple
+from venv import logger
 
 from MyAgent.Memory.base import MemoryConfig
 from MyAgent.Memory.embedding import get_text_embedder, get_dimension
@@ -39,7 +40,38 @@ class EpisodicMemory(BaseMemory):
     - 按时间序列组织
     - 支持模式识别和回溯
     """
+    def __init__(self, config: MemoryConfig, storage_backend=None):
+            super().__init__(config, storage_backend)
 
+            # 本地缓存（内存）
+            self.episodes: List[Episode] = []
+            self.sessions: Dict[str, List[str]] = {}  # session_id -> episode_ids
+
+            # 模式识别缓存
+            self.patterns_cache = {}
+            self.last_pattern_analysis = None
+
+            # 权威文档存储（SQLite）
+            db_dir = self.config.storage_path if hasattr(self.config, 'storage_path') else "./memory_data"
+            os.makedirs(db_dir, exist_ok=True)
+            db_path = os.path.join(db_dir, "memory.db")
+            self.doc_store = SQLiteDocumentStore(db_path=db_path)
+
+            # 统一嵌入模型（多语言，默认384维）
+            self.embedder = get_text_embedder()
+
+            # 向量存储（Qdrant - 使用连接管理器避免重复连接）
+            from ..storage.qdrant_store import QdrantConnectionManager
+            qdrant_url = os.getenv("QDRANT_URL")
+            qdrant_api_key = os.getenv("QDRANT_API_KEY")
+            self.vector_store = QdrantConnectionManager.get_instance(
+                url=qdrant_url,
+                api_key=qdrant_api_key,
+                collection_name=os.getenv("QDRANT_COLLECTION", "hello_agents_vectors"),
+                vector_size=get_dimension(getattr(self.embedder, 'dimension', 384)),
+                distance=os.getenv("QDRANT_DISTANCE", "cosine")
+            )
+        
     def update(
             self,
             memory_id: str,
@@ -96,37 +128,6 @@ class EpisodicMemory(BaseMemory):
 
         return updated or doc_updated
 
-    def __init__(self, config: MemoryConfig, storage_backend=None):
-        super().__init__(config, storage_backend)
-
-        # 本地缓存（内存）
-        self.episodes: List[Episode] = []
-        self.sessions: Dict[str, List[str]] = {}  # session_id -> episode_ids
-
-        # 模式识别缓存
-        self.patterns_cache = {}
-        self.last_pattern_analysis = None
-
-        # 权威文档存储（SQLite）
-        db_dir = self.config.storage_path if hasattr(self.config, 'storage_path') else "./memory_data"
-        os.makedirs(db_dir, exist_ok=True)
-        db_path = os.path.join(db_dir, "memory.db")
-        self.doc_store = SQLiteDocumentStore(db_path=db_path)
-
-        # 统一嵌入模型（多语言，默认384维）
-        self.embedder = get_text_embedder()
-
-        # 向量存储（Qdrant - 使用连接管理器避免重复连接）
-        from ..storage.qdrant_store import QdrantConnectionManager
-        qdrant_url = os.getenv("QDRANT_URL")
-        qdrant_api_key = os.getenv("QDRANT_API_KEY")
-        self.vector_store = QdrantConnectionManager.get_instance(
-            url=qdrant_url,
-            api_key=qdrant_api_key,
-            collection_name=os.getenv("QDRANT_COLLECTION", "hello_agents_vectors"),
-            vector_size=get_dimension(getattr(self.embedder, 'dimension', 384)),
-            distance=os.getenv("QDRANT_DISTANCE", "cosine")
-        )
 
     def add(self, memory_item: MemoryItem) -> str:
         """添加情景记忆"""
@@ -344,3 +345,241 @@ class EpisodicMemory(BaseMemory):
             pass
 
         return removed or doc_deleted
+    
+    def has_memory(self, memory_id: str) -> bool:
+            """检查记忆是否存在"""
+            return any(episode.episode_id == memory_id for episode in self.episodes)
+        
+    def clear(self):
+        """清空所有情景记忆（仅清理episodic，不影响其他类型）"""
+        # 内存缓存
+        self.episodes.clear()
+        self.sessions.clear()
+        self.patterns_cache.clear()
+
+        # SQLite内的episodic全部删除
+        docs = self.doc_store.search_memories(memory_type="episodic", limit=10000)
+        ids = [d["memory_id"] for d in docs]
+        for mid in ids:
+            self.doc_store.delete_memory(mid)
+
+        # Qdrant按ID删除对应向量
+        try:
+            if ids:
+                self.vector_store.delete_memories(ids)
+        except Exception:
+            pass
+
+    def forget(self, strategy: str = "importance_based", threshold: float = 0.1, max_age_days: int = 30) -> int:
+        """情景记忆遗忘机制（硬删除）"""
+        forgotten_count = 0
+        current_time = datetime.now()
+        
+        to_remove = []  # 收集要删除的记忆ID
+        
+        for episode in self.episodes:
+            should_forget = False
+            
+            if strategy == "importance_based":
+                # 基于重要性遗忘
+                if episode.importance < threshold:
+                    should_forget = True
+            elif strategy == "time_based":
+                # 基于时间遗忘
+                cutoff_time = current_time - timedelta(days=max_age_days)
+                if episode.timestamp < cutoff_time:
+                    should_forget = True
+            elif strategy == "capacity_based":
+                # 基于容量遗忘（保留最重要的）
+                if len(self.episodes) > self.config.max_capacity:
+                    sorted_episodes = sorted(self.episodes, key=lambda e: e.importance)
+                    excess_count = len(self.episodes) - self.config.max_capacity
+                    if episode in sorted_episodes[:excess_count]:
+                        should_forget = True
+            
+            if should_forget:
+                to_remove.append(episode.episode_id)
+        
+        # 执行硬删除
+        for episode_id in to_remove:
+            if self.remove(episode_id):
+                forgotten_count += 1
+                logger.info(f"情景记忆硬删除: {episode_id[:8]}... (策略: {strategy})")
+        
+        return forgotten_count
+
+    def get_all(self) -> List[MemoryItem]:
+        """获取所有情景记忆（转换为MemoryItem格式）"""
+        memory_items = []
+        for episode in self.episodes:
+            memory_item = MemoryItem(
+                id=episode.episode_id,
+                content=episode.content,
+                memory_type="episodic",
+                user_id=episode.user_id,
+                timestamp=episode.timestamp,
+                importance=episode.importance,
+                metadata=episode.metadata
+            )
+            memory_items.append(memory_item)
+        return memory_items
+    
+    def get_stats(self) -> Dict[str, Any]:
+        """获取情景记忆统计信息（合并SQLite与Qdrant）"""
+        # 硬删除模式：所有episodes都是活跃的
+        active_episodes = self.episodes
+        
+        db_stats = self.doc_store.get_database_stats()
+        try:
+            vs_stats = self.vector_store.get_collection_stats()
+        except Exception:
+            vs_stats = {"store_type": "qdrant"}
+        return {
+            "count": len(active_episodes),  # 活跃记忆数量
+            "forgotten_count": 0,  # 硬删除模式下已遗忘的记忆会被直接删除
+            "total_count": len(self.episodes),  # 总记忆数量
+            "sessions_count": len(self.sessions),
+            "avg_importance": sum(e.importance for e in active_episodes) / len(active_episodes) if active_episodes else 0.0,
+            "time_span_days": self._calculate_time_span(),
+            "memory_type": "episodic",
+            "vector_store": vs_stats,
+            "document_store": {k: v for k, v in db_stats.items() if k.endswith("_count") or k in ["store_type", "db_path"]}
+        }
+    
+    def get_session_episodes(self, session_id: str) -> List[Episode]:
+        """获取指定会话的所有情景"""
+        if session_id not in self.sessions:
+            return []
+        
+        episode_ids = self.sessions[session_id]
+        return [e for e in self.episodes if e.episode_id in episode_ids]
+    
+    def find_patterns(self, user_id: str = None, min_frequency: int = 2) -> List[Dict[str, Any]]:
+        """发现用户行为模式"""
+        # 检查缓存
+        cache_key = f"{user_id}_{min_frequency}"
+        if (cache_key in self.patterns_cache and 
+            self.last_pattern_analysis and 
+            (datetime.now() - self.last_pattern_analysis).hours < 1):
+            return self.patterns_cache[cache_key]
+        
+        # 过滤情景
+        episodes = [e for e in self.episodes if user_id is None or e.user_id == user_id]
+        
+        # 简单的模式识别：基于内容关键词
+        keyword_patterns = {}
+        context_patterns = {}
+        
+        for episode in episodes:
+            # 提取关键词
+            words = episode.content.lower().split()
+            for word in words:
+                if len(word) > 3:  # 忽略短词
+                    keyword_patterns[word] = keyword_patterns.get(word, 0) + 1
+            
+            # 提取上下文模式
+            for key, value in episode.context.items():
+                pattern_key = f"{key}:{value}"
+                context_patterns[pattern_key] = context_patterns.get(pattern_key, 0) + 1
+        
+        # 筛选频繁模式
+        patterns = []
+        
+        for keyword, frequency in keyword_patterns.items():
+            if frequency >= min_frequency:
+                patterns.append({
+                    "type": "keyword",
+                    "pattern": keyword,
+                    "frequency": frequency,
+                    "confidence": frequency / len(episodes)
+                })
+        
+        for context_pattern, frequency in context_patterns.items():
+            if frequency >= min_frequency:
+                patterns.append({
+                    "type": "context",
+                    "pattern": context_pattern,
+                    "frequency": frequency,
+                    "confidence": frequency / len(episodes)
+                })
+        
+        # 按频率排序
+        patterns.sort(key=lambda x: x["frequency"], reverse=True)
+        
+        # 缓存结果
+        self.patterns_cache[cache_key] = patterns
+        self.last_pattern_analysis = datetime.now()
+        
+        return patterns
+    
+    def get_timeline(self, user_id: str = None, limit: int = 50) -> List[Dict[str, Any]]:
+        """获取时间线视图"""
+        episodes = [e for e in self.episodes if user_id is None or e.user_id == user_id]
+        episodes.sort(key=lambda x: x.timestamp, reverse=True)
+        
+        timeline = []
+        for episode in episodes[:limit]:
+            timeline.append({
+                "episode_id": episode.episode_id,
+                "timestamp": episode.timestamp.isoformat(),
+                "content": episode.content[:100] + "..." if len(episode.content) > 100 else episode.content,
+                "session_id": episode.session_id,
+                "importance": episode.importance,
+                "outcome": episode.outcome
+            })
+        
+        return timeline
+    
+    def _filter_episodes(
+        self,
+        user_id: str = None,
+        session_id: str = None,
+        time_range: Tuple[datetime, datetime] = None
+    ) -> List[Episode]:
+        """过滤情景"""
+        filtered = self.episodes
+        
+        if user_id:
+            filtered = [e for e in filtered if e.user_id == user_id]
+        
+        if session_id:
+            filtered = [e for e in filtered if e.session_id == session_id]
+        
+        if time_range:
+            start_time, end_time = time_range
+            filtered = [e for e in filtered if start_time <= e.timestamp <= end_time]
+        
+        return filtered
+    
+    def _calculate_time_span(self) -> float:
+        """计算记忆时间跨度（天）"""
+        if not self.episodes:
+            return 0.0
+        
+        timestamps = [e.timestamp for e in self.episodes]
+        min_time = min(timestamps)
+        max_time = max(timestamps)
+        
+        return (max_time - min_time).days
+    
+    def _persist_episode(self, episode: Episode):
+        """持久化情景到存储后端"""
+        if self.storage and hasattr(self.storage, 'add_memory'):
+            self.storage.add_memory(
+                memory_id=episode.episode_id,
+                user_id=episode.user_id,
+                content=episode.content,
+                memory_type="episodic",
+                timestamp=int(episode.timestamp.timestamp()),
+                importance=episode.importance,
+                properties={
+                    "session_id": episode.session_id,
+                    "context": episode.context,
+                    "outcome": episode.outcome
+                }
+            )
+    
+    def _remove_from_storage(self, memory_id: str):
+        """从存储后端删除"""
+        if self.storage and hasattr(self.storage, 'delete_memory'):
+            self.storage.delete_memory(memory_id)

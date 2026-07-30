@@ -1,6 +1,6 @@
 # my_simple_agent.py
 from typing import Optional, Iterator
-from hello_agents import SimpleAgent, HelloAgentsLLM, Config, Message
+from hello_agents import SimpleAgent, HelloAgentsLLM, Config, Message, ToolRegistry
 import re
 
 class MySimpleAgent(SimpleAgent):
