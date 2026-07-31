@@ -1,0 +1,27 @@
+{
+  "policy_version": "public_demo_acceptance_v1.0",
+  "description": "Generic rules for fictional FinanceAgent demo data. Not an institutional policy.",
+  "currency": "CNY",
+  "large_voucher": {
+    "enabled": true,
+    "amount_gte": "50000.00"
+  },
+  "cost_type_sampling": {
+    "enabled": true,
+    "sample_ratio": 0.2,
+    "rounding": "ceil",
+    "minimum_sample_count_when_eligible": 1,
+    "strategy": "highest_amount_first",
+    "exclude_meeting_fee_records": true
+  },
+  "meeting_fee": {
+    "enabled": true,
+    "category_keywords": ["会议费"],
+    "all_records_required": true
+  },
+  "acceptance_scope": {
+    "include_large_vouchers": true,
+    "include_cost_type_samples": true,
+    "include_meeting_fee_records": true
+  }
+}
