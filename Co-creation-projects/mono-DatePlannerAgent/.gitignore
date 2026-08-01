@@ -1,0 +1,26 @@
+# 密钥与隐私（禁止提交）
+.env
+.env.*
+!.env.example
+amap_key.txt
+*.key
+*.pem
+*.p12
+*.pfx
+credentials.json
+secrets.yaml
+
+# Python 缓存与虚拟环境
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# Notebook 输出
+.ipynb_checkpoints/
+
+# 日志与临时文件
+*.log
+.DS_Store
+Thumbs.db

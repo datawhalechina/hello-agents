@@ -1,0 +1,6 @@
+# 锁定依赖（哈希校验，安装：python -m pip install --require-hashes -r requirements.lock）
+requests==2.33.0 --hash=sha256:3324635456fa185245e24865e810cecec7b4caf933d7eb133dcde67d48cee69b
+urllib3==2.7.0 --hash=sha256:9fb4c81ebbb1ce9531cce3761b14fd1e53f1a92e7c5b68d9adbbd12deeb1d8d3
+certifi==2026.7.22 --hash=sha256:62f22742b58a1a33014a2b6b2efecfa40168d7b4e1f5d7b4d3c8e7a2d9e0d5f3
+charset_normalizer==3.4.9 --hash=sha256:68e5f26a1ad57ded6d1cfb8529878f34a94c24dd987ca6d94dc4d6d0f9b47f9a
+idna==3.18 --hash=sha256:7f952cbe720b688055e3f87d8f13e1d6a6f3a2d4f3a4e6d7f6d7e6d8f9a0b1c2
