@@ -1,1 +1,6 @@
+# 核心数据层（推荐哈希锁定安装：python -m pip install --require-hashes -r requirements.lock）
 requests>=2.32.4,<3
+# HelloAgents 框架（demo_agent.py 需要；含 HelloAgentsLLM / ReActAgent / ToolRegistry）
+# 说明：hello-agents 传递依赖含平台相关 wheel（numpy/pydantic-core 等），
+# 因此框架部分用宽松约束安装；仅用数据层可忽略本行。
+hello-agents>=1.0.0,<2

@@ -17,13 +17,14 @@
 - [x] 8 段式方案报告模板（需求总结 / 推荐方向 / 关键事实 / 路线 / 时间交通 / 待确认 / 备用 / 省流版）
 - [x] 专项调研 SOP 参考（references/：餐厅、户外、电影、手工、演出、展览）
 - [x] 双后端 HTTP 兜底：requests → urllib，失败自动重试
+- [x] HelloAgents 框架接入：4 个自定义 Tool + ToolRegistry 注册表（demo_agent.py）
 
 ## 🛠️ 技术栈
 
 - Python 3.10+
 - 高德开放平台 Web 服务 API（Place / Geocode / Distance / Weather）
-- 可选：HelloAgents 等 LLM Agent 框架（作为数据工具层接入）
-- 依赖极简：仅 `requests`
+- HelloAgents 框架（ToolRegistry / Tool / HelloAgentsLLM / ReActAgent）
+- 依赖：`requests` + `hello-agents`
 
 ## 🚀 快速开始
 
@@ -59,6 +60,11 @@ jupyter lab
 
 # 方式二：命令行一键演示
 python -m date_planner.planner "西餐厅"
+
+# 方式三：HelloAgents 框架接入演示（无需任何 Key 也可先跑 --dry-run）
+python demo_agent.py --dry-run
+# 配置 LLM 后由大模型自动规划：
+python demo_agent.py "帮我在北京找一家评分高的西餐厅，再查一下今天天气"
 ```
 
 ## 📖 使用示例
@@ -89,6 +95,27 @@ DatePlanner().demo(city="北京", keywords="桌游")
 
 更多用法见 `date_planner/planner.py` 的 `build_report` 与 `demo` 方法。
 
+### HelloAgents 框架接入
+
+```python
+from date_planner.hello_tools import build_registry
+
+registry = build_registry()          # 注册 4 个高德工具
+print(registry.get_tools_description())
+res = registry.execute_tool("amap_text_search", {"keywords": "西餐厅", "city": "北京"})
+print(res.text)
+
+# 配合 HelloAgentsLLM + ReActAgent 实现 LLM 自动规划，见 demo_agent.py
+```
+
+`.env` 中新增 LLM 配置项（可选）：
+
+```bash
+LLM_MODEL_ID=deepseek-chat
+LLM_API_KEY=your_llm_api_key
+LLM_BASE_URL=https://api.deepseek.com/v1
+```
+
 ## 🎯 项目亮点
 
 - **真实数据闭环**：所有地点/距离/天气来自高德 API，杜绝 LLM 幻觉
@@ -104,7 +131,7 @@ DatePlanner().demo(city="北京", keywords="桌游")
 
 ## 🔮 未来计划
 
-- [ ] 接入 LLM Agent（HelloAgents SimpleAgent/ReAct），自动完成“需求→调研→方案”全链路
+- [x] 接入 LLM Agent（HelloAgents ReActAgent + 高德工具），自动完成“需求→调研→方案”全链路（见 demo_agent.py）
 - [ ] 增加预约/排队等动态信息的网页搜索核验
 - [ ] 支持多城市批量方案对比
 - [ ] Gradio 可视化交互界面
