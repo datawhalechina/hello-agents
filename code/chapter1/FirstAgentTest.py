@@ -189,12 +189,27 @@ for i in range(5): # 设置最大循环次数
     action_str = action_match.group(1).strip()
 
     if action_str.startswith("Finish"):
-        final_answer = re.match(r"Finish\[(.*)\]", action_str).group(1)
+        finish_match = re.match(r"Finish\[(.*)\]", action_str, re.DOTALL)
+        if finish_match:
+            final_answer = finish_match.group(1).strip()
+        else:
+            # 模型未按 Finish[...] 格式输出时，回退截取 Finish 之后的内容，避免抛出异常
+            final_answer = action_str[len("Finish"):].lstrip("[:： ").rstrip("]").strip()
         print(f"任务完成，最终答案: {final_answer}")
         break
-    
-    tool_name = re.search(r"(\w+)\(", action_str).group(1)
-    args_str = re.search(r"\((.*)\)", action_str).group(1)
+
+    tool_match = re.search(r"(\w+)\((.*)\)", action_str, re.DOTALL)
+    if not tool_match:
+        observation = (
+            f"错误: 未能解析行动 '{action_str}'。"
+            "请使用 '工具名(参数名=\"参数值\")' 或 'Finish[最终答案]' 的格式。"
+        )
+        observation_str = f"Observation: {observation}"
+        print(f"{observation_str}\n" + "="*40)
+        prompt_history.append(observation_str)
+        continue
+    tool_name = tool_match.group(1)
+    args_str = tool_match.group(2)
     kwargs = dict(re.findall(r'(\w+)="([^"]*)"', args_str))
 
     if tool_name in available_tools:
