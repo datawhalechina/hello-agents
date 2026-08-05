@@ -31,6 +31,7 @@ class MyAdvancedSearchTool:
         if os.getenv("SERPAPI_API_KEY"):
             try:
                 import serpapi
+                self.serpapi_client = serpapi.Client(api_key=os.getenv("SERPAPI_API_KEY"))
                 self.search_sources.append("serpapi")
                 print("✅ SerpApi搜索源已启用")
             except ImportError:
@@ -99,13 +100,11 @@ class MyAdvancedSearchTool:
         """使用SerpApi搜索"""
         import serpapi
 
-        search = serpapi.GoogleSearch({
+        
+        results = self.serpapi_client.search({
             "q": query,
-            "api_key": os.getenv("SERPAPI_API_KEY"),
-            "num": 3
+            'num_results': 3,
         })
-
-        results = search.get_dict()
 
         result = "🔗 Google搜索结果：\n"
         if "organic_results" in results:
