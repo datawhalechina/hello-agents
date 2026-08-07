@@ -148,9 +148,9 @@ class NPCAgentManager:
             storage_path=memory_dir,
             working_memory_capacity=10,  # 最近10条对话
             working_memory_tokens=2000,  # 最多2000个token
-            episodic_memory_capacity=100,  # 最多100条长期记忆
-            enable_forgetting=True,  # 启用遗忘机制
-            forgetting_threshold=0.3  # 重要性低于0.3的记忆会被遗忘
+            max_capacity=100,  # 最多100条长期记忆
+            importance_threshold=0.3,  # 检索和整合时关注重要性较高的记忆
+            decay_factor=0.95  # 时间衰减系数
         )
 
         # 创建记忆管理器

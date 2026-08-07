@@ -1,0 +1,27 @@
+[
+  {"device_id":"bj-core-sw-01","site_id":"site-bj-hq","device_type":"wired_switch","model":"Cisco C9500","vendor":"Cisco","firmware":"17.9.4","status":"online"},
+  {"device_id":"bj-access-sw-17","site_id":"site-bj-hq","device_type":"wired_switch","model":"H3C S5560X","vendor":"H3C","firmware":"R7510P10","status":"online"},
+  {"device_id":"bj-wlc-01","site_id":"site-bj-hq","device_type":"wireless_controller","model":"Cisco 9800-40","vendor":"Cisco","firmware":"17.12.2","status":"online"},
+  {"device_id":"bj-ap-f7-03","site_id":"site-bj-hq","device_type":"wireless_ap","model":"Aironet 9130","vendor":"Cisco","firmware":"8.10.185","status":"online"},
+
+  {"device_id":"sh-core-sw-01","site_id":"site-sh-fin","device_type":"wired_switch","model":"Aruba 8325","vendor":"Aruba","firmware":"10.12.1020","status":"online"},
+  {"device_id":"sh-wlc-01","site_id":"site-sh-fin","device_type":"wireless_controller","model":"Aruba 7210","vendor":"Aruba","firmware":"8.11.2.3","status":"online"},
+  {"device_id":"sh-ap-f12-08","site_id":"site-sh-fin","device_type":"wireless_ap","model":"Aruba AP-635","vendor":"Aruba","firmware":"10.6.0.2","status":"online"},
+
+  {"device_id":"gz-core-sw-01","site_id":"site-gz-rd","device_type":"wired_switch","model":"Huawei S6730","vendor":"Huawei","firmware":"V200R022","status":"online"},
+  {"device_id":"gz-wlc-01","site_id":"site-gz-rd","device_type":"wireless_controller","model":"Huawei AC6508","vendor":"Huawei","firmware":"V200R021","status":"online"},
+  {"device_id":"gz-ap-lab-04","site_id":"site-gz-rd","device_type":"wireless_ap","model":"Huawei AP7060","vendor":"Huawei","firmware":"V200R021","status":"online"},
+
+  {"device_id":"sz-core-sw-01","site_id":"site-sz-ops","device_type":"wired_switch","model":"Juniper EX4650","vendor":"Juniper","firmware":"23.4R1","status":"online"},
+  {"device_id":"sz-edge-sw-03","site_id":"site-sz-ops","device_type":"wired_switch","model":"Juniper EX4400","vendor":"Juniper","firmware":"23.2R2","status":"degraded"},
+  {"device_id":"sz-wlc-01","site_id":"site-sz-ops","device_type":"wireless_controller","model":"Mist Edge","vendor":"Juniper","firmware":"1.9.2","status":"online"},
+  {"device_id":"sz-ap-c7-12","site_id":"site-sz-ops","device_type":"wireless_ap","model":"Juniper AP45","vendor":"Juniper","firmware":"0.11.31680","status":"online"},
+
+  {"device_id":"cd-core-sw-01","site_id":"site-cd-west","device_type":"wired_switch","model":"Ruijie RG-S6220","vendor":"Ruijie","firmware":"11.4(1)","status":"online"},
+  {"device_id":"cd-wlc-01","site_id":"site-cd-west","device_type":"wireless_controller","model":"Ruijie WS6008","vendor":"Ruijie","firmware":"3.5.1","status":"online"},
+  {"device_id":"cd-ap-a3-02","site_id":"site-cd-west","device_type":"wireless_ap","model":"Ruijie AP820-I","vendor":"Ruijie","firmware":"3.5.1","status":"online"},
+
+  {"device_id":"wh-core-sw-01","site_id":"site-wh-delivery","device_type":"wired_switch","model":"Cisco C9300","vendor":"Cisco","firmware":"17.6.5","status":"online"},
+  {"device_id":"wh-wlc-01","site_id":"site-wh-delivery","device_type":"wireless_controller","model":"Cisco 9800-L","vendor":"Cisco","firmware":"17.9.3","status":"online"},
+  {"device_id":"wh-ap-e2-06","site_id":"site-wh-delivery","device_type":"wireless_ap","model":"Cisco 9120","vendor":"Cisco","firmware":"8.10.183","status":"offline"}
+]

@@ -40,7 +40,7 @@ duck egg. How much in dollars does she make every day at the farmers' market?
   <p>图 11.1 LLM 训练全景图</p>
 </div>
 
-<strong>预训练阶段</strong>是 LLM 训练的第一阶段，目标是让模型学习语言的基本规律和世界知识。这个阶段使用海量的文本数据(通常是数 TB 级别)，通过自监督学习的方式训练模型。最常见的预训练任务是因果语言建模(Causal Language Modeling)，也称为下一个词预测(Next Token Prediction)。
+<strong>预训练阶段</strong>是 LLM 训练的第一阶段，目标是让模型学习语言的基本规律和世界知识。这个阶段使用海量的文本数据(通常是数 TB 级别)，通过自监督学习的方式训练模型：训练信号来自文本本身，例如根据上文预测下一个词。最常见的预训练任务是因果语言建模(Causal Language Modeling)，也称为下一个词预测(Next Token Prediction)。
 
 给定一个文本序列 $x_1, x_2, ..., x_t$，模型需要预测下一个词 $x_{t+1}$:
 
@@ -50,7 +50,7 @@ $$
 
 其中 $\theta$ 是模型参数，$P(x_t | x_1, ..., x_{t-1}; \theta)$ 是模型预测的下一个词的概率分布，目标是最小化负对数似然，即最大化预测正确词的概率。例如，给定文本"The cat sat on the"，模型需要预测下一个词最可能是"mat"。通过在海量文本上进行这样的训练，模型逐渐学会语法规则(什么样的词序是合法的)、语义知识(词与词之间的关系)、世界知识(关于世界的事实性信息)以及基础的推理能力。
 
-预训练阶段的特点是数据量巨大、计算成本高、学到的是通用的语言理解和生成能力、采用无监督学习。
+预训练阶段的特点是数据量巨大、计算成本高，学到的是通用的语言理解和生成能力，训练过程通常采用从未标注文本中自动构造监督信号的自监督目标。
 
 <strong>后训练阶段</strong>则是要解决预训练模型的不足。预训练后的模型虽然具备了强大的语言能力，但它只是一个"预测下一个词"的模型，并不知道如何遵循人类的指令、生成有帮助无害诚实的回答、拒绝不当的请求，以及以对话的方式与人交互。后训练阶段就是要解决这些问题，让模型对齐人类的偏好和价值观。
 
@@ -90,7 +90,7 @@ $$
 
 可以看到，Agentic RL 的关键特征是多步交互、每一步的行动都会改变环境状态、每一步都可以获得反馈、优化整个任务的完成质量。
 
-强化学习是基于马尔可夫决策过程(Markov Decision Process， MDP)框架进行形式化的。MDP 由五元组 $(S, A, P, R, \gamma)$ 定义:状态空间$S$、行动空间$A$、状态转移函数$P(s'|s,a)$、奖励函数$R(s,a)$、折扣因子$\gamma$。让我们从 MDP 的角度对比 PBRFT 和 Agentic RL，如表 11.1 所示。
+强化学习常用马尔可夫决策过程(Markov Decision Process，MDP)框架进行形式化。MDP 由五元组 $(S, A, P, R, \gamma)$ 定义：状态空间 $S$、行动空间 $A$、状态转移函数 $P(s'|s,a)$、奖励函数 $R(s,a)$ 和折扣因子 $\gamma$。下表从 MDP 角度对比 PBRFT 和 Agentic RL。
 
 <div align="center">
   <p>表 11.1 PBRFT 与 Agentic RL 对比</p>
@@ -187,7 +187,7 @@ rl_tool = RLTrainingTool()
 
 # 1. 快速测试:SFT训练(10个样本，1个epoch)
 sft_result_str = rl_tool.run({
-    "action": "train"，
+    "action": "train",
     "algorithm": "sft",
     "model_name": "Qwen/Qwen3-0.6B",
     "output_dir": "./models/quick_test_sft",
@@ -1254,7 +1254,7 @@ GRPO 有一些特定的参数需要理解和调优。
 
 <strong>优化参数</strong>:
 
-- `learning_rate`: GRPO 的学习率通常比 SFT 小，因为我们不想偏离 SFT 模型太远。建议 1e-5 到 5e-5。
+- `learning_rate`: GRPO 的学习率通常比 SFT 小，因为我们不想偏离 SFT 模型太远。建议 1e-6 到 1e-5；小模型上学习率过大（如 5e-5）可能导致策略坍塌。
 - `kl_coef`: KL 散度惩罚系数，控制策略更新的幅度。太小(0.01)可能导致策略偏离太远，太大(0.5)可能限制学习。建议 0.05-0.1。
 - `clip_range`: 策略比率裁剪范围，类似 PPO 的 epsilon。建议 0.2。
 
@@ -2207,6 +2207,7 @@ print(f"最佳准确率: {study.best_value:.2%}")
   <p>表 11.8 超参数调优方法对比</p>
   <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/11-figures/11-table-8.png" alt="" width="85%"/>
 </div>
+
 ### 11.6.3 分布式训练
 
 当数据量和模型规模增大时，单 GPU 训练会变得非常缓慢。这时我们需要使用分布式训练来加速训练过程。HelloAgents 基于 TRL 和 Hugging Face Accelerate，天然支持多 GPU 和多节点分布式训练

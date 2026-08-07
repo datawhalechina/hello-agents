@@ -1,0 +1,42 @@
+@"
+# --- 环境变量与敏感信息 ---
+.env
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# --- Jupyter Notebook ---
+.ipynb_checkpoints/
+*.ipynb_checkpoints/
+
+# --- 虚拟环境 ---
+venv/
+.venv/
+env/
+envs/
+.conda/
+virtualenv/
+
+# --- IDE/编辑器 ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# --- 日志与临时文件 ---
+*.log
+*.tmp
+
+# --- 运行时输出 ---
+output/
+"@ | Set-Content -Path "Co-creation-projects\Johnx-w-EmailDigestAgent\.gitignore" -Encoding UTF8

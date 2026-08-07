@@ -1,0 +1,7 @@
+openai==2.21.0
+dotenv==0.9.9
+matplotlib==3.10.8
+numpy==2.3.5
+sympy==1.14.0
+func-timeout==4.3.5
+hello-agents==1.0.0

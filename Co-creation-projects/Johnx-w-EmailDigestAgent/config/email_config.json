@@ -1,0 +1,49 @@
+{
+  "imap": {
+    "server": "imap.qq.com",
+    "port": 993,
+    "use_ssl": true,
+    "username": "your_email@qq.com",
+    "password": "你的IMAP授权码",
+    "max_emails_per_fetch": 50
+  },
+  "presets": {
+    "qq": {
+      "server": "imap.qq.com",
+      "port": 993,
+      "note": "需要在QQ邮箱设置中开启IMAP/SMTP服务，使用授权码而非登录密码"
+    },
+    "163": {
+      "server": "imap.163.com",
+      "port": 993,
+      "note": "需要在网易邮箱设置中开启IMAP/SMTP服务，使用授权码"
+    },
+    "126": {
+      "server": "imap.126.com",
+      "port": 993,
+      "note": "同163邮箱配置方式"
+    },
+    "gmail": {
+      "server": "imap.gmail.com",
+      "port": 993,
+      "note": "需要开启两步验证后生成应用专用密码，或使用OAuth"
+    },
+    "outlook": {
+      "server": "outlook.office365.com",
+      "port": 993,
+      "note": "微软邮箱，使用登录密码或应用专用密码"
+    }
+  },
+  "classification_categories": {
+    "work": "工作相关（会议、项目、任务、汇报）",
+    "client": "客户/外部合作（咨询、需求、合同）",
+    "personal": "个人（同事闲聊、团建、活动）",
+    "notification": "系统通知（Jira、GitHub、CI/CD、日历）",
+    "promotion": "促销/营销（广告、推广、优惠）",
+    "spam": "垃圾邮件"
+  },
+  "priority_rules": {
+    "high_keywords": ["紧急", "urgent", "asap", "deadline", "截止", "重要", "important", "合同", "审批"],
+    "low_keywords": ["newsletter", "周报", "日报", "通知", "订阅", "promotion", "offer"]
+  }
+}

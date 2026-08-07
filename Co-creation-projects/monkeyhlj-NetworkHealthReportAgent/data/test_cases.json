@@ -1,0 +1,20 @@
+[
+  {
+    "name": "default_week_shanghai",
+    "site_id": "site-sh-fin",
+    "start_date": "2026-05-23",
+    "end_date": "2026-05-29",
+    "expected": {
+      "health_level": "warning"
+    }
+  },
+  {
+    "name": "default_week_beijing",
+    "site_id": "site-bj-hq",
+    "start_date": "2026-05-23",
+    "end_date": "2026-05-29",
+    "expected": {
+      "health_level": "healthy"
+    }
+  }
+]

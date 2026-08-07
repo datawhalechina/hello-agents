@@ -193,6 +193,14 @@
             background-color: var(--theme-color);
             color: white;
         }
+
+        /* 深色模式下修正 docsify 自带 .sidebar-toggle (左下角汉堡) 的浅色背景 */
+        /* vue.css 默认写死 background-color: hsla(0,0%,100%,.8)，并在小屏折叠态
+           (body.close .sidebar-toggle) 下回写同色，这里一并覆盖 */
+        body.dark-mode .sidebar-toggle,
+        body.dark-mode.close .sidebar-toggle {
+            background-color: transparent;
+        }
     </style>
 </head>
 
@@ -214,11 +222,15 @@
             alias: {
                 // 英文路径映射
                 '/en/README.md': '/README_EN.md',
+                '/en/README_EN.md': '/README_EN.md',
+                '/en/Preface.md': '/Preface.md',
                 '/en/_sidebar.md': '/_sidebar_en.md',
-                '/en/chapter(\\d+)/Chapter(.*)': '/chapter$1/Chapter$2',
+                '/en/.*/_sidebar.md': '/_sidebar_en.md',
+                '/en/(.*)': '/$1',
 
                 // 默认中文侧边栏
-                '/_sidebar.md': '/_sidebar.md'
+                '/_sidebar.md': '/_sidebar.md',
+                '/.*/_sidebar.md': '/_sidebar.md'
             },
             pagination: {
                 previousText: '上一章节',

@@ -1,0 +1,39 @@
+{
+  "incident_id": "INC-001",
+  "service": "checkout-service",
+  "severity": "P1",
+  "alert": {
+    "metric": "http_request_duration_p99",
+    "value": 8.3,
+    "threshold": 1.0,
+    "unit": "seconds",
+    "timestamp": "2024-01-15T14:03:22Z",
+    "description": "P99 request latency critically exceeds SLO threshold"
+  },
+  "logs": [
+    {"timestamp": "2024-01-15T13:58:10Z", "level": "INFO",     "message": "Deployment: checkout-service v2.3.1 rolled out successfully (0 errors during rollout)"},
+    {"timestamp": "2024-01-15T13:59:02Z", "level": "WARN",     "message": "Redis cache miss rate elevated: 34% (threshold 30%) — cache warming in progress"},
+    {"timestamp": "2024-01-15T14:00:01Z", "level": "INFO",     "message": "Processing checkout request user_id=12345 order_id=98001"},
+    {"timestamp": "2024-01-15T14:00:03Z", "level": "WARN",     "message": "DB connection pool: 8/10 connections in use"},
+    {"timestamp": "2024-01-15T14:00:20Z", "level": "WARN",     "message": "JVM GC pause: 420ms stop-the-world collection (heap 78% utilised) — within acceptable range"},
+    {"timestamp": "2024-01-15T14:00:45Z", "level": "ERROR",    "message": "Health check /actuator/health returned 503 from upstream load balancer — retrying (attempt 1/3)"},
+    {"timestamp": "2024-01-15T14:01:00Z", "level": "INFO",     "message": "Health check recovered after retry — upstream responding normally"},
+    {"timestamp": "2024-01-15T14:01:15Z", "level": "WARN",     "message": "DB connection pool: 10/10 connections in use, queuing requests"},
+    {"timestamp": "2024-01-15T14:01:30Z", "level": "WARN",     "message": "Stripe webhook delivery delayed 1200ms (SLA=500ms) — possible downstream congestion"},
+    {"timestamp": "2024-01-15T14:01:45Z", "level": "ERROR",    "message": "DB connection pool exhausted — waiting for available connection (timeout=30s)"},
+    {"timestamp": "2024-01-15T14:02:00Z", "level": "ERROR",    "message": "Query timeout: SELECT * FROM orders WHERE user_id=12345 (full table scan, duration=30s)"},
+    {"timestamp": "2024-01-15T14:02:01Z", "level": "ERROR",    "message": "DB connection pool exhausted — waiting for available connection (timeout=30s)"},
+    {"timestamp": "2024-01-15T14:02:15Z", "level": "WARN",     "message": "Datadog agent: metric submission backlog 850 points — host under load"},
+    {"timestamp": "2024-01-15T14:02:30Z", "level": "ERROR",    "message": "SQLSTATE[HY000]: General error: too many connections"},
+    {"timestamp": "2024-01-15T14:03:00Z", "level": "CRITICAL", "message": "checkout-service: request queue depth=450, dropping new requests"},
+    {"timestamp": "2024-01-15T14:03:22Z", "level": "ALERT",    "message": "P1 FIRED: http_request_duration_p99=8.3s exceeds threshold=1.0s"}
+  ],
+  "metrics": {
+    "http_request_duration_p99": {"14:00": 0.3, "14:01": 1.2, "14:02": 4.7, "14:03": 8.3},
+    "db_pool_active_connections": {"14:00": 3, "14:01": 8, "14:02": 10, "14:03": 10},
+    "db_query_duration_p99_ms":   {"14:00": 45, "14:01": 280, "14:02": 12000, "14:03": 30000},
+    "request_queue_depth":        {"14:00": 12, "14:01": 85, "14:02": 220, "14:03": 450}
+  },
+  "root_cause": "Missing index on orders.user_id causing full table scan. At high load each scan holds a DB connection for 30s+, exhausting the pool of 10 connections.",
+  "affected_users": 2847
+}

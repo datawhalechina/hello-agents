@@ -1,0 +1,4 @@
+# 核心依赖
+hello-agents[all]>=0.2.7
+paddlenlp>=2.6.1
+pandas

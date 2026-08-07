@@ -1501,7 +1501,7 @@ As shown in Figure 12.4, fill in information in submission form:
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/12-figures/12-4.png" alt="" width="85%"/>
-  <p>Figure 12.4 BFCL Evaluation Process Diagram</p>
+  <p>Figure 12.4 GAIA Evaluation Process Diagram</p>
 </div>
 
 Before submission, you can manually check the generated JSONL file:

@@ -1,0 +1,15 @@
+# API 密钥
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# 个人数据
+memory/
+skills/
+tool-output/
+
+# IDE
+.idea/
+.vscode/

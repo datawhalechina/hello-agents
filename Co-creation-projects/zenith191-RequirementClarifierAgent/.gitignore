@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+memory/
+tool-output/
+
+# 根目录规则会忽略 test_*.py；毕业设计需要显式纳入测试文件。
+!tests/
+!tests/test_*.py

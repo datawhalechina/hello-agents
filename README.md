@@ -40,7 +40,7 @@
 - 📖 <strong>Datawhale 开源免费</strong> 完全免费学习本项目所有内容，与社区共同成长
 - 🔍 <strong>理解核心原理</strong> 深入理解智能体的概念、历史与经典范式
 - 🏗️ <strong>亲手实现</strong> 掌握热门低代码平台和智能体代码框架的使用
-- 🛠️ <strong>自研框架[HelloAgents](https://github.com/jjyaoao/helloagents)</strong> 基于 Openai 原生 API 从零构建一个自己的智能体框架
+- 🛠️ <strong>自研框架 [HelloAgents](https://github.com/jjyaoao/helloagents)</strong> 基于 Openai 原生 API 从零构建一个自己的智能体框架
 - ⚙️ <strong>掌握高级技能</strong> 一步步实现上下文工程、Memory、协议、评估等系统性技术
 - 🤝 <strong>模型训练</strong> 掌握 Agentic RL，从 SFT 到 GRPO 的全流程实战训练 LLM
 - 🚀 <strong>驱动真实案例</strong> 实战开发智能旅行助手、赛博小镇等综合项目
@@ -90,6 +90,10 @@
 | [07-环境配置](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra07-环境配置.md)                | 环境配置 |
 | [08-如何写出好的Skill](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra08-如何写出好的Skill.md) | Skill 写作最佳实践 |
 | [09-Agent应用开发实践踩坑与经验分享](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra09-Agent应用开发实践踩坑与经验分享.md) | Code Agent 应用开发踩坑与经验总结 |
+| [10-Agent Self-Evolution智能体自进化](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra10-Agent自进化.md) | Agent 自进化四类闭环与代表项目 |
+| [11-WebAgent科普与实战](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra11-WebAgent科普与实战.md) | Web Agent 原理、反爬实战与 HelloAgents 集成 |
+| [12-旅行助手后训练实战](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra12-旅行助手后训练实战.md) | 把旅行助手 Demo 打磨成能用的 Planner |
+| [13-Hello-Agents视频课录制共创](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra13-Hello-Agents视频课录制共创.md) | 视频课程共创录制资源 |
 
 ### PDF 版本下载
 
@@ -125,7 +129,8 @@
 
 - 视频课程陆续放出（将会更加细致，实践课带领大家从设计思路到实施，授人以鱼也授人以渔）
 - HelloAgents框架已经更新V1.0.0版本，将会继续完善，增加更多好用，轻量化的工具和特性，兼容学习版本。
-- 感谢大家助力4W Star! 现在提供调查问卷，供大家填写自己需要学习的智能体内容。后续作品《从零开始训练智能体》，帮助每一个学习者掌握从零到一训练自定义场景智能体模型的能力。
+- 2026年5月更新智能体最新学习路线, [点击](https://github.com/datawhalechina/Agent-Learning-Hub) 查询
+- 感谢大家助力7W Star! 现在提供调查问卷，供大家填写自己需要学习的智能体内容。后续作品《从零开始训练智能体》，帮助每一个学习者掌握从零到一训练自定义场景智能体模型的能力。
 <div align='center'>
     <img src="./读者反馈问卷.png" alt="读者反馈问卷" width="30%">
     <p>扫描二维码填写反馈意见，助力新项目共同成长</p>
@@ -143,11 +148,12 @@
 ## 🙏 致谢
 
 ### 核心贡献者
-- [陈思州-项目负责人](https://github.com/jjyaoao) (Datawhale 成员, 全文写作和校对)
+- [陈思州-项目负责人](https://github.com/jjyaoao) (Datawhale 成员, 全文写作和校对) <a href="https://www.xiaohongshu.com/user/profile/67b9cc34000000000e013517" target="_blank"><img alt="Static Badge" src="https://img.shields.io/badge/Rednote-小红书-e93c49"></a>
 - [孙韬-联合发起者](https://github.com/fengju0213) (Datawhale 成员、CAMEL-AI, 第九章内容和校对)  
 - [姜舒凡-联合发起者](https://github.com/Tsumugii24)（Datawhale 成员, 章节习题设计和校对）
 - [黄佩林-Datawhale意向成员](https://github.com/HeteroCat) (Agent 开发工程师, 第五章内容贡献者)
 - [曾鑫民-Agent工程师](https://github.com/fancyboi999) (牛客科技, 第十四章案例开发)
+- [胡昊-运营组织者](https://github.com/ACGpp) (Datawhale成员)
 - [朱信忠-指导专家](https://xinzhongzhu.github.io/) (Datawhale首席科学家-浙江师范大学杭州人工智能研究院教授)
 ### Extra-Chapter 贡献者
 - [WH](https://github.com/WHQAQ11) (内容贡献者)
@@ -156,6 +162,9 @@
 - [黄宏晗-DW贡献者团队](https://github.com/XiaoMa-PM) (深圳大学, Extra04 内容贡献)
 - [王大鹏-Datawhale成员](https://github.com/ditingdapeng) (高级研发工程师, Extra08 内容贡献)
 - [尤逸晖-个人开发者](https://github.com/YYHDBL) (南京信息工程大学, Extra09 内容贡献)
+- [殷鑫-个人开发者](https://github.com/vinci-grape) (浙江大学, Extra10 内容贡献)
+- [Pranav Janakiraman-个人开发者](https://github.com/pranavjana) (TinyFish, Extra11 内容贡献)
+- [王雨飞-个人开发者](https://github.com/nameless0120) (北京邮电大学，Extra12 内容贡献)
 
 ### 特别感谢
 - 感谢 [@Sm1les](https://github.com/Sm1les) 对本项目的帮助与支持
@@ -170,7 +179,7 @@
 ## Star History
 
 <div align='center'>
-    <img src="./docs/images/star-history-2026424.png" alt="Datawhale" width="90%">
+    <img src="./docs/images/0803-hello-agents-stats.png" alt="Datawhale" width="90%">
 </div>
 
 <div align="center">
@@ -190,6 +199,20 @@
     <img src="./docs/images/datawhale.png" alt="Datawhale" width="30%">
     <p>扫描二维码关注 Datawhale 公众号，获取更多优质开源内容</p>
 </div>
+
+## 🎓 引用
+
+如果 Hello-Agents 对您的研究或工作有所帮助，欢迎引用：
+
+```bibtex
+@misc{hello_agents2025,
+  title  = {Hello-Agents: Building an AI Agent from Scratch},
+  author = {Sizhou Chen and Tao Sun and Shufan Jiang and Peilin Huang and Xinmin Zeng and Hao Hu and Xinzhong Zhu and all Hello-Agents contributors},
+  year   = {2025},
+  url    = {https://github.com/datawhalechina/Hello-Agents},
+  note   = {GitHub repository}
+}
+```
 
 ---
 

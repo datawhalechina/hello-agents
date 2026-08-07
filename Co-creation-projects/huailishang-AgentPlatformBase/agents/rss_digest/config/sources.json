@@ -1,0 +1,148 @@
+{
+  "sources": [
+    {
+      "name": "Andrej Karpathy",
+      "category": "AI/LLM Practice",
+      "site_url": "https://karpathy.bearblog.dev",
+      "feed_url": "https://karpathy.bearblog.dev/feed/"
+    },
+    {
+      "name": "Simon Willison",
+      "category": "AI/LLM Practice",
+      "site_url": "https://simonwillison.net",
+      "feed_url": "https://simonwillison.net/atom/everything/"
+    },
+    {
+      "name": "minimaxir",
+      "category": "AI/LLM Practice",
+      "site_url": "https://minimaxir.com",
+      "feed_url": "https://minimaxir.com/index.xml"
+    },
+    {
+      "name": "Gwern",
+      "category": "AI/LLM Practice",
+      "site_url": "https://gwern.net",
+      "feed_url": "https://gwern.substack.com/feed"
+    },
+    {
+      "name": "Gary Marcus",
+      "category": "AI/LLM Critique",
+      "site_url": "https://garymarcus.substack.com",
+      "feed_url": "https://garymarcus.substack.com/feed"
+    },
+    {
+      "name": "Ethan Mollick",
+      "category": "AI/LLM Practice",
+      "site_url": "https://www.oneusefulthing.org",
+      "feed_url": "https://www.oneusefulthing.org/feed"
+    },
+    {
+      "name": "Latent.Space",
+      "category": "AI/LLM Practice",
+      "site_url": "https://www.latent.space",
+      "feed_url": "https://www.latent.space/feed"
+    },
+    {
+      "name": "Chip Huyen",
+      "category": "AI/LLM Practice",
+      "site_url": "https://huyenchip.com",
+      "feed_url": "https://huyenchip.com/feed.xml"
+    },
+    {
+      "name": "Sebastian Raschka",
+      "category": "AI/LLM Practice",
+      "site_url": "https://sebastianraschka.com",
+      "feed_url": "https://sebastianraschka.com/rss_feed.xml"
+    },
+    {
+      "name": "Eugene Yan",
+      "category": "AI/LLM Practice",
+      "site_url": "https://eugeneyan.com",
+      "feed_url": "https://eugeneyan.com/feed.xml"
+    },
+    {
+      "name": "geohot",
+      "category": "AI/Engineering",
+      "site_url": "https://geohot.github.io",
+      "feed_url": "https://geohot.github.io/blog/feed.xml"
+    },
+    {
+      "name": "Paul Graham",
+      "category": "Business and Long-term Judgment",
+      "site_url": "https://paulgraham.com",
+      "feed_url": "http://www.aaronsw.com/2002/feeds/pgessays.rss"
+    },
+    {
+      "name": "Dwarkesh Patel",
+      "category": "Business and Long-term Judgment",
+      "site_url": "https://www.dwarkeshpatel.com",
+      "feed_url": "https://www.dwarkeshpatel.com/feed"
+    },
+    {
+      "name": "Where's Your Ed At",
+      "category": "Business and Long-term Judgment",
+      "site_url": "https://www.wheresyoured.at",
+      "feed_url": "https://www.wheresyoured.at/rss/"
+    },
+    {
+      "name": "Joan Westenberg",
+      "category": "AI/Industry Commentary",
+      "site_url": "https://joanwestenberg.com",
+      "feed_url": "https://joanwestenberg.com/rss"
+    },
+    {
+      "name": "Geoffrey Litt",
+      "category": "AI-adjacent Product Thinking",
+      "site_url": "https://geoffreylitt.com",
+      "feed_url": "https://www.geoffreylitt.com/feed.xml"
+    },
+    {
+      "name": "Derek Thompson",
+      "category": "AI-adjacent Industry Trends",
+      "site_url": "https://derekthompson.org",
+      "feed_url": "https://www.theatlantic.com/feed/author/derek-thompson/"
+    },
+    {
+      "name": "Ben Evans",
+      "category": "Business and Long-term Judgment",
+      "site_url": "https://www.ben-evans.com",
+      "feed_url": "https://www.ben-evans.com/benedictevans?format=rss"
+    },
+    {
+      "name": "Stratechery",
+      "category": "Business and Long-term Judgment",
+      "site_url": "https://stratechery.com",
+      "feed_url": "https://stratechery.com/feed/"
+    },
+    {
+      "name": "Asterisk Mag",
+      "category": "Business and Long-term Judgment",
+      "site_url": "https://asteriskmag.com",
+      "feed_url": "https://asteriskmag.com/feed"
+    },
+    {
+      "name": "Steve Blank",
+      "category": "AI-adjacent Business Thinking",
+      "site_url": "https://steveblank.com",
+      "feed_url": "https://steveblank.com/feed/"
+    },
+    {
+      "name": "Construction Physics",
+      "category": "AI-adjacent Industry Trends",
+      "site_url": "https://construction-physics.com",
+      "feed_url": "https://www.construction-physics.com/feed"
+    },
+    {
+      "name": "Experimental History",
+      "category": "AI-adjacent Science and Society",
+      "site_url": "https://experimental-history.com",
+      "feed_url": "https://www.experimental-history.com/feed"
+    },
+    {
+      "name": "Anil Dash",
+      "category": "AI-adjacent Technology Culture",
+      "site_url": "https://anildash.com",
+      "feed_url": "https://anildash.com/feed.xml"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "incident_id": "INC-002",
+  "service": "auth-service",
+  "severity": "P1",
+  "alert": {
+    "metric": "pod_memory_usage_percent",
+    "value": 96.8,
+    "threshold": 85.0,
+    "unit": "percent",
+    "timestamp": "2024-01-16T09:47:33Z",
+    "description": "Pod memory usage approaching OOM limit"
+  },
+  "logs": [
+    {"timestamp": "2024-01-16T07:30:00Z", "level": "INFO",     "message": "auth-service started, heap=128MB, session_cache=enabled"},
+    {"timestamp": "2024-01-16T08:00:00Z", "level": "INFO",     "message": "Session cache initialized, entries=0, ttl=not_configured"},
+    {"timestamp": "2024-01-16T08:30:00Z", "level": "WARN",     "message": "Memory usage 45%, heap=460MB, session_cache_entries=15420"},
+    {"timestamp": "2024-01-16T09:00:00Z", "level": "WARN",     "message": "Memory usage 62%, heap=634MB, session_cache_entries=31200"},
+    {"timestamp": "2024-01-16T09:30:00Z", "level": "ERROR",    "message": "Memory usage 82%, heap=838MB, session_cache_entries=45800, GC pressure rising"},
+    {"timestamp": "2024-01-16T09:45:00Z", "level": "ERROR",    "message": "GC pause 2100ms — full GC running every 2s, application threads stalled"},
+    {"timestamp": "2024-01-16T09:47:20Z", "level": "CRITICAL", "message": "OOM imminent: heap=991MB/1024MB, session_cache_entries=52340, no eviction policy"},
+    {"timestamp": "2024-01-16T09:47:33Z", "level": "ALERT",    "message": "P1 FIRED: pod_memory_usage_percent=96.8 exceeds threshold=85.0"}
+  ],
+  "metrics": {
+    "pod_memory_usage_percent":  {"07:30": 12.5, "08:00": 22.1, "08:30": 45.0, "09:00": 62.0, "09:30": 82.0, "09:47": 96.8},
+    "session_cache_entries":     {"07:30": 0, "08:00": 0, "08:30": 15420, "09:00": 31200, "09:30": 45800, "09:47": 52340},
+    "gc_pause_ms":               {"07:30": 5, "08:00": 8, "08:30": 45, "09:00": 120, "09:30": 890, "09:47": 2100},
+    "auth_requests_per_sec":     {"07:30": 120, "08:00": 380, "08:30": 520, "09:00": 510, "09:30": 495, "09:47": 380}
+  },
+  "root_cause": "In-memory session cache has no TTL or eviction policy. Sessions accumulate indefinitely causing unbounded heap growth.",
+  "affected_users": 0
+}

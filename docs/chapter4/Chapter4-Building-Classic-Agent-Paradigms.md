@@ -92,6 +92,8 @@ class HelloAgentsLLM:
             print("✅ Large language model response successful:")
             collected_content = []
             for chunk in response:
+                if not chunk.choices:
+                    continue
                 content = chunk.choices[0].delta.content or ""
                 print(content, end="", flush=True)
                 collected_content.append(content)

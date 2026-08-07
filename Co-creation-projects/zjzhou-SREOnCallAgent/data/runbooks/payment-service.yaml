@@ -1,0 +1,30 @@
+service: payment-service
+runbook_version: "2.0"
+procedures:
+  - pattern: "Stripe API 429"
+    severity: P2
+    steps:
+      - "Immediately enable request queue with rate limiting: set STRIPE_MAX_RPS=40 in env and redeploy"
+      - "Enable exponential backoff on retries: set STRIPE_RETRY_BACKOFF=exponential, STRIPE_RETRY_INITIAL_DELAY_MS=1000"
+      - "Check Stripe dashboard for current rate limit quota and usage"
+      - "If a promotional event is active, implement request queuing to smooth burst traffic"
+      - "Add circuit breaker: open circuit if stripe_api_error_rate > 50% for 30s; queue requests locally"
+      - "For sustained high volume: contact Stripe to raise rate limits; consider async Payment Intents API"
+      - "Monitor stripe_api_error_rate and payment_success_rate until both return to baseline"
+
+  - pattern: "payment_success_rate low"
+    severity: P2
+    steps:
+      - "Identify root cause category: check stripe_api_error_rate vs internal payment errors"
+      - "For Stripe rate limit issues: follow 'Stripe API 429' procedure above"
+      - "For authentication failures: verify API key is valid and not expired in Stripe dashboard"
+      - "For network issues: check VPC NAT gateway health and egress bandwidth utilization"
+      - "Communicate status to customer support team with estimated recovery time"
+
+  - pattern: "retry storm"
+    severity: P1
+    steps:
+      - "Immediately disable retries in payment-service config to stop amplification"
+      - "Wait for upstream rate limit window to reset (check retry_after header in logs)"
+      - "Re-enable retries only after adding exponential backoff with jitter"
+      - "Post-incident: add retry budget enforcement to prevent retry storm recurrence"

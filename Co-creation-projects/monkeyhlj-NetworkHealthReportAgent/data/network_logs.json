@@ -1,0 +1,12 @@
+[
+  {"timestamp":"2026-05-29T08:11:23+08:00","site_id":"site-sh-fin","device_id":"sh-wlc-01","severity":"critical","event_type":"auth_failure_spike","message":"802.1X authentication failures exceeded threshold: 176 events/5min"},
+  {"timestamp":"2026-05-29T08:13:10+08:00","site_id":"site-sh-fin","device_id":"sh-ap-f12-08","severity":"warning","event_type":"channel_interference","message":"Detected high 5GHz co-channel interference, channel utilization 86%"},
+  {"timestamp":"2026-05-29T09:42:54+08:00","site_id":"site-sz-ops","device_id":"sz-edge-sw-03","severity":"critical","event_type":"uplink_flap","message":"TenGig uplink flapping detected on xe-0/0/47, 9 flaps in 1 hour"},
+  {"timestamp":"2026-05-29T09:58:03+08:00","site_id":"site-wh-delivery","device_id":"wh-ap-e2-06","severity":"critical","event_type":"ap_offline","message":"AP disconnected from controller for 23 minutes"},
+  {"timestamp":"2026-05-29T10:21:16+08:00","site_id":"site-bj-hq","device_id":"bj-core-sw-01","severity":"warning","event_type":"high_cpu","message":"CPU utilization above 80% for 7 minutes due to backup window"},
+  {"timestamp":"2026-05-29T11:30:44+08:00","site_id":"site-gz-rd","device_id":"gz-wlc-01","severity":"info","event_type":"config_change","message":"Wireless profile updated by netops user: tx-power policy adjusted"},
+  {"timestamp":"2026-05-29T12:17:52+08:00","site_id":"site-cd-west","device_id":"cd-core-sw-01","severity":"warning","event_type":"crc_errors","message":"CRC errors observed on access port ge1/0/23, cable quality suspected"},
+  {"timestamp":"2026-05-29T13:04:11+08:00","site_id":"site-bj-hq","device_id":"bj-ap-f7-03","severity":"info","event_type":"roaming_peak","message":"Client roaming peak reached 154 transitions/hour, within normal range"},
+  {"timestamp":"2026-05-29T14:25:39+08:00","site_id":"site-sz-ops","device_id":"sz-wlc-01","severity":"warning","event_type":"dhcp_latency","message":"Average DHCP ACK delay increased to 410ms"},
+  {"timestamp":"2026-05-29T15:08:27+08:00","site_id":"site-wh-delivery","device_id":"wh-core-sw-01","severity":"critical","event_type":"port_security_violation","message":"Multiple MAC violation events on port Gi1/0/34"}
+]

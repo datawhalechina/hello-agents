@@ -1,0 +1,2 @@
+# 从仓库根目录安装 Python 依赖（与 backend/requirements.txt 保持一致）
+-r backend/requirements.txt

@@ -1,0 +1,68 @@
+[
+  {
+    "site_id": "site-bj-hq",
+    "site_name": "北京总部园区",
+    "city": "北京",
+    "province": "北京市",
+    "latitude": 39.9042,
+    "longitude": 116.4074,
+    "region": "north",
+    "site_type": "hq",
+    "criticality": "high"
+  },
+  {
+    "site_id": "site-sh-fin",
+    "site_name": "上海金融中心",
+    "city": "上海",
+    "province": "上海市",
+    "latitude": 31.2304,
+    "longitude": 121.4737,
+    "region": "east",
+    "site_type": "branch",
+    "criticality": "high"
+  },
+  {
+    "site_id": "site-gz-rd",
+    "site_name": "广州研发中心",
+    "city": "广州",
+    "province": "广东省",
+    "latitude": 23.1291,
+    "longitude": 113.2644,
+    "region": "south",
+    "site_type": "rd",
+    "criticality": "medium"
+  },
+  {
+    "site_id": "site-sz-ops",
+    "site_name": "深圳运营中心",
+    "city": "深圳",
+    "province": "广东省",
+    "latitude": 22.5431,
+    "longitude": 114.0579,
+    "region": "south",
+    "site_type": "ops",
+    "criticality": "medium"
+  },
+  {
+    "site_id": "site-cd-west",
+    "site_name": "成都西区办公室",
+    "city": "成都",
+    "province": "四川省",
+    "latitude": 30.5728,
+    "longitude": 104.0668,
+    "region": "west",
+    "site_type": "branch",
+    "criticality": "medium"
+  },
+  {
+    "site_id": "site-wh-delivery",
+    "site_name": "武汉交付中心",
+    "city": "武汉",
+    "province": "湖北省",
+    "latitude": 30.5928,
+    "longitude": 114.3055,
+    "region": "central",
+    "site_type": "delivery",
+    "criticality": "low"
+  }
+]

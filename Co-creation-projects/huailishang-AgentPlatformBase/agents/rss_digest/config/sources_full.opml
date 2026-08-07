@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="2.0">
+  <head>
+    <title>RSS Digest Full Sources</title>
+  </head>
+  <body>
+    <outline text="RSS Digest Full Sources" title="RSS Digest Full Sources">
+      <outline text="AI/LLM Practice" title="AI/LLM Practice">
+        <outline type="rss" text="Andrej Karpathy" title="Andrej Karpathy" xmlUrl="https://karpathy.bearblog.dev/feed/" htmlUrl="https://karpathy.bearblog.dev"/>
+        <outline type="rss" text="Simon Willison" title="Simon Willison" xmlUrl="https://simonwillison.net/atom/everything/" htmlUrl="https://simonwillison.net"/>
+        <outline type="rss" text="minimaxir" title="minimaxir" xmlUrl="https://minimaxir.com/index.xml" htmlUrl="https://minimaxir.com"/>
+        <outline type="rss" text="Gwern" title="Gwern" xmlUrl="https://gwern.substack.com/feed" htmlUrl="https://gwern.net"/>
+        <outline type="rss" text="Gary Marcus" title="Gary Marcus" xmlUrl="https://garymarcus.substack.com/feed" htmlUrl="https://garymarcus.substack.com"/>
+        <outline type="rss" text="Ethan Mollick" title="Ethan Mollick" xmlUrl="https://www.oneusefulthing.org/feed" htmlUrl="https://www.oneusefulthing.org"/>
+        <outline type="rss" text="Latent.Space" title="Latent.Space" xmlUrl="https://www.latent.space/feed" htmlUrl="https://www.latent.space"/>
+        <outline type="rss" text="Chip Huyen" title="Chip Huyen" xmlUrl="https://huyenchip.com/feed.xml" htmlUrl="https://huyenchip.com"/>
+        <outline type="rss" text="Sebastian Raschka" title="Sebastian Raschka" xmlUrl="https://sebastianraschka.com/rss_feed.xml" htmlUrl="https://sebastianraschka.com"/>
+        <outline type="rss" text="Eugene Yan" title="Eugene Yan" xmlUrl="https://eugeneyan.com/feed.xml" htmlUrl="https://eugeneyan.com"/>
+        <outline type="rss" text="geohot" title="geohot" xmlUrl="https://geohot.github.io/blog/feed.xml" htmlUrl="https://geohot.github.io"/>
+      </outline>
+      <outline text="Business and Long-term Judgment" title="Business and Long-term Judgment">
+        <outline type="rss" text="Paul Graham" title="Paul Graham" xmlUrl="http://www.aaronsw.com/2002/feeds/pgessays.rss" htmlUrl="https://paulgraham.com"/>
+        <outline type="rss" text="Dwarkesh Patel" title="Dwarkesh Patel" xmlUrl="https://www.dwarkeshpatel.com/feed" htmlUrl="https://www.dwarkeshpatel.com"/>
+        <outline type="rss" text="Where's Your Ed At" title="Where's Your Ed At" xmlUrl="https://www.wheresyoured.at/rss/" htmlUrl="https://www.wheresyoured.at"/>
+        <outline type="rss" text="Joan Westenberg" title="Joan Westenberg" xmlUrl="https://joanwestenberg.com/rss" htmlUrl="https://joanwestenberg.com"/>
+        <outline type="rss" text="Geoffrey Litt" title="Geoffrey Litt" xmlUrl="https://www.geoffreylitt.com/feed.xml" htmlUrl="https://geoffreylitt.com"/>
+        <outline type="rss" text="Derek Thompson" title="Derek Thompson" xmlUrl="https://www.theatlantic.com/feed/author/derek-thompson/" htmlUrl="https://derekthompson.org"/>
+        <outline type="rss" text="Ben Evans" title="Ben Evans" xmlUrl="https://www.ben-evans.com/benedictevans?format=rss" htmlUrl="https://www.ben-evans.com"/>
+        <outline type="rss" text="Stratechery" title="Stratechery" xmlUrl="https://stratechery.com/feed/" htmlUrl="https://stratechery.com"/>
+        <outline type="rss" text="Asterisk Mag" title="Asterisk Mag" xmlUrl="https://asteriskmag.com/feed" htmlUrl="https://asteriskmag.com"/>
+        <outline type="rss" text="Steve Blank" title="Steve Blank" xmlUrl="https://steveblank.com/feed/" htmlUrl="https://steveblank.com"/>
+        <outline type="rss" text="Construction Physics" title="Construction Physics" xmlUrl="https://www.construction-physics.com/feed" htmlUrl="https://construction-physics.com"/>
+        <outline type="rss" text="Experimental History" title="Experimental History" xmlUrl="https://www.experimental-history.com/feed" htmlUrl="https://experimental-history.com"/>
+        <outline type="rss" text="Anil Dash" title="Anil Dash" xmlUrl="https://anildash.com/feed.xml" htmlUrl="https://anildash.com"/>
+      </outline>
+    </outline>
+  </body>
+</opml>
