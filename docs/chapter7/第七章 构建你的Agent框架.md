@@ -617,7 +617,7 @@ SimpleAgent是最基础的Agent实现，它展示了如何在框架基础上构�
 ```python
 # my_simple_agent.py
 from typing import Optional, Iterator
-from hello_agents import SimpleAgent, HelloAgentsLLM, Config, Message,ToolRegistry
+from hello_agents import SimpleAgent, HelloAgentsLLM, Config, Message
 
 class MySimpleAgent(SimpleAgent):
     """
@@ -954,7 +954,7 @@ print(f"可用工具: {basic_agent.list_tools()}")
 print(f"\n对话历史: {len(basic_agent.get_history())} 条消息")
 ```
 
-在本节中，我们通过继承 `Agent` 基类，成功构建了一个功能完备且遵循框架规范的基础对话智能体 `MySimpleAgent`。它不仅支持基础对话，还具备可选的工具调用能力、流式响应和便利的工具管理方法。
+在本节中，我们通过继承框架中的 `SimpleAgent` 类并重写其核心方法，成功构建了一个功能完备且遵循框架规范的基础对话智能体 `MySimpleAgent`。它不仅支持基础对话，还具备可选的工具调用能力、流式响应和便利的工具管理方法。需要注意的是，本节实现的 `stream_run` 面向纯对话的流式输出，不会走 `_run_with_tools` 的多轮工具调用逻辑。
 
 ### 7.4.2 ReActAgent
 
