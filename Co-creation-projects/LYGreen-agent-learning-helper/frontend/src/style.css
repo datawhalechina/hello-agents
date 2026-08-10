@@ -1,0 +1,11 @@
+:root {
+  --primary: #6c5ce7;
+  --primary-hover: #8172f3;
+  --success: #00b894;
+  --error: #ff7675;
+  --bg-color: #f0f3f8;
+  --card-bg: #ffffff;
+  --text-main: #2d3436;
+  --text-sub: #636e72;
+  --border-radius: 16px;
+}
