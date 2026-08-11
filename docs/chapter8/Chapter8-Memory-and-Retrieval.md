@@ -340,25 +340,31 @@ agent.tool_registry = tool_registry
 print("=== Adding Multiple Memories ===")
 
 # Add first memory
-result1 = memory_tool.run("add", content="User Zhang San is a Python developer focusing on machine learning and data analysis", memory_type="semantic", importance=0.8)
+result1 = memory_tool.run(
+    {"action": "add", "content": "User Zhang San is a Python developer focusing on machine learning and data analysis",
+     "memory_type": "semantic", "importance": 0.8})
 print(f"Memory 1: {result1}")
 
 # Add second memory
-result2 = memory_tool.run("add", content="Li Si is a frontend engineer skilled in React and Vue.js development", memory_type="semantic", importance=0.7)
+result2 = memory_tool.run(
+    {"action": "add", "content": "Li Si is a frontend engineer skilled in React and Vue.js development",
+     "memory_type": "semantic", "importance": 0.7})
 print(f"Memory 2: {result2}")
 
 # Add third memory
-result3 = memory_tool.run("add", content="Wang Wu is a product manager responsible for user experience design and requirements analysis", memory_type="semantic", importance=0.6)
+result3 = memory_tool.run({"action": "add",
+                           "content": "Wang Wu is a product manager responsible for user experience design and requirements analysis",
+                           "memory_type": "semantic", "importance": 0.6})
 print(f"Memory 3: {result3}")
 
 print("\n=== Searching Specific Memories ===")
 # Search for frontend-related memories
 print("🔍 Searching 'frontend engineer':")
-result = memory_tool.run("search", query="frontend engineer", limit=3)
+result = memory_tool.run({"action": "search", "query": "frontend engineer", "limit": 3})
 print(result)
 
 print("\n=== Memory Summary ===")
-result = memory_tool.run("summary")
+result = memory_tool.run({"action": "summary"})
 print(result)
 ```
 
