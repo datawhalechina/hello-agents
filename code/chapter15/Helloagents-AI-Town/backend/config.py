@@ -3,6 +3,10 @@
 import os
 from typing import Optional
 
+from dotenv import load_dotenv
+
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+
 class Settings:
     """应用配置"""
     
@@ -39,4 +43,3 @@ class Settings:
         return True
 
 settings = Settings()
-
