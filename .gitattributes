@@ -1,0 +1,2 @@
+# Strip notebook outputs before storing in Git
+*.ipynb filter=nbstripout
