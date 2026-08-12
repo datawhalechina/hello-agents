@@ -1,0 +1,359 @@
+:root {
+    --primary-color: #4CAF50;
+    --bg-color: #f5f7fa;
+    --chat-bg: #ffffff;
+    --text-color: #333333;
+    --border-color: #e1e4e8;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+}
+
+.app-layout {
+    display: flex;
+    width: 100%;
+    max-width: 1400px;
+    height: 100%;
+    background-color: var(--chat-bg);
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+.sidebar {
+    width: 260px;
+    background-color: #f8f9fa;
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.right-sidebar {
+    border-right: none;
+    border-left: 1px solid var(--border-color);
+}
+
+.new-btn {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.new-btn:hover {
+    background-color: #45a049;
+}
+
+.session-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.session-item {
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.session-title {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 5px;
+}
+
+.delete-session-btn {
+    background: none;
+    border: none;
+    padding: 2px 5px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    color: #e74c3c;
+    font-size: 14px;
+}
+
+.session-item:hover .delete-session-btn {
+    opacity: 0.7;
+}
+
+.delete-session-btn:hover {
+    opacity: 1 !important;
+    transform: scale(1.2);
+}
+
+.session-item:hover, .session-item.active {
+    background-color: #e8f5e9;
+    border-color: var(--primary-color);
+}
+
+.session-item.active .delete-session-btn {
+    color: #c0392b;
+}
+
+.user-profile h3, .user-profile h4 {
+    margin-bottom: 15px;
+    margin-top: 0;
+    color: var(--text-color);
+}
+
+.level-section {
+    margin-bottom: 20px;
+}
+
+.level-section select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.history-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.history-list li {
+    background: #fff;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.container.main-chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-shadow: none;
+    max-width: none;
+}
+
+header {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    background-color: #fff;
+}
+
+header h1 {
+    margin: 0;
+    color: var(--primary-color);
+    font-size: 24px;
+}
+
+header p {
+    margin: 5px 0 0;
+    color: #666;
+    font-size: 14px;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chat-container {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.message {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+
+.bot-message {
+    align-self: flex-start;
+    background-color: #f0f2f5;
+    color: #1c1e21;
+    border-bottom-left-radius: 0;
+}
+
+.user-message {
+    align-self: flex-end;
+    background-color: var(--primary-color);
+    color: white;
+    border-bottom-right-radius: 0;
+}
+
+.input-area {
+    padding: 20px;
+    border-top: 1px solid var(--border-color);
+    background-color: #fff;
+}
+
+.file-upload {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.upload-btn {
+    background-color: #f0f2f5;
+    border: 1px solid var(--border-color);
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.upload-btn:hover {
+    background-color: #e4e6e9;
+}
+
+#file-name {
+    font-size: 14px;
+    color: #666;
+}
+
+.text-input {
+    display: flex;
+    gap: 10px;
+}
+
+textarea {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    resize: none;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.loading {
+    align-self: flex-start;
+    color: #666;
+    font-style: italic;
+    font-size: 14px;
+}
+
+/* 工具调用样式 */
+.tool-calls-container {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tool-call-block {
+    background-color: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    overflow: hidden;
+    font-size: 13px;
+}
+
+.tool-call-header {
+    background-color: #e9ecef;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #e1e4e8;
+}
+
+.tool-icon {
+    font-size: 14px;
+}
+
+.tool-name {
+    color: #495057;
+}
+
+.tool-call-details {
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tool-label {
+    font-weight: bold;
+    color: #6c757d;
+    margin-bottom: 4px;
+    font-size: 12px;
+}
+
+.tool-args pre, .tool-result pre {
+    margin: 0;
+    padding: 8px;
+    background-color: #212529;
+    color: #f8f9fa;
+    border-radius: 4px;
+    overflow-x: auto;
+    max-height: 200px;
+}
+
+.tool-args code, .tool-result code {
+    font-family: 'Consolas', 'Monaco', monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.message-text {
+    margin-top: 5px;
+}

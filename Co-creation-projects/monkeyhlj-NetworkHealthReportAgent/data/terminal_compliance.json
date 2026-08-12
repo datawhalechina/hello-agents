@@ -1,0 +1,8 @@
+[
+  {"date":"2026-05-29","site_id":"site-bj-hq","wired_clients":812,"wireless_clients":1260,"unknown_clients":13,"compliant_rate":0.982,"high_risk_terminals":9,"guest_network_ratio":0.134},
+  {"date":"2026-05-29","site_id":"site-sh-fin","wired_clients":645,"wireless_clients":1045,"unknown_clients":27,"compliant_rate":0.946,"high_risk_terminals":21,"guest_network_ratio":0.178},
+  {"date":"2026-05-29","site_id":"site-gz-rd","wired_clients":523,"wireless_clients":738,"unknown_clients":14,"compliant_rate":0.967,"high_risk_terminals":12,"guest_network_ratio":0.152},
+  {"date":"2026-05-29","site_id":"site-sz-ops","wired_clients":701,"wireless_clients":998,"unknown_clients":33,"compliant_rate":0.931,"high_risk_terminals":28,"guest_network_ratio":0.194},
+  {"date":"2026-05-29","site_id":"site-cd-west","wired_clients":420,"wireless_clients":612,"unknown_clients":8,"compliant_rate":0.977,"high_risk_terminals":7,"guest_network_ratio":0.121},
+  {"date":"2026-05-29","site_id":"site-wh-delivery","wired_clients":510,"wireless_clients":690,"unknown_clients":19,"compliant_rate":0.952,"high_risk_terminals":16,"guest_network_ratio":0.169}
+]

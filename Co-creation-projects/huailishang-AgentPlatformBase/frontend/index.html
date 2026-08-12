@@ -1,0 +1,61 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>智能体平台</title>
+    <link rel="stylesheet" href="./styles.css?v=20260426-single-chat" />
+  </head>
+  <body>
+    <main class="shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">智</div>
+          <div>
+            <h1>智能体平台</h1>
+            <p>单聊工作台</p>
+          </div>
+        </div>
+
+        <section class="panel">
+          <div class="panel-title">智能体</div>
+          <div id="agentList" class="agent-list"></div>
+        </section>
+      </aside>
+
+      <section class="chat">
+        <header class="chat-header">
+          <div>
+            <h2>智能体单聊</h2>
+            <p id="statusText">正在连接后端...</p>
+          </div>
+          <button id="refreshButton" class="icon-button" title="刷新">↻</button>
+        </header>
+
+        <div id="messages" class="messages"></div>
+
+        <form id="chatForm" class="composer mention-composer">
+          <div class="input-wrap">
+            <input id="messageInput" type="text" placeholder="输入 @ 选择智能体，也可以直接发送给助手..." autocomplete="off" />
+            <div id="mentionMenu" class="mention-menu" hidden></div>
+          </div>
+          <button type="submit">发送</button>
+        </form>
+      </section>
+
+      <aside class="inspector">
+        <section class="panel">
+          <div class="panel-title">当前任务</div>
+          <div id="taskView" class="task-view">暂无任务</div>
+        </section>
+
+        <section class="panel events-panel">
+          <div class="panel-title">事件日志</div>
+          <div id="eventList" class="event-list"></div>
+        </section>
+      </aside>
+    </main>
+
+    <script src="./app.js?v=20260426-single-chat"></script>
+  </body>
+</html>

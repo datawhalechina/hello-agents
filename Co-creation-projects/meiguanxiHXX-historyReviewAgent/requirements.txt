@@ -1,0 +1,7 @@
+hello-agents>=0.1.0
+python-dotenv>=1.0.0
+requests>=2.31.0
+duckduckgo-search>=7.0.0
+huggingface_hub>=0.25.0
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0

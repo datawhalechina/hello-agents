@@ -40,7 +40,7 @@ Before diving into Agentic RL, we need to first understand the complete process 
   <p>Figure 11.1 LLM Training Landscape</p>
 </div>
 
-**Pretraining Stage** is the first stage of LLM training, with the goal of making the model learn basic language patterns and world knowledge. This stage uses massive amounts of text data (usually TB-level) and trains the model through self-supervised learning. The most common pretraining task is Causal Language Modeling, also known as Next Token Prediction.
+**Pretraining Stage** is the first stage of LLM training, with the goal of making the model learn basic language patterns and world knowledge. This stage uses massive amounts of text data (usually TB-level) and trains the model through self-supervised learning, where the training signal is constructed from the text itself, such as predicting the next word from the previous context. The most common pretraining task is Causal Language Modeling, also known as Next Token Prediction.
 
 Given a text sequence $x_1, x_2, ..., x_t$, the model needs to predict the next word $x_{t+1}$:
 
@@ -50,7 +50,7 @@ $$
 
 Where $\theta$ is the model parameters, $P(x_t | x_1, ..., x_{t-1}; \theta)$ is the probability distribution of the next word predicted by the model, and the goal is to minimize negative log-likelihood, i.e., maximize the probability of predicting the correct word. For example, given the text "The cat sat on the", the model needs to predict that the next word is most likely "mat". Through training on massive amounts of text, the model gradually learns grammar rules (what word sequences are legal), semantic knowledge (relationships between words), world knowledge (factual information about the world), and basic reasoning abilities.
 
-The characteristics of the pretraining stage are: massive data volume, high computational cost, learning general language understanding and generation capabilities, and using unsupervised learning.
+The characteristics of the pretraining stage are: massive data volume, high computational cost, learning general language understanding and generation capabilities, and using self-supervised objectives constructed from unlabeled text rather than manually labeled task data.
 
 **Post-training Stage** aims to address the shortcomings of pretrained models. Although pretrained models have powerful language capabilities, they are just "next word prediction" models and don't know how to follow human instructions, generate helpful, harmless, and honest answers, refuse inappropriate requests, and interact with humans in a conversational manner. The post-training stage aims to solve these problems and align the model with human preferences and values.
 
@@ -90,7 +90,7 @@ Let's understand this difference through a specific example. In the PBRFT scenar
 
 As can be seen, key features of Agentic RL are multi-step interaction, each action changes environment state, each step can receive feedback, and optimizing overall task completion quality.
 
-Reinforcement learning is formalized based on the Markov Decision Process (MDP) framework. MDP is defined by a five-tuple $(S, A, P, R, \gamma)$: state space $S$, action space $A$, state transition function $P(s'|s,a)$, reward function $R(s,a)$, discount factor $\gamma$. Let's compare PBRFT and Agentic RL from the MDP perspective, as shown in Table 11.1.
+Reinforcement learning is commonly formalized with the Markov Decision Process (MDP) framework. An MDP is defined by a five-tuple $(S, A, P, R, \gamma)$: state space $S$, action space $A$, state transition function $P(s'|s,a)$, reward function $R(s,a)$, and discount factor $\gamma$. The table below compares PBRFT and Agentic RL from the MDP perspective.
 
 <div align="center">
   <p>Table 11.1 Comparison of PBRFT and Agentic RL</p>
@@ -1258,7 +1258,7 @@ GRPO has some specific parameters that need to be understood and tuned.
 
 **Optimization Parameters**:
 
-- `learning_rate`: GRPO's learning rate is usually smaller than SFT because we don't want to deviate too far from the SFT model. Recommend 1e-5 to 5e-5.
+- `learning_rate`: GRPO's learning rate is usually smaller than SFT because we don't want to deviate too far from the SFT model. Recommend 1e-6 to 1e-5; too large a learning rate (e.g., 5e-5) on small models may cause policy collapse.
 - `kl_coef`: KL divergence penalty coefficient, controls magnitude of policy updates. Too small (0.01) may cause policy to deviate too far, too large (0.5) may limit learning. Recommend 0.05-0.1.
 - `clip_range`: Policy ratio clipping range, similar to PPO's epsilon. Recommend 0.2.
 

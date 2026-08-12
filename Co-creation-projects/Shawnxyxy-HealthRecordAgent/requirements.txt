@@ -1,0 +1,42 @@
+# 后端 Web 框架
+fastapi==0.128.8
+uvicorn==0.40.0
+starlette==0.52.1
+sse-starlette==3.2.0
+aiofiles==23.2.1
+httpx==0.28.1
+httpx-sse==0.4.3
+anyio==4.12.1
+sniffio==1.3.1
+aiohttp==3.13.3
+aiosignal==1.4.0
+
+# Agent 框架 / LLM
+hello-agents==0.2.8
+openai==1.109.1
+transformers==4.57.6
+tiktoken==0.12.0
+accelerate==1.12.0
+bitsandbytes==0.49.1
+torch==2.10.0
+peft==0.18.1
+
+# PDF 解析
+pdfplumber==0.11.9
+pdfminer.six==20251230
+pypdf==6.7.0
+
+# 数据处理
+numpy==2.4.2
+pandas==2.3.3
+
+# JSON / Pydantic
+pydantic==2.12.5
+pydantic-settings==2.12.0
+
+# 可选工具库
+python-dotenv==1.2.1
+rich==14.3.2
+
+# RAG / 向量检索
+pymilvus

@@ -163,5 +163,8 @@ cython_debug/
 
 # 忽略各种文件夹下codex AGENRS.md
 AGENTS.md
-
 .vscode
+test_*.py
+!test_tools.py
+.workbuddy/
+memory/

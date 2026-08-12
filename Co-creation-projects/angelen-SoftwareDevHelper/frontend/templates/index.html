@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoftwareDevHelper - 软件开发学习助手</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- 左侧会话列表 -->
+        <aside class="sidebar left-sidebar">
+            <button id="new-session-btn" class="primary-btn new-btn">+ 新建会话</button>
+            <div class="session-list" id="session-list">
+                <!-- 会话列表动态加载 -->
+            </div>
+        </aside>
+
+        <!-- 中间主聊天区 -->
+        <div class="container main-chat">
+            <header class="chat-header">
+                <h1 id="current-session-title">👨‍💻 SoftwareDevHelper</h1>
+                <p>你的专属软件开发学习助手</p>
+            </header>
+            
+            <main>
+                <div class="chat-container" id="chat-container">
+                    <!-- 聊天消息会动态插入这里 -->
+                </div>
+                
+                <div class="input-area">
+                    <div class="file-upload">
+                        <label for="project-upload" class="upload-btn">上传项目 (.zip)</label>
+                        <input type="file" id="project-upload" accept=".zip" style="display: none;">
+                        <span id="file-name">未选择文件</span>
+                    </div>
+                    
+                    <div class="text-input">
+                        <textarea id="user-input" placeholder="输入你的问题或回复..." rows="3"></textarea>
+                        <button id="send-btn">发送</button>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- 右侧用户水平和记录窗口 -->
+        <aside class="sidebar right-sidebar">
+            <div class="user-profile">
+                <h3>用户档案</h3>
+                <div class="level-section">
+                    <label for="user-level">当前水平：</label>
+                    <select id="user-level">
+                        <option value="beginner">初学者 (Beginner)</option>
+                        <option value="intermediate">中级 (Intermediate)</option>
+                        <option value="advanced">高级 (Advanced)</option>
+                    </select>
+                </div>
+                <div class="history-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h4 style="margin: 0;">做题记录</h4>
+                        <button id="reset-memory-btn" style="background: none; border: none; font-size: 14px; cursor: pointer; color: #e74c3c;" title="清空记录并重置水平">🗑️ 清空</button>
+                    </div>
+                    <ul id="history-list" class="history-list">
+                        <!-- 记录动态加载 -->
+                    </ul>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

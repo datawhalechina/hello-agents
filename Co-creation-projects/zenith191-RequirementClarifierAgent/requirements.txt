@@ -1,0 +1,9 @@
+# 核心依赖
+hello-agents[all]==0.2.9
+
+# 环境变量
+python-dotenv>=1.0.0,<2.0.0
+
+# Notebook 与测试
+jupyterlab>=4.0.0,<5.0.0
+pytest>=8.0.0,<10.0.0

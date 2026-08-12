@@ -1,0 +1,24 @@
+<svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="lobster-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff6b5b"/>
+      <stop offset="100%" stop-color="#d63031"/>
+    </linearGradient>
+  </defs>
+  <!-- Body -->
+  <path d="M60 15 C35 15 20 38 20 55 C20 72 32 90 48 95 L48 105 L56 105 L56 95 C56 95 60 97 64 95 L64 105 L72 105 L72 95 C88 90 100 72 100 55 C100 38 85 15 60 15Z" fill="url(#lobster-gradient)"/>
+  <!-- Left Claw -->
+  <path d="M25 42 C12 38 8 48 12 58 C16 68 26 63 30 54 C33 47 30 43 25 42Z" fill="url(#lobster-gradient)"/>
+  <!-- Right Claw -->
+  <path d="M95 42 C108 38 112 48 108 58 C104 68 94 63 90 54 C87 47 90 43 95 42Z" fill="url(#lobster-gradient)"/>
+  <!-- Antenna -->
+  <path d="M48 18 Q40 8 35 12" stroke="#ff6b5b" stroke-width="3" stroke-linecap="round"/>
+  <path d="M72 18 Q80 8 85 12" stroke="#ff6b5b" stroke-width="3" stroke-linecap="round"/>
+  <!-- Eyes -->
+  <circle cx="48" cy="38" r="7" fill="#1a1a2e"/>
+  <circle cx="72" cy="38" r="7" fill="#1a1a2e"/>
+  <circle cx="49" cy="37" r="3" fill="#fff"/>
+  <circle cx="73" cy="37" r="3" fill="#fff"/>
+  <!-- Smile -->
+  <path d="M52 52 Q60 58 68 52" stroke="#1a1a2e" stroke-width="2" stroke-linecap="round" fill="none"/>
+</svg>

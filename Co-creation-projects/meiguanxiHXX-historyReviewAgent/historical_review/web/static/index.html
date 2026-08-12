@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>史观交锋 · 多角色历史辩论</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <header class="site-header">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">史</span>
+      <div>
+        <h1>史观交锋</h1>
+        <p class="tagline">官修≠真相 · 野史与边缘叙事 · 政治与权力语境 · 域外之镜 · 蹊跷与阴谋论辨析 → 怀疑中综合</p>
+      </div>
+    </div>
+    <button type="button" class="btn ghost" id="btn-toggle-config" aria-expanded="true">收起配置</button>
+  </header>
+
+  <div class="layout">
+    <aside class="panel config-panel" id="config-panel">
+      <h2 class="panel-title">模型与运行配置</h2>
+      <p class="hint">以下配置可在浏览器内保存（本地 <code>localStorage</code>），不会自动写入服务器 <code>.env</code>。</p>
+
+      <label class="field">
+        <span>OpenRouter API Key</span>
+        <input type="password" id="cfg-api-key" autocomplete="off" placeholder="sk-or-v1-… 或留空用服务端环境变量" />
+      </label>
+
+      <label class="field">
+        <span>Base URL</span>
+        <input type="url" id="cfg-base-url" placeholder="https://openrouter.ai/api/v1" />
+      </label>
+
+      <label class="field">
+        <span>模型 ID</span>
+        <input type="text" id="cfg-model" placeholder="openai/gpt-4o-mini" />
+      </label>
+
+      <div class="field-row">
+        <label class="field compact">
+          <span>辩论温度</span>
+          <input type="number" id="cfg-debate-temp" min="0" max="2" step="0.01" value="0.72" />
+        </label>
+        <label class="field compact">
+          <span>综合温度</span>
+          <input type="number" id="cfg-synth-temp" min="0" max="2" step="0.01" value="0.22" />
+        </label>
+      </div>
+
+      <div class="field-row">
+        <label class="field compact">
+          <span>Max tokens</span>
+          <input type="number" id="cfg-max-tokens" min="256" max="128000" step="256" value="4096" />
+        </label>
+        <label class="field compact">
+          <span>请求超时(s)</span>
+          <input type="number" id="cfg-timeout" min="30" max="600" step="10" value="180" />
+        </label>
+      </div>
+
+      <label class="check">
+        <input type="checkbox" id="cfg-use-evidence" checked />
+        <span>启用维基 + DuckDuckGo 考据附录</span>
+      </label>
+
+      <label class="check">
+        <input type="checkbox" id="cfg-remember" />
+        <span>记住配置到本机浏览器（含 API Key，请勿在公共电脑勾选）</span>
+      </label>
+
+      <div class="btn-row">
+        <button type="button" class="btn secondary" id="btn-save-config">保存配置</button>
+        <button type="button" class="btn ghost" id="btn-clear-config">清除本地配置</button>
+      </div>
+    </aside>
+
+    <main class="panel main-panel">
+      <h2 class="panel-title">议题</h2>
+      <textarea id="topic-input" rows="5" placeholder="例如：靖康之变中主流叙事与常见阴谋论说法，哪些较可信？需要哪些史料才能定论？"></textarea>
+
+      <div class="btn-row main-actions">
+        <button type="button" class="btn primary" id="btn-run">开始辩论</button>
+        <span class="status" id="status-text"></span>
+      </div>
+
+      <section class="progress-section" id="progress-section" aria-live="polite">
+        <h2 class="panel-title">进行状态</h2>
+        <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-track">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <p class="progress-meta" id="progress-meta">就绪</p>
+        <div class="progress-log" id="progress-log"></div>
+      </section>
+
+      <section class="output-section" aria-live="polite">
+        <h2 class="panel-title">辩论正文（随步骤追加）</h2>
+        <div id="output-error" class="error-banner hidden" role="alert"></div>
+        <article id="output-md" class="markdown-body"></article>
+      </section>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+    <p>输出仅供思辨与学习；密钥请勿提交到 Git。流式展示进度；完整流程约 12 次模型调用（五角色两轮 + 秘书 + 终局），请勿关闭标签页。</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

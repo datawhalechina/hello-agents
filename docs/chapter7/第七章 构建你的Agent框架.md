@@ -17,7 +17,7 @@
 - **过度抽象的复杂性**：许多框架为了追求通用性，引入了大量抽象层和配置选项。以LangChain为例，其链式调用机制虽然灵活，但对初学者而言学习曲线陡峭，往往需要理解大量概念才能完成简单任务。
 - **快速迭代带来的不稳定性**：商业化框架为了抢占市场，API接口变更频繁。开发者经常面临版本升级后代码无法运行的困扰，维护成本居高不下。
 - **黑盒化的实现逻辑**：许多框架将核心逻辑封装得过于严密，开发者难以理解Agent的内部工作机制，缺乏深度定制能力。遇到问题时只能依赖文档和社区支持，尤其是如果社区不够活跃，可能一个反馈意见会非常久也没有人推进，影响后续的开发效率。
-- **依赖关系的复杂性**：成熟框架往往携带大量依赖包，安装包体积庞大，在需要与别的项目代码配合的下可能出现依赖冲突问题。
+- **依赖关系的复杂性**：成熟框架往往携带大量依赖包，安装包体积庞大，在需要与别的项目代码配合使用可能出现依赖冲突问题。
 
 （2）从使用者到构建者的能力跃迁
 
@@ -96,7 +96,8 @@ hello-agents/
 为了让读者能够快速体验本章的完整功能，我们提供了可直接安装的Python包。你可以通过以下命令安装本章对应的版本：
 
 ```bash
-# python版本需要>=3.10
+# hello-agents 框架代码可见链接：https://github.com/jjyaoao/helloagents
+# Python 版本需要>=3.10
 pip install "hello-agents==0.1.1"
 ```
 
@@ -611,12 +612,12 @@ class Agent(ABC):
 
 ### 7.4.1 SimpleAgent
 
-SimpleAgent是最基础的Agent实现，它展示了如何在框架基础上构建一个完整的对话智能体。我们将通过继承框架基类来重写SimpleAgent。首先，在你的项目目录中创建一个`my_simple_agent.py`文件：
+SimpleAgent是最基础的Agent实现，它展示了如何在框架基础上构建一个完整的对话智能体。我们将通过继承框架中已有的`SimpleAgent`类并重写其核心方法，来实现一个可扩展的版本。首先，在你的项目目录中创建一个`my_simple_agent.py`文件：
 
 ```python
 # my_simple_agent.py
 from typing import Optional, Iterator
-from hello_agents import SimpleAgent, HelloAgentsLLM, Config, Message
+from hello_agents import SimpleAgent, HelloAgentsLLM, Config, Message,ToolRegistry
 
 class MySimpleAgent(SimpleAgent):
     """
@@ -639,7 +640,7 @@ class MySimpleAgent(SimpleAgent):
         print(f"✅ {name} 初始化完成，工具调用: {'启用' if self.enable_tool_calling else '禁用'}")
 ```
 
-接下来，我们需要重写Agent基类的抽象方法`run`。SimpleAgent支持可选的工具调用功能，也方便后续章节的扩展：
+接下来，我们需要重写`run`方法。SimpleAgent支持可选的工具调用功能，也方便后续章节的扩展：
 
 ```python
 # 继续在 my_simple_agent.py 中添加
@@ -2145,7 +2146,7 @@ async def test_parallel_execution():
 
 ## 7.6 本章小结
 
-在正式总结之前，我们想告诉大家一个好消息：对于本章实现的所有方法和功能，都在GitHub仓库中提供了完整的测试案例。你可以访问[这个链接](https://github.com/jjyaoao/HelloAgents/blob/main/examples/chapter07_basic_setup.py)查看和运行这些测试代码。这个文件包含了四种Agent范式的演示、工具系统的集成测试、高级功能的使用示例，以及交互式的Agent体验。如果你想验证自己的实现是否正确，或者想深入了解框架的实际使用方式，这些测试案例将是有价值的参考。
+在正式总结之前，我们想告诉大家一个好消息：对于本章实现的所有方法和功能，都在GitHub仓库中提供了完整的测试案例。你可以访问[这个链接](https://github.com/datawhalechina/hello-agents/tree/main/code/chapter7)查看和运行这些测试代码。该目录包含了四种Agent范式的演示、工具系统的集成测试、高级功能的使用示例，以及交互式的Agent体验。如果你想验证自己的实现是否正确，或者想深入了解框架的实际使用方式，这些测试案例将是有价值的参考。
 
 回顾本章，我们完成了一项富有挑战的任务：一步步构建了一个基础的智能体框架——HelloAgents。这个过程始终遵循着“分层解耦、职责单一、接口统一”的核心原则。
 

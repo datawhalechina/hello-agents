@@ -1,0 +1,11 @@
+# 核心依赖
+hello-agents[all]>=0.2.7
+
+# Web框架
+fastapi>=0.109.0
+uvicorn>=0.27.0
+python-multipart>=0.0.9
+
+# 其他工具
+python-dotenv>=1.0.0
+pytest>=8.0.0

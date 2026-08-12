@@ -1,0 +1,12 @@
+# 运行时生成的数据目录
+data/
+outputs/
+memory/
+
+# 临时测试脚本
+test_*.py
+!test_tools.py
+
+
+# 内部状态文件 (如果存在)
+.workbuddy/

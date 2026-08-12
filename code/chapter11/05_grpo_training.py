@@ -75,7 +75,7 @@ def standard_grpo_training():
         # 训练配置
         "num_epochs": 3,
         "batch_size": 2,  # GRPO需要更多显存
-        "learning_rate": 1e-5,  # 比SFT小10倍
+        "learning_rate": 1e-5,  # 比SFT小10倍；注意：5e-5 在小模型上可能导致策略坍塌，必要时可调至 1e-6
         
         # LoRA配置
         "use_lora": True,

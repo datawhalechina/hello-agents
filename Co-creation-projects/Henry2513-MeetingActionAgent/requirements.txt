@@ -1,0 +1,12 @@
+# 核心依赖
+hello-agents==0.2.9
+openai>=1.109,<2
+pydantic>=2.12,<3
+python-dotenv>=1.2,<2
+
+# hello-agents 0.2.9 在导入时需要此依赖
+huggingface-hub>=1.20,<2
+
+# Notebook 环境
+jupyterlab>=4.4,<5
+ipykernel>=6.30,<8

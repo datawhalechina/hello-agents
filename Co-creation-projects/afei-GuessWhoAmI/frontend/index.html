@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GuessWhoAmI - 智能对话游戏</title>
+    <link rel="stylesheet" href="style.css?v=3">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎤 GuessWhoAmI</h1>
+            <p class="subtitle">与AI智能对话，猜出神秘人物</p>        </header>
+
+        <div id="intro-section" class="intro-section">
+            <div class="game-rules">
+                <h2>游戏规则</h2>
+                <ul>
+                    <li>🎯 系统会随机选择一个知名人物</li>
+                    <li>💬 你可以通过提问来获取线索</li>
+                    <li>🤔 尝试猜出这个人物的名字</li>
+                    <li>📝 每局最多提问10次，可使用 3 次提示</li>
+                    <li>🏆 看看你能在多短时间内猜对！</li>
+                </ul>            </div>
+            
+            <button id="start-game" class="start-btn">开始游戏</button>
+        </div>
+
+        <!-- Loading overlay shown during Tavily search + LLM distillation -->
+        <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="loading-box">
+                <div class="loading-spinner"></div>
+                <p class="loading-title">正在准备游戏...</p>
+                <p id="loading-step" class="loading-step">🔍 正在搜索历史人物资料</p>
+            </div>
+        </div>
+
+        <div id="game-section" class="game-section hidden">
+            <div class="game-header">
+                <div class="game-stats">
+                    <span id="remaining-questions">剩余提问: 20</span>
+                    <span id="remaining-hints">剩余提示: 3</span>
+                </div>
+                <button id="get-hint" class="hint-btn" disabled>获取提示</button>
+            </div>
+
+            <div id="chat-container" class="chat-container">
+                <div class="welcome-message">
+                    <div class="message agent-message">
+                        <div class="message-content">
+                            你好！我是一个知名人物，你可以通过提问来猜测我的身份。开始吧！
+                        </div>                    </div>
+                </div>
+            </div>
+
+            <div class="input-container">
+                <input type="text" id="user-input" placeholder="输入你的问题或猜测..." disabled>
+                <button id="send-btn" disabled>发送</button>
+            </div>
+
+            <div class="guess-section">
+            <input type="text" id="guess-input" placeholder="直接猜测人物名字..." disabled>
+                <button id="guess-btn" disabled>猜一下</button>
+            </div>
+        </div>
+
+        <div id="result-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2 id="result-title"></h2>
+                <p id="result-message"></p>
+                <div id="figure-info"></div>
+                <button id="play-again">再来一局</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js?v=3"></script>
+</body>
+</html>

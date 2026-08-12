@@ -1,0 +1,28 @@
+# Hello Agents 框架
+hello-agents[all]>=0.2.7
+
+# LLM 支持
+openai>=1.0.0
+anthropic>=0.18.0
+
+# 数据处理
+pandas>=2.0.0
+numpy>=1.24.0
+
+# 网页抓取
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+
+# 搜索API
+tavily-python>=0.3.0
+
+# 工具与环境
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+
+# 可选：Excel报告生成
+openpyxl>=3.1.0
+
+# 开发工具（可选）
+pytest>=7.4.0
+black>=23.0.0

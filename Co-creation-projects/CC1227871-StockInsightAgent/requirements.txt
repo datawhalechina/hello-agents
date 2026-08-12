@@ -1,0 +1,7 @@
+akshare>=1.15
+openai>=1.100
+python-dotenv>=0.21
+numpy>=1.26
+pandas>=2.2
+gradio>=5.0
+hello-agents>=1.0

@@ -1,0 +1,5 @@
+# HelloAgents框架
+hello-agents[all]==0.2.2
+
+# 环境变量管理
+python-dotenv>=1.0.0

@@ -1,0 +1,9 @@
+data/*.db
+backend/.venv/
+
+# 记忆评测产物与本地脚本（不入库）
+backend/memory_eval_result_v2.json
+backend/memory_eval_report.md
+backend/scripts/eval_memory_labeled.py
+backend/scripts/memory_eval_dataset.json
+backend/scripts/seed_memory_eval_user.py

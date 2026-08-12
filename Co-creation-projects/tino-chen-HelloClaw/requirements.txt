@@ -1,0 +1,14 @@
+# 核心依赖
+hello-agents>=1.0.0
+
+# Web 框架
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+sse-starlette>=2.0.0
+
+# 工具库
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+click>=8.0.0
+rich>=13.0.0
+httpx[socks]>=0.28.1

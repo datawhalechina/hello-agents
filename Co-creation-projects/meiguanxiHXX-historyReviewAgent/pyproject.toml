@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chapter16-historical-review"
+version = "0.1.0"
+description = "第十六章：多角色历史辩论示例（historical_review）"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "hello-agents>=0.1.0",
+    "python-dotenv>=1.0.0",
+    "requests>=2.31.0",
+    "duckduckgo-search>=7.0.0",
+    "huggingface_hub>=0.25.0",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+]
+
+[project.scripts]
+history-review = "historical_review.run_agent:main"
+history-review-web = "historical_review.web.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["historical_review*"]
+
+[tool.setuptools.package-data]
+"historical_review.web" = ["static/*.html", "static/*.css", "static/*.js"]

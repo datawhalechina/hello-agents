@@ -1,0 +1,33 @@
+[
+  {"date":"2026-05-23","site_id":"site-bj-hq","wired_switch_online_rate":0.998,"wireless_controller_online_rate":1.0,"wireless_ap_online_rate":0.993,"cpu_avg":41.2,"mem_avg":58.1,"packet_loss":0.002,"latency_ms":11.5,"critical_alarm_count":1},
+  {"date":"2026-05-24","site_id":"site-bj-hq","wired_switch_online_rate":0.997,"wireless_controller_online_rate":1.0,"wireless_ap_online_rate":0.991,"cpu_avg":44.8,"mem_avg":59.3,"packet_loss":0.003,"latency_ms":12.1,"critical_alarm_count":1},
+  {"date":"2026-05-25","site_id":"site-bj-hq","wired_switch_online_rate":0.994,"wireless_controller_online_rate":1.0,"wireless_ap_online_rate":0.988,"cpu_avg":50.7,"mem_avg":61.5,"packet_loss":0.005,"latency_ms":13.8,"critical_alarm_count":2},
+  {"date":"2026-05-26","site_id":"site-bj-hq","wired_switch_online_rate":0.998,"wireless_controller_online_rate":1.0,"wireless_ap_online_rate":0.995,"cpu_avg":43.1,"mem_avg":56.7,"packet_loss":0.002,"latency_ms":11.2,"critical_alarm_count":0},
+  {"date":"2026-05-27","site_id":"site-bj-hq","wired_switch_online_rate":0.999,"wireless_controller_online_rate":1.0,"wireless_ap_online_rate":0.996,"cpu_avg":39.5,"mem_avg":54.2,"packet_loss":0.001,"latency_ms":10.5,"critical_alarm_count":0},
+  {"date":"2026-05-28","site_id":"site-bj-hq","wired_switch_online_rate":0.997,"wireless_controller_online_rate":1.0,"wireless_ap_online_rate":0.994,"cpu_avg":42.4,"mem_avg":57.8,"packet_loss":0.002,"latency_ms":11.0,"critical_alarm_count":1},
+  {"date":"2026-05-29","site_id":"site-bj-hq","wired_switch_online_rate":0.996,"wireless_controller_online_rate":1.0,"wireless_ap_online_rate":0.992,"cpu_avg":45.3,"mem_avg":60.1,"packet_loss":0.003,"latency_ms":12.0,"critical_alarm_count":1},
+
+  {"date":"2026-05-23","site_id":"site-sh-fin","wired_switch_online_rate":0.995,"wireless_controller_online_rate":0.998,"wireless_ap_online_rate":0.982,"cpu_avg":47.2,"mem_avg":63.3,"packet_loss":0.006,"latency_ms":16.8,"critical_alarm_count":3},
+  {"date":"2026-05-24","site_id":"site-sh-fin","wired_switch_online_rate":0.993,"wireless_controller_online_rate":0.997,"wireless_ap_online_rate":0.979,"cpu_avg":52.9,"mem_avg":66.2,"packet_loss":0.009,"latency_ms":18.2,"critical_alarm_count":4},
+  {"date":"2026-05-25","site_id":"site-sh-fin","wired_switch_online_rate":0.992,"wireless_controller_online_rate":0.996,"wireless_ap_online_rate":0.975,"cpu_avg":56.4,"mem_avg":68.5,"packet_loss":0.011,"latency_ms":19.4,"critical_alarm_count":5},
+  {"date":"2026-05-26","site_id":"site-sh-fin","wired_switch_online_rate":0.994,"wireless_controller_online_rate":0.997,"wireless_ap_online_rate":0.980,"cpu_avg":49.1,"mem_avg":64.8,"packet_loss":0.007,"latency_ms":17.5,"critical_alarm_count":3},
+  {"date":"2026-05-27","site_id":"site-sh-fin","wired_switch_online_rate":0.995,"wireless_controller_online_rate":0.998,"wireless_ap_online_rate":0.983,"cpu_avg":46.5,"mem_avg":61.7,"packet_loss":0.006,"latency_ms":16.3,"critical_alarm_count":2},
+  {"date":"2026-05-28","site_id":"site-sh-fin","wired_switch_online_rate":0.994,"wireless_controller_online_rate":0.998,"wireless_ap_online_rate":0.981,"cpu_avg":50.2,"mem_avg":63.9,"packet_loss":0.008,"latency_ms":17.0,"critical_alarm_count":3},
+  {"date":"2026-05-29","site_id":"site-sh-fin","wired_switch_online_rate":0.993,"wireless_controller_online_rate":0.997,"wireless_ap_online_rate":0.978,"cpu_avg":54.0,"mem_avg":67.1,"packet_loss":0.010,"latency_ms":18.9,"critical_alarm_count":4},
+
+  {"date":"2026-05-23","site_id":"site-gz-rd","wired_switch_online_rate":0.996,"wireless_controller_online_rate":0.999,"wireless_ap_online_rate":0.987,"cpu_avg":45.1,"mem_avg":59.8,"packet_loss":0.004,"latency_ms":14.2,"critical_alarm_count":2},
+  {"date":"2026-05-26","site_id":"site-gz-rd","wired_switch_online_rate":0.994,"wireless_controller_online_rate":0.998,"wireless_ap_online_rate":0.984,"cpu_avg":48.8,"mem_avg":62.6,"packet_loss":0.006,"latency_ms":15.6,"critical_alarm_count":3},
+  {"date":"2026-05-29","site_id":"site-gz-rd","wired_switch_online_rate":0.995,"wireless_controller_online_rate":0.999,"wireless_ap_online_rate":0.986,"cpu_avg":46.3,"mem_avg":60.7,"packet_loss":0.005,"latency_ms":14.7,"critical_alarm_count":2},
+
+  {"date":"2026-05-23","site_id":"site-sz-ops","wired_switch_online_rate":0.991,"wireless_controller_online_rate":0.997,"wireless_ap_online_rate":0.981,"cpu_avg":58.2,"mem_avg":70.4,"packet_loss":0.014,"latency_ms":22.1,"critical_alarm_count":6},
+  {"date":"2026-05-26","site_id":"site-sz-ops","wired_switch_online_rate":0.989,"wireless_controller_online_rate":0.996,"wireless_ap_online_rate":0.978,"cpu_avg":61.5,"mem_avg":72.8,"packet_loss":0.016,"latency_ms":23.5,"critical_alarm_count":7},
+  {"date":"2026-05-29","site_id":"site-sz-ops","wired_switch_online_rate":0.990,"wireless_controller_online_rate":0.997,"wireless_ap_online_rate":0.979,"cpu_avg":59.4,"mem_avg":71.1,"packet_loss":0.015,"latency_ms":22.9,"critical_alarm_count":6},
+
+  {"date":"2026-05-23","site_id":"site-cd-west","wired_switch_online_rate":0.998,"wireless_controller_online_rate":1.0,"wireless_ap_online_rate":0.992,"cpu_avg":37.9,"mem_avg":50.3,"packet_loss":0.002,"latency_ms":10.7,"critical_alarm_count":1},
+  {"date":"2026-05-26","site_id":"site-cd-west","wired_switch_online_rate":0.997,"wireless_controller_online_rate":1.0,"wireless_ap_online_rate":0.991,"cpu_avg":39.2,"mem_avg":52.1,"packet_loss":0.003,"latency_ms":11.2,"critical_alarm_count":1},
+  {"date":"2026-05-29","site_id":"site-cd-west","wired_switch_online_rate":0.998,"wireless_controller_online_rate":1.0,"wireless_ap_online_rate":0.993,"cpu_avg":38.6,"mem_avg":51.7,"packet_loss":0.002,"latency_ms":10.9,"critical_alarm_count":1},
+
+  {"date":"2026-05-23","site_id":"site-wh-delivery","wired_switch_online_rate":0.994,"wireless_controller_online_rate":0.998,"wireless_ap_online_rate":0.977,"cpu_avg":53.2,"mem_avg":66.8,"packet_loss":0.010,"latency_ms":18.3,"critical_alarm_count":4},
+  {"date":"2026-05-26","site_id":"site-wh-delivery","wired_switch_online_rate":0.992,"wireless_controller_online_rate":0.997,"wireless_ap_online_rate":0.973,"cpu_avg":56.8,"mem_avg":69.2,"packet_loss":0.013,"latency_ms":20.4,"critical_alarm_count":5},
+  {"date":"2026-05-29","site_id":"site-wh-delivery","wired_switch_online_rate":0.991,"wireless_controller_online_rate":0.996,"wireless_ap_online_rate":0.970,"cpu_avg":58.0,"mem_avg":70.5,"packet_loss":0.014,"latency_ms":21.1,"critical_alarm_count":6}
+]

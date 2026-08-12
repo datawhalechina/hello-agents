@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>健康助手</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="app">
+
+    <header class="app-header">
+        <h1 class="app-title">健康助手</h1>
+        <p class="app-subtitle">档案分析与饮食建议</p>
+    </header>
+
+    <section class="card user-strip" aria-label="用户">
+        <span class="field-label">用户 ID</span>
+        <input type="text" id="userId" placeholder="例如 mobile_13800000000 或 demo-alice" autocomplete="username" />
+        <label class="tech-toggle">
+            <input type="checkbox" id="devModeToggle" />
+            开发者模式（内部编号、Agent 全名、轨迹与原始 JSON）
+        </label>
+    </section>
+
+    <nav class="tab-segment" role="tablist" aria-label="主功能">
+        <button type="button" role="tab" id="tabBtn-analysis" aria-selected="true" aria-controls="tab-analysis" data-tab="analysis">档案分析</button>
+        <button type="button" role="tab" id="tabBtn-diet" aria-selected="false" aria-controls="tab-diet" data-tab="diet">饮食助手</button>
+        <button type="button" role="tab" id="tabBtn-history" aria-selected="false" aria-controls="tab-history" data-tab="history">历史记录</button>
+    </nav>
+
+    <!-- Tab：档案分析 -->
+    <div id="tab-analysis" class="tab-panel" role="tabpanel" aria-labelledby="tabBtn-analysis">
+        <div class="card">
+            <h2>体检报告</h2>
+            <p class="section-lead">粘贴文本或上传 PDF，生成结构化解读与建议。</p>
+
+            <div class="flex-row">
+                <div class="flex-column">
+                    <span class="field-label-inline">文本</span>
+                    <textarea id="reportText" placeholder="在此粘贴体检报告内容…"></textarea>
+                    <button type="button" class="btn btn-primary" onclick="analyze()">分析文本报告</button>
+                </div>
+                <div class="flex-column">
+                    <span class="field-label-inline">PDF 文件</span>
+                    <input type="file" id="pdfFile" accept=".pdf" />
+                    <button type="button" class="btn btn-primary" onclick="uploadPDF()">分析 PDF 报告</button>
+                </div>
+            </div>
+
+            <div id="analysis"></div>
+            <ul id="progressList" class="hidden"></ul>
+        </div>
+
+        <div id="resultCard" class="card hidden">
+            <h2>分析摘要</h2>
+            <div id="report"></div>
+        </div>
+    </div>
+
+    <!-- Tab：饮食助手 -->
+    <div id="tab-diet" class="tab-panel hidden" role="tabpanel" aria-labelledby="tabBtn-diet">
+        <div class="card" id="dietCard">
+            <h2>饮食推荐</h2>
+            <p class="section-lead">先填写「今天吃了什么」，系统会解析营养并生成下一餐可执行建议；你的反馈会纳入后续推荐。</p>
+
+            <div class="diet-grid">
+                <label>健康目标
+                    <select id="dietGoal">
+                        <option value="muscle_gain">增肌</option>
+                        <option value="fat_loss">减脂</option>
+                        <option value="maintain">维持</option>
+                    </select>
+                </label>
+            </div>
+
+            <label class="field-label-inline" style="margin-top: 16px;">今天吃了什么（必填）</label>
+            <textarea id="dietFoodLog" rows="4" placeholder="例如：早餐豆浆300ml+鸡蛋2个；午餐鸡腿饭；下午拿铁；晚餐前香蕉1根"></textarea>
+
+            <label class="field-label-inline" style="margin-top: 12px;">运动/睡眠情况</label>
+            <input type="text" id="dietActivityContext" placeholder="例如：今晚力量训练60分钟，昨晚睡眠6.5小时" />
+
+            <label class="field-label-inline" style="margin-top: 12px;">补充说明</label>
+            <textarea id="dietNotes" rows="3" placeholder="例如：只能便利店、训练后 1 小时内要吃上"></textarea>
+
+            <div class="btn-row">
+                <button type="button" class="btn btn-primary" onclick="recommendDiet()">生成饮食推荐</button>
+            </div>
+
+            <div id="dietStatus"></div>
+            <div id="dietResult" class="hidden"></div>
+
+            <div class="card-hr" role="presentation"></div>
+
+            <h3 id="feedbackSectionTitle">反馈执行情况</h3>
+            <p class="section-lead">告诉系统你是否按<strong>某一次</strong>推荐执行、原因是什么；下次生成推荐时会参考。列表来自你的历史推荐，不必手抄编号。</p>
+
+            <label class="field-label-inline">要为哪一条推荐写反馈？</label>
+            <div class="reflect-run-row">
+                <select id="reflectRunSelect" aria-describedby="reflectRunHint"></select>
+                <button type="button" class="btn btn-secondary btn-compact" onclick="refreshReflectRunOptions()">刷新列表</button>
+            </div>
+            <span id="reflectRunHint" class="field-hint">生成推荐后会自动出现在列表中；刚生成完也可点「刷新列表」。</span>
+
+            <fieldset class="reflect-follow-fieldset" style="margin-top: 16px;">
+                <legend class="field-label-inline">是否按这条推荐执行？</legend>
+                <label class="radio-row">
+                    <input type="radio" name="reflectFollowedChoice" value="yes" id="reflectFollowedYes" />
+                    是，已尽量按推荐吃
+                </label>
+                <label class="radio-row">
+                    <input type="radio" name="reflectFollowedChoice" value="no" id="reflectFollowedNo" />
+                    否，没有完全按推荐做
+                </label>
+            </fieldset>
+
+            <div id="reflectReasonBlock" class="reflect-reason-block hidden">
+                <label class="field-label-inline" for="reflectReasonCode">未执行的主要原因</label>
+                <select id="reflectReasonCode">
+                    <option value="">请选择</option>
+                    <option value="cant_buy">买不到</option>
+                    <option value="too_late">太晚/闭店</option>
+                    <option value="dont_want">不想吃</option>
+                    <option value="other">其他</option>
+                </select>
+                <label class="field-label-inline" style="margin-top: 10px;">补充说明</label>
+                <input type="text" id="reflectDetail" placeholder="可选，例如具体缺货商品" />
+            </div>
+
+            <div class="btn-row">
+                <button type="button" class="btn btn-primary" onclick="submitDietReflect()">保存反馈</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab：历史记录 -->
+    <div id="tab-history" class="tab-panel hidden" role="tabpanel" aria-labelledby="tabBtn-history">
+        <div class="card">
+            <h2>历史记录</h2>
+            <p class="section-lead">饮食推荐与反馈摘要；原始 JSON 仅在「开发者模式」下展示。</p>
+            <div class="btn-row">
+                <button type="button" class="btn btn-secondary" onclick="loadDietHistory()">刷新</button>
+            </div>
+            <p id="historySummary" class="history-summary hidden" aria-live="polite"></p>
+            <details id="historyRawDetails" class="history-raw hidden">
+                <summary>原始数据（JSON）</summary>
+                <pre id="dietHistoryPre"></pre>
+            </details>
+            <p id="historyEmptyHint" class="history-placeholder">点击「刷新」加载数据。</p>
+        </div>
+    </div>
+
+    <dialog id="reflectPromptDialog" class="app-dialog" aria-labelledby="reflectDialogTitle">
+        <h2 id="reflectDialogTitle" class="dialog-title">推荐已保存</h2>
+        <p class="dialog-body">是否现在填写执行情况？（可选，帮助下次推荐更贴合你。）</p>
+        <div class="btn-row dialog-actions">
+            <button type="button" class="btn btn-primary" id="reflectDialogGo">填写反馈</button>
+            <button type="button" class="btn btn-secondary" id="reflectDialogLater">稍后</button>
+        </div>
+    </dialog>
+
+    <script src="app.js"></script>
+</body>
+</html>

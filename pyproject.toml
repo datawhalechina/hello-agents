@@ -6,10 +6,12 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "dotenv>=0.9.9",
-    "nbstripout>=0.8.2",
+    "numpy>=2.4.4",
     "openai>=2.14.0",
     "requests>=2.32.5",
     "tavily-python>=0.7.17",
+    "torch>=2.11.0",
+    "transformers>=5.7.0",
 ]
 
 [[tool.uv.index]]

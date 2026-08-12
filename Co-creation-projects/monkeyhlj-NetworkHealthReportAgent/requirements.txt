@@ -1,0 +1,9 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+pydantic>=2.9.0
+python-dotenv>=1.0.1
+hello-agents>=0.2.4,<=0.2.9
+fastmcp>=2.0.0
+python-dateutil>=2.9.0
+huggingface_hub>=0.25.0
+ipykernel==7.2.0

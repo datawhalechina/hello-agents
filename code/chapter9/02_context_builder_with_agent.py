@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 from hello_agents import SimpleAgent, HelloAgentsLLM, ToolRegistry
 from hello_agents.context import ContextBuilder, ContextConfig
-from hello_agents.tools import MemoryTool, RAGTool
+#from hello_agents.tools import MemoryTool, RAGTool
 from hello_agents.core.message import Message
 from datetime import datetime
 
@@ -50,7 +50,7 @@ class ContextAwareAgent(SimpleAgent):
             {"role": "system", "content": optimized_context},
             {"role": "user", "content": user_input}
         ]
-        response = self.llm.invoke(messages)
+        response = self.llm.invoke(messages).content
 
         # 3. 更新对话历史
         self.conversation_history.append(

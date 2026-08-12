@@ -1,0 +1,38 @@
+# =========================================================================
+# Docker 构建忽略文件 — 排除不必要的文件加速构建
+# =========================================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Node.js
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 文档和日志
+docs/
+*.md
+README.md
+*.log
+
+# 环境变量（在构建时单独COPY）
+# .env 需要被COPY，不忽略
+
+# 临时文件
+tmp/
+temp/

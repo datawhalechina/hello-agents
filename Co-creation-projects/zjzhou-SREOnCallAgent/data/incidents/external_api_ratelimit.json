@@ -1,0 +1,34 @@
+{
+  "incident_id": "INC-003",
+  "service": "payment-service",
+  "severity": "P2",
+  "alert": {
+    "metric": "payment_success_rate",
+    "value": 23.4,
+    "threshold": 95.0,
+    "unit": "percent",
+    "timestamp": "2024-01-17T16:22:10Z",
+    "description": "Payment success rate critically below SLO"
+  },
+  "logs": [
+    {"timestamp": "2024-01-17T16:10:00Z", "level": "INFO",     "message": "Payment processing started for order_id=98765"},
+    {"timestamp": "2024-01-17T16:15:00Z", "level": "WARN",     "message": "Stripe API slow response: 2.3s for POST /v1/charges"},
+    {"timestamp": "2024-01-17T16:18:00Z", "level": "ERROR",    "message": "Stripe API 429 Too Many Requests: retry_after=60s"},
+    {"timestamp": "2024-01-17T16:18:01Z", "level": "ERROR",    "message": "Retry 1/3 for order_id=99001 (no backoff configured — immediate retry)"},
+    {"timestamp": "2024-01-17T16:18:02Z", "level": "ERROR",    "message": "Stripe API 429 Too Many Requests (retry 1 failed immediately)"},
+    {"timestamp": "2024-01-17T16:18:02Z", "level": "ERROR",    "message": "Retry 2/3 for order_id=99001 (no backoff — immediate retry)"},
+    {"timestamp": "2024-01-17T16:18:03Z", "level": "ERROR",    "message": "Stripe API 429 Too Many Requests (retry 2 failed)"},
+    {"timestamp": "2024-01-17T16:18:03Z", "level": "ERROR",    "message": "Retry 3/3 for order_id=99001 (final retry, no backoff)"},
+    {"timestamp": "2024-01-17T16:18:04Z", "level": "ERROR",    "message": "All retries exhausted for order_id=99001 — payment FAILED"},
+    {"timestamp": "2024-01-17T16:20:00Z", "level": "CRITICAL", "message": "Stripe API rate limit cascade: 347 failed payments in 2 minutes, amplified by retry storm"},
+    {"timestamp": "2024-01-17T16:22:10Z", "level": "ALERT",    "message": "P2 FIRED: payment_success_rate=23.4% below threshold=95.0%"}
+  ],
+  "metrics": {
+    "payment_success_rate":       {"16:10": 99.1, "16:15": 88.3, "16:18": 45.2, "16:20": 27.8, "16:22": 23.4},
+    "stripe_api_calls_per_min":   {"16:10": 45,   "16:15": 280,  "16:18": 890,  "16:20": 1240, "16:22": 1380},
+    "stripe_api_error_rate":      {"16:10": 0.0,  "16:15": 3.2,  "16:18": 62.4, "16:20": 88.1, "16:22": 94.6},
+    "failed_payments_count":      {"16:10": 0,    "16:15": 12,   "16:18": 89,   "16:20": 347,  "16:22": 521}
+  },
+  "root_cause": "Promotional flash sale caused 30x payment request spike. Retry logic has no exponential backoff — each 429 triggers immediate retries, creating a retry storm that amplifies the rate limit violation.",
+  "affected_users": 521
+}

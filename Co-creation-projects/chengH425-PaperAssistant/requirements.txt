@@ -1,0 +1,15 @@
+# Core
+hello-agents>=1.0.0
+
+# Environment
+python-dotenv>=1.0.0
+
+# Web UI
+gradio>=4.0.0
+
+# PDF Processing
+PyPDF2>=3.0.0
+
+# Jupyter
+jupyterlab>=4.0.0
+ipykernel>=6.5.0
