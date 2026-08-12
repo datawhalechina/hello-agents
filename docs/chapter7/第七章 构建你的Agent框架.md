@@ -149,8 +149,6 @@ print(response)
 print(f"历史消息数: {len(agent.get_history())}")
 ```
 
-
-
 ## 7.2 HelloAgentsLLM扩展
 
 本节内容将在第 4.1.3 节创建的 `HelloAgentsLLM` 基础上进行迭代升级。我们将把这个基础客户端，改造为一个更具适应性的模型调用中枢。本次升级主要围绕以下三个目标展开：
@@ -201,11 +199,11 @@ class MyLLM(HelloAgentsLLM):
         if provider == "modelscope":
             print("正在使用自定义的 ModelScope Provider")
             self.provider = "modelscope"
-            
+
             # 解析 ModelScope 的凭证
             self.api_key = api_key or os.getenv("MODELSCOPE_API_KEY")
             self.base_url = base_url or "https://api-inference.modelscope.cn/v1/"
-            
+
             # 验证凭证是否存在
             if not self.api_key:
                 raise ValueError("ModelScope API key not found. Please set MODELSCOPE_API_KEY environment variable.")
@@ -215,7 +213,7 @@ class MyLLM(HelloAgentsLLM):
             self.temperature = kwargs.get('temperature', 0.7)
             self.max_tokens = kwargs.get('max_tokens')
             self.timeout = kwargs.get('timeout', 60)
-            
+
             # 使用获取的参数创建OpenAI客户端实例
             self._client = OpenAI(api_key=self.api_key, base_url=self.base_url, timeout=self.timeout)
 
@@ -249,7 +247,7 @@ from my_llm import MyLLM # 注意:这里导入我们自己的类
 load_dotenv()
 
 # 实例化我们重写的客户端，并指定provider
-llm = MyLLM(provider="modelscope") 
+llm = MyLLM(provider="modelscope")
 
 # 准备消息
 messages = [{"role": "user", "content": "你好，请介绍一下你自己。"}]
@@ -356,7 +354,6 @@ llm_client = HelloAgentsLLM(
 1. **最高优先级：检查特定服务商的环境变量** 这是最直接、最可靠的判断依据。框架会依次检查 `MODELSCOPE_API_KEY`, `OPENAI_API_KEY`, `ZHIPU_API_KEY` 等环境变量是否存在。一旦发现任何一个，就会立即确定对应的服务商。
 
 2. **次高优先级：根据 `base_url` 进行判断** 如果用户没有设置特定服务商的密钥，但设置了通用的 `LLM_BASE_URL`，框架会转而解析这个 URL。
-
    - **域名匹配**：通过检查 URL 中是否包含 `"api-inference.modelscope.cn"`, `"api.openai.com"` 等特征字符串来识别云服务商。
 
    - **端口匹配**：通过检查 URL 中是否包含 `:11434` (Ollama), `:8000` (VLLM) 等本地服务的标准端口来识别本地部署方案。
@@ -413,7 +410,7 @@ def _resolve_credentials(self, api_key: Optional[str], base_url: Optional[str]) 
         resolved_api_key = api_key or os.getenv("MODELSCOPE_API_KEY") or os.getenv("LLM_API_KEY")
         resolved_base_url = base_url or os.getenv("LLM_BASE_URL") or "https://api-inference.modelscope.cn/v1/"
         return resolved_api_key, resolved_base_url
-    
+
     # ... 其他服务商的逻辑
 ```
 
@@ -433,7 +430,7 @@ from hello_agents import HelloAgentsLLM
 load_dotenv()
 
 # 无需传入 provider，框架会自动检测
-llm = HelloAgentsLLM() 
+llm = HelloAgentsLLM()
 # 框架内部日志会显示检测到 provider 为 'ollama'
 
 # 后续调用方式完全不变
@@ -453,8 +450,6 @@ for chunk in llm.think(messages):
 </div>
 
 如上表7.1所示，这种演进体现了框架设计的重要原则：**从简单开始，逐步完善**。我们在保持接口简洁的同时，增强了功能的完整性。
-
-
 
 ## 7.3 框架接口实现
 
@@ -479,12 +474,12 @@ MessageRole = Literal["user", "assistant", "system", "tool"]
 
 class Message(BaseModel):
     """消息类"""
-    
+
     content: str
     role: MessageRole
     timestamp: datetime = None
     metadata: Optional[Dict[str, Any]] = None
-    
+
     def __init__(self, content: str, role: MessageRole, **kwargs):
         super().__init__(
             content=content,
@@ -492,14 +487,14 @@ class Message(BaseModel):
             timestamp=kwargs.get('timestamp', datetime.now()),
             metadata=kwargs.get('metadata', {})
         )
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """转换为字典格式（OpenAI API格式）"""
         return {
             "role": self.role,
             "content": self.content
         }
-    
+
     def __str__(self) -> str:
         return f"[{self.role}] {self.content}"
 ```
@@ -518,20 +513,20 @@ from pydantic import BaseModel
 
 class Config(BaseModel):
     """HelloAgents配置类"""
-    
+
     # LLM配置
     default_model: str = "gpt-3.5-turbo"
     default_provider: str = "openai"
     temperature: float = 0.7
     max_tokens: Optional[int] = None
-    
+
     # 系统配置
     debug: bool = False
     log_level: str = "INFO"
-    
+
     # 其他配置
     max_history_length: int = 100
-    
+
     @classmethod
     def from_env(cls) -> "Config":
         """从环境变量创建配置"""
@@ -541,7 +536,7 @@ class Config(BaseModel):
             temperature=float(os.getenv("TEMPERATURE", "0.7")),
             max_tokens=int(os.getenv("MAX_TOKENS")) if os.getenv("MAX_TOKENS") else None,
         )
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """转换为字典"""
         return self.dict()
@@ -563,7 +558,7 @@ from .config import Config
 
 class Agent(ABC):
     """Agent基类"""
-    
+
     def __init__(
         self,
         name: str,
@@ -576,24 +571,24 @@ class Agent(ABC):
         self.system_prompt = system_prompt
         self.config = config or Config()
         self._history: list[Message] = []
-    
+
     @abstractmethod
     def run(self, input_text: str, **kwargs) -> str:
         """运行Agent"""
         pass
-    
+
     def add_message(self, message: Message):
         """添加消息到历史记录"""
         self._history.append(message)
-    
+
     def clear_history(self):
         """清空历史记录"""
         self._history.clear()
-    
+
     def get_history(self) -> list[Message]:
         """获取历史记录"""
         return self._history.copy()
-    
+
     def __str__(self) -> str:
         return f"Agent(name={self.name}, provider={self.llm.provider})"
 ```
@@ -879,14 +874,14 @@ class MySimpleAgent(SimpleAgent):
     def has_tools(self) -> bool:
         """检查是否有可用工具"""
         return self.enable_tool_calling and self.tool_registry is not None
-    
+
     def remove_tool(self, tool_name: str) -> bool:
         """移除工具（便利方法）"""
         if self.tool_registry:
             self.tool_registry.unregister(tool_name)
             return True
         return False
-    
+
     def list_tools(self) -> list:
         """列出所有可用工具"""
         if self.tool_registry:
@@ -1285,12 +1280,13 @@ print(f"数学专用Agent结果: {math_result}")
 FunctionCallAgent是hello-agents在0.2.8之后引入的Agent，它基于OpenAI原生函数调用机制的Agent，展示了如何使用OpenAI的函数调用机制来构建Agent。
 它支持以下功能：
 
-- _build_tool_schemas:通过工具的description构建OpenAI的function calling schema
-- _extract_message_content:从OpenAI的响应中提取文本
-- _parse_function_call_arguments:解析模型返回的JSON字符串参数
-- _convert_parameter_types:转换参数类型
+- \_build_tool_schemas:通过工具的description构建OpenAI的function calling schema
+- \_extract_message_content:从OpenAI的响应中提取文本
+- \_parse_function_call_arguments:解析模型返回的JSON字符串参数
+- \_convert_parameter_types:转换参数类型
 
 这些功能可以使其具备原生的OpenAI Function Calling的能力，对比使用prompt约束的方式，具备更强的鲁棒性。
+
 ```python
 def _invoke_with_tools(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]], tool_choice: Union[str, dict], **kwargs):
         """调用底层OpenAI客户端执行函数调用"""
@@ -1365,7 +1361,7 @@ print(completion)
 
 Tool基类是整个工具系统的核心抽象，它定义了所有工具必须遵循的接口规范：
 
-````python
+```python
 class Tool(ABC):
     """工具基类"""
 
@@ -1382,14 +1378,15 @@ class Tool(ABC):
     def get_parameters(self) -> List[ToolParameter]:
         """获取工具参数定义"""
         pass
-````
+```
+
 这个设计体现了面向对象设计的核心思想：通过统一的`run`方法接口，所有工具都能以一致的方式执行，接受字典参数并返回字符串结果，确保了框架的一致性。同时，工具具备了自描述能力，通过`get_parameters`方法能够清晰地告诉调用者自己需要什么参数，这种内省机制为自动化文档生成和参数验证提供了基础。而name和description等元数据的设计，则让工具系统具备了良好的可发现性和可理解性。
 
 （2）ToolParameter参数定义系统
 
 为了支持复杂的参数验证和文档生成，我们设计了ToolParameter类：
 
-````python
+```python
 class ToolParameter(BaseModel):
     """工具参数定义"""
     name: str
@@ -1397,14 +1394,15 @@ class ToolParameter(BaseModel):
     description: str
     required: bool = True
     default: Any = None
-````
+```
+
 这种设计让工具能够精确描述自己的参数需求，支持类型检查、默认值设置和文档自动生成。
 
 （3）ToolRegistry注册表的实现
 
 ToolRegistry是工具系统的管理中枢，它提供了工具的注册、发现、执行等核心功能，在这一节我们主要用到以下功能：
 
-````python
+```python
 class ToolRegistry:
     """HelloAgents工具注册表"""
 
@@ -1418,7 +1416,7 @@ class ToolRegistry:
             print(f"⚠️ 警告:工具 '{tool.name}' 已存在，将被覆盖。")
         self._tools[tool.name] = tool
         print(f"✅ 工具 '{tool.name}' 已注册。")
-        
+
     def register_function(self, name: str, description: str, func: Callable[[str], str]):
         """
         直接注册函数作为工具（简便方式）
@@ -1436,7 +1434,8 @@ class ToolRegistry:
             "func": func
         }
         print(f"✅ 工具 '{name}' 已注册。")
-````
+```
+
 ToolRegistry支持两种注册方式：
 
 1. **Tool对象注册**：适合复杂工具，支持完整的参数定义和验证
@@ -1446,7 +1445,7 @@ ToolRegistry支持两种注册方式：
 
 注册表提供了丰富的工具管理功能：
 
-````python
+```python
 def get_tools_description(self) -> str:
     """获取所有可用工具的格式化描述字符串"""
     descriptions = []
@@ -1460,10 +1459,11 @@ def get_tools_description(self) -> str:
         descriptions.append(f"- {name}: {info['description']}")
 
     return "\n".join(descriptions) if descriptions else "暂无可用工具"
-````
+```
+
 这个方法生成的描述字符串可以直接用于构建Agent的提示词，让Agent了解可用的工具。
 
-````python
+```python
 def to_openai_schema(self) -> Dict[str, Any]:
         """转换为 OpenAI function calling schema 格式
 
@@ -1511,7 +1511,8 @@ def to_openai_schema(self) -> Dict[str, Any]:
                 }
             }
         }
-````
+```
+
 这个方法生成的schema可以直接用于原生的OpenAI SDK的工具调用。
 
 ### 7.5.2 自定义工具开发
@@ -1673,7 +1674,7 @@ pip install "hello-agents[search]==0.1.1"
 
 HelloAgents框架内置的SearchTool展示了如何设计一个高级的多源搜索工具：
 
-````python
+```python
 class SearchTool(Tool):
     """
     智能混合搜索工具
@@ -1694,14 +1695,15 @@ class SearchTool(Tool):
         self.serpapi_key = serpapi_key or os.getenv("SERPAPI_API_KEY")
         self.available_backends = []
         self._setup_backends()
-````
+```
+
 这个设计的核心思想是根据可用的API密钥和依赖库，自动选择最佳的搜索后端。
 
 （2）TAVILY与SERPAPI搜索源的整合策略
 
 框架实现了智能的后端选择逻辑：
 
-````python
+```python
 def _search_hybrid(self, query: str) -> str:
     """混合搜索 - 智能选择最佳搜索源"""
     # 优先使用Tavily（AI优化的搜索）
@@ -1724,14 +1726,15 @@ def _search_hybrid(self, query: str) -> str:
 
     # 如果都不可用，提示用户配置API
     return "❌ 没有可用的搜索源，请配置TAVILY_API_KEY或SERPAPI_API_KEY环境变量"
-````
+```
+
 这种设计体现了高可用系统的核心理念：通过降级机制，系统能够从最优的搜索源逐步降级到可用的备选方案。当所有搜索源都不可用时，明确提示用户配置正确的API密钥。
 
 （3）搜索结果的统一格式化
 
 不同搜索引擎返回的结果格式不同，框架通过统一的格式化方法来处理：
 
-````python
+```python
 def _search_tavily(self, query: str) -> str:
     """使用Tavily搜索"""
     response = self.tavily_client.search(
@@ -1749,7 +1752,7 @@ def _search_tavily(self, query: str) -> str:
         result += f"    来源: {item.get('url', '')}\n\n"
 
     return result
-````
+```
 
 基于框架的设计思想，我们可以创建自己的高级搜索工具。这次我们使用类的方式来展示不同的实现方法，创建`my_advanced_search.py`：
 
@@ -2142,8 +2145,6 @@ async def test_parallel_execution():
 
 基于以上的设计和实现经验，我们可以总结出工具系统开发的核心理念：在设计层面，每个工具都应该遵循单一职责原则，专注于特定功能的同时保持接口的统一性，并将完善的异常处理和安全优先的输入验证作为基本要求。在性能优化方面，利用异步执行提高并发处理能力，同时合理管理外部连接和系统资源。
 
-
-
 ## 7.6 本章小结
 
 在正式总结之前，我们想告诉大家一个好消息：对于本章实现的所有方法和功能，都在GitHub仓库中提供了完整的测试案例。你可以访问[这个链接](https://github.com/datawhalechina/hello-agents/tree/main/code/chapter7)查看和运行这些测试代码。该目录包含了四种Agent范式的演示、工具系统的集成测试、高级功能的使用示例，以及交互式的Agent体验。如果你想验证自己的实现是否正确，或者想深入了解框架的实际使用方式，这些测试案例将是有价值的参考。
@@ -2156,11 +2157,9 @@ async def test_parallel_execution():
 
 接下来，我们将一起探索如何往框架中加入RAG系统与Memory机制，敬请期待第八章！
 
-
 ## 习题
 
 1. 本章构建了 `HelloAgents` 框架，并阐述了"为何需要自建Agent框架"。请分析：
-
    - 在7.1.1节中提到了当前主流框架的四个主要局限性。结合你在[第六章习题](../chapter6/第六章%20框架开发实践.md#习题)或实际项目中使用过的某个框架的实际经验，说明这些问题是如何影响开发效率的。
    - `HelloAgents` 提出了"万物皆为工具"的设计理念，将 `Memory`、`RAG`、`MCP` 等模块都抽象为工具。这种设计有什么优势？是否存在局限性？请举例说明。
    - 对比第四章从零实现的智能体代码和本章的框架化实现，框架化带来了哪些具体的改进？如果让你设计一个框架，你会优先考虑哪些设计原则？
@@ -2168,13 +2167,11 @@ async def test_parallel_execution():
 2. 在7.2节中，我们扩展了 `HelloAgentsLLM` 以支持多模型供应商和本地模型调用。
 
    > <strong>提示</strong>：这是一道实践题，建议实际操作
-
-   - 参考7.2.1节的示例，尝试为 `HelloAgentsLLM` 添加一个新模型供应商的支持（如`Gemini`、`Anthropic`、`Kim`）。要求通过继承方式实现，并能够自动检测该提供商的环境变量。
+   - 参考7.2.1节的示例，尝试为 `HelloAgentsLLM` 添加一个新模型供应商的支持（如`Gemini`、`Anthropic`、`Kimi`）。要求通过继承方式实现，并能够自动检测该提供商的环境变量。
    - 在7.2.3节中介绍了自动检测机制的三个优先级。请分析：如果同时设置了 `OPENAI_API_KEY` 和 `LLM_BASE_URL="http://localhost:11434/v1"`，框架最后会选择哪个提供商？这种优先级设计是否合理？
    - 除了本章介绍的 `VLLM` 和 `Ollama`，还有 `SGLang` 等其他本地模型部署方案。请先搜索并了解 `SGLang` 的基本信息和特点，然后对比 `VLLM`、`SGLang` 和 `Ollama` 这三者在易用性、资源占用、推理速度、推理精度等方面的优劣。
 
 3. 在7.3节中，我们实现了 `Message` 类、`Config` 类和 `Agent` 基类。请分析：
-
    - `Message` 类使用了 `Pydantic` 的 `BaseModel` 进行数据验证。这种设计在实际应用中有哪些优势？
    - `Agent` 基类定义了 `run` 和 `_execute` 两个方法，其中 `run` 是公开接口，`_execute` 是抽象方法。这种设计模式叫什么？有什么好处？
    - 在 `Config` 类中，我们使用了单例模式。请解释什么是单例模式，为什么配置管理需要使用单例模式？如果不使用单例会导致什么问题？
@@ -2182,19 +2179,16 @@ async def test_parallel_execution():
 4. 在7.4节中，我们动手进行了四种 `Agent` 范式的框架化实现。
 
    > <strong>提示</strong>：这是一道实践题，建议实际操作
-
    - 对比第四章从零实现的 `ReActAgent` 和本章框架化的 `ReActAgent`，列举3个具体的改进点，并说明这些改进如何提升了代码的可维护性和可扩展性。
    - `ReflectionAgent` 实现了"执行-反思-优化"循环。请扩展这个实现，添加一个"质量评分"机制：在每次反思后，让 `LLM` 对当前版本的输出打分，只有分数低于阈值时才继续优化，否则提前终止。
    - 请设计并实现一个新的 `Agent` 范式 `Tree-of-Thought Agent`，要求继承 `Agent` 基类，它能够在每一步生成多个可能的思考路径，然后选择最优路径继续。
 
 5. 在7.5节中，我们构建了工具系统。请思考以下问题：
-
    - `BaseTool` 类定义了 `execute` 抽象方法，所有工具都必须实现这个方法。请解释为什么要强制所有工具实现统一的接口？如果某个工具需要返回多个值（如搜索工具返回标题、摘要、链接），应该如何设计？
    - 在7.5.3节中实现了工具链（`ToolChain`）。请设计一个实际的应用场景，需要串联至少3个工具，并画出工具链的执行流程图。
    - 异步工具执行器（`AsyncToolExecutor`）使用了线程池来并行执行工具。请分析：在什么情况下并行执行工具能带来性能提升？
 
 6. 框架的可扩展性是设计的重要考量因素之一。你现在要扩展 `HelloAgents` 框架，为其实现一些有趣的新功能和特性。
-
    - 首先为 `HelloAgents` 添加一个"流式输出"功能，使得 `Agent` 在生成响应时能够实时返回中间结果（类似 `ChatGPT` 用户界面的打字效果）。请设计这个功能的实现方案，说明需要修改哪些类和方法。
    - 然后为框架添加"多轮对话管理"功能，能够自动管理对话历史、支持对话分支和回溯，你会如何设计？需要新增哪些类？如何与现有的 `Message` 系统集成？
    - 最后请为 `HelloAgents` 设计一个"插件系统"，允许第三方开发者通过插件的方式扩展框架功能（如添加新的 `Agent` 类型、新的工具类型等），而无需修改框架核心代码。要求画出插件系统的架构图并说明关键接口。
