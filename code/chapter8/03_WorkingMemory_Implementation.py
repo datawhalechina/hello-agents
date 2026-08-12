@@ -9,7 +9,7 @@ import time
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
 from hello_agents.tools import MemoryTool
-from hello_agents.memory import MemoryItem
+from hello_agents.memory import MemoryItem, MemoryConfig
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -17,6 +17,8 @@ class WorkingMemoryDemo:
     """工作记忆演示类"""
     
     def __init__(self):
+        config = MemoryConfig()
+        config.working_memory_capacity = 50
         self.memory_tool = MemoryTool(
             user_id="working_memory_demo",
             memory_types=["working"]  # 只启用工作记忆
@@ -251,7 +253,7 @@ class WorkingMemoryDemo:
         print(f"批量搜索10次耗时: {search_time:.3f}秒")
         
         # 获取最终统计
-        final_stats = self.memory_tool.run("stats")
+        final_stats = self.memory_tool.run({ "action": "stats" })
         print(f"\n📊 最终统计: {final_stats}")
 
 def main():
