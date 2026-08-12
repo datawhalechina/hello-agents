@@ -69,7 +69,7 @@ class PodcastSynthesisService:
                     continue
                 
                 try:
-                    segment = AudioSegment.from_file(file_path, format="mp3")
+                    segment = AudioSegment.from_file(file_path)
                     if valid_segments_count > 0:
                         combined += silence
                     combined += segment

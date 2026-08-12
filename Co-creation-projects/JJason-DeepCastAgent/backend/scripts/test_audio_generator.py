@@ -16,7 +16,12 @@ class TestAudioGenerationService(unittest.TestCase):
         self.mock_config.audio_output_dir = "./test_output"
         self.mock_config.tts_base_url = "http://test.api/tts"
         self.mock_config.tts_model = "test-tts"
+        self.mock_config.minimax_api_key = None
+        self.mock_config.minimax_tts_region = "global_en"
+        self.mock_config.minimax_tts_model = "speech-2.8-hd"
+        self.mock_config.minimax_tts_audio_format = "mp3"
         self.mock_config.ffmpeg_path = "ffmpeg"
+        self.mock_config.tts_timeout = 300
 
         # Patch Path.mkdir to avoid actual filesystem creation during init
         with patch('pathlib.Path.mkdir'):
@@ -88,6 +93,57 @@ class TestAudioGenerationService(unittest.TestCase):
         self.assertEqual(self.service._get_voice_for_role("Guest"), "liwa")
         self.assertEqual(self.service._get_voice_for_role("Liwa"), "liwa")
         self.assertEqual(self.service._get_voice_for_role("Unknown"), "xiayu") # Default
+
+    @patch('requests.post')
+    @patch('builtins.open', new_callable=mock_open)
+    @patch('pathlib.Path.exists')
+    def test_minimax_cn_request_and_encoded_audio_response(self, mock_exists, mock_file, mock_post):
+        mock_exists.return_value = False
+        self.mock_config.minimax_api_key = "test_key"
+        self.mock_config.minimax_tts_region = "cn_zh"
+        self.mock_config.minimax_tts_audio_format = "wav"
+
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "data": {"status": 2, "audio": "000102ff"},
+            "base_resp": {"status_code": 0},
+        }
+        mock_post.return_value = mock_response
+
+        files = self.service.generate_audio(
+            [{"role": "Host", "content": "Hello world"}],
+            "task_456",
+        )
+
+        self.assertEqual(files, ["test_output/task_456_000_Host.wav"])
+        _, kwargs = mock_post.call_args
+        self.assertEqual(kwargs["json"], {
+            "model": "speech-2.8-hd",
+            "text": "Hello world",
+            "stream": False,
+            "output_format": "hex",
+            "voice_setting": {"voice_id": "xiayu"},
+            "audio_setting": {"format": "wav"},
+        })
+        self.assertEqual(
+            mock_post.call_args.args[0],
+            "https://api.minimaxi.com/v1/t2a_v2",
+        )
+        mock_file().write.assert_called_once_with(b"\x00\x01\x02\xff")
+
+    def test_minimax_global_endpoint_and_supported_parameters(self):
+        self.mock_config.minimax_api_key = "test_key"
+        self.assertEqual(
+            self.service._minimax_endpoint(),
+            "https://api.minimax.io/v1/t2a_v2",
+        )
+        from services.audio_generator import MINIMAX_TTS_CONFIG
+        self.assertEqual(MINIMAX_TTS_CONFIG["models"][0], "speech-2.8-hd")
+        self.assertEqual(
+            MINIMAX_TTS_CONFIG["audio_formats"],
+            ("mp3", "wav", "flac", "pcm"),
+        )
 
 if __name__ == '__main__':
     unittest.main()
