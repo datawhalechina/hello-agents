@@ -1,0 +1,10 @@
+{
+  "description": "示例研究问题（可直接复制到 main.ipynb 中运行）",
+  "queries": [
+    "SEC61G in Lung Cancer",
+    "SEC61G 在肺癌中的作用",
+    "KRAS mutation targeted therapy resistance",
+    "PD-1 immunotherapy biomarkers non-small cell lung cancer",
+    "tumor microenvironment single-cell RNA-seq"
+  ]
+}

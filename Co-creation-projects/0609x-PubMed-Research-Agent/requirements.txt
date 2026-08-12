@@ -1,0 +1,32 @@
+# ============================================================
+# PubMed-Research-Agent Dependencies
+# ============================================================
+
+# --- HelloAgents 框架（毕业设计 Demo 核心） ---
+hello-agents[all]>=0.2.9
+
+# --- Jupyter 运行环境 ---
+jupyter>=1.0.0
+notebook>=7.0.0
+
+# --- 核心运行时 ---
+biopython>=1.81            # NCBI E-utilities（PubMed 检索）
+httpx>=0.27.0              # OpenAI 兼容 LLM 客户端
+pydantic>=2.0.0
+pydantic-settings>=2.0.0   # 配置管理
+python-dotenv>=1.0.0       # .env 加载
+
+# --- 后端 API（完整系统） ---
+fastapi>=0.109.0
+uvicorn>=0.27.0
+sqlalchemy>=2.0.0
+aiosqlite>=0.19.0
+
+# --- RAG 向量检索 ---
+qdrant-client>=1.9.0
+
+# --- 知识图谱 ---
+neo4j>=5.0.0
+
+# --- 测试 ---
+pytest>=7.4.0

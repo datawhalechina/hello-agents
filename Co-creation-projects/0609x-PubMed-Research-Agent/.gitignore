@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# 虚拟环境
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 环境变量（切勿提交密钥）
+.env
+
+# 数据库与运行时数据
+*.db
+*.sqlite3
+data/*.db
+data/cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# 日志
+*.log
+logs/
+
+# 系统文件
+.DS_Store
+Thumbs.db
