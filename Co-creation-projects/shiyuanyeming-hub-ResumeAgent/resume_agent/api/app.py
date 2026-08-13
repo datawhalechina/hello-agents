@@ -2,14 +2,38 @@
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 from uuid import UUID
 
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
-from resume_agent.api.schemas import FactBaseCreateRequest, ExperienceCreateRequest
+from resume_agent.agents.mentor import DeterministicQuestionWriter
+from resume_agent.agents.structured import AgentOutputError
+from resume_agent.agents.unavailable import (
+    AgentUnavailableError,
+    UnavailableFactAuditAgent,
+)
+from resume_agent.api.schemas import (
+    AnswerRequest,
+    FactBaseCreateRequest,
+    ExperienceCreateRequest,
+    SessionCreateRequest,
+    UnknownRequest,
+)
 from resume_agent.application.fact_base_service import FactBaseService
-from resume_agent.domain.models import CareerFactBase
+from resume_agent.application.interview_service import (
+    InterviewService,
+    InterviewTurn,
+    MentorQuestion,
+    UnknownOutcome,
+)
+from resume_agent.application.ports import (
+    FactAuditAgent,
+    QuestionWriterAgent,
+    RevisionConflict,
+)
+from resume_agent.domain.models import CareerFactBase, InterviewSession
 from resume_agent.infrastructure.sqlite_repositories import (
     SQLiteFactBaseRepository,
     SQLiteSessionRepository,
@@ -25,17 +49,30 @@ class ServiceContainer:
     session_repository: SQLiteSessionRepository
     version_repository: SQLiteVersionRepository
     fact_bases: FactBaseService
+    interviews: InterviewService
 
 
-def create_app(database_path: Path) -> FastAPI:
+def create_app(
+    database_path: Path,
+    *,
+    fact_audit_agent: Optional[FactAuditAgent] = None,
+    question_writer: Optional[QuestionWriterAgent] = None,
+) -> FastAPI:
     store = SQLiteStore(Path(database_path))
     fact_base_repository = SQLiteFactBaseRepository(store)
+    session_repository = SQLiteSessionRepository(store)
     container = ServiceContainer(
         store=store,
         fact_base_repository=fact_base_repository,
-        session_repository=SQLiteSessionRepository(store),
+        session_repository=session_repository,
         version_repository=SQLiteVersionRepository(store),
         fact_bases=FactBaseService(fact_base_repository),
+        interviews=InterviewService(
+            fact_base_repository,
+            session_repository,
+            fact_audit_agent or UnavailableFactAuditAgent(),
+            question_writer or DeterministicQuestionWriter(),
+        ),
     )
     app = FastAPI(
         title="ResumeAgent API",
@@ -48,6 +85,31 @@ def create_app(database_path: Path) -> FastAPI:
     def handle_not_found(request: Request, error: KeyError) -> JSONResponse:
         detail = error.args[0] if error.args else str(error)
         return JSONResponse(status_code=404, content={"detail": detail})
+
+    @app.exception_handler(RevisionConflict)
+    def handle_revision_conflict(
+        request: Request,
+        error: RevisionConflict,
+    ) -> JSONResponse:
+        return JSONResponse(status_code=409, content={"detail": str(error)})
+
+    @app.exception_handler(AgentUnavailableError)
+    def handle_agent_unavailable(
+        request: Request,
+        error: AgentUnavailableError,
+    ) -> JSONResponse:
+        return JSONResponse(status_code=503, content={"detail": str(error)})
+
+    @app.exception_handler(AgentOutputError)
+    def handle_agent_output(
+        request: Request,
+        error: AgentOutputError,
+    ) -> JSONResponse:
+        return JSONResponse(status_code=502, content={"detail": str(error)})
+
+    @app.exception_handler(ValueError)
+    def handle_invalid_state(request: Request, error: ValueError) -> JSONResponse:
+        return JSONResponse(status_code=422, content={"detail": str(error)})
 
     @app.get("/health", tags=["system"])
     def health() -> dict:
@@ -85,5 +147,63 @@ def create_app(database_path: Path) -> FastAPI:
             request.organization,
             request.role,
         )
+
+    @app.post(
+        "/sessions",
+        response_model=InterviewSession,
+        status_code=status.HTTP_201_CREATED,
+        tags=["interviews"],
+    )
+    def create_session(request: SessionCreateRequest) -> InterviewSession:
+        return container.interviews.create_session(
+            request.fact_base_id,
+            request.active_experience_id,
+        )
+
+    @app.get(
+        "/sessions/{session_id}",
+        response_model=InterviewSession,
+        tags=["interviews"],
+    )
+    def get_session(session_id: UUID) -> InterviewSession:
+        return container.interviews.get_session(session_id)
+
+    @app.post(
+        "/sessions/{session_id}/answers",
+        response_model=InterviewTurn,
+        tags=["interviews"],
+    )
+    def answer(session_id: UUID, request: AnswerRequest) -> InterviewTurn:
+        return container.interviews.answer(session_id, request.message)
+
+    @app.post(
+        "/sessions/{session_id}/proposals/{proposal_id}/confirm",
+        response_model=InterviewTurn,
+        tags=["interviews"],
+    )
+    def confirm(session_id: UUID, proposal_id: UUID) -> InterviewTurn:
+        return container.interviews.confirm(session_id, proposal_id)
+
+    @app.post(
+        "/sessions/{session_id}/unknown",
+        response_model=UnknownOutcome,
+        tags=["interviews"],
+    )
+    def record_unknown(
+        session_id: UUID,
+        request: UnknownRequest,
+    ) -> UnknownOutcome:
+        return container.interviews.record_unknown(
+            session_id,
+            request.dimension,
+        )
+
+    @app.get(
+        "/sessions/{session_id}/next-question",
+        response_model=Optional[MentorQuestion],
+        tags=["interviews"],
+    )
+    def next_question(session_id: UUID) -> Optional[MentorQuestion]:
+        return container.interviews.next_question(session_id)
 
     return app

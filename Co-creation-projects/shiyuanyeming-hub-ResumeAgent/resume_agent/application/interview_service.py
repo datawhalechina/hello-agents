@@ -18,6 +18,7 @@ from resume_agent.application.question_planner import (
     QuestionPlanner,
 )
 from resume_agent.domain.models import (
+    CareerFactBase,
     FactProposal,
     InterviewMessage,
     InterviewSession,
@@ -60,6 +61,28 @@ class InterviewService:
         self.question_writer = question_writer
         self.planner = planner or QuestionPlanner()
 
+    def create_session(
+        self,
+        fact_base_id: UUID,
+        active_experience_id: UUID,
+    ) -> InterviewSession:
+        base = self.fact_bases.get(fact_base_id)
+        try:
+            base.get_experience(active_experience_id)
+        except KeyError as error:
+            raise ValueError(
+                "active experience does not belong to the selected fact base"
+            ) from error
+        session = InterviewSession(
+            fact_base_id=fact_base_id,
+            active_experience_id=active_experience_id,
+        )
+        self.sessions.create(session)
+        return self.sessions.get(session.id)
+
+    def get_session(self, session_id: UUID) -> InterviewSession:
+        return self.sessions.get(session_id)
+
     def answer(self, session_id: UUID, message: str) -> InterviewTurn:
         session = self.sessions.get(session_id)
         base = self.fact_bases.get(session.fact_base_id)
@@ -67,6 +90,8 @@ class InterviewService:
             raise ValueError("an active experience is required before deepening")
 
         session.messages.append(InterviewMessage(role="user", content=message))
+        session.updated_at = utc_now()
+        self.sessions.save(session)
         proposal = self.audit_agent.propose(message, session, base)
         if proposal.experience_id != session.active_experience_id:
             raise ValueError("agent proposal targeted a different experience")
@@ -137,7 +162,7 @@ class InterviewService:
     def _make_question(
         self,
         session: InterviewSession,
-        base,
+        base: CareerFactBase,
     ) -> Optional[MentorQuestion]:
         if session.active_experience_id is None:
             return None
