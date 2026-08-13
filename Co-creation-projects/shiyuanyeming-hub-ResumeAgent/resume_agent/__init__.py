@@ -1,5 +1,17 @@
 """Stable public API for the ResumeAgent mentor core."""
 
+from resume_agent.agents.hello_agents_adapter import (
+    HelloAgentsRunner,
+    MentorAgentPair,
+    build_mentor_agents,
+)
+from resume_agent.agents.mentor import (
+    DeterministicQuestionWriter,
+    StructuredFactAuditAgent,
+    StructuredQuestionWriterAgent,
+)
+from resume_agent.agents.prompts import FACT_AUDIT_PROMPT, QUESTION_WRITER_PROMPT
+from resume_agent.agents.structured import AgentOutputError
 from resume_agent.application.interview_service import (
     InterviewService,
     InterviewTurn,
@@ -36,9 +48,11 @@ from resume_agent.infrastructure.sqlite_repositories import (
 )
 
 __all__ = [
+    "AgentOutputError",
     "CareerFactBase",
     "CareerTarget",
     "ConfidenceStatus",
+    "DeterministicQuestionWriter",
     "Experience",
     "FactProposal",
     "FactValue",
@@ -46,21 +60,28 @@ __all__ = [
     "InterviewService",
     "InterviewSession",
     "InterviewTurn",
+    "FACT_AUDIT_PROMPT",
+    "HelloAgentsRunner",
     "MentorQuestion",
+    "MentorAgentPair",
     "PlanningSignals",
     "QualityDimension",
     "QualityReport",
     "QuestionHistory",
     "QuestionPlan",
     "QuestionPlanner",
+    "QUESTION_WRITER_PROMPT",
     "ResumeVersion",
     "SQLiteFactBaseRepository",
     "SQLiteSessionRepository",
     "SQLiteStore",
     "SQLiteVersionRepository",
     "Specificity",
+    "StructuredFactAuditAgent",
+    "StructuredQuestionWriterAgent",
     "UnknownOutcome",
     "VersionService",
     "VersionStatus",
+    "build_mentor_agents",
     "evaluate_experience",
 ]

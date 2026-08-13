@@ -95,6 +95,33 @@ jupyter lab
 
 每段经历从六个维度评估：情境、个人责任、行动、方法、结果和证据。只有用户确认的事实才进入统一事实库；估算值会保留估算标记，敏感标记与事实可信度分别保存。不同岗位版本只引用统一事实库中的经历，不复制或改写原始事实。
 
+### 接入现有 HelloAgents
+
+导师核心不会在导入时创建模型或读取 API Key。Notebook 可以继续使用已有的 `SimpleAgent`，只需要用核心提供的提示词分别创建事实审计 Agent 和问题生成 Agent，再通过适配器接入：
+
+```python
+from hello_agents import SimpleAgent
+from resume_agent import (
+    FACT_AUDIT_PROMPT,
+    QUESTION_WRITER_PROMPT,
+    build_mentor_agents,
+)
+
+audit_agent = SimpleAgent(
+    name="事实审计",
+    llm=llm,
+    system_prompt=FACT_AUDIT_PROMPT,
+)
+question_agent = SimpleAgent(
+    name="导师追问",
+    llm=llm,
+    system_prompt=QUESTION_WRITER_PROMPT,
+)
+mentor_agents = build_mentor_agents(audit_agent, question_agent)
+```
+
+`mentor_agents.fact_auditor` 和 `mentor_agents.question_writer` 可直接传给 `InterviewService`。模型返回的经历 ID 和事实库版本号不会被信任，这两个值始终由程序状态注入；结构化输出连续两次不合法时会返回可恢复错误。
+
 ### 可选样式（每语 3 套）
 
 | 语言 | 样式 | 说明 |
@@ -132,7 +159,7 @@ jupyter lab
 
 - [x] 粘贴目标 JD，自动标注简历缺失关键词
 - [x] 多版本管理核心（同一事实库派生多个投递版本）
-- [ ] 接入结构化 HelloAgents 多智能体提示词
+- [x] 接入结构化 HelloAgents 多智能体提示词
 - [ ] 提供 FastAPI 服务与 Streamlit Web 界面
 - [ ] 将现有三语渲染器迁移为独立 Python 包，并让 Notebook 调用公开 API
 - [ ] 多模板切换与日文 B5 纸张支持
