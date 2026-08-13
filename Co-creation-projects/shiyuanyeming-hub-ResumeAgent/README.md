@@ -128,7 +128,7 @@ uvicorn resume_agent.api.main:app --reload
 - 默认数据库：`data/resume_agent.db`
 - 可通过 `RESUME_AGENT_DB=/path/to/file.db` 指定其他数据库
 
-默认入口会按上述环境变量自动构造 HelloAgents 事实审计 Agent 和导师追问 Agent。每次结构化调用都会创建新的 `SimpleAgent`，不共享框架对话历史，避免候选人会话互相污染。没有配置时，事实库、版本管理、预览和导出仍可离线使用；Web 侧边栏会提前显示“导师 Agent 未启用”，提交需要事实抽取的回答时接口仍会明确返回 HTTP 503，同时保留用户刚提交的消息。
+默认入口会按上述环境变量自动构造 HelloAgents 事实审计 Agent 和导师追问 Agent。每次结构化调用都会创建新的 `SimpleAgent`，不共享框架对话历史，避免候选人会话互相污染。由于简历提示可能包含个人敏感信息，HelloAgents 的 trace、session、skills、todo、devlog 和 subagent 持久化在这两个专用 Agent 上默认关闭；业务会话只由 ResumeAgent 自己的 SQLite 仓库管理。没有配置时，事实库、版本管理、预览和导出仍可离线使用；Web 侧边栏会提前显示“导师 Agent 未启用”，提交需要事实抽取的回答时接口仍会明确返回 HTTP 503，同时保留用户刚提交的消息。
 
 运行状态可以通过 `GET /capabilities` 查看。该接口只返回框架、模型名和功能开关，不返回 API Key 或完整供应商地址。
 

@@ -152,6 +152,17 @@ def _load_hello_agents() -> ModuleType:
     return import_module("hello_agents")
 
 
+def _private_agent_config(framework):
+    return framework.Config(
+        trace_enabled=False,
+        session_enabled=False,
+        skills_enabled=False,
+        todowrite_enabled=False,
+        devlog_enabled=False,
+        subagent_enabled=False,
+    )
+
+
 def build_mentor_runtime(
     environ: Optional[Mapping[str, str]] = None,
     *,
@@ -203,6 +214,7 @@ def build_mentor_runtime(
             name="简历事实审计",
             llm=llm,
             system_prompt=FACT_AUDIT_PROMPT,
+            config=_private_agent_config(framework),
         )
     )
     question_runner = FreshAgentRunner(
@@ -210,6 +222,7 @@ def build_mentor_runtime(
             name="简历导师追问",
             llm=llm,
             system_prompt=QUESTION_WRITER_PROMPT,
+            config=_private_agent_config(framework),
         )
     )
     return MentorRuntime(

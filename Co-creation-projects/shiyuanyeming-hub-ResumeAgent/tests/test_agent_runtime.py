@@ -166,3 +166,46 @@ def test_fresh_runner_converts_provider_error_to_safe_unavailable_error():
 
     assert "provider" not in str(error.value).lower()
     assert "sk-secret-value" not in str(error.value)
+
+
+def test_runtime_disables_framework_persistence_for_sensitive_resume_prompts():
+    configs = []
+    agents = []
+
+    class FakeConfig:
+        def __init__(self, **kwargs):
+            configs.append(kwargs)
+
+    class FakeLLM:
+        def __init__(self, **kwargs):
+            pass
+
+    class FakeAgent:
+        def __init__(self, **kwargs):
+            agents.append(kwargs)
+
+        def run(self, prompt):
+            return "{}"
+
+    runtime = build_mentor_runtime(
+        VALID_ENV,
+        framework_loader=lambda: SimpleNamespace(
+            Config=FakeConfig,
+            HelloAgentsLLM=FakeLLM,
+            SimpleAgent=FakeAgent,
+        ),
+    )
+
+    runtime.fact_auditor.runner.factory()
+
+    assert configs == [
+        {
+            "trace_enabled": False,
+            "session_enabled": False,
+            "skills_enabled": False,
+            "todowrite_enabled": False,
+            "devlog_enabled": False,
+            "subagent_enabled": False,
+        }
+    ]
+    assert agents[0]["config"].__class__ is FakeConfig
