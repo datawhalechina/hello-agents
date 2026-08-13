@@ -4,7 +4,12 @@ from typing import List, Optional
 from uuid import UUID
 
 from resume_agent.application.ports import FactBaseRepository
-from resume_agent.domain.models import CareerFactBase, CareerTarget
+from resume_agent.domain.models import (
+    CandidateProfile,
+    CareerFactBase,
+    CareerTarget,
+    utc_now,
+)
 
 
 class FactBaseService:
@@ -32,5 +37,18 @@ class FactBaseService:
         expected_revision = base.revision
         base.add_experience(organization, role)
         base.revision += 1
+        self.repository.save(base, expected_revision=expected_revision)
+        return self.repository.get(base.id)
+
+    def update_profile(
+        self,
+        fact_base_id: UUID,
+        profile: CandidateProfile,
+    ) -> CareerFactBase:
+        base = self.repository.get(fact_base_id)
+        expected_revision = base.revision
+        base.profile = profile
+        base.revision += 1
+        base.updated_at = utc_now()
         self.repository.save(base, expected_revision=expected_revision)
         return self.repository.get(base.id)

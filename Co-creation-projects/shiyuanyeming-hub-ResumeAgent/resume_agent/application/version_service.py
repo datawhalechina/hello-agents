@@ -83,6 +83,14 @@ class VersionService:
         version.name = name
         return self.save(version)
 
+    def set_style(self, version_id: UUID, style: str) -> ResumeVersion:
+        normalized = style.strip()
+        if not normalized:
+            raise ValueError("style must not be empty")
+        version = self.repository.get(version_id)
+        version.styles = {**version.styles, version.locale: normalized}
+        return self.save(version)
+
     def activate(self, version_id: UUID) -> ResumeVersion:
         target = self.repository.get(version_id)
         for version in self.repository.list(target.fact_base_id):

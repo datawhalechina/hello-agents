@@ -5,7 +5,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from resume_agent.domain.models import CareerTarget, QualityDimension
+from resume_agent.domain.models import CandidateProfile, CareerTarget, QualityDimension
 
 
 class FactBaseCreateRequest(BaseModel):
@@ -15,6 +15,10 @@ class FactBaseCreateRequest(BaseModel):
 class ExperienceCreateRequest(BaseModel):
     organization: str = Field(min_length=1)
     role: str = Field(min_length=1)
+
+
+class ProfileUpdateRequest(CandidateProfile):
+    pass
 
 
 class SessionCreateRequest(BaseModel):
@@ -45,3 +49,7 @@ class VersionCloneRequest(BaseModel):
 
 class VersionRenameRequest(BaseModel):
     name: str = Field(min_length=1)
+
+
+class VersionStyleRequest(BaseModel):
+    style: str = Field(min_length=1)

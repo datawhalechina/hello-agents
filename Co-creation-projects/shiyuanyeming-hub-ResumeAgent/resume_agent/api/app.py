@@ -18,11 +18,13 @@ from resume_agent.api.schemas import (
     AnswerRequest,
     FactBaseCreateRequest,
     ExperienceCreateRequest,
+    ProfileUpdateRequest,
     SessionCreateRequest,
     UnknownRequest,
     VersionCloneRequest,
     VersionCreateRequest,
     VersionRenameRequest,
+    VersionStyleRequest,
 )
 from resume_agent.application.fact_base_service import FactBaseService
 from resume_agent.application.interview_service import (
@@ -167,6 +169,17 @@ def create_app(
             request.organization,
             request.role,
         )
+
+    @app.patch(
+        "/fact-bases/{fact_base_id}/profile",
+        response_model=CareerFactBase,
+        tags=["fact-bases"],
+    )
+    def update_profile(
+        fact_base_id: UUID,
+        request: ProfileUpdateRequest,
+    ) -> CareerFactBase:
+        return container.fact_bases.update_profile(fact_base_id, request)
 
     @app.get(
         "/fact-bases/{fact_base_id}/experiences/{experience_id}/quality",
@@ -334,6 +347,17 @@ def create_app(
         request: VersionRenameRequest,
     ) -> ResumeVersion:
         return container.versions.rename(version_id, request.name)
+
+    @app.put(
+        "/versions/{version_id}/style",
+        response_model=ResumeVersion,
+        tags=["versions"],
+    )
+    def set_version_style(
+        version_id: UUID,
+        request: VersionStyleRequest,
+    ) -> ResumeVersion:
+        return container.versions.set_style(version_id, request.style)
 
     @app.post(
         "/versions/{version_id}/activate",

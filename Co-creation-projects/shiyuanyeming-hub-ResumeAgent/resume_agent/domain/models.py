@@ -102,6 +102,14 @@ class CareerTarget(BaseModel):
     languages: List[str] = Field(default_factory=lambda: ["zh", "ja", "en"])
 
 
+class CandidateProfile(BaseModel):
+    name: str = ""
+    email: str = ""
+    phone: str = ""
+    location: str = ""
+    links: List[str] = Field(default_factory=list)
+
+
 class FactProposal(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     fact_base_revision: int = Field(ge=0)
@@ -115,6 +123,7 @@ class FactProposal(BaseModel):
 class CareerFactBase(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     revision: int = Field(default=0, ge=0)
+    profile: CandidateProfile = Field(default_factory=CandidateProfile)
     target: CareerTarget = Field(default_factory=CareerTarget)
     experiences: List[Experience] = Field(default_factory=list)
     confirmed_proposal_ids: Set[UUID] = Field(default_factory=set)
