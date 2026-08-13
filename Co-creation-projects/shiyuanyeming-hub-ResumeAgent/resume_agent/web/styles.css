@@ -69,6 +69,8 @@ button:disabled, .button-link.disabled { cursor: not-allowed; opacity: 0.45; }
 .header-spacer, .toolbar-spacer { flex: 1; }
 .service-status { align-items: center; display: flex; gap: 6px; }
 .status-dot { background: #cbd5e1; border-radius: 50%; height: 8px; width: 8px; }
+.service-status.ready .status-dot { background: var(--success); }
+.service-status.offline .status-dot { background: #d97706; }
 
 .workbench {
   display: grid;
@@ -127,6 +129,7 @@ button:disabled, .button-link.disabled { cursor: not-allowed; opacity: 0.45; }
   gap: 10px;
   padding: 10px;
 }
+.chat-composer[hidden] { display: none; }
 
 .chat-composer textarea {
   border: 1px solid var(--line);
@@ -144,6 +147,17 @@ button:disabled, .button-link.disabled { cursor: not-allowed; opacity: 0.45; }
 .section-heading h2 { color: var(--accent); font-size: 16px; margin: 0 0 4px; }
 .section-heading p { color: var(--muted); font-size: 12px; margin: 0 0 14px; }
 .empty-state { border: 1px dashed var(--line); border-radius: 10px; color: var(--muted); padding: 16px; }
+
+.onboarding-form { display: grid; gap: 10px; }
+.form-field { color: var(--muted); display: grid; font-size: 12px; gap: 5px; }
+.form-field input {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  min-height: 38px;
+  padding: 7px 10px;
+}
+.onboarding-form > button { justify-self: start; margin-top: 4px; }
 
 .document-toolbar {
   align-items: center;
@@ -170,7 +184,21 @@ dialog::backdrop { background: rgba(15, 23, 42, 0.3); }
 dialog h2 { color: var(--accent); font-size: 18px; margin-top: 0; }
 dialog p { color: var(--muted); line-height: 1.6; }
 .dialog-actions { display: flex; justify-content: flex-end; margin-top: 18px; }
-.toast { bottom: 20px; left: 50%; pointer-events: none; position: fixed; transform: translateX(-50%); }
+.toast {
+  background: #172033;
+  border-radius: 18px;
+  bottom: 20px;
+  color: #fff;
+  left: 50%;
+  opacity: 0;
+  padding: 8px 16px;
+  pointer-events: none;
+  position: fixed;
+  transform: translateX(-50%);
+  transition: opacity 160ms ease;
+  z-index: 30;
+}
+.toast.show { opacity: 0.94; }
 
 .sr-only { clip: rect(0, 0, 0, 0); clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; white-space: nowrap; width: 1px; }
 
