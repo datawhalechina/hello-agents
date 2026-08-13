@@ -8,6 +8,7 @@ from resume_agent.domain.models import (
     FactValue,
     InterviewSession,
     QualityDimension,
+    ResumeVersion,
 )
 
 
@@ -40,6 +41,27 @@ class InMemorySessionRepository:
 
     def save(self, session: InterviewSession) -> None:
         self.items[session.id] = deepcopy(session)
+
+
+class InMemoryVersionRepository:
+    def __init__(self, versions: Iterable[ResumeVersion] = ()):
+        self.items = {version.id: deepcopy(version) for version in versions}
+
+    def get(self, version_id: UUID) -> ResumeVersion:
+        return deepcopy(self.items[version_id])
+
+    def list(self, fact_base_id: UUID):
+        return [
+            deepcopy(version)
+            for version in self.items.values()
+            if version.fact_base_id == fact_base_id
+        ]
+
+    def save(self, version: ResumeVersion) -> None:
+        self.items[version.id] = deepcopy(version)
+
+    def delete(self, version_id: UUID) -> None:
+        del self.items[version_id]
 
 
 class StubAuditAgent:
