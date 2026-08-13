@@ -47,6 +47,9 @@ let currentSession = null;
 let versions = [];
 let currentVersion = null;
 let capabilitiesState = null;
+let currentRendered = null;
+let editMode = false;
+let editorView = "visual";
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitizeUiState(state)));
@@ -653,6 +656,7 @@ function renderDocumentToolbar() {
       versionSelect.append(option);
     }
     versionSelect.addEventListener("change", () => chooseVersion(versionSelect.value));
+    versionSelect.disabled = editMode;
     switcher.append(versionSelect);
     if (currentVersion.locale === "ja") {
       const documentTypes = element("div", "document-types");
@@ -669,7 +673,7 @@ function renderDocumentToolbar() {
     for (const style of styleNames) {
       styleSelect.append(new Option(style, style, false, style === selectedStyle));
     }
-    styleSelect.disabled = false;
+    styleSelect.disabled = editMode;
     styleSelect.onchange = async () => {
       styleSelect.disabled = true;
       try {
@@ -685,8 +689,12 @@ function renderDocumentToolbar() {
     };
   }
 
-  byId("edit-button").disabled = true;
-  byId("edit-button").title = currentVersion ? "手工编辑将在下一阶段接入" : "请先创建岗位版本";
+  const editButton = byId("edit-button");
+  editButton.disabled = !currentVersion;
+  editButton.textContent = editMode ? "保存编辑" : "编辑";
+  editButton.title = currentVersion ? "编辑当前简历草稿" : "请先创建岗位版本";
+  const draftBadge = byId("draft-badge");
+  draftBadge.hidden = !currentVersion?.manual_html && !currentVersion?.manual_markdown;
   configureExportLink("export-pdf", "pdf", currentVersion);
   configureExportLink("export-html", "html", currentVersion);
   configureExportLink("export-markdown", "md", currentVersion);
@@ -698,7 +706,10 @@ async function renderDocument() {
   const empty = byId("preview-empty");
   const frame = byId("preview-frame");
   const warnings = byId("preview-warnings");
+  byId("preview-editor-bar").hidden = !editMode;
+  byId("markdown-editor").hidden = true;
   warnings.replaceChildren();
+  currentRendered = null;
   frame.hidden = true;
   frame.removeAttribute("srcdoc");
   empty.hidden = false;
@@ -713,6 +724,7 @@ async function renderDocument() {
   try {
     const rendered = await api.previewVersion(requestedId);
     if (currentVersion?.id !== requestedId) return;
+    currentRendered = rendered;
     for (const warning of rendered.warnings || []) {
       warnings.append(element("div", "preview-warning", warning.message));
     }
@@ -721,6 +733,78 @@ async function renderDocument() {
     frame.hidden = false;
   } catch (error) {
     placeholder.textContent = error instanceof ApiError ? error.message : "预览生成失败";
+  }
+}
+
+function setEditorView(view) {
+  editorView = view === "markdown" ? "markdown" : "visual";
+  const frame = byId("preview-frame");
+  const markdown = byId("markdown-editor");
+  const visualButton = byId("visual-editor-button");
+  const markdownButton = byId("markdown-editor-button");
+  frame.hidden = editorView !== "visual";
+  markdown.hidden = editorView !== "markdown";
+  visualButton.classList.toggle("selected", editorView === "visual");
+  markdownButton.classList.toggle("selected", editorView === "markdown");
+  if (frame.contentDocument) {
+    frame.contentDocument.designMode = editMode && editorView === "visual" ? "on" : "off";
+  }
+}
+
+function beginEditor() {
+  if (!currentVersion || !currentRendered) {
+    showToast("预览尚未准备好");
+    return;
+  }
+  editMode = true;
+  editorView = "visual";
+  byId("markdown-editor").value = currentRendered.markdown;
+  byId("preview-editor-bar").hidden = false;
+  renderDocumentToolbar();
+  setEditorView("visual");
+  showToast("可以直接修改右侧文字，也可以编辑 Markdown");
+}
+
+function editedHtml() {
+  const documentRoot = byId("preview-frame").contentDocument?.documentElement;
+  return documentRoot ? `<!DOCTYPE html>\n${documentRoot.outerHTML}` : currentRendered?.html || "";
+}
+
+async function saveEditor() {
+  const button = byId("edit-button");
+  button.disabled = true;
+  try {
+    const updated = await api.setVersionDraft(currentVersion.id, {
+      markdown: byId("markdown-editor").value,
+      html: editedHtml(),
+    });
+    versions = versions.map((item) => item.id === updated.id ? updated : item);
+    currentVersion = updated;
+    editMode = false;
+    await renderDocument();
+    renderToolsTab();
+    showToast("编辑稿已保存到服务端");
+  } catch (error) {
+    showToast(error instanceof ApiError ? error.message : "编辑稿保存失败");
+    button.disabled = false;
+  }
+}
+
+async function resetDraft() {
+  if (!currentVersion) return;
+  const button = byId("reset-draft-button");
+  button.disabled = true;
+  try {
+    const updated = await api.setVersionDraft(currentVersion.id, { markdown: "", html: "" });
+    versions = versions.map((item) => item.id === updated.id ? updated : item);
+    currentVersion = updated;
+    editMode = false;
+    await renderDocument();
+    renderToolsTab();
+    showToast("已恢复为事实库自动生成的版本");
+  } catch (error) {
+    showToast(error instanceof ApiError ? error.message : "恢复失败");
+    button.disabled = false;
   }
 }
 
@@ -864,5 +948,15 @@ byId("settings-button").addEventListener("click", () => byId("settings-dialog").
 byId("sample-button").addEventListener("click", createSample);
 byId("language-button").addEventListener("click", cycleLanguage);
 byId("chat-composer").addEventListener("submit", submitAnswer);
+byId("edit-button").addEventListener("click", () => {
+  if (editMode) saveEditor();
+  else beginEditor();
+});
+byId("visual-editor-button").addEventListener("click", () => setEditorView("visual"));
+byId("markdown-editor-button").addEventListener("click", () => setEditorView("markdown"));
+byId("reset-draft-button").addEventListener("click", resetDraft);
+byId("preview-frame").addEventListener("load", () => {
+  if (editMode && editorView === "visual") setEditorView("visual");
+});
 
 boot();

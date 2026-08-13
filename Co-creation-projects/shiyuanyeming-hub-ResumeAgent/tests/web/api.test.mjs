@@ -195,6 +195,10 @@ test("version methods use exact create, activate, style, and preview contracts",
   await api.createVersion("base-1", payload);
   await api.activateVersion("version-1");
   await api.setVersionStyle("version-1", "japanese_rirekisho");
+  await api.setVersionDraft("version-1", {
+    markdown: "# 手工稿",
+    html: "<main>手工稿</main>",
+  });
   await api.previewVersion("version-1");
 
   assert.equal(calls[0][0], "/fact-bases/base-1/versions");
@@ -206,7 +210,13 @@ test("version methods use exact create, activate, style, and preview contracts",
   assert.equal(calls[3][0], "/versions/version-1/style");
   assert.equal(calls[3][1].method, "PUT");
   assert.deepEqual(JSON.parse(calls[3][1].body), { style: "japanese_rirekisho" });
-  assert.equal(calls[4][0], "/versions/version-1/preview");
+  assert.equal(calls[4][0], "/versions/version-1/draft");
+  assert.equal(calls[4][1].method, "PUT");
+  assert.deepEqual(JSON.parse(calls[4][1].body), {
+    markdown: "# 手工稿",
+    html: "<main>手工稿</main>",
+  });
+  assert.equal(calls[5][0], "/versions/version-1/preview");
   assert.equal(api.exportUrl("version-1", "docx"), "/versions/version-1/export?format=docx");
 });
 

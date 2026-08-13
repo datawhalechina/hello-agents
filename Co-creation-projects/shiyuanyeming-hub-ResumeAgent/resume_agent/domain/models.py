@@ -217,6 +217,8 @@ class ResumeVersion(BaseModel):
     ordering: List[UUID] = Field(default_factory=list)
     emphasis: Dict[UUID, List[str]] = Field(default_factory=dict)
     styles: Dict[str, str] = Field(default_factory=dict)
+    manual_markdown: str = ""
+    manual_html: str = ""
     base_revision: int = Field(ge=0)
     status: VersionStatus = VersionStatus.DRAFT
     is_active: bool = False

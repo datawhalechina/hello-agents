@@ -53,3 +53,8 @@ class VersionRenameRequest(BaseModel):
 
 class VersionStyleRequest(BaseModel):
     style: str = Field(min_length=1)
+
+
+class VersionDraftRequest(BaseModel):
+    markdown: str = Field(default="", max_length=500_000)
+    html: str = Field(default="", max_length=500_000)

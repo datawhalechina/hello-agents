@@ -166,6 +166,10 @@ export function createApi(fetchImpl = globalThis.fetch) {
       method: "PUT",
       body: JSON.stringify({ style }),
     }),
+    setVersionDraft: (versionId, draft) => request(`/versions/${versionId}/draft`, {
+      method: "PUT",
+      body: JSON.stringify(draft),
+    }),
     previewVersion: (versionId) => request(`/versions/${versionId}/preview`),
     exportUrl: (versionId, format) => (
       `/versions/${versionId}/export?format=${encodeURIComponent(format)}`

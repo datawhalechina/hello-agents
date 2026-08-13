@@ -26,6 +26,7 @@ from resume_agent.api.schemas import (
     UnknownRequest,
     VersionCloneRequest,
     VersionCreateRequest,
+    VersionDraftRequest,
     VersionRenameRequest,
     VersionStyleRequest,
 )
@@ -449,6 +450,21 @@ def create_app(
         request: VersionStyleRequest,
     ) -> ResumeVersion:
         return container.versions.set_style(version_id, request.style)
+
+    @app.put(
+        "/versions/{version_id}/draft",
+        response_model=ResumeVersion,
+        tags=["versions"],
+    )
+    def set_version_draft(
+        version_id: UUID,
+        request: VersionDraftRequest,
+    ) -> ResumeVersion:
+        return container.versions.set_draft(
+            version_id,
+            request.markdown,
+            request.html,
+        )
 
     @app.post(
         "/versions/{version_id}/activate",

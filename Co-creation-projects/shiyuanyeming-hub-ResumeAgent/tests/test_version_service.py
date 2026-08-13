@@ -93,3 +93,18 @@ def test_rename_preserves_version_identity():
 
     assert renamed.id == version.id
     assert renamed.name == "After"
+
+
+def test_manual_draft_is_persisted_without_mutating_fact_selection():
+    service, base, experience = make_version_service()
+    version = service.create(
+        base,
+        "Analyst",
+        selected_experience_ids=[experience.id],
+    )
+
+    saved = service.set_draft(version.id, "# 手工稿", "<main>手工稿</main>")
+
+    assert saved.manual_markdown == "# 手工稿"
+    assert saved.manual_html == "<main>手工稿</main>"
+    assert saved.selected_experience_ids == [experience.id]

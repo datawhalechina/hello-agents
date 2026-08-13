@@ -24,7 +24,13 @@ class ResumeRenderService:
     def preview(self, version_id: UUID) -> RenderedResume:
         version = self.versions.get(version_id)
         base = self.fact_bases.get(version.fact_base_id)
-        return self.renderer.render(base, version)
+        rendered = self.renderer.render(base, version)
+        return rendered.model_copy(
+            update={
+                "markdown": version.manual_markdown or rendered.markdown,
+                "html": version.manual_html or rendered.html,
+            }
+        )
 
     def export(self, version_id: UUID, format: RenderFormat) -> ExportedFile:
         return self.exporter.export(self.preview(version_id), format)

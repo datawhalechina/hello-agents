@@ -215,7 +215,13 @@ button:disabled, .button-link.disabled { cursor: not-allowed; opacity: 0.45; }
 .document-switcher, .document-types { align-items: center; display: flex; gap: 6px; }
 .document-types button { min-height: 30px; padding: 4px 9px; }
 .document-types button.selected { background: var(--accent-soft); border-color: #c8d7e6; color: var(--accent); opacity: 1; }
+.draft-badge { background: #f4f0e7; border-radius: 10px; color: #725a2b; font-size: 11px; padding: 3px 8px; }
 .preview-surface { background: #e8ecf1; flex: 1; min-height: 0; overflow: auto; padding: 18px; }
+.preview-editor-bar { align-items: center; background: #fff; border: 1px solid var(--line); border-radius: 8px; display: flex; gap: 7px; margin: 0 auto 10px; max-width: 900px; padding: 8px 10px; }
+.preview-editor-bar[hidden] { display: none; }
+.preview-editor-bar strong { color: var(--accent); font-size: 12px; }
+.preview-editor-bar button { min-height: 30px; padding: 4px 9px; }
+.preview-editor-bar button.selected { background: var(--accent-soft); border-color: #c8d7e6; color: var(--accent); }
 .preview-warnings { display: grid; gap: 6px; margin: 0 auto 10px; max-width: 760px; }
 .preview-warnings:empty { display: none; }
 .preview-warning { background: #fff8e8; border: 1px solid #ead7a5; border-radius: 8px; color: #7c5a11; font-size: 12px; padding: 8px 10px; }
@@ -226,6 +232,8 @@ button:disabled, .button-link.disabled { cursor: not-allowed; opacity: 0.45; }
 .paper-placeholder span { color: var(--muted); }
 #preview-frame { background: #fff; border: 0; box-shadow: 0 3px 14px rgba(15, 23, 42, 0.1); display: block; margin: 0 auto; min-height: 1120px; width: min(100%, 900px); }
 #preview-frame[hidden] { display: none; }
+#markdown-editor { background: #fff; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); display: block; font-family: "SFMono-Regular", Consolas, monospace; line-height: 1.6; margin: 0 auto; min-height: 760px; padding: 18px; resize: vertical; width: min(100%, 900px); }
+#markdown-editor[hidden] { display: none; }
 
 dialog { border: 1px solid var(--line); border-radius: 12px; max-width: 420px; padding: 22px; }
 dialog::backdrop { background: rgba(15, 23, 42, 0.3); }

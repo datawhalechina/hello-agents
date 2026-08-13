@@ -121,3 +121,48 @@ def test_pdf_engine_failure_maps_to_503(tmp_path):
 
     assert response.status_code == 503
     assert "browser" in response.json()["detail"]
+
+
+def test_manual_draft_is_persisted_and_used_for_preview(client):
+    version = create_populated_version(client)
+
+    response = client.put(
+        f"/versions/{version['id']}/draft",
+        json={"markdown": "# 手工稿", "html": "<main>手工稿</main>"},
+    )
+    preview = client.get(f"/versions/{version['id']}/preview").json()
+
+    assert response.status_code == 200
+    assert response.json()["manual_markdown"] == "# 手工稿"
+    assert preview["markdown"] == "# 手工稿"
+    assert preview["html"] == "<main>手工稿</main>"
+
+
+def test_empty_manual_draft_restores_generated_preview(client):
+    version = create_populated_version(client)
+    generated = client.get(f"/versions/{version['id']}/preview").json()
+    client.put(
+        f"/versions/{version['id']}/draft",
+        json={"markdown": "# 手工稿", "html": "<main>手工稿</main>"},
+    )
+
+    reset = client.put(
+        f"/versions/{version['id']}/draft",
+        json={"markdown": "", "html": ""},
+    )
+    restored = client.get(f"/versions/{version['id']}/preview").json()
+
+    assert reset.status_code == 200
+    assert restored["markdown"] == generated["markdown"]
+    assert restored["html"] == generated["html"]
+
+
+def test_manual_draft_rejects_oversized_fields(client):
+    version = create_populated_version(client)
+
+    response = client.put(
+        f"/versions/{version['id']}/draft",
+        json={"markdown": "x" * 500_001, "html": ""},
+    )
+
+    assert response.status_code == 422

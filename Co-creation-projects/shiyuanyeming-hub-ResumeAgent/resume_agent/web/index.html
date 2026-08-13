@@ -90,6 +90,7 @@
             <option>藏青现代</option>
           </select>
           <span class="toolbar-spacer"></span>
+          <span id="draft-badge" class="draft-badge" hidden>编辑稿</span>
           <button id="edit-button" type="button" disabled>编辑</button>
           <a id="export-pdf" class="button-link primary disabled" aria-disabled="true">PDF</a>
           <a id="export-html" class="button-link disabled" aria-disabled="true">HTML</a>
@@ -97,6 +98,13 @@
           <a id="export-docx" class="button-link disabled" aria-disabled="true">DOCX</a>
         </div>
         <div class="preview-surface">
+          <div id="preview-editor-bar" class="preview-editor-bar" hidden>
+            <strong>正在编辑</strong>
+            <button id="visual-editor-button" class="selected" type="button">可视化</button>
+            <button id="markdown-editor-button" type="button">Markdown</button>
+            <span class="toolbar-spacer"></span>
+            <button id="reset-draft-button" type="button">恢复自动生成</button>
+          </div>
           <div id="preview-warnings" class="preview-warnings" aria-live="polite"></div>
           <div id="preview-empty" class="preview-empty">
             <div class="paper-placeholder">
@@ -104,7 +112,8 @@
               <span>完成建档并确认经历事实后，简历会显示在这里。</span>
             </div>
           </div>
-          <iframe id="preview-frame" title="简历预览" sandbox="" hidden></iframe>
+          <textarea id="markdown-editor" aria-label="Markdown 草稿" spellcheck="false" hidden></textarea>
+          <iframe id="preview-frame" title="简历预览" sandbox="allow-same-origin" hidden></iframe>
         </div>
       </section>
     </main>

@@ -96,6 +96,17 @@ class VersionService:
         version.styles = {**version.styles, version.locale: normalized}
         return self.save(version)
 
+    def set_draft(
+        self,
+        version_id: UUID,
+        markdown: str,
+        html: str,
+    ) -> ResumeVersion:
+        version = self.repository.get(version_id)
+        version.manual_markdown = markdown
+        version.manual_html = html
+        return self.save(version)
+
     def activate(self, version_id: UUID) -> ResumeVersion:
         target = self.repository.get(version_id)
         for version in self.repository.list(target.fact_base_id):
