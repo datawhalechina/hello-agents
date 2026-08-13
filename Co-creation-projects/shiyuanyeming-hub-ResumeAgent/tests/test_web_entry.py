@@ -15,6 +15,10 @@ def test_root_serves_original_workbench_shell(tmp_path):
     )
     assert 'id="chat-composer"' in response.text
     assert 'id="preview-frame"' in response.text
+    assert 'id="base-select"' in response.text
+    assert 'id="new-base-button"' in response.text
+    assert 'id="interview-progress"' in response.text
+    assert 'aria-label="访谈证据进度"' in response.text
     assert "stSidebar" not in response.text
     assert "把做过的事，讲成有证据的职业故事" not in response.text
 
@@ -40,5 +44,6 @@ def test_styles_define_required_breakpoints_without_ai_effects(tmp_path):
     assert "400px minmax(0, 1fr)" in css
     assert "@media (max-width: 960px)" in css
     assert "@media (max-width: 640px)" in css
+    assert "[hidden] { display: none !important; }" in css
     assert "linear-gradient" not in css
     assert "backdrop-filter" not in css

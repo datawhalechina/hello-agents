@@ -44,6 +44,7 @@ const state = readState();
 let bases = [];
 let currentBase = null;
 let currentSession = null;
+let currentExperienceQuality = null;
 let versions = [];
 let currentVersion = null;
 let capabilitiesState = null;
@@ -112,14 +113,55 @@ function replaceBase(updated) {
   currentBase = updated;
 }
 
+function renderBaseSwitcher() {
+  const select = byId("base-select");
+  const sampleButton = byId("sample-button");
+  const newButton = byId("new-base-button");
+  const hasBases = bases.length > 0;
+  select.replaceChildren();
+
+  if (!hasBases) {
+    select.append(new Option("暂无档案", ""));
+    select.disabled = true;
+  } else {
+    if (!currentBase) select.append(new Option("新档案（尚未保存）", "", true, true));
+    for (const base of bases) {
+      const role = base.target?.role?.trim() || "未命名岗位";
+      select.append(new Option(role, base.id, false, base.id === currentBase?.id));
+    }
+    select.disabled = false;
+  }
+
+  sampleButton.hidden = hasBases;
+  newButton.hidden = !hasBases;
+  newButton.disabled = hasBases && !currentBase;
+  newButton.textContent = currentBase ? "新建档案" : "正在新建档案";
+}
+
 function chooseBase(base) {
   const changedBase = state.factBaseId && state.factBaseId !== base.id;
   currentBase = base;
+  currentExperienceQuality = null;
   state.factBaseId = base.id;
   const selected = base.experiences.find((item) => item.id === state.experienceId);
   state.experienceId = selected?.id || base.experiences.at(-1)?.id || "";
   if (changedBase) delete state.versionId;
   saveState();
+}
+
+async function loadCurrentExperienceQuality() {
+  currentExperienceQuality = null;
+  if (!currentBase || !state.experienceId) return;
+  const baseId = currentBase.id;
+  const experienceId = state.experienceId;
+  try {
+    const quality = await api.experienceQuality(baseId, experienceId);
+    if (currentBase?.id === baseId && state.experienceId === experienceId) {
+      currentExperienceQuality = quality;
+    }
+  } catch {
+    currentExperienceQuality = null;
+  }
 }
 
 async function loadVersions() {
@@ -156,13 +198,34 @@ async function recoverSession() {
 }
 
 async function activateBase(base) {
+  replaceBase(base);
   chooseBase(base);
-  await Promise.all([recoverSession(), loadVersions()]);
+  await Promise.all([recoverSession(), loadVersions(), loadCurrentExperienceQuality()]);
+  renderBaseSwitcher();
   renderConversation();
   await renderFactBase();
   renderJdTab();
   renderToolsTab();
   await renderDocument();
+}
+
+function startNewBase() {
+  currentBase = null;
+  currentSession = null;
+  currentExperienceQuality = null;
+  versions = [];
+  currentVersion = null;
+  for (const key of ["factBaseId", "experienceId", "sessionId", "versionId"]) {
+    delete state[key];
+  }
+  saveState();
+  renderBaseSwitcher();
+  selectTab("chat");
+  renderOnboarding();
+  renderFactBase();
+  renderJdTab();
+  renderToolsTab();
+  renderDocument();
 }
 
 function renderOnboarding() {
@@ -234,11 +297,41 @@ function experienceSelector() {
     state.experienceId = select.value;
     delete state.sessionId;
     saveState();
-    await recoverSession();
+    await Promise.all([recoverSession(), loadCurrentExperienceQuality()]);
     renderConversation();
   });
   wrapper.append(select);
   return wrapper;
+}
+
+function renderInterviewProgress() {
+  const progress = element("div", "interview-progress");
+  progress.id = "interview-progress";
+  progress.setAttribute("role", "status");
+  progress.setAttribute("aria-label", "访谈证据进度");
+
+  const completed = currentExperienceQuality?.present_dimensions;
+  const pending = currentSession
+    ? Object.values(currentSession.pending_proposals || {}).at(-1)
+    : null;
+  const focusKey = pending?.dimension
+    || currentSession?.current_question?.dimension
+    || DIMENSIONS.find(([key]) => currentExperienceQuality?.scores?.[key] === 0)?.[0];
+  const focus = DIMENSIONS.find(([key]) => key === focusKey)?.[1]
+    || (currentExperienceQuality?.passes_gate ? "证据已达到可写门槛" : "开始访谈");
+
+  const summary = element("div", "progress-summary");
+  summary.append(
+    element("strong", "", "证据进度"),
+    element("span", "", Number.isInteger(completed) ? `${completed}/6 个维度` : "正在读取"),
+  );
+  const track = element("div", "progress-track");
+  track.setAttribute("aria-hidden", "true");
+  for (let index = 0; index < 6; index += 1) {
+    track.append(element("span", index < (completed || 0) ? "complete" : ""));
+  }
+  progress.append(summary, track, element("span", "progress-focus", `当前重点：${focus}`));
+  return progress;
 }
 
 function renderPendingProposal(proposal) {
@@ -275,7 +368,7 @@ function renderConversation() {
   }
   const panel = byId("chat-panel");
   panel.replaceChildren();
-  panel.append(experienceSelector());
+  panel.append(experienceSelector(), renderInterviewProgress());
 
   const actions = element("div", "panel-actions");
   const pending = currentSession
@@ -341,6 +434,7 @@ async function ensureSession() {
 async function startInterview() {
   const button = byId("start-interview");
   button.disabled = true;
+  button.textContent = "正在准备问题…";
   try {
     const session = await ensureSession();
     await api.currentQuestion(session.id);
@@ -349,6 +443,7 @@ async function startInterview() {
   } catch (error) {
     showToast(error instanceof ApiError ? error.message : "访谈启动失败");
     button.disabled = false;
+    button.textContent = "重试开始访谈";
   }
 }
 
@@ -360,6 +455,7 @@ async function submitAnswer(event) {
   if (!message) return;
   const submit = event.currentTarget.querySelector("button[type=submit]");
   submit.disabled = true;
+  submit.textContent = "正在发送…";
   try {
     const session = await ensureSession();
     await api.answer(session.id, message);
@@ -377,6 +473,7 @@ async function submitAnswer(event) {
     }
   } finally {
     submit.disabled = false;
+    submit.textContent = "发送回答";
   }
 }
 
@@ -389,6 +486,7 @@ async function confirmFact(proposalId) {
     ]);
     replaceBase(base);
     currentSession = session;
+    await loadCurrentExperienceQuality();
     renderConversation();
     await renderFactBase();
   } catch (error) {
@@ -632,11 +730,13 @@ function configureExportLink(id, format, version) {
     link.removeAttribute("href");
     link.classList.add("disabled");
     link.setAttribute("aria-disabled", "true");
+    link.title = "请先创建岗位版本";
     return;
   }
   link.href = api.exportUrl(version.id, format);
   link.classList.remove("disabled");
   link.setAttribute("aria-disabled", "false");
+  link.removeAttribute("title");
 }
 
 function renderDocumentToolbar() {
@@ -646,7 +746,7 @@ function renderDocumentToolbar() {
   styleSelect.replaceChildren();
 
   if (!currentVersion) {
-    styleSelect.append(new Option("藏青现代"));
+    styleSelect.append(new Option("先创建岗位版本"));
     styleSelect.disabled = true;
   } else {
     const versionSelect = document.createElement("select");
@@ -691,7 +791,7 @@ function renderDocumentToolbar() {
 
   const editButton = byId("edit-button");
   editButton.disabled = !currentVersion;
-  editButton.textContent = editMode ? "保存编辑" : "编辑";
+  editButton.textContent = !currentVersion ? "先创建岗位版本" : editMode ? "保存编辑" : "编辑简历";
   editButton.title = currentVersion ? "编辑当前简历草稿" : "请先创建岗位版本";
   const draftBadge = byId("draft-badge");
   draftBadge.hidden = !currentVersion?.manual_html && !currentVersion?.manual_markdown;
@@ -867,7 +967,9 @@ function renderToolsTab() {
 }
 
 async function createSample() {
-  byId("sample-button").disabled = true;
+  const button = byId("sample-button");
+  button.disabled = true;
+  button.textContent = "正在创建…";
   try {
     let base = await api.createFactBase({
       role: "数据分析师",
@@ -884,7 +986,8 @@ async function createSample() {
   } catch (error) {
     showToast(error instanceof ApiError ? error.message : "示例档案创建失败");
   } finally {
-    byId("sample-button").disabled = false;
+    button.disabled = false;
+    button.textContent = "示例档案";
   }
 }
 
@@ -923,6 +1026,7 @@ async function boot() {
       api.listFactBases(),
     ]);
     bases = loadedBases;
+    renderBaseSwitcher();
     capabilitiesState = capabilities;
     setServiceStatus(capabilities);
     const base = bases.find((item) => item.id === state.factBaseId) || bases.at(-1) || null;
@@ -931,6 +1035,7 @@ async function boot() {
   } catch (error) {
     capabilitiesState = null;
     setServiceStatus(null);
+    renderBaseSwitcher();
     renderOnboarding();
     showToast(error instanceof ApiError ? error.message : "页面初始化失败");
   }
@@ -945,7 +1050,19 @@ byId("primary-tabs").addEventListener("click", (event) => {
   if (button.dataset.tab === "tools") renderToolsTab();
 });
 byId("settings-button").addEventListener("click", () => byId("settings-dialog").showModal());
+byId("base-select").addEventListener("change", async (event) => {
+  const base = bases.find((item) => item.id === event.currentTarget.value);
+  if (!base) return;
+  event.currentTarget.disabled = true;
+  try {
+    await activateBase(base);
+  } catch (error) {
+    showToast(error instanceof ApiError ? error.message : "档案切换失败");
+    renderBaseSwitcher();
+  }
+});
 byId("sample-button").addEventListener("click", createSample);
+byId("new-base-button").addEventListener("click", startNewBase);
 byId("language-button").addEventListener("click", cycleLanguage);
 byId("chat-composer").addEventListener("submit", submitAnswer);
 byId("edit-button").addEventListener("click", () => {

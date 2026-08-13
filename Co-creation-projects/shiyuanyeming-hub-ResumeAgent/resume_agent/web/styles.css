@@ -13,6 +13,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 html, body { margin: 0; min-height: 100%; }
 
@@ -66,6 +67,16 @@ button:disabled, .button-link.disabled { cursor: not-allowed; opacity: 0.45; }
 .brand { align-items: center; color: var(--accent); display: flex; font-size: 17px; gap: 6px; text-decoration: none; }
 .brand-mark { color: #d97706; font-size: 18px; }
 .product-note, .service-status { color: var(--muted); font-size: 12px; white-space: nowrap; }
+.base-switcher { display: block; min-width: 150px; width: min(220px, 24vw); }
+.base-switcher select {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  min-height: 34px;
+  padding: 6px 28px 6px 10px;
+  width: 100%;
+}
 .header-spacer, .toolbar-spacer { flex: 1; }
 .service-status { align-items: center; display: flex; gap: 6px; }
 .status-dot { background: #cbd5e1; border-radius: 50%; height: 8px; width: 8px; }
@@ -118,6 +129,21 @@ button:disabled, .button-link.disabled { cursor: not-allowed; opacity: 0.45; }
 .panel-content { flex: 1; min-height: 0; overflow: auto; padding: 14px; }
 .tab-panel[hidden] { display: none; }
 .panel-actions { display: flex; margin-bottom: 12px; }
+.interview-progress {
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  display: grid;
+  gap: 7px;
+  margin-bottom: 12px;
+  padding: 10px 11px;
+}
+.progress-summary { align-items: center; display: flex; gap: 8px; justify-content: space-between; }
+.progress-summary strong { color: var(--accent); font-size: 12px; }
+.progress-summary span, .progress-focus { color: var(--muted); font-size: 12px; }
+.progress-track { display: grid; gap: 4px; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.progress-track span { background: #dfe6ee; border-radius: 3px; height: 5px; }
+.progress-track span.complete { background: var(--accent); }
 .chat-messages { display: flex; flex-direction: column; gap: 10px; }
 .message { border-radius: 10px; line-height: 1.65; padding: 11px 13px; }
 .system-message { background: #f8fafc; border: 1px dashed #d8e0ea; color: var(--muted); }
@@ -151,6 +177,7 @@ button:disabled, .button-link.disabled { cursor: not-allowed; opacity: 0.45; }
   line-height: 1.5;
   max-height: 120px;
   min-height: 54px;
+  min-width: 0;
   padding: 9px 11px;
   resize: vertical;
 }
@@ -266,24 +293,38 @@ dialog p { color: var(--muted); line-height: 1.6; }
 }
 
 @media (max-width: 640px) {
-  .app-header { gap: 7px; min-height: 54px; padding: 8px 10px; }
+  .app-header {
+    display: grid;
+    gap: 7px;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    min-height: 88px;
+    padding: 8px 10px;
+  }
   .brand { font-size: 16px; }
-  .product-note, #sample-button { display: none; }
+  .brand { grid-column: 1; grid-row: 1; }
+  .product-note, .header-spacer { display: none; }
+  .base-switcher { grid-column: 1; grid-row: 2; min-width: 0; width: 100%; }
+  .service-status { grid-column: 2; grid-row: 1; }
+  #settings-button { grid-column: 3; grid-row: 1; }
+  #language-button { grid-column: 2; grid-row: 2; }
+  #sample-button, #new-base-button { grid-column: 3; grid-row: 2; }
   .service-status { font-size: 0; }
   .service-status .status-dot { display: block; }
-  .app-header button { min-height: 32px; padding: 5px 9px; }
+  .app-header button { min-height: 36px; padding: 5px 9px; }
   .workbench { gap: 8px; padding: 8px; }
   .task-panel { height: 620px; }
   .document-panel { height: 760px; }
-  .primary-tabs button { flex: 1 0 auto; padding-left: 13px; padding-right: 13px; }
+  .primary-tabs button { flex: 1 1 25%; min-height: 42px; min-width: 0; padding-left: 7px; padding-right: 7px; }
   .panel-content { padding: 11px; }
   .chat-composer { gap: 7px; padding: 8px; }
   .send-button { min-width: 60px; }
-  .document-toolbar { flex-wrap: nowrap; overflow-x: auto; }
+  .document-toolbar { align-content: flex-start; flex-wrap: wrap; overflow-x: visible; }
   .document-toolbar > * { flex: 0 0 auto; }
+  .document-switcher { min-width: 0; width: 100%; }
+  .document-switcher > select { min-width: 0; width: 100%; }
   .document-toolbar .toolbar-spacer { display: none; }
   .preview-surface { padding: 10px; }
   .paper-placeholder { min-height: 620px; padding: 30px 24px; }
-  .preview-editor-bar { overflow-x: auto; }
+  .preview-editor-bar { flex-wrap: wrap; overflow-x: visible; }
   #preview-frame { min-height: 940px; }
 }

@@ -15,6 +15,12 @@
         <strong>ResumeAgent</strong>
       </a>
       <span class="product-note">中日英简历工作台</span>
+      <label id="base-switcher" class="base-switcher" for="base-select">
+        <span class="sr-only">当前档案</span>
+        <select id="base-select" aria-label="当前档案" disabled>
+          <option>正在读取档案…</option>
+        </select>
+      </label>
       <span class="header-spacer"></span>
       <span id="service-status" class="service-status" role="status">
         <span class="status-dot"></span>
@@ -22,6 +28,7 @@
       </span>
       <button id="language-button" type="button">中文简历</button>
       <button id="sample-button" type="button">示例档案</button>
+      <button id="new-base-button" type="button" hidden>新建档案</button>
       <button id="settings-button" type="button">设置</button>
     </header>
 
@@ -39,6 +46,12 @@
             <div class="panel-actions">
               <button id="start-interview" class="primary" type="button">开始访谈</button>
             </div>
+            <div
+              id="interview-progress"
+              class="interview-progress"
+              role="status"
+              aria-label="访谈证据进度"
+            >建立档案后显示证据进度</div>
             <div id="chat-messages" class="chat-messages" aria-live="polite">
               <div class="message system-message">
                 先选择简历语言并建立档案。导师会一次问一个问题，你只需要按真实情况回答。
@@ -78,7 +91,7 @@
             rows="2"
             placeholder="回答导师的问题，或直接补充一段真实经历"
           ></textarea>
-          <button class="primary send-button" type="submit">发送</button>
+          <button class="primary send-button" type="submit">发送回答</button>
         </form>
       </section>
 
@@ -87,11 +100,11 @@
           <div id="document-switcher" class="document-switcher" aria-label="文档类型"></div>
           <label class="sr-only" for="style-select">版式风格</label>
           <select id="style-select" aria-label="版式风格" disabled>
-            <option>藏青现代</option>
+            <option>先创建岗位版本</option>
           </select>
           <span class="toolbar-spacer"></span>
           <span id="draft-badge" class="draft-badge" hidden>编辑稿</span>
-          <button id="edit-button" type="button" disabled>编辑</button>
+          <button id="edit-button" type="button" disabled>先创建岗位版本</button>
           <a id="export-pdf" class="button-link primary disabled" aria-disabled="true">PDF</a>
           <a id="export-html" class="button-link disabled" aria-disabled="true">HTML</a>
           <a id="export-markdown" class="button-link disabled" aria-disabled="true">Markdown</a>
