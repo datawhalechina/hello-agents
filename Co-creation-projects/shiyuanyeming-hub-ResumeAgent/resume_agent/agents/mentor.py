@@ -126,6 +126,24 @@ class DeterministicQuestionWriter:
         QualityDimension.EVIDENCE: "有什么数字、交付物或反馈可以证明这项工作的效果？",
     }
 
+    _RECALL_ANCHORS = {
+        QualityDimension.CONTEXT: "回想一下当时触发这项工作的具体背景、业务需求或要解决的问题是什么？",
+        QualityDimension.RESPONSIBILITY: "回想当时的分工，哪一部分是明确交给你本人负责的？",
+        QualityDimension.ACTION: "回想执行过程：你当时先做了哪一步，接着具体做了什么？",
+        QualityDimension.METHOD: "回想一下你当时如何判断、用了什么工具或方法来推进这项工作？",
+        QualityDimension.RESULT: "回想这项工作前后，例如服务人数、频率、耗时或效果发生了什么变化？",
+        QualityDimension.EVIDENCE: "回想可佐证的线索：有没有数字、交付物、采用情况或负责人反馈？",
+    }
+
+    _ALTERNATIVE_EVIDENCE = {
+        QualityDimension.CONTEXT: "如果暂时想不起具体场景，能否从当时的背景、需求或要解决的问题来说明？",
+        QualityDimension.RESPONSIBILITY: "如果没有正式职责说明，能否从分工或同事交给你的任务来说明你本人负责什么？",
+        QualityDimension.ACTION: "如果不记得完整步骤，能否从你当时的第一步或一个具体动作开始回忆？",
+        QualityDimension.METHOD: "如果不记得具体工具，能否说明你采用的流程、判断方法或协作方式？",
+        QualityDimension.RESULT: "如果没有数字，能否说明上线采用、流程变化或其他结果？",
+        QualityDimension.EVIDENCE: "如果没有数字，是否有交付物、上线采用、流程变化或负责人反馈等替代证据？",
+    }
+
     def write(
         self,
         plan: QuestionPlan,
@@ -133,13 +151,7 @@ class DeterministicQuestionWriter:
         target: CareerTarget,
     ) -> str:
         if plan.escalation == "recall_anchors":
-            return (
-                "为了帮助你回忆，例如可以想想服务人数、发生频率、耗时前后变化、"
-                "交付物数量或采用情况；其中哪一项最接近这段经历的结果？"
-            )
+            return self._RECALL_ANCHORS[plan.dimension]
         if plan.escalation == "alternative_evidence":
-            return (
-                "如果没有数字，是否有上线采用、形成报告、流程发生变化或负责人反馈"
-                "等替代证据？"
-            )
+            return self._ALTERNATIVE_EVIDENCE[plan.dimension]
         return self._DIRECT[plan.dimension]

@@ -125,6 +125,29 @@ def test_deterministic_writer_supports_three_escalation_levels(
     assert question.count("？") == 1
 
 
+@pytest.mark.parametrize("escalation", ["recall_anchors", "alternative_evidence"])
+def test_deterministic_follow_ups_are_dimension_specific(escalation):
+    base, experience, session = make_state()
+    writer = DeterministicQuestionWriter()
+
+    questions = [
+        writer.write(
+            QuestionPlan(
+                dimension=dimension,
+                priority=0.9,
+                attempt=1,
+                escalation=escalation,
+            ),
+            experience,
+            base.target,
+        )
+        for dimension in QualityDimension
+    ]
+
+    assert len(set(questions)) == len(QualityDimension)
+    assert all(question.count("?") + question.count("？") == 1 for question in questions)
+
+
 def test_structured_writer_returns_exactly_one_question():
     base, experience, session = make_state()
     runner = FakeRunner('{"question": "这项工作最终带来了什么变化？"}')

@@ -1,4 +1,5 @@
 from resume_agent.application.interview_service import InterviewService
+from resume_agent.agents.mentor import DeterministicQuestionWriter
 from resume_agent.domain.models import (
     CareerFactBase,
     InterviewSession,
@@ -55,6 +56,36 @@ def test_confirmation_updates_base_and_returns_one_next_question():
     assert bases.get(session.fact_base_id).revision == 1
     assert len(result.questions) == 1
     assert turn.proposal.id not in sessions.get(session.id).pending_proposals
+
+
+def test_different_dimension_answer_reasks_with_context_recall_anchors():
+    service, session, bases, sessions, experience = make_interview()
+    service.question_writer = DeterministicQuestionWriter()
+    session.skipped_dimensions = set(QualityDimension) - {
+        QualityDimension.CONTEXT,
+    }
+    sessions.save(session)
+
+    asked = service.next_question(session.id)
+    assert asked is not None
+    assert asked.dimension is QualityDimension.CONTEXT
+    assert asked.escalation == "direct"
+
+    turn = service.answer(session.id, "I built the weekly dashboard myself")
+    assert turn.proposal is not None
+    assert turn.proposal.dimension is QualityDimension.ACTION
+
+    next_turn = service.confirm(session.id, turn.proposal.id)
+
+    assert next_turn.question is not None
+    assert next_turn.question.dimension is QualityDimension.CONTEXT
+    assert next_turn.question.escalation == "recall_anchors"
+    assert (
+        next_turn.question.text
+        == "回想一下当时触发这项工作的具体背景、业务需求或要解决的问题是什么？"
+    )
+    assert next_turn.question.text != asked.text
+    assert sessions.get(session.id).attempts == {QualityDimension.CONTEXT: 1}
 
 
 def test_skip_after_two_unknown_answers_prevents_same_gap():

@@ -101,6 +101,11 @@ class InterviewService:
         if session.active_experience_id is None:
             raise ValueError("an active experience is required before deepening")
 
+        asked_dimension = (
+            session.current_question.dimension
+            if session.current_question is not None
+            else None
+        )
         session.messages.append(InterviewMessage(role="user", content=message))
         session.current_question = None
         session.updated_at = utc_now()
@@ -111,6 +116,13 @@ class InterviewService:
         if proposal.fact_base_revision != base.revision:
             raise ValueError("agent proposal used a stale fact-base revision")
 
+        if (
+            asked_dimension is not None
+            and proposal.dimension is not asked_dimension
+        ):
+            session.attempts[asked_dimension] = (
+                session.attempts.get(asked_dimension, 0) + 1
+            )
         session.pending_proposals[proposal.id] = proposal
         session.updated_at = utc_now()
         self.sessions.save(session)
