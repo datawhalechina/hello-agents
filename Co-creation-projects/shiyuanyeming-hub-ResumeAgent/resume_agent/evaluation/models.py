@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import Annotated, Literal, Optional, Union
 
 from pydantic import BaseModel, Field, computed_field
@@ -75,3 +76,26 @@ class CaseScore(BaseModel):
     @property
     def passed(self) -> bool:
         return bool(self.checks) and all(self.checks.values())
+
+
+class BenchmarkReport(BaseModel):
+    dataset_version: str
+    repeats: int = Field(ge=1)
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    metadata: dict[str, str] = Field(default_factory=dict)
+    scores: list[CaseScore]
+    metrics: dict[str, float]
+
+    @computed_field
+    @property
+    def total_runs(self) -> int:
+        return len(self.scores)
+
+    @computed_field
+    @property
+    def strict_pass_rate(self) -> float:
+        return self.metrics.get("strict_pass_rate", 0.0)
+
+    @property
+    def failed_scores(self) -> list[CaseScore]:
+        return [score for score in self.scores if not score.passed]
