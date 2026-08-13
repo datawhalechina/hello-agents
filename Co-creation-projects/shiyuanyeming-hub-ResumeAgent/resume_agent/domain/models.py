@@ -196,6 +196,7 @@ class InterviewSession(BaseModel):
     messages: List[InterviewMessage] = Field(default_factory=list)
     pending_proposals: Dict[UUID, FactProposal] = Field(default_factory=dict)
     attempts: Dict[QualityDimension, int] = Field(default_factory=dict)
+    unknown_attempts: Dict[QualityDimension, int] = Field(default_factory=dict)
     skipped_dimensions: Set[QualityDimension] = Field(default_factory=set)
     current_question: Optional[InterviewQuestion] = None
     created_at: datetime = Field(default_factory=utc_now)

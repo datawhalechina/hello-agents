@@ -169,8 +169,9 @@ class InterviewService:
         dimension: QualityDimension,
     ) -> UnknownOutcome:
         session = self.sessions.get(session_id)
-        attempts = session.attempts.get(dimension, 0) + 1
-        session.attempts[dimension] = attempts
+        attempts = session.unknown_attempts.get(dimension, 0) + 1
+        session.unknown_attempts[dimension] = attempts
+        session.attempts[dimension] = session.attempts.get(dimension, 0) + 1
         skipped = attempts >= 2
         if skipped:
             session.skipped_dimensions.add(dimension)

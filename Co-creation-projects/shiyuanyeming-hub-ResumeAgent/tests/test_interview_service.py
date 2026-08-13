@@ -99,6 +99,30 @@ def test_skip_after_two_unknown_answers_prevents_same_gap():
     assert service.next_question(session.id).dimension is not QualityDimension.RESULT
 
 
+def test_off_dimension_answer_does_not_count_as_explicit_unknown():
+    service, session, bases, sessions, experience = make_interview()
+    service.question_writer = DeterministicQuestionWriter()
+    session.skipped_dimensions = set(QualityDimension) - {
+        QualityDimension.CONTEXT,
+    }
+    sessions.save(session)
+
+    service.next_question(session.id)
+    turn = service.answer(session.id, "I built the weekly dashboard myself")
+    service.confirm(session.id, turn.proposal.id)
+
+    first = service.record_unknown(session.id, QualityDimension.CONTEXT)
+    second = service.record_unknown(session.id, QualityDimension.CONTEXT)
+
+    assert first.attempts == 1
+    assert first.skipped is False
+    assert second.attempts == 2
+    assert second.skipped is True
+    stored = sessions.get(session.id)
+    assert stored.attempts[QualityDimension.CONTEXT] == 3
+    assert stored.unknown_attempts[QualityDimension.CONTEXT] == 2
+
+
 def test_interview_asks_only_one_question_per_turn():
     service, session, bases, sessions, experience = make_interview()
     turn = service.answer(session.id, "I built the weekly dashboard myself")
