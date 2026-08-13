@@ -24,7 +24,7 @@ Add `CandidateProfile` to `CareerFactBase` with `name`, `email`, `phone`, `locat
 `resume_agent/rendering/models.py` defines the transport-neutral render result, warnings, style catalog, and export format enum. `resume_agent/rendering/renderer.py` contains a pure `ResumeRenderer.render(base, version)` operation. It:
 
 1. Resolves only `version.selected_experience_ids`, in `version.ordering` order.
-2. Uses only confirmed `FactValue` instances.
+2. Excludes every `UNVERIFIED` value. User-confirmed estimates remain visible as estimates and produce a warning.
 3. Creates evidence bullets from action, method, result, responsibility, context, and evidence statements without combining unrelated facts into new causal claims.
 4. Escapes every user-controlled value before placing it in HTML.
 5. Produces Markdown and a self-contained A4 HTML document from the same intermediate sections.
