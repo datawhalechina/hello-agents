@@ -34,15 +34,15 @@
 
     <main class="workbench">
       <section class="panel task-panel" aria-label="简历任务面板">
-        <nav id="primary-tabs" class="primary-tabs" aria-label="简历工作区">
-          <button data-tab="chat" aria-selected="true" type="button">访谈</button>
-          <button data-tab="facts" aria-selected="false" type="button">事实库</button>
-          <button data-tab="jd" aria-selected="false" type="button">JD 定制</button>
-          <button data-tab="tools" aria-selected="false" type="button">工具</button>
+        <nav id="primary-tabs" class="primary-tabs" aria-label="简历工作区" role="tablist">
+          <button id="chat-tab" data-tab="chat" aria-controls="chat-panel" aria-selected="true" role="tab" tabindex="0" type="button">访谈</button>
+          <button id="facts-tab" data-tab="facts" aria-controls="facts-panel" aria-selected="false" role="tab" tabindex="-1" type="button">事实库</button>
+          <button id="jd-tab" data-tab="jd" aria-controls="jd-panel" aria-selected="false" role="tab" tabindex="-1" type="button">JD 定制</button>
+          <button id="tools-tab" data-tab="tools" aria-controls="tools-panel" aria-selected="false" role="tab" tabindex="-1" type="button">工具</button>
         </nav>
 
         <div class="panel-content">
-          <section id="chat-panel" class="tab-panel" data-panel="chat">
+          <section id="chat-panel" class="tab-panel" data-panel="chat" aria-labelledby="chat-tab" role="tabpanel" tabindex="0">
             <div class="panel-actions">
               <button id="start-interview" class="primary" type="button">开始访谈</button>
             </div>
@@ -59,7 +59,7 @@
             </div>
           </section>
 
-          <section id="facts-panel" class="tab-panel" data-panel="facts" hidden>
+          <section id="facts-panel" class="tab-panel" data-panel="facts" aria-labelledby="facts-tab" role="tabpanel" tabindex="0" hidden>
             <div class="section-heading">
               <h2>事实库</h2>
               <p>只有经过你确认的内容才会进入简历。</p>
@@ -67,7 +67,7 @@
             <div id="facts-content" class="empty-state">建立档案后可在这里查看经历证据。</div>
           </section>
 
-          <section id="jd-panel" class="tab-panel" data-panel="jd" hidden>
+          <section id="jd-panel" class="tab-panel" data-panel="jd" aria-labelledby="jd-tab" role="tabpanel" tabindex="0" hidden>
             <div class="section-heading">
               <h2>JD 定制</h2>
               <p>针对具体岗位选择经历和重点，不改写原始事实。</p>
@@ -75,7 +75,7 @@
             <div id="jd-content" class="empty-state">建立档案后可以创建岗位版本。</div>
           </section>
 
-          <section id="tools-panel" class="tab-panel" data-panel="tools" hidden>
+          <section id="tools-panel" class="tab-panel" data-panel="tools" aria-labelledby="tools-tab" role="tabpanel" tabindex="0" hidden>
             <div class="section-heading">
               <h2>工具</h2>
               <p>低频设置、和暦换算与导出入口。</p>
@@ -105,10 +105,11 @@
           <span class="toolbar-spacer"></span>
           <span id="draft-badge" class="draft-badge" hidden>编辑稿</span>
           <button id="edit-button" type="button" disabled>先创建岗位版本</button>
-          <a id="export-pdf" class="button-link primary disabled" aria-disabled="true">PDF</a>
-          <a id="export-html" class="button-link disabled" aria-disabled="true">HTML</a>
-          <a id="export-markdown" class="button-link disabled" aria-disabled="true">Markdown</a>
-          <a id="export-docx" class="button-link disabled" aria-disabled="true">DOCX</a>
+          <a id="export-pdf" class="button-link primary disabled" role="link" aria-describedby="export-prerequisite" aria-disabled="true" tabindex="0">PDF</a>
+          <a id="export-html" class="button-link disabled" role="link" aria-describedby="export-prerequisite" aria-disabled="true" tabindex="0">HTML</a>
+          <a id="export-markdown" class="button-link disabled" role="link" aria-describedby="export-prerequisite" aria-disabled="true" tabindex="0">Markdown</a>
+          <a id="export-docx" class="button-link disabled" role="link" aria-describedby="export-prerequisite" aria-disabled="true" tabindex="0">DOCX</a>
+          <span id="export-prerequisite" class="export-prerequisite">请先创建岗位版本后再导出。</span>
         </div>
         <div class="preview-surface">
           <div id="preview-editor-bar" class="preview-editor-bar" hidden>

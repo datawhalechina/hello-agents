@@ -5,6 +5,11 @@ import {
   sanitizeUiState,
   toWareki,
 } from "/assets/api.js";
+import {
+  baseSelection,
+  createGenerationGate,
+  storeBaseSelection,
+} from "/assets/workbench-state.js";
 
 const STORAGE_KEY = "resume-agent-ui-v1";
 const LANGUAGE_LABELS = {
@@ -51,6 +56,11 @@ let capabilitiesState = null;
 let currentRendered = null;
 let editMode = false;
 let editorView = "visual";
+let editorTarget = null;
+let currentRenderedVersionId = null;
+const baseActivationGate = createGenerationGate();
+const experienceGate = createGenerationGate();
+const versionGate = createGenerationGate();
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitizeUiState(state)));
@@ -85,7 +95,9 @@ function setServiceStatus(capabilities) {
 function selectTab(name) {
   const selected = ["chat", "facts", "jd", "tools"].includes(name) ? name : "chat";
   for (const button of byId("primary-tabs").querySelectorAll("button")) {
-    button.setAttribute("aria-selected", String(button.dataset.tab === selected));
+    const isSelected = button.dataset.tab === selected;
+    button.setAttribute("aria-selected", String(isSelected));
+    button.tabIndex = isSelected ? 0 : -1;
   }
   for (const panel of document.querySelectorAll("[data-panel]")) {
     panel.hidden = panel.dataset.panel !== selected;
@@ -113,6 +125,42 @@ function replaceBase(updated) {
   currentBase = updated;
 }
 
+function cacheBase(updated) {
+  const index = bases.findIndex((base) => base.id === updated.id);
+  if (index >= 0) bases[index] = updated;
+  else bases.push(updated);
+}
+
+function commitSelection(baseId, selection) {
+  const saved = storeBaseSelection(state, baseId, selection);
+  state.factBaseId = baseId;
+  for (const key of ["experienceId", "sessionId", "versionId"]) {
+    if (saved[key]) state[key] = saved[key];
+    else delete state[key];
+  }
+  saveState();
+}
+
+function resetEditorState() {
+  editMode = false;
+  editorView = "visual";
+  editorTarget = null;
+  currentRendered = null;
+  currentRenderedVersionId = null;
+  const markdown = byId("markdown-editor");
+  if (markdown) markdown.value = "";
+  const frame = byId("preview-frame");
+  if (frame?.contentDocument) frame.contentDocument.designMode = "off";
+}
+
+function resetComposerAction() {
+  const submit = byId("chat-composer")?.querySelector('button[type="submit"]');
+  if (submit) {
+    submit.disabled = false;
+    submit.textContent = "发送回答";
+  }
+}
+
 function renderBaseSwitcher() {
   const select = byId("base-select");
   const sampleButton = byId("sample-button");
@@ -138,78 +186,96 @@ function renderBaseSwitcher() {
   newButton.textContent = currentBase ? "新建档案" : "正在新建档案";
 }
 
-function chooseBase(base) {
-  const changedBase = state.factBaseId && state.factBaseId !== base.id;
-  currentBase = base;
-  currentExperienceQuality = null;
-  state.factBaseId = base.id;
-  const selected = base.experiences.find((item) => item.id === state.experienceId);
-  state.experienceId = selected?.id || base.experiences.at(-1)?.id || "";
-  if (changedBase) delete state.versionId;
-  saveState();
-}
-
-async function loadCurrentExperienceQuality() {
-  currentExperienceQuality = null;
-  if (!currentBase || !state.experienceId) return;
-  const baseId = currentBase.id;
-  const experienceId = state.experienceId;
-  try {
-    const quality = await api.experienceQuality(baseId, experienceId);
-    if (currentBase?.id === baseId && state.experienceId === experienceId) {
-      currentExperienceQuality = quality;
-    }
-  } catch {
-    currentExperienceQuality = null;
-  }
-}
-
-async function loadVersions() {
-  versions = currentBase ? await api.listVersions(currentBase.id) : [];
-  currentVersion = versions.find((item) => item.id === state.versionId)
-    || versions.find((item) => item.is_active && item.locale === state.locale)
-    || versions.find((item) => item.locale === state.locale)
-    || versions.find((item) => item.is_active)
-    || versions.at(-1)
+async function recoverSession(baseId, experienceId, preferredSessionId = "") {
+  if (!experienceId) return null;
+  const sessions = await api.listSessions(baseId, experienceId);
+  return sessions.find((session) => session.id === preferredSessionId)
+    || sessions.at(-1)
     || null;
-  if (currentVersion) {
-    state.versionId = currentVersion.id;
-    state.locale = currentVersion.locale;
-  } else {
-    delete state.versionId;
-  }
-  saveState();
 }
 
-async function recoverSession() {
-  currentSession = null;
-  if (!currentBase || !state.experienceId) return;
-  try {
-    const sessions = await api.listSessions(currentBase.id, state.experienceId);
-    currentSession = sessions.find((session) => session.id === state.sessionId)
-      || sessions.at(-1)
-      || null;
-    if (currentSession) state.sessionId = currentSession.id;
-    else delete state.sessionId;
-    saveState();
-  } catch (error) {
-    showToast(error instanceof ApiError ? error.message : "访谈记录读取失败");
-  }
+async function loadVersions(baseId, preferredVersionId = "", locale = state.locale) {
+  const loaded = await api.listVersions(baseId);
+  const selected = loaded.find((item) => item.id === preferredVersionId)
+    || loaded.find((item) => item.is_active && item.locale === locale)
+    || loaded.find((item) => item.locale === locale)
+    || loaded.find((item) => item.is_active)
+    || loaded.at(-1)
+    || null;
+  return { versions: loaded, currentVersion: selected };
+}
+
+async function loadCurrentExperienceQuality(baseId, experienceId) {
+  return experienceId ? api.experienceQuality(baseId, experienceId) : null;
+}
+
+function renderCommittedWorkbench() {
+  renderBaseSwitcher();
+  renderConversation();
+  renderJdTab();
+  renderToolsTab();
 }
 
 async function activateBase(base) {
-  replaceBase(base);
-  chooseBase(base);
-  await Promise.all([recoverSession(), loadVersions(), loadCurrentExperienceQuality()]);
-  renderBaseSwitcher();
-  renderConversation();
-  await renderFactBase();
-  renderJdTab();
-  renderToolsTab();
-  await renderDocument();
+  const generation = baseActivationGate.next();
+  experienceGate.next();
+  versionGate.next();
+  if (editMode) {
+    resetEditorState();
+    void renderDocument(generation);
+  }
+  const saved = baseSelection(state, base.id);
+  const selectedExperience = base.experiences.find((item) => item.id === saved.experienceId)
+    || base.experiences.at(-1)
+    || null;
+  const experienceId = selectedExperience?.id || "";
+
+  try {
+    const [session, versionState, quality] = await Promise.all([
+      recoverSession(base.id, experienceId, saved.sessionId),
+      loadVersions(base.id, saved.versionId),
+      loadCurrentExperienceQuality(base.id, experienceId),
+    ]);
+    if (!baseActivationGate.isCurrent(generation)) return false;
+
+    resetEditorState();
+    cacheBase(base);
+    currentBase = base;
+    currentSession = session;
+    currentExperienceQuality = quality;
+    versions = versionState.versions;
+    currentVersion = versionState.currentVersion;
+    if (currentVersion) state.locale = currentVersion.locale;
+    commitSelection(base.id, {
+      experienceId,
+      sessionId: session?.id || "",
+      versionId: currentVersion?.id || "",
+    });
+    resetComposerAction();
+    byId("language-button").textContent = LANGUAGE_LABELS[state.locale];
+    renderCommittedWorkbench();
+    await Promise.all([
+      renderFactBase(generation),
+      renderDocument(generation),
+    ]);
+    return true;
+  } catch (error) {
+    if (!baseActivationGate.isCurrent(generation)) return false;
+    renderCommittedWorkbench();
+    await Promise.all([
+      renderFactBase(baseActivationGate.current()),
+      renderDocument(baseActivationGate.current()),
+    ]);
+    throw error;
+  }
 }
 
 function startNewBase() {
+  baseActivationGate.next();
+  experienceGate.next();
+  versionGate.next();
+  resetEditorState();
+  resetComposerAction();
   currentBase = null;
   currentSession = null;
   currentExperienceQuality = null;
@@ -226,6 +292,59 @@ function startNewBase() {
   renderJdTab();
   renderToolsTab();
   renderDocument();
+}
+
+function captureExperienceContext() {
+  return {
+    baseGeneration: baseActivationGate.current(),
+    experienceGeneration: experienceGate.current(),
+    baseId: currentBase?.id || "",
+    experienceId: state.experienceId || "",
+  };
+}
+
+function isCurrentExperienceContext(context) {
+  return baseActivationGate.isCurrent(context.baseGeneration)
+    && experienceGate.isCurrent(context.experienceGeneration)
+    && currentBase?.id === context.baseId
+    && state.experienceId === context.experienceId;
+}
+
+async function activateExperience(experienceId) {
+  if (!currentBase || !currentBase.experiences.some((item) => item.id === experienceId)) {
+    return false;
+  }
+  const baseId = currentBase.id;
+  const baseGeneration = baseActivationGate.current();
+  const generation = experienceGate.next();
+  const saved = baseSelection(state, baseId);
+  const preferredSessionId = saved.experienceId === experienceId ? saved.sessionId : "";
+  try {
+    const [session, quality] = await Promise.all([
+      recoverSession(baseId, experienceId, preferredSessionId),
+      loadCurrentExperienceQuality(baseId, experienceId),
+    ]);
+    if (!baseActivationGate.isCurrent(baseGeneration)
+      || !experienceGate.isCurrent(generation)
+      || currentBase?.id !== baseId) return false;
+    currentSession = session;
+    currentExperienceQuality = quality;
+    commitSelection(baseId, {
+      ...saved,
+      experienceId,
+      sessionId: session?.id || "",
+    });
+    resetComposerAction();
+    renderConversation();
+    return true;
+  } catch (error) {
+    if (!baseActivationGate.isCurrent(baseGeneration)
+      || !experienceGate.isCurrent(generation)
+      || currentBase?.id !== baseId) return false;
+    renderConversation();
+    showToast(error instanceof ApiError ? error.message : "经历读取失败");
+    return false;
+  }
 }
 
 function renderOnboarding() {
@@ -294,11 +413,7 @@ function experienceSelector() {
     select.append(option);
   }
   select.addEventListener("change", async () => {
-    state.experienceId = select.value;
-    delete state.sessionId;
-    saveState();
-    await Promise.all([recoverSession(), loadCurrentExperienceQuality()]);
-    renderConversation();
+    await activateExperience(select.value);
   });
   wrapper.append(select);
   return wrapper;
@@ -423,27 +538,40 @@ function renderConversation() {
   messages.scrollTop = messages.scrollHeight;
 }
 
-async function ensureSession() {
+async function ensureSession(context) {
+  if (!isCurrentExperienceContext(context)) return null;
   if (currentSession) return currentSession;
-  currentSession = await api.createSession(currentBase.id, state.experienceId);
-  state.sessionId = currentSession.id;
-  saveState();
-  return currentSession;
+  const session = await api.createSession(context.baseId, context.experienceId);
+  if (!isCurrentExperienceContext(context)) return null;
+  currentSession = session;
+  commitSelection(context.baseId, {
+    ...baseSelection(state, context.baseId),
+    experienceId: context.experienceId,
+    sessionId: session.id,
+  });
+  return session;
 }
 
 async function startInterview() {
   const button = byId("start-interview");
+  const context = captureExperienceContext();
   button.disabled = true;
   button.textContent = "正在准备问题…";
   try {
-    const session = await ensureSession();
+    const session = await ensureSession(context);
+    if (!session || !isCurrentExperienceContext(context)) return;
     await api.currentQuestion(session.id);
-    currentSession = await api.getSession(session.id);
+    const updated = await api.getSession(session.id);
+    if (!isCurrentExperienceContext(context)) return;
+    currentSession = updated;
     renderConversation();
   } catch (error) {
+    if (!isCurrentExperienceContext(context)) return;
     showToast(error instanceof ApiError ? error.message : "访谈启动失败");
-    button.disabled = false;
-    button.textContent = "重试开始访谈";
+    if (button.isConnected) {
+      button.disabled = false;
+      button.textContent = "重试开始访谈";
+    }
   }
 }
 
@@ -453,52 +581,74 @@ async function submitAnswer(event) {
   const input = byId("chat-input");
   const message = input.value.trim();
   if (!message) return;
+  const context = captureExperienceContext();
   const submit = event.currentTarget.querySelector("button[type=submit]");
   submit.disabled = true;
   submit.textContent = "正在发送…";
   try {
-    const session = await ensureSession();
+    const session = await ensureSession(context);
+    if (!session || !isCurrentExperienceContext(context)) return;
     await api.answer(session.id, message);
+    if (!isCurrentExperienceContext(context)) return;
     input.value = "";
-    currentSession = await api.getSession(session.id);
+    const updated = await api.getSession(session.id);
+    if (!isCurrentExperienceContext(context)) return;
+    currentSession = updated;
     renderConversation();
   } catch (error) {
+    if (!isCurrentExperienceContext(context)) return;
     if (error instanceof ApiError && error.category === "unavailable") {
       showToast("回答已保存，导师暂时无法提炼；稍后可以继续");
-      currentSession = state.sessionId ? await api.getSession(state.sessionId) : currentSession;
+      const updated = state.sessionId ? await api.getSession(state.sessionId) : currentSession;
+      if (!isCurrentExperienceContext(context)) return;
+      currentSession = updated;
       renderConversation();
       input.value = "";
     } else {
       showToast(error instanceof ApiError ? error.message : "回答发送失败");
     }
   } finally {
-    submit.disabled = false;
-    submit.textContent = "发送回答";
+    if (isCurrentExperienceContext(context)) {
+      submit.disabled = false;
+      submit.textContent = "发送回答";
+    }
   }
 }
 
 async function confirmFact(proposalId) {
+  const context = captureExperienceContext();
+  const sessionId = currentSession?.id;
+  if (!sessionId) return;
   try {
-    await api.confirmProposal(currentSession.id, proposalId);
-    const [base, session] = await Promise.all([
-      api.getFactBase(currentBase.id),
-      api.getSession(currentSession.id),
+    await api.confirmProposal(sessionId, proposalId);
+    const [base, session, quality] = await Promise.all([
+      api.getFactBase(context.baseId),
+      api.getSession(sessionId),
+      loadCurrentExperienceQuality(context.baseId, context.experienceId),
     ]);
+    if (!isCurrentExperienceContext(context)) return;
     replaceBase(base);
     currentSession = session;
-    await loadCurrentExperienceQuality();
+    currentExperienceQuality = quality;
     renderConversation();
-    await renderFactBase();
+    await renderFactBase(context.baseGeneration);
   } catch (error) {
+    if (!isCurrentExperienceContext(context)) return;
     showToast(error instanceof ApiError ? error.message : "事实确认失败");
   }
 }
 
 async function rejectFact(proposalId) {
+  const context = captureExperienceContext();
+  const sessionId = currentSession?.id;
+  if (!sessionId) return;
   try {
-    currentSession = await api.rejectProposal(currentSession.id, proposalId);
+    const session = await api.rejectProposal(sessionId, proposalId);
+    if (!isCurrentExperienceContext(context)) return;
+    currentSession = session;
     renderConversation();
   } catch (error) {
+    if (!isCurrentExperienceContext(context)) return;
     showToast(error instanceof ApiError ? error.message : "事实退回失败");
   }
 }
@@ -506,12 +656,17 @@ async function rejectFact(proposalId) {
 async function recordUnknown() {
   const question = currentSession?.current_question;
   if (!question) return;
+  const context = captureExperienceContext();
+  const sessionId = currentSession.id;
   try {
-    await api.recordUnknown(currentSession.id, question.dimension);
-    await api.currentQuestion(currentSession.id);
-    currentSession = await api.getSession(currentSession.id);
+    await api.recordUnknown(sessionId, question.dimension);
+    await api.currentQuestion(sessionId);
+    const session = await api.getSession(sessionId);
+    if (!isCurrentExperienceContext(context)) return;
+    currentSession = session;
     renderConversation();
   } catch (error) {
+    if (!isCurrentExperienceContext(context)) return;
     showToast(error instanceof ApiError ? error.message : "暂时无法跳过这个问题");
   }
 }
@@ -519,6 +674,8 @@ async function recordUnknown() {
 function profileForm() {
   const form = element("form", "profile-form");
   const profile = currentBase.profile || {};
+  const baseId = currentBase.id;
+  const baseGeneration = baseActivationGate.current();
   form.append(
     field("姓名", "name", "", profile.name || ""),
     field("邮箱", "email", "", profile.email || ""),
@@ -534,13 +691,14 @@ function profileForm() {
     const data = new FormData(form);
     save.disabled = true;
     try {
-      const updated = await api.updateProfile(currentBase.id, {
+      const updated = await api.updateProfile(baseId, {
         name: String(data.get("name") || "").trim(),
         email: String(data.get("email") || "").trim(),
         phone: String(data.get("phone") || "").trim(),
         location: String(data.get("location") || "").trim(),
         links: String(data.get("links") || "").split("\n").map((item) => item.trim()).filter(Boolean),
       });
+      if (!baseActivationGate.isCurrent(baseGeneration) || currentBase?.id !== baseId) return;
       replaceBase(updated);
       showToast("基本信息已保存");
     } catch (error) {
@@ -559,7 +717,7 @@ function factValue(value) {
   return row;
 }
 
-async function renderFactBase() {
+async function renderFactBase(expectedGeneration = baseActivationGate.current()) {
   const root = byId("facts-content");
   root.className = "facts-content";
   root.replaceChildren();
@@ -568,19 +726,21 @@ async function renderFactBase() {
     root.textContent = "建立档案后可在这里查看经历证据。";
     return;
   }
+  const base = currentBase;
   const profileDetails = element("details", "profile-details");
   profileDetails.open = false;
   profileDetails.append(element("summary", "", "候选人基本信息"), profileForm());
   root.append(profileDetails);
 
-  const qualityReports = await Promise.all(currentBase.experiences.map(async (experience) => {
+  const qualityReports = await Promise.all(base.experiences.map(async (experience) => {
     try {
-      return await api.experienceQuality(currentBase.id, experience.id);
+      return await api.experienceQuality(base.id, experience.id);
     } catch {
       return null;
     }
   }));
-  currentBase.experiences.forEach((experience, index) => {
+  if (!baseActivationGate.isCurrent(expectedGeneration) || currentBase?.id !== base.id) return;
+  base.experiences.forEach((experience, index) => {
     const card = element("article", "experience-card");
     card.append(element("h3", "", `${experience.organization} · ${experience.role}`));
     const quality = qualityReports[index];
@@ -607,11 +767,8 @@ async function renderFactBase() {
     const deepen = element("button", "", "继续访谈");
     deepen.type = "button";
     deepen.addEventListener("click", async () => {
-      state.experienceId = experience.id;
-      delete state.sessionId;
       selectTab("chat");
-      await recoverSession();
-      renderConversation();
+      await activateExperience(experience.id);
     });
     card.append(grid, deepen);
     root.append(card);
@@ -619,17 +776,42 @@ async function renderFactBase() {
 }
 
 async function chooseVersion(versionId) {
-  state.versionId = versionId;
-  saveState();
+  if (!currentBase || !versions.some((item) => item.id === versionId)) return false;
+  const baseId = currentBase.id;
+  const baseGeneration = baseActivationGate.current();
+  const generation = versionGate.next();
+  if (editMode) {
+    resetEditorState();
+    void renderDocument(baseGeneration);
+  }
   try {
     await api.activateVersion(versionId);
-    await loadVersions();
+    const versionState = await loadVersions(baseId, versionId);
+    if (!baseActivationGate.isCurrent(baseGeneration)
+      || !versionGate.isCurrent(generation)
+      || currentBase?.id !== baseId) return false;
+    resetEditorState();
+    versions = versionState.versions;
+    currentVersion = versionState.currentVersion;
+    if (currentVersion) state.locale = currentVersion.locale;
+    commitSelection(baseId, {
+      ...baseSelection(state, baseId),
+      versionId: currentVersion?.id || "",
+    });
     byId("language-button").textContent = LANGUAGE_LABELS[state.locale];
     renderJdTab();
     renderToolsTab();
-    await renderDocument();
+    await renderDocument(baseGeneration);
+    return true;
   } catch (error) {
+    if (!baseActivationGate.isCurrent(baseGeneration)
+      || !versionGate.isCurrent(generation)
+      || currentBase?.id !== baseId) return false;
+    renderJdTab();
+    renderToolsTab();
+    await renderDocument(baseGeneration);
     showToast(error instanceof ApiError ? error.message : "版本切换失败");
+    return false;
   }
 }
 
@@ -685,8 +867,10 @@ function renderJdTab() {
       return;
     }
     submit.disabled = true;
+    const baseId = currentBase.id;
+    const baseGeneration = baseActivationGate.current();
     try {
-      const version = await api.createVersion(currentBase.id, {
+      const version = await api.createVersion(baseId, {
         name,
         target_role: String(data.get("targetRole") || "").trim(),
         company: String(data.get("company") || "").trim(),
@@ -694,11 +878,14 @@ function renderJdTab() {
         locale: state.locale,
         selected_experience_ids: data.getAll("experienceIds").map(String),
       });
-      state.versionId = version.id;
-      saveState();
+      if (!baseActivationGate.isCurrent(baseGeneration) || currentBase?.id !== baseId) return;
+      versions = [...versions.filter((item) => item.id !== version.id), version];
       await chooseVersion(version.id);
-      showToast("岗位版本已创建");
+      if (baseActivationGate.isCurrent(baseGeneration) && currentBase?.id === baseId) {
+        showToast("岗位版本已创建");
+      }
     } catch (error) {
+      if (!baseActivationGate.isCurrent(baseGeneration) || currentBase?.id !== baseId) return;
       showToast(error instanceof ApiError ? error.message : "版本创建失败");
       submit.disabled = false;
     }
@@ -730,12 +917,16 @@ function configureExportLink(id, format, version) {
     link.removeAttribute("href");
     link.classList.add("disabled");
     link.setAttribute("aria-disabled", "true");
+    link.setAttribute("aria-describedby", "export-prerequisite");
+    link.setAttribute("tabindex", "0");
     link.title = "请先创建岗位版本";
     return;
   }
   link.href = api.exportUrl(version.id, format);
   link.classList.remove("disabled");
   link.setAttribute("aria-disabled", "false");
+  link.removeAttribute("aria-describedby");
+  link.removeAttribute("tabindex");
   link.removeAttribute("title");
 }
 
@@ -775,14 +966,26 @@ function renderDocumentToolbar() {
     }
     styleSelect.disabled = editMode;
     styleSelect.onchange = async () => {
+      const baseId = currentBase?.id;
+      const versionId = currentVersion.id;
+      const baseGeneration = baseActivationGate.current();
+      const versionGeneration = versionGate.current();
       styleSelect.disabled = true;
       try {
-        const updated = await api.setVersionStyle(currentVersion.id, styleSelect.value);
+        const updated = await api.setVersionStyle(versionId, styleSelect.value);
+        if (!baseActivationGate.isCurrent(baseGeneration)
+          || !versionGate.isCurrent(versionGeneration)
+          || currentBase?.id !== baseId
+          || currentVersion?.id !== versionId) return;
         versions = versions.map((item) => item.id === updated.id ? updated : item);
         currentVersion = updated;
-        await renderDocument();
+        await renderDocument(baseGeneration);
         showToast("版式已保存");
       } catch (error) {
+        if (!baseActivationGate.isCurrent(baseGeneration)
+          || !versionGate.isCurrent(versionGeneration)
+          || currentBase?.id !== baseId
+          || currentVersion?.id !== versionId) return;
         showToast(error instanceof ApiError ? error.message : "版式保存失败");
         styleSelect.disabled = false;
       }
@@ -795,13 +998,14 @@ function renderDocumentToolbar() {
   editButton.title = currentVersion ? "编辑当前简历草稿" : "请先创建岗位版本";
   const draftBadge = byId("draft-badge");
   draftBadge.hidden = !currentVersion?.manual_html && !currentVersion?.manual_markdown;
+  byId("export-prerequisite").hidden = Boolean(currentVersion);
   configureExportLink("export-pdf", "pdf", currentVersion);
   configureExportLink("export-html", "html", currentVersion);
   configureExportLink("export-markdown", "md", currentVersion);
   configureExportLink("export-docx", "docx", currentVersion);
 }
 
-async function renderDocument() {
+async function renderDocument(expectedBaseGeneration = baseActivationGate.current()) {
   renderDocumentToolbar();
   const empty = byId("preview-empty");
   const frame = byId("preview-frame");
@@ -810,6 +1014,7 @@ async function renderDocument() {
   byId("markdown-editor").hidden = true;
   warnings.replaceChildren();
   currentRendered = null;
+  currentRenderedVersionId = null;
   frame.hidden = true;
   frame.removeAttribute("srcdoc");
   empty.hidden = false;
@@ -820,11 +1025,15 @@ async function renderDocument() {
   }
 
   const requestedId = currentVersion.id;
+  const requestedVersionGeneration = versionGate.current();
   placeholder.textContent = "正在生成预览…";
   try {
     const rendered = await api.previewVersion(requestedId);
-    if (currentVersion?.id !== requestedId) return;
+    if (!baseActivationGate.isCurrent(expectedBaseGeneration)
+      || !versionGate.isCurrent(requestedVersionGeneration)
+      || currentVersion?.id !== requestedId) return;
     currentRendered = rendered;
+    currentRenderedVersionId = requestedId;
     for (const warning of rendered.warnings || []) {
       warnings.append(element("div", "preview-warning", warning.message));
     }
@@ -832,6 +1041,9 @@ async function renderDocument() {
     empty.hidden = true;
     frame.hidden = false;
   } catch (error) {
+    if (!baseActivationGate.isCurrent(expectedBaseGeneration)
+      || !versionGate.isCurrent(requestedVersionGeneration)
+      || currentVersion?.id !== requestedId) return;
     placeholder.textContent = error instanceof ApiError ? error.message : "预览生成失败";
   }
 }
@@ -852,12 +1064,18 @@ function setEditorView(view) {
 }
 
 function beginEditor() {
-  if (!currentVersion || !currentRendered) {
+  if (!currentVersion || !currentRendered || currentRenderedVersionId !== currentVersion.id) {
     showToast("预览尚未准备好");
     return;
   }
   editMode = true;
   editorView = "visual";
+  editorTarget = {
+    baseGeneration: baseActivationGate.current(),
+    versionGeneration: versionGate.current(),
+    baseId: currentBase.id,
+    versionId: currentVersion.id,
+  };
   byId("markdown-editor").value = currentRendered.markdown;
   byId("preview-editor-bar").hidden = false;
   renderDocumentToolbar();
@@ -872,19 +1090,41 @@ function editedHtml() {
 
 async function saveEditor() {
   const button = byId("edit-button");
+  const target = editorTarget;
+  if (!target
+    || !baseActivationGate.isCurrent(target.baseGeneration)
+    || !versionGate.isCurrent(target.versionGeneration)
+    || currentBase?.id !== target.baseId
+    || currentVersion?.id !== target.versionId) {
+    resetEditorState();
+    await renderDocument();
+    showToast("版本已切换，请重新编辑");
+    return;
+  }
+  const draft = {
+    markdown: byId("markdown-editor").value,
+    html: editedHtml(),
+  };
   button.disabled = true;
   try {
-    const updated = await api.setVersionDraft(currentVersion.id, {
-      markdown: byId("markdown-editor").value,
-      html: editedHtml(),
-    });
+    const updated = await api.setVersionDraft(target.versionId, draft);
+    if (editorTarget !== target
+      || !baseActivationGate.isCurrent(target.baseGeneration)
+      || !versionGate.isCurrent(target.versionGeneration)
+      || currentBase?.id !== target.baseId
+      || currentVersion?.id !== target.versionId) return;
     versions = versions.map((item) => item.id === updated.id ? updated : item);
     currentVersion = updated;
-    editMode = false;
-    await renderDocument();
+    resetEditorState();
+    await renderDocument(target.baseGeneration);
     renderToolsTab();
     showToast("编辑稿已保存到服务端");
   } catch (error) {
+    if (editorTarget !== target
+      || !baseActivationGate.isCurrent(target.baseGeneration)
+      || !versionGate.isCurrent(target.versionGeneration)
+      || currentBase?.id !== target.baseId
+      || currentVersion?.id !== target.versionId) return;
     showToast(error instanceof ApiError ? error.message : "编辑稿保存失败");
     button.disabled = false;
   }
@@ -892,28 +1132,45 @@ async function saveEditor() {
 
 async function resetDraft() {
   if (!currentVersion) return;
+  const target = {
+    baseGeneration: baseActivationGate.current(),
+    versionGeneration: versionGate.current(),
+    baseId: currentBase.id,
+    versionId: currentVersion.id,
+  };
   const button = byId("reset-draft-button");
   button.disabled = true;
   try {
-    const updated = await api.setVersionDraft(currentVersion.id, { markdown: "", html: "" });
+    const updated = await api.setVersionDraft(target.versionId, { markdown: "", html: "" });
+    if (!baseActivationGate.isCurrent(target.baseGeneration)
+      || !versionGate.isCurrent(target.versionGeneration)
+      || currentBase?.id !== target.baseId
+      || currentVersion?.id !== target.versionId) return;
     versions = versions.map((item) => item.id === updated.id ? updated : item);
     currentVersion = updated;
-    editMode = false;
-    await renderDocument();
+    resetEditorState();
+    await renderDocument(target.baseGeneration);
     renderToolsTab();
     showToast("已恢复为事实库自动生成的版本");
   } catch (error) {
+    if (!baseActivationGate.isCurrent(target.baseGeneration)
+      || !versionGate.isCurrent(target.versionGeneration)
+      || currentBase?.id !== target.baseId
+      || currentVersion?.id !== target.versionId) return;
     showToast(error instanceof ApiError ? error.message : "恢复失败");
     button.disabled = false;
   }
 }
 
-function toolExportLink(label, format) {
+function toolExportLink(label, format, prerequisiteId) {
   const link = element("a", "button-link", label);
+  link.setAttribute("role", "link");
   if (currentVersion) link.href = api.exportUrl(currentVersion.id, format);
   else {
     link.classList.add("disabled");
     link.setAttribute("aria-disabled", "true");
+    link.setAttribute("aria-describedby", prerequisiteId);
+    link.setAttribute("tabindex", "0");
   }
   return link;
 }
@@ -934,12 +1191,16 @@ function renderToolsTab() {
 
   const exports = element("section", "tool-card");
   exports.append(element("h3", "", "当前版本导出"));
+  const prerequisite = element("p", "export-prerequisite", "请先创建岗位版本后再导出。 ");
+  prerequisite.id = "tools-export-prerequisite";
+  prerequisite.hidden = Boolean(currentVersion);
+  exports.append(prerequisite);
   const exportActions = element("div", "tool-actions");
   exportActions.append(
-    toolExportLink("HTML", "html"),
-    toolExportLink("Markdown", "md"),
-    toolExportLink("DOCX", "docx"),
-    toolExportLink("PDF", "pdf"),
+    toolExportLink("HTML", "html", prerequisite.id),
+    toolExportLink("Markdown", "md", prerequisite.id),
+    toolExportLink("DOCX", "docx", prerequisite.id),
+    toolExportLink("PDF", "pdf", prerequisite.id),
   );
   exports.append(exportActions);
   root.append(exports);
@@ -997,11 +1258,13 @@ async function cycleLanguage() {
   byId("language-button").textContent = LANGUAGE_LABELS[state.locale];
   saveState();
   if (!currentBase) return;
+  const baseId = currentBase.id;
+  const baseGeneration = baseActivationGate.current();
   try {
     let version = versions.find((item) => item.locale === state.locale);
     if (!version) {
       const role = currentBase.target?.role || "通用";
-      version = await api.createVersion(currentBase.id, {
+      version = await api.createVersion(baseId, {
         name: `${LANGUAGE_LABELS[state.locale]} · ${role}`,
         target_role: role,
         company: "",
@@ -1009,9 +1272,12 @@ async function cycleLanguage() {
         locale: state.locale,
         selected_experience_ids: currentBase.experiences.map((item) => item.id),
       });
+      if (!baseActivationGate.isCurrent(baseGeneration) || currentBase?.id !== baseId) return;
+      versions = [...versions.filter((item) => item.id !== version.id), version];
     }
     await chooseVersion(version.id);
   } catch (error) {
+    if (!baseActivationGate.isCurrent(baseGeneration) || currentBase?.id !== baseId) return;
     showToast(error instanceof ApiError ? error.message : "语言版本切换失败");
   }
 }
@@ -1049,16 +1315,31 @@ byId("primary-tabs").addEventListener("click", (event) => {
   if (button.dataset.tab === "jd") renderJdTab();
   if (button.dataset.tab === "tools") renderToolsTab();
 });
+byId("primary-tabs").addEventListener("keydown", (event) => {
+  if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+  const tabs = [...event.currentTarget.querySelectorAll('[role="tab"]')];
+  const currentIndex = tabs.indexOf(document.activeElement);
+  if (currentIndex < 0) return;
+  event.preventDefault();
+  let nextIndex = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : currentIndex;
+  if (event.key === "ArrowLeft") nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+  if (event.key === "ArrowRight") nextIndex = (currentIndex + 1) % tabs.length;
+  tabs[nextIndex].focus();
+  tabs[nextIndex].click();
+});
 byId("settings-button").addEventListener("click", () => byId("settings-dialog").showModal());
 byId("base-select").addEventListener("change", async (event) => {
-  const base = bases.find((item) => item.id === event.currentTarget.value);
+  const select = event.currentTarget;
+  const base = bases.find((item) => item.id === select.value);
   if (!base) return;
-  event.currentTarget.disabled = true;
+  select.setAttribute("aria-busy", "true");
   try {
     await activateBase(base);
   } catch (error) {
     showToast(error instanceof ApiError ? error.message : "档案切换失败");
     renderBaseSwitcher();
+  } finally {
+    select.removeAttribute("aria-busy");
   }
 });
 byId("sample-button").addEventListener("click", createSample);

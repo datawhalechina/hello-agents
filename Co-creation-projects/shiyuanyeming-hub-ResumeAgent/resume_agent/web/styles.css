@@ -244,6 +244,7 @@ button:disabled, .button-link.disabled { cursor: not-allowed; opacity: 0.45; }
 .document-types button { min-height: 30px; padding: 4px 9px; }
 .document-types button.selected { background: var(--accent-soft); border-color: #c8d7e6; color: var(--accent); opacity: 1; }
 .draft-badge { background: #f4f0e7; border-radius: 10px; color: #725a2b; font-size: 11px; padding: 3px 8px; }
+.export-prerequisite { color: var(--muted); flex: 1 0 100%; font-size: 12px; }
 .preview-surface { background: #e8ecf1; flex: 1; min-height: 0; overflow: auto; padding: 18px; }
 .preview-editor-bar { align-items: center; background: #fff; border: 1px solid var(--line); border-radius: 8px; display: flex; gap: 7px; margin: 0 auto 10px; max-width: 900px; padding: 8px 10px; }
 .preview-editor-bar[hidden] { display: none; }
@@ -285,6 +286,13 @@ dialog p { color: var(--muted); line-height: 1.6; }
 .toast.show { opacity: 0.94; }
 
 .sr-only { clip: rect(0, 0, 0, 0); clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; white-space: nowrap; width: 1px; }
+
+@media (min-width: 641px) and (max-width: 960px) {
+  .app-header { align-content: center; flex-wrap: wrap; }
+  .app-header .header-spacer { display: none; }
+  .base-switcher { flex: 1 1 180px; width: auto; }
+  .service-status { margin-left: auto; }
+}
 
 @media (max-width: 960px) {
   .workbench { grid-template-columns: 1fr; height: auto; }

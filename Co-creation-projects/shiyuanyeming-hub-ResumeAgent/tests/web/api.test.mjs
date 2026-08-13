@@ -101,6 +101,15 @@ test("sanitizeUiState keeps selection fields and drops credentials", () => {
       tab: "facts",
       apiKey: "secret",
       candidateAnswer: "private answer",
+      baseSelections: {
+        "base-1": {
+          experienceId: "experience-1",
+          sessionId: "session-1",
+          versionId: "version-1",
+          candidateAnswer: "private answer",
+          markdown: "private draft",
+        },
+      },
     }),
     {
       factBaseId: "base-1",
@@ -109,6 +118,13 @@ test("sanitizeUiState keeps selection fields and drops credentials", () => {
       versionId: "version-1",
       locale: "ja",
       tab: "facts",
+      baseSelections: {
+        "base-1": {
+          experienceId: "experience-1",
+          sessionId: "session-1",
+          versionId: "version-1",
+        },
+      },
     },
   );
 });

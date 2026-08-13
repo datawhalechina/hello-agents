@@ -19,6 +19,11 @@ def test_root_serves_original_workbench_shell(tmp_path):
     assert 'id="new-base-button"' in response.text
     assert 'id="interview-progress"' in response.text
     assert 'aria-label="访谈证据进度"' in response.text
+    assert 'role="tablist"' in response.text
+    assert response.text.count('role="tab"') == 4
+    assert response.text.count('role="tabpanel"') == 4
+    assert 'aria-describedby="export-prerequisite"' in response.text
+    assert 'id="export-prerequisite"' in response.text
     assert "stSidebar" not in response.text
     assert "把做过的事，讲成有证据的职业故事" not in response.text
 
@@ -28,6 +33,7 @@ def test_web_assets_are_served(tmp_path):
         css = client.get("/assets/styles.css")
         api = client.get("/assets/api.js")
         app = client.get("/assets/app.js")
+        workbench_state = client.get("/assets/workbench-state.js")
 
     assert css.status_code == 200
     assert css.headers["content-type"].startswith("text/css")
@@ -35,6 +41,8 @@ def test_web_assets_are_served(tmp_path):
     assert "javascript" in api.headers["content-type"]
     assert app.status_code == 200
     assert "javascript" in app.headers["content-type"]
+    assert workbench_state.status_code == 200
+    assert "javascript" in workbench_state.headers["content-type"]
 
 
 def test_styles_define_required_breakpoints_without_ai_effects(tmp_path):
@@ -43,6 +51,8 @@ def test_styles_define_required_breakpoints_without_ai_effects(tmp_path):
 
     assert "400px minmax(0, 1fr)" in css
     assert "@media (max-width: 960px)" in css
+    assert "@media (min-width: 641px) and (max-width: 960px)" in css
+    assert "flex-wrap: wrap" in css
     assert "@media (max-width: 640px)" in css
     assert "[hidden] { display: none !important; }" in css
     assert "linear-gradient" not in css

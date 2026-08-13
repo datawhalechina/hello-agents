@@ -79,6 +79,24 @@ export function sanitizeUiState(value) {
   if (result.tab && !["chat", "facts", "jd", "tools"].includes(result.tab)) {
     delete result.tab;
   }
+  if (source.baseSelections && typeof source.baseSelections === "object") {
+    const selections = {};
+    for (const [baseId, selection] of Object.entries(source.baseSelections)) {
+      if (!baseId
+        || baseId.length > 200
+        || ["__proto__", "constructor", "prototype"].includes(baseId)
+        || !selection
+        || typeof selection !== "object") continue;
+      const safeSelection = {};
+      for (const key of ["experienceId", "sessionId", "versionId"]) {
+        if (typeof selection[key] === "string" && selection[key] && selection[key].length <= 200) {
+          safeSelection[key] = selection[key];
+        }
+      }
+      selections[baseId] = safeSelection;
+    }
+    if (Object.keys(selections).length) result.baseSelections = selections;
+  }
   return result;
 }
 
