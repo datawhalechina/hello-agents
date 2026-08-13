@@ -44,7 +44,7 @@ Agent 访谈（提问→回答→解析入库）
 - LLM：DeepSeek（OpenAI 兼容接口，可换 Qwen / Kimi / Ollama）
 - PDF：本机 Chrome / Edge headless
 - DOCX：python-docx
-- Web：FastAPI、HTTPX、Streamlit 1.61+
+- Web：FastAPI、原生 ES Modules、HTTPX（Streamlit 作为可选旧界面）
 - 其他：python-dotenv、Jupyter Notebook
 - 导师核心：Pydantic 2、SQLite、pytest
 
@@ -102,14 +102,7 @@ cp .env.example .env
 
 占位密钥、缺失配置和非法地址不会被接受。API 启动时只构造 Agent，不会自动调用模型或消耗额度。
 
-### 运行项目
-
-```bash
-jupyter lab
-# 打开 main.ipynb，按顺序运行全部单元格
-```
-
-### 启动 FastAPI 服务
+### 启动完整工作台
 
 安装 Web 开发依赖：
 
@@ -117,18 +110,19 @@ jupyter lab
 python3 -m pip install -e '.[dev]'
 ```
 
-在第一个终端启动 API：
+启动 FastAPI 后，原版双栏工作台和 API 会由同一个进程提供：
 
 ```bash
 uvicorn resume_agent.api.main:app --reload
+# 浏览器打开 http://127.0.0.1:8000/
 ```
 
-- API 默认地址：`http://127.0.0.1:8000`
+- 工作台：`http://127.0.0.1:8000/`
 - OpenAPI 文档：`http://127.0.0.1:8000/docs`
 - 默认数据库：`data/resume_agent.db`
 - 可通过 `RESUME_AGENT_DB=/path/to/file.db` 指定其他数据库
 
-默认入口会按上述环境变量自动构造 HelloAgents 事实审计 Agent 和导师追问 Agent。每次结构化调用都会创建新的 `SimpleAgent`，不共享框架对话历史，避免候选人会话互相污染。由于简历提示可能包含个人敏感信息，HelloAgents 的 trace、session、skills、todo、devlog 和 subagent 持久化在这两个专用 Agent 上默认关闭；业务会话只由 ResumeAgent 自己的 SQLite 仓库管理。没有配置时，事实库、版本管理、预览和导出仍可离线使用；Web 侧边栏会提前显示“导师 Agent 未启用”，提交需要事实抽取的回答时接口仍会明确返回 HTTP 503，同时保留用户刚提交的消息。
+默认入口会按上述环境变量自动构造 HelloAgents 事实审计 Agent 和导师追问 Agent。每次结构化调用都会创建新的 `SimpleAgent`，不共享框架对话历史，避免候选人会话互相污染。由于简历提示可能包含个人敏感信息，HelloAgents 的 trace、session、skills、todo、devlog 和 subagent 持久化在这两个专用 Agent 上默认关闭；业务会话只由 ResumeAgent 自己的 SQLite 仓库管理。没有配置时，事实库、版本管理、预览和导出仍可离线使用；页头会显示“仅离线功能”，回答会先保存，导师恢复后可以继续提炼。
 
 运行状态可以通过 `GET /capabilities` 查看。该接口只返回框架、模型名和功能开关，不返回 API Key 或完整供应商地址。
 
@@ -152,7 +146,9 @@ resume-agent-eval --repeats 3 --fail-under 0.90
 
 每次运行会生成同名的 JSON 和 Markdown 报告。报告只记录模型名、框架、案例 ID、检查项和安全的异常类别，不保存测试回答、完整提示词、模型原始输出、API Key 或供应商地址。模型运行有随机性时使用 `--repeats`；同一个案例必须在每次重复中都满足确定性安全检查，才适合作为发布依据。
 
-在第二个终端启动 Web 界面：
+### 可选：旧版 Streamlit 界面
+
+如需对照旧实现，可在 FastAPI 已运行时另开终端：
 
 ```bash
 streamlit run streamlit_app.py
@@ -164,14 +160,14 @@ Web 界面默认连接 `http://127.0.0.1:8000`，可以覆盖：
 RESUME_AGENT_API_URL=http://127.0.0.1:9000 streamlit run streamlit_app.py
 ```
 
-Web 产品包含四个工作区：
+默认双栏工作台包含四个工作区：
 
 - **导师对话**：默认入口，一次只追问一个证据缺口，候选事实必须确认后入库
 - **证据档案**：维护姓名和联系方式，查看六维证据状态和已确认事实，敏感内容默认折叠
-- **投递版本**：创建、克隆、激活、重命名、删除岗位版本
-- **预览评审**：选择岗位版本与三语样式，实时预览，并下载 HTML、Markdown、DOCX 或 PDF
+- **JD 定制**：针对岗位创建和切换中文、日文、英文投递版本
+- **工具**：和暦换算、运行状态和当前版本导出入口
 
-当前档案、经历、版本和工作区会同步到浏览器 URL 查询参数；页面刷新后可恢复选择。服务端会按事实库和经历恢复访谈会话，当前问题也是幂等读取，不会因 Streamlit rerun 重复提问。HTTP 写操作不会自动重试。
+当前档案、经历、版本、语言和工作区只保存必要的选择 ID；回答、事实和手工简历草稿都落在服务端 SQLite，不写入浏览器存储。页面刷新后可恢复访谈与编辑稿。当前问题是幂等读取，HTTP 写操作不会自动重试。
 
 渲染器只使用版本选中的经历，并排除所有未确认事实。估算事实会保留并显示核对警告；事实库更新后，旧版本仍可预览，但会标记为陈旧。中文、英文、日文模板只本地化标题和版式，不会擅自翻译用户事实。日文 Web 版当前生成 `職務経歴書`；需要生日、教育、照片和资格信息的 JIS `履歴書` 将在资料模型扩展后接入。
 

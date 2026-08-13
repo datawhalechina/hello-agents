@@ -31,3 +31,14 @@ def test_web_assets_are_served(tmp_path):
     assert "javascript" in api.headers["content-type"]
     assert app.status_code == 200
     assert "javascript" in app.headers["content-type"]
+
+
+def test_styles_define_required_breakpoints_without_ai_effects(tmp_path):
+    with TestClient(create_app(tmp_path / "app.db")) as client:
+        css = client.get("/assets/styles.css").text
+
+    assert "400px minmax(0, 1fr)" in css
+    assert "@media (max-width: 960px)" in css
+    assert "@media (max-width: 640px)" in css
+    assert "linear-gradient" not in css
+    assert "backdrop-filter" not in css

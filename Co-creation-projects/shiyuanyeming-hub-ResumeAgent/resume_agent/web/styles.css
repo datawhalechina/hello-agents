@@ -75,7 +75,7 @@ button:disabled, .button-link.disabled { cursor: not-allowed; opacity: 0.45; }
 .workbench {
   display: grid;
   gap: 12px;
-  grid-template-columns: 400px 1fr;
+  grid-template-columns: 400px minmax(0, 1fr);
   height: calc(100vh - 58px);
   padding: 12px;
 }
@@ -86,6 +86,7 @@ button:disabled, .button-link.disabled { cursor: not-allowed; opacity: 0.45; }
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   min-height: 0;
+  min-width: 0;
   overflow: hidden;
 }
 
@@ -258,8 +259,31 @@ dialog p { color: var(--muted); line-height: 1.6; }
 
 .sr-only { clip: rect(0, 0, 0, 0); clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; white-space: nowrap; width: 1px; }
 
-@media (max-width: 900px) {
+@media (max-width: 960px) {
   .workbench { grid-template-columns: 1fr; height: auto; }
-  .task-panel { min-height: 620px; }
-  .document-panel { min-height: 760px; }
+  .task-panel { height: 660px; }
+  .document-panel { height: 860px; }
+}
+
+@media (max-width: 640px) {
+  .app-header { gap: 7px; min-height: 54px; padding: 8px 10px; }
+  .brand { font-size: 16px; }
+  .product-note, #sample-button { display: none; }
+  .service-status { font-size: 0; }
+  .service-status .status-dot { display: block; }
+  .app-header button { min-height: 32px; padding: 5px 9px; }
+  .workbench { gap: 8px; padding: 8px; }
+  .task-panel { height: 620px; }
+  .document-panel { height: 760px; }
+  .primary-tabs button { flex: 1 0 auto; padding-left: 13px; padding-right: 13px; }
+  .panel-content { padding: 11px; }
+  .chat-composer { gap: 7px; padding: 8px; }
+  .send-button { min-width: 60px; }
+  .document-toolbar { flex-wrap: nowrap; overflow-x: auto; }
+  .document-toolbar > * { flex: 0 0 auto; }
+  .document-toolbar .toolbar-spacer { display: none; }
+  .preview-surface { padding: 10px; }
+  .paper-placeholder { min-height: 620px; padding: 30px 24px; }
+  .preview-editor-bar { overflow-x: auto; }
+  #preview-frame { min-height: 940px; }
 }
