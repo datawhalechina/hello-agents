@@ -41,6 +41,10 @@ def test_web_assets_are_served(tmp_path):
     assert "javascript" in api.headers["content-type"]
     assert app.status_code == 200
     assert "javascript" in app.headers["content-type"]
+    assert "sessionTransitionGate" in app.text
+    assert "previewGate" in app.text
+    assert "languageGate" in app.text
+    assert "documentCommitGeneration" in app.text
     assert workbench_state.status_code == 200
     assert "javascript" in workbench_state.headers["content-type"]
 

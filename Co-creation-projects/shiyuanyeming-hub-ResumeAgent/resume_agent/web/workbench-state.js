@@ -16,6 +16,37 @@ export function createGenerationGate() {
   };
 }
 
+export function createTransitionGate() {
+  let generation = 0;
+  let transitioning = false;
+  return {
+    begin() {
+      generation += 1;
+      transitioning = true;
+      return generation;
+    },
+    cancel() {
+      generation += 1;
+      transitioning = false;
+      return generation;
+    },
+    current() {
+      return generation;
+    },
+    finish(candidate) {
+      if (candidate !== generation) return false;
+      transitioning = false;
+      return true;
+    },
+    isCurrent(candidate) {
+      return candidate === generation;
+    },
+    isTransitioning() {
+      return transitioning;
+    },
+  };
+}
+
 export function baseSelection(state, baseId) {
   const saved = state.baseSelections?.[baseId];
   if (saved) return { ...saved };

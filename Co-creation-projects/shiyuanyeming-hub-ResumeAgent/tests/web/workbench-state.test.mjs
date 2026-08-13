@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   baseSelection,
   createGenerationGate,
+  createTransitionGate,
   storeBaseSelection,
 } from "../../resume_agent/web/workbench-state.js";
 
@@ -16,6 +17,57 @@ test("generation gates reject stale async commits", () => {
   assert.equal(gate.isCurrent(first), false);
   assert.equal(gate.isCurrent(second), true);
   assert.equal(gate.current(), second);
+});
+
+
+test("transition gates keep the latest intent active until it finishes", () => {
+  const gate = createTransitionGate();
+  const first = gate.begin();
+  const second = gate.begin();
+
+  assert.equal(gate.isTransitioning(), true);
+  assert.equal(gate.finish(first), false);
+  assert.equal(gate.isTransitioning(), true);
+  assert.equal(gate.finish(second), true);
+  assert.equal(gate.isTransitioning(), false);
+});
+
+
+test("cancel invalidates an in-flight transition immediately", () => {
+  const gate = createTransitionGate();
+  const pending = gate.begin();
+
+  gate.cancel();
+
+  assert.equal(gate.isCurrent(pending), false);
+  assert.equal(gate.finish(pending), false);
+  assert.equal(gate.isTransitioning(), false);
+});
+
+
+test("preview generation rejects an older response for the same version", () => {
+  const previewGate = createGenerationGate();
+  const committed = [];
+  const firstPreview = previewGate.next();
+  const refreshedPreview = previewGate.next();
+
+  if (previewGate.isCurrent(refreshedPreview)) committed.push("new-style-preview");
+  if (previewGate.isCurrent(firstPreview)) committed.push("old-style-preview");
+
+  assert.deepEqual(committed, ["new-style-preview"]);
+});
+
+
+test("language generation makes the last rapid intent win", () => {
+  const languageGate = createGenerationGate();
+  let committedLocale = "zh";
+  const japaneseIntent = languageGate.next();
+  const englishIntent = languageGate.next();
+
+  if (languageGate.isCurrent(englishIntent)) committedLocale = "en";
+  if (languageGate.isCurrent(japaneseIntent)) committedLocale = "ja";
+
+  assert.equal(committedLocale, "en");
 });
 
 

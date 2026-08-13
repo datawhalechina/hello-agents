@@ -8,6 +8,7 @@ import {
 import {
   baseSelection,
   createGenerationGate,
+  createTransitionGate,
   storeBaseSelection,
 } from "/assets/workbench-state.js";
 
@@ -58,9 +59,16 @@ let editMode = false;
 let editorView = "visual";
 let editorTarget = null;
 let currentRenderedVersionId = null;
+let documentCommitGeneration = 0;
+let versionTransitioning = false;
+let languageTransitioning = false;
+let languageIntentLocale = state.locale;
 const baseActivationGate = createGenerationGate();
 const experienceGate = createGenerationGate();
 const versionGate = createGenerationGate();
+const previewGate = createGenerationGate();
+const languageGate = createGenerationGate();
+const sessionTransitionGate = createTransitionGate();
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitizeUiState(state)));
@@ -161,6 +169,48 @@ function resetComposerAction() {
   }
 }
 
+function setSessionTransitionUi() {
+  const transitioning = sessionTransitionGate.isTransitioning();
+  const panel = byId("chat-panel");
+  const composer = byId("chat-composer");
+  panel.toggleAttribute("aria-busy", transitioning);
+  composer.toggleAttribute("aria-busy", transitioning);
+  for (const control of panel.querySelectorAll("button, select")) {
+    control.disabled = transitioning || control.disabled;
+  }
+  for (const control of composer.querySelectorAll("button, textarea")) {
+    control.disabled = transitioning;
+  }
+  byId("base-select").disabled = transitioning || bases.length === 0;
+  byId("new-base-button").disabled = transitioning || (bases.length > 0 && !currentBase);
+}
+
+function beginSessionTransition() {
+  const token = sessionTransitionGate.begin();
+  setSessionTransitionUi();
+  renderDocumentToolbar();
+  byId("reset-draft-button").disabled = true;
+  return token;
+}
+
+function finishSessionTransition(token) {
+  if (!sessionTransitionGate.finish(token)) return false;
+  renderBaseSwitcher();
+  renderConversation();
+  renderDocumentToolbar();
+  byId("reset-draft-button").disabled = false;
+  return true;
+}
+
+function cancelSessionTransitions() {
+  sessionTransitionGate.cancel();
+  setSessionTransitionUi();
+}
+
+function documentIsTransitioning() {
+  return sessionTransitionGate.isTransitioning() || versionTransitioning || languageTransitioning;
+}
+
 function renderBaseSwitcher() {
   const select = byId("base-select");
   const sampleButton = byId("sample-button");
@@ -177,12 +227,12 @@ function renderBaseSwitcher() {
       const role = base.target?.role?.trim() || "未命名岗位";
       select.append(new Option(role, base.id, false, base.id === currentBase?.id));
     }
-    select.disabled = false;
+    select.disabled = sessionTransitionGate.isTransitioning();
   }
 
   sampleButton.hidden = hasBases;
   newButton.hidden = !hasBases;
-  newButton.disabled = hasBases && !currentBase;
+  newButton.disabled = sessionTransitionGate.isTransitioning() || (hasBases && !currentBase);
   newButton.textContent = currentBase ? "新建档案" : "正在新建档案";
 }
 
@@ -209,21 +259,16 @@ async function loadCurrentExperienceQuality(baseId, experienceId) {
   return experienceId ? api.experienceQuality(baseId, experienceId) : null;
 }
 
-function renderCommittedWorkbench() {
-  renderBaseSwitcher();
-  renderConversation();
-  renderJdTab();
-  renderToolsTab();
-}
-
 async function activateBase(base) {
   const generation = baseActivationGate.next();
   experienceGate.next();
   versionGate.next();
-  if (editMode) {
-    resetEditorState();
-    void renderDocument(generation);
-  }
+  languageGate.next();
+  versionTransitioning = false;
+  languageTransitioning = false;
+  languageIntentLocale = state.locale;
+  byId("language-button").textContent = LANGUAGE_LABELS[state.locale];
+  const transition = beginSessionTransition();
   const saved = baseSelection(state, base.id);
   const selectedExperience = base.experiences.find((item) => item.id === saved.experienceId)
     || base.experiences.at(-1)
@@ -236,9 +281,9 @@ async function activateBase(base) {
       loadVersions(base.id, saved.versionId),
       loadCurrentExperienceQuality(base.id, experienceId),
     ]);
-    if (!baseActivationGate.isCurrent(generation)) return false;
+    if (!baseActivationGate.isCurrent(generation)
+      || !sessionTransitionGate.isCurrent(transition)) return false;
 
-    resetEditorState();
     cacheBase(base);
     currentBase = base;
     currentSession = session;
@@ -246,6 +291,9 @@ async function activateBase(base) {
     versions = versionState.versions;
     currentVersion = versionState.currentVersion;
     if (currentVersion) state.locale = currentVersion.locale;
+    languageIntentLocale = state.locale;
+    documentCommitGeneration += 1;
+    resetEditorState();
     commitSelection(base.id, {
       experienceId,
       sessionId: session?.id || "",
@@ -253,19 +301,21 @@ async function activateBase(base) {
     });
     resetComposerAction();
     byId("language-button").textContent = LANGUAGE_LABELS[state.locale];
-    renderCommittedWorkbench();
+    finishSessionTransition(transition);
+    renderJdTab();
+    renderToolsTab();
     await Promise.all([
       renderFactBase(generation),
-      renderDocument(generation),
+      renderDocument(),
     ]);
     return true;
   } catch (error) {
-    if (!baseActivationGate.isCurrent(generation)) return false;
-    renderCommittedWorkbench();
-    await Promise.all([
-      renderFactBase(baseActivationGate.current()),
-      renderDocument(baseActivationGate.current()),
-    ]);
+    if (!baseActivationGate.isCurrent(generation)
+      || !sessionTransitionGate.isCurrent(transition)) return false;
+    finishSessionTransition(transition);
+    renderJdTab();
+    renderToolsTab();
+    await renderFactBase(baseActivationGate.current());
     throw error;
   }
 }
@@ -274,6 +324,12 @@ function startNewBase() {
   baseActivationGate.next();
   experienceGate.next();
   versionGate.next();
+  previewGate.next();
+  languageGate.next();
+  cancelSessionTransitions();
+  versionTransitioning = false;
+  languageTransitioning = false;
+  documentCommitGeneration += 1;
   resetEditorState();
   resetComposerAction();
   currentBase = null;
@@ -285,6 +341,8 @@ function startNewBase() {
     delete state[key];
   }
   saveState();
+  languageIntentLocale = state.locale;
+  byId("language-button").textContent = LANGUAGE_LABELS[state.locale];
   renderBaseSwitcher();
   selectTab("chat");
   renderOnboarding();
@@ -306,6 +364,7 @@ function captureExperienceContext() {
 function isCurrentExperienceContext(context) {
   return baseActivationGate.isCurrent(context.baseGeneration)
     && experienceGate.isCurrent(context.experienceGeneration)
+    && !sessionTransitionGate.isTransitioning()
     && currentBase?.id === context.baseId
     && state.experienceId === context.experienceId;
 }
@@ -317,6 +376,7 @@ async function activateExperience(experienceId) {
   const baseId = currentBase.id;
   const baseGeneration = baseActivationGate.current();
   const generation = experienceGate.next();
+  const transition = beginSessionTransition();
   const saved = baseSelection(state, baseId);
   const preferredSessionId = saved.experienceId === experienceId ? saved.sessionId : "";
   try {
@@ -326,6 +386,7 @@ async function activateExperience(experienceId) {
     ]);
     if (!baseActivationGate.isCurrent(baseGeneration)
       || !experienceGate.isCurrent(generation)
+      || !sessionTransitionGate.isCurrent(transition)
       || currentBase?.id !== baseId) return false;
     currentSession = session;
     currentExperienceQuality = quality;
@@ -335,13 +396,14 @@ async function activateExperience(experienceId) {
       sessionId: session?.id || "",
     });
     resetComposerAction();
-    renderConversation();
+    finishSessionTransition(transition);
     return true;
   } catch (error) {
     if (!baseActivationGate.isCurrent(baseGeneration)
       || !experienceGate.isCurrent(generation)
+      || !sessionTransitionGate.isCurrent(transition)
       || currentBase?.id !== baseId) return false;
-    renderConversation();
+    finishSessionTransition(transition);
     showToast(error instanceof ApiError ? error.message : "经历读取失败");
     return false;
   }
@@ -536,6 +598,7 @@ function renderConversation() {
   panel.append(messages);
   byId("chat-composer").hidden = state.tab !== "chat";
   messages.scrollTop = messages.scrollHeight;
+  setSessionTransitionUi();
 }
 
 async function ensureSession(context) {
@@ -553,6 +616,7 @@ async function ensureSession(context) {
 }
 
 async function startInterview() {
+  if (sessionTransitionGate.isTransitioning()) return;
   const button = byId("start-interview");
   const context = captureExperienceContext();
   button.disabled = true;
@@ -577,7 +641,7 @@ async function startInterview() {
 
 async function submitAnswer(event) {
   event.preventDefault();
-  if (!currentBase) return;
+  if (!currentBase || sessionTransitionGate.isTransitioning()) return;
   const input = byId("chat-input");
   const message = input.value.trim();
   if (!message) return;
@@ -616,6 +680,7 @@ async function submitAnswer(event) {
 }
 
 async function confirmFact(proposalId) {
+  if (sessionTransitionGate.isTransitioning()) return;
   const context = captureExperienceContext();
   const sessionId = currentSession?.id;
   if (!sessionId) return;
@@ -639,6 +704,7 @@ async function confirmFact(proposalId) {
 }
 
 async function rejectFact(proposalId) {
+  if (sessionTransitionGate.isTransitioning()) return;
   const context = captureExperienceContext();
   const sessionId = currentSession?.id;
   if (!sessionId) return;
@@ -654,6 +720,7 @@ async function rejectFact(proposalId) {
 }
 
 async function recordUnknown() {
+  if (sessionTransitionGate.isTransitioning()) return;
   const question = currentSession?.current_question;
   if (!question) return;
   const context = captureExperienceContext();
@@ -775,41 +842,54 @@ async function renderFactBase(expectedGeneration = baseActivationGate.current())
   });
 }
 
-async function chooseVersion(versionId) {
+async function chooseVersion(versionId, { languageGeneration = null } = {}) {
   if (!currentBase || !versions.some((item) => item.id === versionId)) return false;
+  if (languageGeneration === null) {
+    languageGate.next();
+    languageTransitioning = false;
+    languageIntentLocale = state.locale;
+    byId("language-button").textContent = LANGUAGE_LABELS[state.locale];
+  }
   const baseId = currentBase.id;
   const baseGeneration = baseActivationGate.current();
   const generation = versionGate.next();
-  if (editMode) {
-    resetEditorState();
-    void renderDocument(baseGeneration);
-  }
+  const intentIsCurrent = () => languageGeneration === null
+    || languageGate.isCurrent(languageGeneration);
+  versionTransitioning = true;
+  renderJdTab();
+  renderDocumentToolbar();
   try {
     await api.activateVersion(versionId);
     const versionState = await loadVersions(baseId, versionId);
     if (!baseActivationGate.isCurrent(baseGeneration)
       || !versionGate.isCurrent(generation)
+      || !intentIsCurrent()
       || currentBase?.id !== baseId) return false;
+    documentCommitGeneration += 1;
     resetEditorState();
     versions = versionState.versions;
     currentVersion = versionState.currentVersion;
     if (currentVersion) state.locale = currentVersion.locale;
+    languageIntentLocale = state.locale;
     commitSelection(baseId, {
       ...baseSelection(state, baseId),
       versionId: currentVersion?.id || "",
     });
+    versionTransitioning = false;
     byId("language-button").textContent = LANGUAGE_LABELS[state.locale];
     renderJdTab();
     renderToolsTab();
-    await renderDocument(baseGeneration);
+    await renderDocument();
     return true;
   } catch (error) {
     if (!baseActivationGate.isCurrent(baseGeneration)
       || !versionGate.isCurrent(generation)
+      || !intentIsCurrent()
       || currentBase?.id !== baseId) return false;
+    versionTransitioning = false;
     renderJdTab();
     renderToolsTab();
-    await renderDocument(baseGeneration);
+    renderDocumentToolbar();
     showToast(error instanceof ApiError ? error.message : "版本切换失败");
     return false;
   }
@@ -903,7 +983,7 @@ function renderJdTab() {
     card.append(heading, element("p", "", versionMeta(version)));
     const use = element("button", "", version.id === currentVersion?.id ? "正在使用" : "使用此版本");
     use.type = "button";
-    use.disabled = version.id === currentVersion?.id;
+    use.disabled = documentIsTransitioning() || version.id === currentVersion?.id;
     use.addEventListener("click", () => chooseVersion(version.id));
     card.append(use);
     list.append(card);
@@ -947,7 +1027,7 @@ function renderDocumentToolbar() {
       versionSelect.append(option);
     }
     versionSelect.addEventListener("change", () => chooseVersion(versionSelect.value));
-    versionSelect.disabled = editMode;
+    versionSelect.disabled = editMode || documentIsTransitioning();
     switcher.append(versionSelect);
     if (currentVersion.locale === "ja") {
       const documentTypes = element("div", "document-types");
@@ -964,7 +1044,7 @@ function renderDocumentToolbar() {
     for (const style of styleNames) {
       styleSelect.append(new Option(style, style, false, style === selectedStyle));
     }
-    styleSelect.disabled = editMode;
+    styleSelect.disabled = editMode || documentIsTransitioning();
     styleSelect.onchange = async () => {
       const baseId = currentBase?.id;
       const versionId = currentVersion.id;
@@ -979,7 +1059,7 @@ function renderDocumentToolbar() {
           || currentVersion?.id !== versionId) return;
         versions = versions.map((item) => item.id === updated.id ? updated : item);
         currentVersion = updated;
-        await renderDocument(baseGeneration);
+        await renderDocument();
         showToast("版式已保存");
       } catch (error) {
         if (!baseActivationGate.isCurrent(baseGeneration)
@@ -993,7 +1073,7 @@ function renderDocumentToolbar() {
   }
 
   const editButton = byId("edit-button");
-  editButton.disabled = !currentVersion;
+  editButton.disabled = !currentVersion || documentIsTransitioning();
   editButton.textContent = !currentVersion ? "先创建岗位版本" : editMode ? "保存编辑" : "编辑简历";
   editButton.title = currentVersion ? "编辑当前简历草稿" : "请先创建岗位版本";
   const draftBadge = byId("draft-badge");
@@ -1005,7 +1085,8 @@ function renderDocumentToolbar() {
   configureExportLink("export-docx", "docx", currentVersion);
 }
 
-async function renderDocument(expectedBaseGeneration = baseActivationGate.current()) {
+async function renderDocument() {
+  const previewGeneration = previewGate.next();
   renderDocumentToolbar();
   const empty = byId("preview-empty");
   const frame = byId("preview-frame");
@@ -1025,12 +1106,14 @@ async function renderDocument(expectedBaseGeneration = baseActivationGate.curren
   }
 
   const requestedId = currentVersion.id;
-  const requestedVersionGeneration = versionGate.current();
+  const requestedBaseId = currentBase?.id;
+  const requestedDocumentGeneration = documentCommitGeneration;
   placeholder.textContent = "正在生成预览…";
   try {
     const rendered = await api.previewVersion(requestedId);
-    if (!baseActivationGate.isCurrent(expectedBaseGeneration)
-      || !versionGate.isCurrent(requestedVersionGeneration)
+    if (!previewGate.isCurrent(previewGeneration)
+      || documentCommitGeneration !== requestedDocumentGeneration
+      || currentBase?.id !== requestedBaseId
       || currentVersion?.id !== requestedId) return;
     currentRendered = rendered;
     currentRenderedVersionId = requestedId;
@@ -1041,8 +1124,9 @@ async function renderDocument(expectedBaseGeneration = baseActivationGate.curren
     empty.hidden = true;
     frame.hidden = false;
   } catch (error) {
-    if (!baseActivationGate.isCurrent(expectedBaseGeneration)
-      || !versionGate.isCurrent(requestedVersionGeneration)
+    if (!previewGate.isCurrent(previewGeneration)
+      || documentCommitGeneration !== requestedDocumentGeneration
+      || currentBase?.id !== requestedBaseId
       || currentVersion?.id !== requestedId) return;
     placeholder.textContent = error instanceof ApiError ? error.message : "预览生成失败";
   }
@@ -1071,10 +1155,9 @@ function beginEditor() {
   editMode = true;
   editorView = "visual";
   editorTarget = {
-    baseGeneration: baseActivationGate.current(),
-    versionGeneration: versionGate.current(),
     baseId: currentBase.id,
     versionId: currentVersion.id,
+    documentGeneration: documentCommitGeneration,
   };
   byId("markdown-editor").value = currentRendered.markdown;
   byId("preview-editor-bar").hidden = false;
@@ -1089,11 +1172,11 @@ function editedHtml() {
 }
 
 async function saveEditor() {
+  if (documentIsTransitioning()) return;
   const button = byId("edit-button");
   const target = editorTarget;
   if (!target
-    || !baseActivationGate.isCurrent(target.baseGeneration)
-    || !versionGate.isCurrent(target.versionGeneration)
+    || documentCommitGeneration !== target.documentGeneration
     || currentBase?.id !== target.baseId
     || currentVersion?.id !== target.versionId) {
     resetEditorState();
@@ -1109,20 +1192,18 @@ async function saveEditor() {
   try {
     const updated = await api.setVersionDraft(target.versionId, draft);
     if (editorTarget !== target
-      || !baseActivationGate.isCurrent(target.baseGeneration)
-      || !versionGate.isCurrent(target.versionGeneration)
+      || documentCommitGeneration !== target.documentGeneration
       || currentBase?.id !== target.baseId
       || currentVersion?.id !== target.versionId) return;
     versions = versions.map((item) => item.id === updated.id ? updated : item);
     currentVersion = updated;
     resetEditorState();
-    await renderDocument(target.baseGeneration);
+    await renderDocument();
     renderToolsTab();
     showToast("编辑稿已保存到服务端");
   } catch (error) {
     if (editorTarget !== target
-      || !baseActivationGate.isCurrent(target.baseGeneration)
-      || !versionGate.isCurrent(target.versionGeneration)
+      || documentCommitGeneration !== target.documentGeneration
       || currentBase?.id !== target.baseId
       || currentVersion?.id !== target.versionId) return;
     showToast(error instanceof ApiError ? error.message : "编辑稿保存失败");
@@ -1131,30 +1212,27 @@ async function saveEditor() {
 }
 
 async function resetDraft() {
-  if (!currentVersion) return;
+  if (!currentVersion || documentIsTransitioning()) return;
   const target = {
-    baseGeneration: baseActivationGate.current(),
-    versionGeneration: versionGate.current(),
     baseId: currentBase.id,
     versionId: currentVersion.id,
+    documentGeneration: documentCommitGeneration,
   };
   const button = byId("reset-draft-button");
   button.disabled = true;
   try {
     const updated = await api.setVersionDraft(target.versionId, { markdown: "", html: "" });
-    if (!baseActivationGate.isCurrent(target.baseGeneration)
-      || !versionGate.isCurrent(target.versionGeneration)
+    if (documentCommitGeneration !== target.documentGeneration
       || currentBase?.id !== target.baseId
       || currentVersion?.id !== target.versionId) return;
     versions = versions.map((item) => item.id === updated.id ? updated : item);
     currentVersion = updated;
     resetEditorState();
-    await renderDocument(target.baseGeneration);
+    await renderDocument();
     renderToolsTab();
     showToast("已恢复为事实库自动生成的版本");
   } catch (error) {
-    if (!baseActivationGate.isCurrent(target.baseGeneration)
-      || !versionGate.isCurrent(target.versionGeneration)
+    if (documentCommitGeneration !== target.documentGeneration
       || currentBase?.id !== target.baseId
       || currentVersion?.id !== target.versionId) return;
     showToast(error instanceof ApiError ? error.message : "恢复失败");
@@ -1253,32 +1331,62 @@ async function createSample() {
 }
 
 async function cycleLanguage() {
-  const index = LANGUAGE_ORDER.indexOf(state.locale);
-  state.locale = LANGUAGE_ORDER[(index + 1) % LANGUAGE_ORDER.length];
-  byId("language-button").textContent = LANGUAGE_LABELS[state.locale];
-  saveState();
-  if (!currentBase) return;
+  const index = LANGUAGE_ORDER.indexOf(languageIntentLocale);
+  const desiredLocale = LANGUAGE_ORDER[(index + 1) % LANGUAGE_ORDER.length];
+  languageIntentLocale = desiredLocale;
+  const generation = languageGate.next();
+  versionGate.next();
+  versionTransitioning = false;
+  byId("language-button").textContent = LANGUAGE_LABELS[desiredLocale];
+  if (!currentBase) {
+    state.locale = desiredLocale;
+    saveState();
+    return;
+  }
   const baseId = currentBase.id;
   const baseGeneration = baseActivationGate.current();
+  const experienceIds = currentBase.experiences.map((item) => item.id);
+  const intentIsCurrent = () => languageGate.isCurrent(generation)
+    && baseActivationGate.isCurrent(baseGeneration)
+    && currentBase?.id === baseId;
+  languageTransitioning = true;
+  byId("language-button").setAttribute("aria-busy", "true");
+  renderJdTab();
+  renderDocumentToolbar();
   try {
-    let version = versions.find((item) => item.locale === state.locale);
+    let version = versions.find((item) => item.locale === desiredLocale);
     if (!version) {
       const role = currentBase.target?.role || "通用";
       version = await api.createVersion(baseId, {
-        name: `${LANGUAGE_LABELS[state.locale]} · ${role}`,
+        name: `${LANGUAGE_LABELS[desiredLocale]} · ${role}`,
         target_role: role,
         company: "",
         raw_jd: "",
-        locale: state.locale,
-        selected_experience_ids: currentBase.experiences.map((item) => item.id),
+        locale: desiredLocale,
+        selected_experience_ids: experienceIds,
       });
-      if (!baseActivationGate.isCurrent(baseGeneration) || currentBase?.id !== baseId) return;
+      if (!intentIsCurrent()) return;
       versions = [...versions.filter((item) => item.id !== version.id), version];
     }
-    await chooseVersion(version.id);
+    const selected = await chooseVersion(version.id, { languageGeneration: generation });
+    if (!intentIsCurrent()) return;
+    languageTransitioning = false;
+    languageIntentLocale = state.locale;
+    if (!selected) byId("language-button").textContent = LANGUAGE_LABELS[state.locale];
+    renderJdTab();
+    renderDocumentToolbar();
   } catch (error) {
-    if (!baseActivationGate.isCurrent(baseGeneration) || currentBase?.id !== baseId) return;
+    if (!intentIsCurrent()) return;
+    languageTransitioning = false;
+    languageIntentLocale = state.locale;
+    byId("language-button").textContent = LANGUAGE_LABELS[state.locale];
+    renderJdTab();
+    renderDocumentToolbar();
     showToast(error instanceof ApiError ? error.message : "语言版本切换失败");
+  } finally {
+    if (languageGate.isCurrent(generation)) {
+      byId("language-button").removeAttribute("aria-busy");
+    }
   }
 }
 
