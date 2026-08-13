@@ -10,6 +10,7 @@ from fastapi import FastAPI, Request, Response, status
 from fastapi.responses import JSONResponse
 
 from resume_agent.agents.mentor import DeterministicQuestionWriter
+from resume_agent.agents.runtime import AgentCapabilityStatus
 from resume_agent.agents.structured import AgentOutputError
 from resume_agent.agents.unavailable import (
     AgentUnavailableError,
@@ -72,6 +73,7 @@ class ServiceContainer:
     interviews: InterviewService
     versions: VersionService
     rendering: ResumeRenderService
+    capabilities: AgentCapabilityStatus
 
 
 def create_app(
@@ -81,6 +83,7 @@ def create_app(
     question_writer: Optional[QuestionWriterAgent] = None,
     resume_exporter: Optional[ResumeExporter] = None,
     resume_renderer: Optional[ResumeRenderer] = None,
+    agent_capabilities: Optional[AgentCapabilityStatus] = None,
 ) -> FastAPI:
     store = SQLiteStore(Path(database_path))
     fact_base_repository = SQLiteFactBaseRepository(store)
@@ -88,6 +91,21 @@ def create_app(
     version_repository = SQLiteVersionRepository(store)
     renderer = resume_renderer or ResumeRenderer()
     exporter = resume_exporter or ResumeExporter()
+    if agent_capabilities is not None:
+        capabilities = agent_capabilities
+    elif fact_audit_agent is not None:
+        capabilities = AgentCapabilityStatus(
+            status="ready",
+            mentor=True,
+            fact_audit=True,
+            question_writer=question_writer is not None,
+            framework="injected",
+            model="injected",
+        )
+    else:
+        capabilities = AgentCapabilityStatus.offline(
+            "LLM runtime is not configured for this application instance"
+        )
     container = ServiceContainer(
         store=store,
         fact_base_repository=fact_base_repository,
@@ -107,6 +125,7 @@ def create_app(
             renderer,
             exporter,
         ),
+        capabilities=capabilities,
     )
     app = FastAPI(
         title="ResumeAgent API",
@@ -155,6 +174,14 @@ def create_app(
     @app.get("/health", tags=["system"])
     def health() -> dict:
         return {"status": "ok"}
+
+    @app.get(
+        "/capabilities",
+        response_model=AgentCapabilityStatus,
+        tags=["system"],
+    )
+    def capabilities() -> AgentCapabilityStatus:
+        return container.capabilities
 
     @app.post(
         "/fact-bases",

@@ -12,6 +12,12 @@ from resume_agent.agents.mentor import (
 )
 from resume_agent.agents.prompts import FACT_AUDIT_PROMPT, QUESTION_WRITER_PROMPT
 from resume_agent.agents.structured import AgentOutputError
+from resume_agent.agents.runtime import (
+    AgentCapabilityStatus,
+    AgentRuntimeSettings,
+    MentorRuntime,
+    build_mentor_runtime,
+)
 from resume_agent.application.interview_service import (
     InterviewService,
     InterviewTurn,
@@ -54,6 +60,8 @@ from resume_agent.rendering.renderer import ResumeRenderer
 
 __all__ = [
     "AgentOutputError",
+    "AgentCapabilityStatus",
+    "AgentRuntimeSettings",
     "CareerFactBase",
     "CareerTarget",
     "CandidateProfile",
@@ -70,6 +78,7 @@ __all__ = [
     "HelloAgentsRunner",
     "MentorQuestion",
     "MentorAgentPair",
+    "MentorRuntime",
     "PlanningSignals",
     "QualityDimension",
     "QualityReport",
@@ -92,6 +101,7 @@ __all__ = [
     "VersionService",
     "VersionStatus",
     "build_mentor_agents",
+    "build_mentor_runtime",
     "create_app",
     "evaluate_experience",
 ]
