@@ -17,10 +17,16 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+  "hello-agents>=1,<2",
   "httpx>=0.28,<1",
   "httpx2>=2,<3",
+  "python-dotenv>=1,<2",
   "pytest>=8,<9",
   "streamlit>=1.61,<2",
+]
+agents = [
+  "hello-agents>=1,<2",
+  "python-dotenv>=1,<2",
 ]
 web = [
   "httpx>=0.28,<1",

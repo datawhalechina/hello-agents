@@ -7,6 +7,7 @@ from resume_agent.agents.mentor import (
     StructuredFactAuditAgent,
     StructuredQuestionWriterAgent,
 )
+from resume_agent.agents.unavailable import AgentUnavailableError
 
 
 class SimpleAgentLike(Protocol):
@@ -20,7 +21,14 @@ class HelloAgentsRunner:
         self.agent = agent
 
     def run(self, prompt: str) -> str:
-        return str(self.agent.run(prompt))
+        try:
+            return str(self.agent.run(prompt))
+        except AgentUnavailableError:
+            raise
+        except Exception as error:
+            raise AgentUnavailableError(
+                "mentor model request failed; check model configuration and connectivity"
+            ) from error
 
 
 @dataclass(frozen=True)
