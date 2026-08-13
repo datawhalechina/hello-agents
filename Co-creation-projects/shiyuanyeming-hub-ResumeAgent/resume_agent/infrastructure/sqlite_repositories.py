@@ -10,6 +10,7 @@ from resume_agent.domain.models import (
     CareerFactBase,
     InterviewSession,
     ResumeVersion,
+    utc_now,
 )
 
 
@@ -48,12 +49,48 @@ class SQLiteStore:
                 CREATE TABLE IF NOT EXISTS resume_versions (
                     id TEXT PRIMARY KEY,
                     fact_base_id TEXT NOT NULL,
+                    is_active INTEGER NOT NULL DEFAULT 0,
                     payload TEXT NOT NULL
                 );
 
                 CREATE INDEX IF NOT EXISTS idx_versions_fact_base
                     ON resume_versions (fact_base_id);
                 """
+            )
+            columns = {
+                row["name"]
+                for row in connection.execute("PRAGMA table_info(resume_versions)")
+            }
+            if "is_active" not in columns:
+                connection.execute(
+                    "ALTER TABLE resume_versions "
+                    "ADD COLUMN is_active INTEGER NOT NULL DEFAULT 0"
+                )
+            self._normalize_active_versions(connection)
+            connection.execute(
+                """
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_one_active_version_per_base
+                    ON resume_versions (fact_base_id)
+                 WHERE is_active = 1
+                """
+            )
+
+    @staticmethod
+    def _normalize_active_versions(connection: sqlite3.Connection) -> None:
+        rows = connection.execute(
+            "SELECT id, fact_base_id, payload FROM resume_versions ORDER BY rowid"
+        ).fetchall()
+        active_base_ids: set[str] = set()
+        for row in rows:
+            version = ResumeVersion.model_validate_json(row["payload"])
+            keep_active = version.is_active and row["fact_base_id"] not in active_base_ids
+            if keep_active:
+                active_base_ids.add(row["fact_base_id"])
+            if version.is_active != keep_active:
+                version.is_active = keep_active
+            connection.execute(
+                "UPDATE resume_versions SET is_active = ?, payload = ? WHERE id = ?",
+                (int(keep_active), version.model_dump_json(), row["id"]),
             )
 
 
@@ -189,18 +226,58 @@ class SQLiteVersionRepository:
         with self.store.connect() as connection:
             connection.execute(
                 """
-                INSERT INTO resume_versions (id, fact_base_id, payload)
-                VALUES (?, ?, ?)
+                INSERT INTO resume_versions (id, fact_base_id, is_active, payload)
+                VALUES (?, ?, ?, ?)
                 ON CONFLICT(id) DO UPDATE SET
                     fact_base_id = excluded.fact_base_id,
+                    is_active = excluded.is_active,
                     payload = excluded.payload
                 """,
                 (
                     str(version.id),
                     str(version.fact_base_id),
+                    int(version.is_active),
                     version.model_dump_json(),
                 ),
             )
+
+    def activate(self, version_id: UUID) -> ResumeVersion:
+        with self.store.connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            target_row = connection.execute(
+                "SELECT fact_base_id FROM resume_versions WHERE id = ?",
+                (str(version_id),),
+            ).fetchone()
+            if target_row is None:
+                raise KeyError(f"resume version not found: {version_id}")
+            rows = connection.execute(
+                "SELECT id, payload FROM resume_versions WHERE fact_base_id = ?",
+                (target_row["fact_base_id"],),
+            ).fetchall()
+            connection.execute(
+                "UPDATE resume_versions SET is_active = 0 WHERE fact_base_id = ?",
+                (target_row["fact_base_id"],),
+            )
+            now = utc_now()
+            for row in rows:
+                version = ResumeVersion.model_validate_json(row["payload"])
+                should_be_active = version.id == version_id
+                if version.is_active != should_be_active:
+                    version.is_active = should_be_active
+                    version.updated_at = now
+                connection.execute(
+                    """
+                    UPDATE resume_versions
+                       SET is_active = ?, payload = ?
+                     WHERE id = ?
+                    """,
+                    (
+                        int(should_be_active),
+                        version.model_dump_json(),
+                        row["id"],
+                    ),
+                )
+        return self.get(version_id)
 
     def delete(self, version_id: UUID) -> None:
         with self.store.connect() as connection:

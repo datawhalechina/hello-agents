@@ -108,14 +108,7 @@ class VersionService:
         return self.save(version)
 
     def activate(self, version_id: UUID) -> ResumeVersion:
-        target = self.repository.get(version_id)
-        for version in self.repository.list(target.fact_base_id):
-            should_be_active = version.id == target.id
-            if version.is_active != should_be_active:
-                version.is_active = should_be_active
-                version.updated_at = utc_now()
-                self.repository.save(version)
-        return self.repository.get(version_id)
+        return self.repository.activate(version_id)
 
     def delete(self, version_id: UUID) -> None:
         self.repository.delete(version_id)

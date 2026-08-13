@@ -1,4 +1,5 @@
 from copy import deepcopy
+from threading import RLock
 from typing import Iterable
 from uuid import UUID
 
@@ -46,6 +47,7 @@ class InMemorySessionRepository:
 class InMemoryVersionRepository:
     def __init__(self, versions: Iterable[ResumeVersion] = ()):
         self.items = {version.id: deepcopy(version) for version in versions}
+        self._lock = RLock()
 
     def get(self, version_id: UUID) -> ResumeVersion:
         return deepcopy(self.items[version_id])
@@ -59,6 +61,14 @@ class InMemoryVersionRepository:
 
     def save(self, version: ResumeVersion) -> None:
         self.items[version.id] = deepcopy(version)
+
+    def activate(self, version_id: UUID) -> ResumeVersion:
+        with self._lock:
+            target = self.items[version_id]
+            for version in self.items.values():
+                if version.fact_base_id == target.fact_base_id:
+                    version.is_active = version.id == version_id
+            return deepcopy(self.items[version_id])
 
     def delete(self, version_id: UUID) -> None:
         del self.items[version_id]

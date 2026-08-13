@@ -1,3 +1,5 @@
+from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier
 from uuid import uuid4
 
 import pytest
@@ -99,3 +101,30 @@ def test_deleting_version_does_not_touch_fact_base(tmp_path):
     assert bases.get(base.id).id == base.id
     with pytest.raises(KeyError):
         versions.get(version.id)
+
+
+def test_concurrent_version_activation_keeps_exactly_one_active(tmp_path):
+    database = tmp_path / "resume-agent.db"
+    repository = SQLiteVersionRepository(SQLiteStore(database))
+    base = CareerFactBase()
+    first = ResumeVersion(name="First", fact_base_id=base.id, base_revision=0)
+    second = ResumeVersion(name="Second", fact_base_id=base.id, base_revision=0)
+    repository.save(first)
+    repository.save(second)
+    barrier = Barrier(2)
+
+    def activate(version_id):
+        local_repository = SQLiteVersionRepository(SQLiteStore(database))
+        barrier.wait()
+        local_repository.activate(version_id)
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        futures = [
+            executor.submit(activate, first.id),
+            executor.submit(activate, second.id),
+        ]
+        for future in futures:
+            future.result()
+
+    active = [version for version in repository.list(base.id) if version.is_active]
+    assert len(active) == 1
