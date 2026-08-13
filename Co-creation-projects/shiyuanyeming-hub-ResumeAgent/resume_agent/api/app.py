@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
+from urllib.parse import quote
 from uuid import UUID
 
 from fastapi import FastAPI, Request, Response, status
@@ -33,6 +34,7 @@ from resume_agent.application.interview_service import (
     MentorQuestion,
     UnknownOutcome,
 )
+from resume_agent.application.render_service import ResumeRenderService
 from resume_agent.application.ports import (
     FactAuditAgent,
     QuestionWriterAgent,
@@ -51,6 +53,13 @@ from resume_agent.infrastructure.sqlite_repositories import (
     SQLiteStore,
     SQLiteVersionRepository,
 )
+from resume_agent.rendering.exporters import (
+    RenderEngineUnavailable,
+    RenderFormat,
+    ResumeExporter,
+)
+from resume_agent.rendering.models import RenderedResume
+from resume_agent.rendering.renderer import ResumeRenderer
 
 
 @dataclass(frozen=True)
@@ -62,6 +71,7 @@ class ServiceContainer:
     fact_bases: FactBaseService
     interviews: InterviewService
     versions: VersionService
+    rendering: ResumeRenderService
 
 
 def create_app(
@@ -69,11 +79,15 @@ def create_app(
     *,
     fact_audit_agent: Optional[FactAuditAgent] = None,
     question_writer: Optional[QuestionWriterAgent] = None,
+    resume_exporter: Optional[ResumeExporter] = None,
+    resume_renderer: Optional[ResumeRenderer] = None,
 ) -> FastAPI:
     store = SQLiteStore(Path(database_path))
     fact_base_repository = SQLiteFactBaseRepository(store)
     session_repository = SQLiteSessionRepository(store)
     version_repository = SQLiteVersionRepository(store)
+    renderer = resume_renderer or ResumeRenderer()
+    exporter = resume_exporter or ResumeExporter()
     container = ServiceContainer(
         store=store,
         fact_base_repository=fact_base_repository,
@@ -87,6 +101,12 @@ def create_app(
             question_writer or DeterministicQuestionWriter(),
         ),
         versions=VersionService(version_repository),
+        rendering=ResumeRenderService(
+            fact_base_repository,
+            version_repository,
+            renderer,
+            exporter,
+        ),
     )
     app = FastAPI(
         title="ResumeAgent API",
@@ -120,6 +140,13 @@ def create_app(
         error: AgentOutputError,
     ) -> JSONResponse:
         return JSONResponse(status_code=502, content={"detail": str(error)})
+
+    @app.exception_handler(RenderEngineUnavailable)
+    def handle_render_engine_unavailable(
+        request: Request,
+        error: RenderEngineUnavailable,
+    ) -> JSONResponse:
+        return JSONResponse(status_code=503, content={"detail": str(error)})
 
     @app.exception_handler(ValueError)
     def handle_invalid_state(request: Request, error: ValueError) -> JSONResponse:
@@ -324,6 +351,32 @@ def create_app(
     )
     def get_version(version_id: UUID) -> ResumeVersion:
         return container.versions.get(version_id)
+
+    @app.get(
+        "/versions/{version_id}/preview",
+        response_model=RenderedResume,
+        tags=["rendering"],
+    )
+    def preview_version(version_id: UUID) -> RenderedResume:
+        return container.rendering.preview(version_id)
+
+    @app.get(
+        "/versions/{version_id}/export",
+        tags=["rendering"],
+    )
+    def export_version(version_id: UUID, format: RenderFormat) -> Response:
+        exported = container.rendering.export(version_id, format)
+        ascii_filename = f"resume_{format.value}.{format.value}"
+        encoded_filename = quote(exported.filename)
+        disposition = (
+            f'attachment; filename="{ascii_filename}"; '
+            f"filename*=UTF-8''{encoded_filename}"
+        )
+        return Response(
+            content=exported.content,
+            media_type=exported.media_type,
+            headers={"Content-Disposition": disposition},
+        )
 
     @app.post(
         "/versions/{version_id}/clone",
