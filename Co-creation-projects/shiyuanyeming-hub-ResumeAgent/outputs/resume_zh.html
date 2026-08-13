@@ -1,51 +1,24 @@
 <!DOCTYPE html>
-<html lang="ja"><head><meta charset="utf-8"><title>简历</title>
+<html lang="zh"><head><meta charset="utf-8"><title>简历</title>
 <style>
-@page { size: A4; margin: 16mm 14mm; }
-body { font-family: "Hiragino Sans GB", "PingFang SC", "Hiragino Kaku Gothic ProN",
-       "Noto Sans CJK SC", sans-serif;
-       font-size: 10.5pt; line-height: 1.65; color: #1a1a1a; margin: 0; }
-h1 { font-size: 16pt; margin: 0 0 4mm; }
-h2 { font-size: 11.5pt; border-bottom: 1.2px solid #333; padding-bottom: 1mm; margin: 5mm 0 2mm; }
-h3 { font-size: 10.5pt; margin: 3mm 0 1mm; }
+@page { size: A4; margin: 14mm 16mm; }
+body { font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", sans-serif;
+       font-size: 10pt; line-height: 1.7; color: #2b2b2b; margin: 0; }
+.header { border-bottom: 2.2pt solid #1F4E79; padding-bottom: 3mm; margin-bottom: 4.5mm; }
+.name { font-size: 20pt; font-weight: bold; color: #1F4E79; margin: 0; letter-spacing: 1px; }
+.role { color: #4A6785; font-size: 10.5pt; margin: 1.5mm 0 0; }
+.contact { color: #666; font-size: 9pt; margin-top: 1.5mm; }
+.contact span { margin-right: 4mm; }
+h2 { font-size: 11.5pt; color: #1F4E79; margin: 4.5mm 0 2mm; padding-left: 2.5mm;
+     border-left: 3.5pt solid #1F4E79; }
+h3 { font-size: 10.5pt; color: #2b2b2b; margin: 2.5mm 0 0.5mm; }
+.muted { color: #666; font-size: 9pt; }
 ul { margin: 1mm 0 2mm; padding-left: 5mm; }
-li { margin: 0.8mm 0; }
-p { margin: 1mm 0; }
-table.grid { width: 100%; border-collapse: collapse; }
-table.grid td, table.grid th { border: 0.6px solid #444; padding: 2mm 3mm; vertical-align: top; }
-.kv td:first-child { width: 26mm; background: #f3f3f3; }
-.photo-box { width: 27mm; height: 36mm; border: 0.8px solid #333; font-size: 8pt; color: #777;
-             display: flex; align-items: center; justify-content: center; text-align: center; }
-.head-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4mm; }
+li { margin: 0.7mm 0; }
+li::marker { color: #4A90B8; }
+.chips { margin: 1mm 0 2mm; }
+.chip { display: inline-block; background: #EDF2F8; border: 0.5pt solid #B8CCE4;
+        border-radius: 2.5mm; padding: 0.4mm 2.2mm; margin: 0.4mm; font-size: 9pt; color: #1F4E79; }
+.job-title { color: #1F4E79; font-weight: bold; }
 </style></head>
-<body><h1>李明</h1>
-<ul>
-<li>电话：138-0000-0000 ｜ 邮箱：liming@example.com</li>
-<li>求职意向：数据分析师 / Data Analyst / データアナリスト</li>
-</ul>
-<h2>教育背景</h2>
-<ul>
-<li><b>复旦大学</b> ｜ 经济学 · 本科 ｜ 2020.09–2024.06</li>
-</ul>
-<p>  - GPA 3.6/4.0 ｜ 校级奖学金（2022）</p>
-<h2>工作经历</h2>
-<ul>
-<li><b>上海云数科技有限公司</b> ｜ 数据分析实习生 ｜ 2023.07–2023.09</li>
-</ul>
-<p>  - 撰写用户增长周报，覆盖日活/留存/转化等核心指标</p>
-<p>  - 搭建自动化看板，将周报制作时间从4小时缩短至30分钟</p>
-<p>  - 协助A/B实验分析，累计输出实验报告12份</p>
-<ul>
-<li><b>杭州某电商集团</b> ｜ 数据分析师 ｜ 2024.07–2026.06</li>
-</ul>
-<p>  - 负责复购率与用户分层分析</p>
-<p>  - 设计RFM分层模型，覆盖500万用户</p>
-<p>  - 主导转化率提升实验，目标页转化率提升5.2%</p>
-<h2>技能</h2>
-<ul>
-<li>技术栈：Python (pandas / matplotlib)、SQL (MySQL / Hive)、Tableau、Excel</li>
-<li>语言：日语 N2、英语 CET-6</li>
-<li>证书：日本语能力测试 N2（2023.12）</li>
-</ul>
-<h2>自我评价</h2>
-<p>复旦大学经济学本科，GPA 3.6，获校级奖学金。具备3年数据分析经验，曾搭建自动化看板提升效率87.5%，设计RFM模型覆盖500万用户，推动转化率提升5.2%。日语N2，掌握Python、SQL、Tableau。</p></body></html>
+<body><div class="header"><p class="name">李明</p><p class="role">求职意向：数据分析师 / Data Analyst / データアナリスト</p><p class="contact"><span>电话：138-0000-0000</span><span>邮箱：liming@example.com</span></p></div><h2>教育背景</h2><h3>复旦大学 <span class="muted">经济学 · 本科 ｜ 2020.09–2024.06</span></h3><p class="muted">GPA 3.6/4.0 ｜ 校级奖学金（2022）</p><h2>工作经历</h2><h3><span class="job-title">上海云数科技有限公司</span> <span class="muted">数据分析实习生 ｜ 2023.07–2023.09</span></h3><ul><li>撰写用户增长数据周报，覆盖日活/留存/转化等核心指标</li><li>搭建自动化看板，周报制作时间从4小时缩短至30分钟</li><li>协助A/B实验分析，累计输出实验报告12份</li></ul><h3><span class="job-title">杭州某电商集团</span> <span class="muted">数据分析师 ｜ 2024.07–2026.06</span></h3><ul><li>分析复购率与用户分层，设计RFM模型覆盖500万用户</li><li>主导转化率提升实验，目标页转化率提升5.2%</li></ul><h2>技能</h2><div class="chips"><span class="chip">Python (pandas / matplotlib)</span><span class="chip">SQL (MySQL / Hive)</span><span class="chip">Tableau</span><span class="chip">Excel</span><span class="chip">日语 N2</span><span class="chip">英语 CET-6</span></div><h2>自我评价</h2><p>复旦大学经济学本科，3年数据分析经验，擅长SQL/Python/Tableau，曾提升周报效率87.5%及转化率5.2%，日语N2，志在数据驱动业务增长。</p></body></html>
