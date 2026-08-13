@@ -84,7 +84,13 @@ jupyter lab
 
 ### 启动 FastAPI 服务
 
-安装开发依赖后运行：
+安装 Web 开发依赖：
+
+```bash
+python3 -m pip install -e '.[dev]'
+```
+
+在第一个终端启动 API：
 
 ```bash
 uvicorn resume_agent.api.main:app --reload
@@ -96,6 +102,27 @@ uvicorn resume_agent.api.main:app --reload
 - 可通过 `RESUME_AGENT_DB=/path/to/file.db` 指定其他数据库
 
 默认入口不会在导入时读取 LLM API Key，因此事实库、版本管理和确定性追问可以离线使用；提交自然语言回答进行事实抽取前，需要通过 `create_app(..., fact_audit_agent=...)` 注入配置好的事实审计 Agent。没有配置时接口会明确返回 HTTP 503，同时保留用户刚提交的消息。
+
+在第二个终端启动 Web 界面：
+
+```bash
+streamlit run streamlit_app.py
+```
+
+Web 界面默认连接 `http://127.0.0.1:8000`，可以覆盖：
+
+```bash
+RESUME_AGENT_API_URL=http://127.0.0.1:9000 streamlit run streamlit_app.py
+```
+
+Web 首版包含四个工作区：
+
+- **导师对话**：默认入口，一次只追问一个证据缺口，候选事实必须确认后入库
+- **证据档案**：查看六维证据状态和已确认事实，敏感内容默认折叠
+- **投递版本**：创建、克隆、激活、重命名、删除岗位版本
+- **预览评审**：当前明确显示未接入状态，等待三语渲染与 HR/ATS 服务迁移
+
+当前档案、经历、版本和工作区会同步到浏览器 URL 查询参数；页面刷新后可恢复选择。服务端会按事实库和经历恢复访谈会话，当前问题也是幂等读取，不会因 Streamlit rerun 重复提问。HTTP 写操作不会自动重试。
 
 ## 📖 使用示例
 
@@ -176,7 +203,7 @@ mentor_agents = build_mentor_agents(audit_agent, question_agent)
 - [x] 多版本管理核心（同一事实库派生多个投递版本）
 - [x] 接入结构化 HelloAgents 多智能体提示词
 - [x] 提供 FastAPI 服务接口与 OpenAPI 文档
-- [ ] 提供 Streamlit Web 界面
+- [x] 提供 Streamlit Web 界面（导师对话、证据档案、投递版本、预览空状态）
 - [ ] 将现有三语渲染器迁移为独立 Python 包，并让 Notebook 调用公开 API
 - [ ] 多模板切换与日文 B5 纸张支持
 - [ ] 上传已有简历（PDF/DOCX）解析导入
