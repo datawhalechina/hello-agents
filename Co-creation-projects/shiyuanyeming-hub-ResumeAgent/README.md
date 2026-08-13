@@ -33,6 +33,8 @@ Agent 访谈（提问→回答→解析入库）
 - [x] 每语 3 套可选样式（共 9 种组合），样式画廊一键对比
 - [x] 三语润色与摘要（数字一致性自动校验，防篡改）
 - [x] JD 解析定制：关键词提取 → 缺口标注 → 定制建议报告
+- [x] 导师式证据访谈核心（六维质量门槛、单点追问、确认后入库）
+- [x] 多版本管理核心（创建、切换、克隆、重命名、删除、过期检测）
 - [x] 模拟 HR / ATS 评审（四项评分 + 问题 + 建议）
 - [x] Markdown / HTML / PDF 导出（A4 版式，系统 CJK 字体）
 
@@ -42,6 +44,7 @@ Agent 访谈（提问→回答→解析入库）
 - LLM：DeepSeek（OpenAI 兼容接口，可换 Qwen / Kimi / Ollama）
 - PDF：Playwright Chromium（备选：本机 Chrome headless / 浏览器打印）
 - 其他：python-dotenv、Jupyter Notebook
+- 导师核心：Pydantic 2、SQLite、pytest
 
 ## 🚀 快速开始
 
@@ -57,6 +60,13 @@ pip install -r requirements.txt
 ```
 
 > 说明：`hello-agents` 自 1.0.0 起不再提供 `[all]` extra，直接安装基础包即可。
+
+开发导师核心时使用可编辑安装：
+
+```bash
+python3 -m pip install -e '.[dev]'
+python3 -m pytest -q
+```
 
 ### 配置 API 密钥
 
@@ -78,6 +88,12 @@ jupyter lab
 2. **选择样式**：运行「样式画廊」单元格后到 `outputs/style_preview/` 对比 9 种组合；在「演示 6」单元格修改 `STYLE_CHOICE` 后重新运行即可换样式导出
 3. **真实使用**：把「交互模式」单元格中的 `RUN_INTERACTIVE` 改为 `True`，即可与 Agent 实时对话完善简历
 4. **自定义数据**：修改 `data/sample_answers.json` 中的示例求职者信息
+
+## 🧭 导师核心架构
+
+新版核心把“问问题”和“判断该问什么”分开：LLM Agent 负责理解用户、抽取候选事实和组织自然语言；确定性程序负责访谈状态、质量评分、跳过规则、事实确认、版本隔离和持久化。默认测试完全离线，不需要 API Key。
+
+每段经历从六个维度评估：情境、个人责任、行动、方法、结果和证据。只有用户确认的事实才进入统一事实库；估算值会保留估算标记，敏感标记与事实可信度分别保存。不同岗位版本只引用统一事实库中的经历，不复制或改写原始事实。
 
 ### 可选样式（每语 3 套）
 
@@ -114,8 +130,11 @@ jupyter lab
 
 ## 🔮 未来计划
 
-- [ ] 粘贴目标 JD，自动标注简历缺失关键词
-- [ ] 多版本管理（同一事实库派生多个投递版本）
+- [x] 粘贴目标 JD，自动标注简历缺失关键词
+- [x] 多版本管理核心（同一事实库派生多个投递版本）
+- [ ] 接入结构化 HelloAgents 多智能体提示词
+- [ ] 提供 FastAPI 服务与 Streamlit Web 界面
+- [ ] 将现有三语渲染器迁移为独立 Python 包，并让 Notebook 调用公开 API
 - [ ] 多模板切换与日文 B5 纸张支持
 - [ ] 上传已有简历（PDF/DOCX）解析导入
 
