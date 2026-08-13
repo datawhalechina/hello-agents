@@ -84,6 +84,7 @@ uvicorn resume_agent.api.main:app --reload
 ## 测试
 
 ```bash
+pip install -e '.[dev]'
 .venv/bin/python -m pytest -q
 node --test tests/web/*.test.mjs
 ```
@@ -114,4 +115,4 @@ resume-agent-eval --repeats 3 --fail-under 0.90
 
 本项目最初作为 [Datawhale HelloAgents](https://github.com/datawhalechina/hello-agents) 教程共创项目开发，现作为可独立运行的作品继续维护。
 
-代码按 [MIT License](LICENSE) 发布。
+本项目沿用教程上游的 [CC BY-NC-SA 4.0](LICENSE) 许可证，并保留原项目署名。

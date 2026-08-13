@@ -84,6 +84,7 @@ Model settings are read only by the server. Starting the application does not au
 ## Tests
 
 ```bash
+pip install -e '.[dev]'
 .venv/bin/python -m pytest -q
 node --test tests/web/*.test.mjs
 ```
@@ -114,4 +115,4 @@ resume-agent-eval --repeats 3 --fail-under 0.90
 
 This project began as a co-created [Datawhale HelloAgents](https://github.com/datawhalechina/hello-agents) tutorial project and is now maintained as a standalone portfolio project.
 
-Released under the [MIT License](LICENSE).
+This project retains the tutorial upstream's [CC BY-NC-SA 4.0](LICENSE) license and attribution.
