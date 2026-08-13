@@ -16,8 +16,14 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+  "httpx>=0.28,<1",
   "httpx2>=2,<3",
   "pytest>=8,<9",
+  "streamlit>=1.50,<2",
+]
+web = [
+  "httpx>=0.28,<1",
+  "streamlit>=1.50,<2",
 ]
 
 [tool.setuptools.packages.find]
