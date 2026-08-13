@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 from uuid import UUID
 
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, Response, status
 from fastapi.responses import JSONResponse
 
 from resume_agent.agents.mentor import DeterministicQuestionWriter
@@ -20,6 +20,9 @@ from resume_agent.api.schemas import (
     ExperienceCreateRequest,
     SessionCreateRequest,
     UnknownRequest,
+    VersionCloneRequest,
+    VersionCreateRequest,
+    VersionRenameRequest,
 )
 from resume_agent.application.fact_base_service import FactBaseService
 from resume_agent.application.interview_service import (
@@ -33,7 +36,12 @@ from resume_agent.application.ports import (
     QuestionWriterAgent,
     RevisionConflict,
 )
-from resume_agent.domain.models import CareerFactBase, InterviewSession
+from resume_agent.application.version_service import VersionService
+from resume_agent.domain.models import (
+    CareerFactBase,
+    InterviewSession,
+    ResumeVersion,
+)
 from resume_agent.infrastructure.sqlite_repositories import (
     SQLiteFactBaseRepository,
     SQLiteSessionRepository,
@@ -50,6 +58,7 @@ class ServiceContainer:
     version_repository: SQLiteVersionRepository
     fact_bases: FactBaseService
     interviews: InterviewService
+    versions: VersionService
 
 
 def create_app(
@@ -61,11 +70,12 @@ def create_app(
     store = SQLiteStore(Path(database_path))
     fact_base_repository = SQLiteFactBaseRepository(store)
     session_repository = SQLiteSessionRepository(store)
+    version_repository = SQLiteVersionRepository(store)
     container = ServiceContainer(
         store=store,
         fact_base_repository=fact_base_repository,
         session_repository=session_repository,
-        version_repository=SQLiteVersionRepository(store),
+        version_repository=version_repository,
         fact_bases=FactBaseService(fact_base_repository),
         interviews=InterviewService(
             fact_base_repository,
@@ -73,6 +83,7 @@ def create_app(
             fact_audit_agent or UnavailableFactAuditAgent(),
             question_writer or DeterministicQuestionWriter(),
         ),
+        versions=VersionService(version_repository),
     )
     app = FastAPI(
         title="ResumeAgent API",
@@ -205,5 +216,92 @@ def create_app(
     )
     def next_question(session_id: UUID) -> Optional[MentorQuestion]:
         return container.interviews.next_question(session_id)
+
+    @app.post(
+        "/fact-bases/{fact_base_id}/versions",
+        response_model=ResumeVersion,
+        status_code=status.HTTP_201_CREATED,
+        tags=["versions"],
+    )
+    def create_version(
+        fact_base_id: UUID,
+        request: VersionCreateRequest,
+    ) -> ResumeVersion:
+        base = container.fact_bases.get(fact_base_id)
+        return container.versions.create(
+            base,
+            request.name,
+            selected_experience_ids=request.selected_experience_ids,
+            target_role=request.target_role,
+            company=request.company,
+            raw_jd=request.raw_jd,
+            locale=request.locale,
+        )
+
+    @app.get(
+        "/fact-bases/{fact_base_id}/versions",
+        response_model=list[ResumeVersion],
+        tags=["versions"],
+    )
+    def list_versions(fact_base_id: UUID) -> list[ResumeVersion]:
+        container.fact_bases.get(fact_base_id)
+        return container.versions.list(fact_base_id)
+
+    @app.post(
+        "/fact-bases/{fact_base_id}/versions/refresh-staleness",
+        response_model=list[ResumeVersion],
+        tags=["versions"],
+    )
+    def refresh_staleness(fact_base_id: UUID) -> list[ResumeVersion]:
+        base = container.fact_bases.get(fact_base_id)
+        return container.versions.refresh_staleness(base)
+
+    @app.get(
+        "/versions/{version_id}",
+        response_model=ResumeVersion,
+        tags=["versions"],
+    )
+    def get_version(version_id: UUID) -> ResumeVersion:
+        return container.versions.get(version_id)
+
+    @app.post(
+        "/versions/{version_id}/clone",
+        response_model=ResumeVersion,
+        status_code=status.HTTP_201_CREATED,
+        tags=["versions"],
+    )
+    def clone_version(
+        version_id: UUID,
+        request: VersionCloneRequest,
+    ) -> ResumeVersion:
+        return container.versions.clone(version_id, request.name)
+
+    @app.patch(
+        "/versions/{version_id}",
+        response_model=ResumeVersion,
+        tags=["versions"],
+    )
+    def rename_version(
+        version_id: UUID,
+        request: VersionRenameRequest,
+    ) -> ResumeVersion:
+        return container.versions.rename(version_id, request.name)
+
+    @app.post(
+        "/versions/{version_id}/activate",
+        response_model=ResumeVersion,
+        tags=["versions"],
+    )
+    def activate_version(version_id: UUID) -> ResumeVersion:
+        return container.versions.activate(version_id)
+
+    @app.delete(
+        "/versions/{version_id}",
+        status_code=status.HTTP_204_NO_CONTENT,
+        tags=["versions"],
+    )
+    def delete_version(version_id: UUID) -> Response:
+        container.versions.delete(version_id)
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
 
     return app

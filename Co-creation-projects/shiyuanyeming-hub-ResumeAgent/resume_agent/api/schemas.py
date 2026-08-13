@@ -1,5 +1,6 @@
 """Transport-only request models for the ResumeAgent API."""
 
+from typing import Dict, List
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -27,3 +28,20 @@ class AnswerRequest(BaseModel):
 
 class UnknownRequest(BaseModel):
     dimension: QualityDimension
+
+
+class VersionCreateRequest(BaseModel):
+    name: str = Field(min_length=1)
+    target_role: str = ""
+    company: str = ""
+    raw_jd: str = ""
+    locale: str = "zh"
+    selected_experience_ids: List[UUID] = Field(default_factory=list)
+
+
+class VersionCloneRequest(BaseModel):
+    name: str = Field(min_length=1)
+
+
+class VersionRenameRequest(BaseModel):
+    name: str = Field(min_length=1)
