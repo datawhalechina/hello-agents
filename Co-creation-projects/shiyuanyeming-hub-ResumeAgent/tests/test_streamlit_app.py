@@ -2,7 +2,13 @@ from uuid import uuid4
 
 from streamlit.testing.v1 import AppTest
 
-from resume_agent.domain.models import CareerFactBase, CareerTarget
+from resume_agent.domain.models import (
+    CandidateProfile,
+    CareerFactBase,
+    CareerTarget,
+    ResumeVersion,
+)
+from resume_agent.rendering.models import RenderedResume, RenderWarning
 
 
 class OnlineDemoClient:
@@ -70,7 +76,7 @@ def test_app_shows_actionable_offline_state():
     assert any("uvicorn" in item.value for item in test.code)
 
 
-def test_preview_workspace_is_honest_empty_state():
+def test_preview_workspace_asks_for_a_version_when_none_exists():
     base = CareerFactBase(target=CareerTarget(role="Data Analyst"))
     test = AppTest.from_function(
         run_app,
@@ -79,7 +85,7 @@ def test_preview_workspace_is_honest_empty_state():
     test.sidebar.radio[0].set_value("预览评审").run()
 
     assert not test.exception
-    assert any("渲染服务尚未接入" in item.value for item in test.info)
+    assert any("投递版本" in item.value for item in test.info)
 
 
 def test_onboarding_creates_fact_base_and_first_experience():
@@ -93,3 +99,98 @@ def test_onboarding_creates_fact_base_and_first_experience():
     assert not test.exception
     assert len(client.bases) == 1
     assert client.bases[0].experiences[0].role == "项目负责人"
+
+
+class PreviewDemoClient(OnlineDemoClient):
+    def __init__(self):
+        base = CareerFactBase(
+            profile=CandidateProfile(
+                name="王明",
+                email="wang@example.com",
+                phone="138-0000-0000",
+            ),
+            target=CareerTarget(role="数据分析师"),
+        )
+        experience = base.add_experience("云数科技", "数据分析师")
+        base.revision = 2
+        super().__init__([base])
+        self.version = ResumeVersion(
+            fact_base_id=base.id,
+            name="目标公司版本",
+            target_role="高级数据分析师",
+            locale="zh",
+            selected_experience_ids=[experience.id],
+            ordering=[experience.id],
+            base_revision=1,
+        )
+        self.saved_styles = []
+
+    def list_versions(self, fact_base_id):
+        return [self.version]
+
+    def preview_version(self, version_id):
+        return RenderedResume(
+            version_id=self.version.id,
+            base_revision=2,
+            version_base_revision=1,
+            locale="zh",
+            style=self.version.styles.get("zh", "藏青现代"),
+            title="简历",
+            filename_stem="目标公司版本_zh",
+            candidate_name="王明",
+            headline="高级数据分析师",
+            contact_line="wang@example.com",
+            summary="以下内容来自一段已确认经历。",
+            experiences=[],
+            skills=[],
+            markdown="# 王明\n",
+            html="<!DOCTYPE html><html><body>王明</body></html>",
+            warnings=[RenderWarning(code="stale_version", message="证据档案已有更新")],
+        )
+
+    def version_export_url(self, version_id, format_name):
+        return f"http://resume.test/versions/{version_id}/export?format={format_name}"
+
+    def set_version_style(self, version_id, style):
+        self.version.styles["zh"] = style
+        self.saved_styles.append(style)
+        return self.version
+
+
+def test_preview_workspace_shows_live_resume_and_downloads():
+    test = AppTest.from_function(run_app, args=(PreviewDemoClient(),)).run()
+    test.sidebar.radio[0].set_value("预览评审").run()
+
+    assert not test.exception
+    assert not any("渲染服务尚未接入" in item.value for item in test.info)
+    assert any("证据档案已有更新" in item.value for item in test.warning)
+    assert any(
+        button.label == "下载 HTML" for button in test.get("download_button")
+    )
+    assert any(
+        button.label == "下载 Markdown" for button in test.get("download_button")
+    )
+
+
+class ProfileDemoClient(OnlineDemoClient):
+    def __init__(self):
+        super().__init__([CareerFactBase(target=CareerTarget(role="产品经理"))])
+        self.updated_profiles = []
+
+    def update_profile(self, fact_base_id, profile):
+        self.bases[0].profile = profile
+        self.bases[0].revision += 1
+        self.updated_profiles.append(profile)
+        return self.bases[0]
+
+
+def test_evidence_workspace_saves_candidate_profile_explicitly():
+    client = ProfileDemoClient()
+    test = AppTest.from_function(run_app, args=(client,)).run()
+    test.sidebar.radio[0].set_value("证据档案").run()
+    test.text_input(key="profile_name").set_value("王明")
+    test.text_input(key="profile_email").set_value("wang@example.com")
+    test.button(key="profile_submit").click().run()
+
+    assert not test.exception
+    assert client.updated_profiles[0].name == "王明"

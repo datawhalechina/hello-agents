@@ -24,9 +24,11 @@ from resume_agent.application.question_planner import (
     QuestionPlan,
     QuestionPlanner,
 )
+from resume_agent.application.render_service import ResumeRenderService
 from resume_agent.application.version_service import VersionService
 from resume_agent.api.app import create_app
 from resume_agent.domain.models import (
+    CandidateProfile,
     CareerFactBase,
     CareerTarget,
     ConfidenceStatus,
@@ -47,11 +49,14 @@ from resume_agent.infrastructure.sqlite_repositories import (
     SQLiteStore,
     SQLiteVersionRepository,
 )
+from resume_agent.rendering.exporters import RenderFormat
+from resume_agent.rendering.renderer import ResumeRenderer
 
 __all__ = [
     "AgentOutputError",
     "CareerFactBase",
     "CareerTarget",
+    "CandidateProfile",
     "ConfidenceStatus",
     "DeterministicQuestionWriter",
     "Experience",
@@ -73,6 +78,9 @@ __all__ = [
     "QuestionPlanner",
     "QUESTION_WRITER_PROMPT",
     "ResumeVersion",
+    "ResumeRenderer",
+    "ResumeRenderService",
+    "RenderFormat",
     "SQLiteFactBaseRepository",
     "SQLiteSessionRepository",
     "SQLiteStore",

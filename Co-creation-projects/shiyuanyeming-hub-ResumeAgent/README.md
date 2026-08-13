@@ -1,6 +1,6 @@
 # ResumeAgent - 中日英三语智能简历生成器
 
-> 基于 HelloAgents 框架的对话式多智能体简历助手：Agent 提问收集 → 结构化事实库 → 三语独立生成 → 导出 PDF
+> 基于 HelloAgents 框架的对话式多智能体简历助手：导师追问 → 证据确认 → 岗位版本 → 三语预览与导出
 
 ## 📝 项目简介
 
@@ -36,13 +36,15 @@ Agent 访谈（提问→回答→解析入库）
 - [x] 导师式证据访谈核心（六维质量门槛、单点追问、确认后入库）
 - [x] 多版本管理核心（创建、切换、克隆、重命名、删除、过期检测）
 - [x] 模拟 HR / ATS 评审（四项评分 + 问题 + 建议）
-- [x] Markdown / HTML / PDF 导出（A4 版式，系统 CJK 字体）
+- [x] Web 实时预览与 Markdown / HTML / DOCX / PDF 导出（A4 版式）
 
 ## 🛠️ 技术栈
 
 - HelloAgents 框架（SimpleAgent + Tool + ToolRegistry）
 - LLM：DeepSeek（OpenAI 兼容接口，可换 Qwen / Kimi / Ollama）
-- PDF：Playwright Chromium（备选：本机 Chrome headless / 浏览器打印）
+- PDF：本机 Chrome / Edge headless
+- DOCX：python-docx
+- Web：FastAPI、HTTPX、Streamlit 1.61+
 - 其他：python-dotenv、Jupyter Notebook
 - 导师核心：Pydantic 2、SQLite、pytest
 
@@ -51,7 +53,7 @@ Agent 访谈（提问→回答→解析入库）
 ### 环境要求
 
 - Python 3.10+
-- 可选：Playwright Chromium（PDF 导出，`playwright install chromium`）
+- Google Chrome 或 Microsoft Edge（仅 PDF 导出需要；其他格式不受影响）
 
 ### 安装依赖
 
@@ -115,14 +117,18 @@ Web 界面默认连接 `http://127.0.0.1:8000`，可以覆盖：
 RESUME_AGENT_API_URL=http://127.0.0.1:9000 streamlit run streamlit_app.py
 ```
 
-Web 首版包含四个工作区：
+Web 产品包含四个工作区：
 
 - **导师对话**：默认入口，一次只追问一个证据缺口，候选事实必须确认后入库
-- **证据档案**：查看六维证据状态和已确认事实，敏感内容默认折叠
+- **证据档案**：维护姓名和联系方式，查看六维证据状态和已确认事实，敏感内容默认折叠
 - **投递版本**：创建、克隆、激活、重命名、删除岗位版本
-- **预览评审**：当前明确显示未接入状态，等待三语渲染与 HR/ATS 服务迁移
+- **预览评审**：选择岗位版本与三语样式，实时预览，并下载 HTML、Markdown、DOCX 或 PDF
 
 当前档案、经历、版本和工作区会同步到浏览器 URL 查询参数；页面刷新后可恢复选择。服务端会按事实库和经历恢复访谈会话，当前问题也是幂等读取，不会因 Streamlit rerun 重复提问。HTTP 写操作不会自动重试。
+
+渲染器只使用版本选中的经历，并排除所有未确认事实。估算事实会保留并显示核对警告；事实库更新后，旧版本仍可预览，但会标记为陈旧。中文、英文、日文模板只本地化标题和版式，不会擅自翻译用户事实。日文 Web 版当前生成 `職務経歴書`；需要生日、教育、照片和资格信息的 JIS `履歴書` 将在资料模型扩展后接入。
+
+PDF 由 API 进程调用本机 Chrome 或 Edge 生成。如果没有可用浏览器，PDF 接口返回 HTTP 503，HTML、Markdown 与 DOCX 仍然可以正常导出。
 
 ## 📖 使用示例
 
@@ -203,8 +209,9 @@ mentor_agents = build_mentor_agents(audit_agent, question_agent)
 - [x] 多版本管理核心（同一事实库派生多个投递版本）
 - [x] 接入结构化 HelloAgents 多智能体提示词
 - [x] 提供 FastAPI 服务接口与 OpenAPI 文档
-- [x] 提供 Streamlit Web 界面（导师对话、证据档案、投递版本、预览空状态）
-- [ ] 将现有三语渲染器迁移为独立 Python 包，并让 Notebook 调用公开 API
+- [x] 提供 Streamlit Web 界面（导师对话、证据档案、投递版本、实时预览）
+- [x] 将三语证据渲染器迁移为独立 Python 包并提供预览/导出 API
+- [ ] 让 Notebook 改为调用新的公开渲染 API
 - [ ] 多模板切换与日文 B5 纸张支持
 - [ ] 上传已有简历（PDF/DOCX）解析导入
 

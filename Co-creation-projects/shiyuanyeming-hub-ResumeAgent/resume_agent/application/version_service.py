@@ -10,6 +10,7 @@ from resume_agent.domain.models import (
     VersionStatus,
     utc_now,
 )
+from resume_agent.rendering.styles import STYLE_CATALOG
 
 
 class VersionService:
@@ -88,6 +89,10 @@ class VersionService:
         if not normalized:
             raise ValueError("style must not be empty")
         version = self.repository.get(version_id)
+        if normalized not in STYLE_CATALOG.get(version.locale, {}):
+            raise ValueError(
+                f"unsupported style for {version.locale}: {normalized}"
+            )
         version.styles = {**version.styles, version.locale: normalized}
         return self.save(version)
 

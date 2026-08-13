@@ -12,6 +12,7 @@ from resume_agent.application.interview_service import (
     UnknownOutcome,
 )
 from resume_agent.domain.models import (
+    CandidateProfile,
     CareerFactBase,
     CareerTarget,
     InterviewSession,
@@ -19,6 +20,8 @@ from resume_agent.domain.models import (
     ResumeVersion,
 )
 from resume_agent.domain.quality import QualityReport
+from resume_agent.rendering.exporters import RenderFormat
+from resume_agent.rendering.models import RenderedResume
 
 
 class ResumeApiError(RuntimeError):
@@ -63,9 +66,10 @@ class HttpResumeAgentClient:
         timeout_seconds: float = 30.0,
         client: Optional[httpx.Client] = None,
     ) -> None:
+        self.base_url = base_url.rstrip("/")
         self._owns_client = client is None
         self.client = client or httpx.Client(
-            base_url=base_url.rstrip("/"),
+            base_url=self.base_url,
             timeout=timeout_seconds,
         )
 
@@ -113,6 +117,18 @@ class HttpResumeAgentClient:
             json={"organization": organization, "role": role},
         )
 
+    def update_profile(
+        self,
+        fact_base_id: Identifier,
+        profile: CandidateProfile,
+    ) -> CareerFactBase:
+        return self._model(
+            CareerFactBase,
+            "PATCH",
+            f"/fact-bases/{fact_base_id}/profile",
+            json=profile.model_dump(mode="json"),
+        )
+
     def get_experience_quality(self, fact_base_id: Identifier, experience_id: Identifier) -> QualityReport:
         return self._model(QualityReport, "GET", f"/fact-bases/{fact_base_id}/experiences/{experience_id}/quality")
 
@@ -157,6 +173,35 @@ class HttpResumeAgentClient:
 
     def rename_version(self, version_id: Identifier, name: str) -> ResumeVersion:
         return self._model(ResumeVersion, "PATCH", f"/versions/{version_id}", json={"name": name})
+
+    def set_version_style(
+        self,
+        version_id: Identifier,
+        style: str,
+    ) -> ResumeVersion:
+        return self._model(
+            ResumeVersion,
+            "PUT",
+            f"/versions/{version_id}/style",
+            json={"style": style},
+        )
+
+    def preview_version(self, version_id: Identifier) -> RenderedResume:
+        return self._model(
+            RenderedResume,
+            "GET",
+            f"/versions/{version_id}/preview",
+        )
+
+    def version_export_url(
+        self,
+        version_id: Identifier,
+        format_name: str,
+    ) -> str:
+        format = RenderFormat(format_name)
+        return (
+            f"{self.base_url}/versions/{version_id}/export?format={format.value}"
+        )
 
     def activate_version(self, version_id: Identifier) -> ResumeVersion:
         return self._model(ResumeVersion, "POST", f"/versions/{version_id}/activate")

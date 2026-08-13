@@ -52,3 +52,15 @@ def test_version_style_is_explicitly_persisted(tmp_path):
     assert response.status_code == 200
     assert response.json()["styles"]["zh"] == "经典墨色"
     assert fetched.json()["styles"]["zh"] == "经典墨色"
+
+
+def test_version_rejects_style_from_another_locale(tmp_path):
+    with TestClient(create_app(tmp_path / "resume.db")) as client:
+        version = create_version(client, locale="zh")
+        response = client.put(
+            f"/versions/{version['id']}/style",
+            json={"style": "现代蓝"},
+        )
+
+    assert response.status_code == 422
+    assert "unsupported style" in response.json()["detail"]

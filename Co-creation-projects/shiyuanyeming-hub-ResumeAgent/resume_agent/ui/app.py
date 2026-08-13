@@ -8,7 +8,13 @@ from uuid import UUID
 
 import streamlit as st
 
-from resume_agent.domain.models import CareerFactBase, CareerTarget, QualityDimension
+from resume_agent.domain.models import (
+    CandidateProfile,
+    CareerFactBase,
+    CareerTarget,
+    QualityDimension,
+)
+from resume_agent.rendering.styles import STYLE_CATALOG
 from resume_agent.ui.client import (
     AgentUnavailable,
     ApiConflict,
@@ -290,6 +296,54 @@ def render_mentor(client, base: CareerFactBase, state: WorkspaceState) -> None:
 
 def render_evidence(client, base: CareerFactBase, state: WorkspaceState) -> None:
     st.subheader("证据档案")
+    with st.expander("候选人基本信息", expanded=not bool(base.profile.name)):
+        st.caption("姓名和联系方式属于统一事实档案，所有投递版本共用。")
+        with st.form("candidate_profile"):
+            name = st.text_input(
+                "姓名",
+                value=base.profile.name,
+                key="profile_name",
+            )
+            email = st.text_input(
+                "邮箱",
+                value=base.profile.email,
+                key="profile_email",
+            )
+            phone = st.text_input(
+                "电话",
+                value=base.profile.phone,
+                key="profile_phone",
+            )
+            location = st.text_input(
+                "所在地",
+                value=base.profile.location,
+                key="profile_location",
+            )
+            links = st.text_area(
+                "个人链接（每行一个）",
+                value="\n".join(base.profile.links),
+                key="profile_links",
+            )
+            submitted = st.form_submit_button(
+                "保存基本信息",
+                type="primary",
+                key="profile_submit",
+            )
+        if submitted:
+            try:
+                client.update_profile(
+                    base.id,
+                    CandidateProfile(
+                        name=name.strip(),
+                        email=email.strip(),
+                        phone=phone.strip(),
+                        location=location.strip(),
+                        links=[item.strip() for item in links.splitlines() if item.strip()],
+                    ),
+                )
+                st.rerun()
+            except Exception as error:
+                show_error(error)
     fact_count = sum(
         len(values)
         for experience in base.experiences
@@ -411,28 +465,83 @@ def render_versions(client, base: CareerFactBase, state: WorkspaceState) -> None
 def render_preview(client, base: CareerFactBase, state: WorkspaceState) -> None:
     st.subheader("预览评审")
     versions = client.list_versions(base.id)
-    if versions:
-        by_id = {version.id: version for version in versions}
-        ids = list(by_id)
-        if state.selected_version_id not in by_id:
-            state.selected_version_id = ids[0]
-        state.selected_version_id = st.selectbox(
-            "投递版本",
-            ids,
-            index=ids.index(state.selected_version_id),
-            format_func=lambda item: by_id[item].name,
-            key="preview_version",
+    if not versions:
+        st.info("还没有投递版本。请先到“投递版本”工作区创建一个版本。")
+        return
+
+    by_id = {version.id: version for version in versions}
+    ids = list(by_id)
+    if state.selected_version_id not in by_id:
+        state.selected_version_id = ids[0]
+    state.selected_version_id = st.selectbox(
+        "投递版本",
+        ids,
+        index=ids.index(state.selected_version_id),
+        format_func=lambda item: by_id[item].name,
+        key="preview_version",
+    )
+    version = by_id[state.selected_version_id]
+    st.caption(f"{version.target_role} · {version.company or '未填写公司'} · {version.locale}")
+
+    style_names = list(STYLE_CATALOG[version.locale])
+    current_style = version.styles.get(version.locale, style_names[0])
+    style = st.selectbox(
+        "版式风格",
+        style_names,
+        index=style_names.index(current_style),
+        key=f"preview_style_{version.id}",
+    )
+    if st.button("保存样式", key=f"save_style_{version.id}"):
+        try:
+            client.set_version_style(version.id, style)
+            st.rerun()
+        except Exception as error:
+            show_error(error)
+
+    try:
+        preview = client.preview_version(version.id)
+    except Exception as error:
+        show_error(error)
+        return
+
+    for warning in preview.warnings:
+        st.warning(warning.message)
+    st.caption(
+        f"证据版本 {preview.version_base_revision} · 当前事实库 {preview.base_revision} · "
+        f"样式 {preview.style}"
+    )
+    st.iframe(preview.html, height=960)
+
+    html_col, markdown_col, docx_col, pdf_col = st.columns(4)
+    with html_col:
+        st.download_button(
+            "下载 HTML",
+            data=preview.html.encode("utf-8"),
+            file_name=f"{preview.filename_stem}.html",
+            mime="text/html",
+            key=f"download_html_{version.id}",
         )
-        version = by_id[state.selected_version_id]
-        st.caption(f"{version.target_role} · {version.company} · {version.locale}")
-    st.info("渲染服务尚未接入。下一阶段会迁移三语模板、HR/ATS 评审和 PDF 导出。")
-    left, right = st.columns(2)
-    with left:
-        st.markdown('<div class="muted-card"><b>简历预览</b><br><br>等待生成服务接入</div>', unsafe_allow_html=True)
-    with right:
-        st.markdown('<div class="muted-card"><b>HR / ATS 评审</b><br><br>等待评审服务接入</div>', unsafe_allow_html=True)
-    st.button("生成三语简历", disabled=True)
-    st.button("导出 PDF", disabled=True)
+    with markdown_col:
+        st.download_button(
+            "下载 Markdown",
+            data=preview.markdown.encode("utf-8"),
+            file_name=f"{preview.filename_stem}.md",
+            mime="text/markdown",
+            key=f"download_md_{version.id}",
+        )
+    with docx_col:
+        st.link_button(
+            "下载 DOCX",
+            client.version_export_url(version.id, "docx"),
+            use_container_width=True,
+        )
+    with pdf_col:
+        st.link_button(
+            "下载 PDF",
+            client.version_export_url(version.id, "pdf"),
+            use_container_width=True,
+        )
+    st.caption("PDF 导出需要 API 所在电脑安装 Google Chrome 或 Microsoft Edge。")
 
 
 def render_app(client) -> None:
