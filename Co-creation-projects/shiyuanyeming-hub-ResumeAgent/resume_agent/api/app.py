@@ -7,7 +7,8 @@ from urllib.parse import quote
 from uuid import UUID
 
 from fastapi import FastAPI, Request, Response, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from resume_agent.agents.mentor import DeterministicQuestionWriter
 from resume_agent.agents.runtime import AgentCapabilityStatus
@@ -133,6 +134,16 @@ def create_app(
         description="Evidence-driven multi-agent resume mentoring service",
     )
     app.state.container = container
+    web_directory = Path(__file__).resolve().parents[1] / "web"
+    app.mount(
+        "/assets",
+        StaticFiles(directory=web_directory),
+        name="web-assets",
+    )
+
+    @app.get("/", include_in_schema=False)
+    def web_workbench() -> FileResponse:
+        return FileResponse(web_directory / "index.html", media_type="text/html")
 
     @app.exception_handler(KeyError)
     def handle_not_found(request: Request, error: KeyError) -> JSONResponse:

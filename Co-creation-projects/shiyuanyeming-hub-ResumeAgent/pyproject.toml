@@ -41,6 +41,7 @@ include = ["resume_agent*"]
 
 [tool.setuptools.package-data]
 "resume_agent.evaluation" = ["datasets/*.jsonl"]
+"resume_agent.web" = ["*.html", "*.css", "*.js", "*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

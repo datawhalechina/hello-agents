@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>ResumeAgent · 中日英简历工作台</title>
+    <link rel="stylesheet" href="/assets/styles.css">
+  </head>
+  <body>
+    <header id="app-header" class="app-header">
+      <a class="brand" href="/" aria-label="ResumeAgent 首页">
+        <span class="brand-mark" aria-hidden="true">⚡</span>
+        <strong>ResumeAgent</strong>
+      </a>
+      <span class="product-note">中日英简历工作台</span>
+      <span class="header-spacer"></span>
+      <span id="service-status" class="service-status" role="status">
+        <span class="status-dot"></span>
+        <span>正在连接</span>
+      </span>
+      <button id="language-button" type="button">中文简历</button>
+      <button id="sample-button" type="button">示例档案</button>
+      <button id="settings-button" type="button">设置</button>
+    </header>
+
+    <main class="workbench">
+      <section class="panel task-panel" aria-label="简历任务面板">
+        <nav id="primary-tabs" class="primary-tabs" aria-label="简历工作区">
+          <button data-tab="chat" aria-selected="true" type="button">访谈</button>
+          <button data-tab="facts" aria-selected="false" type="button">事实库</button>
+          <button data-tab="jd" aria-selected="false" type="button">JD 定制</button>
+          <button data-tab="tools" aria-selected="false" type="button">工具</button>
+        </nav>
+
+        <div class="panel-content">
+          <section id="chat-panel" class="tab-panel" data-panel="chat">
+            <div class="panel-actions">
+              <button id="start-interview" class="primary" type="button">开始访谈</button>
+            </div>
+            <div id="chat-messages" class="chat-messages" aria-live="polite">
+              <div class="message system-message">
+                先选择简历语言并建立档案。导师会一次问一个问题，你只需要按真实情况回答。
+              </div>
+            </div>
+          </section>
+
+          <section id="facts-panel" class="tab-panel" data-panel="facts" hidden>
+            <div class="section-heading">
+              <h2>事实库</h2>
+              <p>只有经过你确认的内容才会进入简历。</p>
+            </div>
+            <div id="facts-content" class="empty-state">建立档案后可在这里查看经历证据。</div>
+          </section>
+
+          <section id="jd-panel" class="tab-panel" data-panel="jd" hidden>
+            <div class="section-heading">
+              <h2>JD 定制</h2>
+              <p>针对具体岗位选择经历和重点，不改写原始事实。</p>
+            </div>
+            <div id="jd-content" class="empty-state">建立档案后可以创建岗位版本。</div>
+          </section>
+
+          <section id="tools-panel" class="tab-panel" data-panel="tools" hidden>
+            <div class="section-heading">
+              <h2>工具</h2>
+              <p>低频设置、和暦换算与导出入口。</p>
+            </div>
+            <div id="tools-content" class="empty-state">工具会在选定档案后显示。</div>
+          </section>
+        </div>
+
+        <form id="chat-composer" class="chat-composer">
+          <label class="sr-only" for="chat-input">回答导师</label>
+          <textarea
+            id="chat-input"
+            rows="2"
+            placeholder="回答导师的问题，或直接补充一段真实经历"
+          ></textarea>
+          <button class="primary send-button" type="submit">发送</button>
+        </form>
+      </section>
+
+      <section class="panel document-panel" aria-label="简历文档">
+        <div id="document-toolbar" class="document-toolbar">
+          <div id="document-switcher" class="document-switcher" aria-label="文档类型"></div>
+          <label class="sr-only" for="style-select">版式风格</label>
+          <select id="style-select" aria-label="版式风格" disabled>
+            <option>藏青现代</option>
+          </select>
+          <span class="toolbar-spacer"></span>
+          <button id="edit-button" type="button" disabled>编辑</button>
+          <a id="export-pdf" class="button-link primary disabled" aria-disabled="true">PDF</a>
+          <a id="export-html" class="button-link disabled" aria-disabled="true">HTML</a>
+          <a id="export-markdown" class="button-link disabled" aria-disabled="true">Markdown</a>
+          <a id="export-docx" class="button-link disabled" aria-disabled="true">DOCX</a>
+        </div>
+        <div class="preview-surface">
+          <div id="preview-empty" class="preview-empty">
+            <div class="paper-placeholder">
+              <strong>简历预览</strong>
+              <span>完成建档并确认经历事实后，简历会显示在这里。</span>
+            </div>
+          </div>
+          <iframe id="preview-frame" title="简历预览" sandbox="" hidden></iframe>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="settings-dialog">
+      <form method="dialog">
+        <h2>运行设置</h2>
+        <p>模型连接由服务端环境变量管理。浏览器不会保存 API Key。</p>
+        <div class="dialog-actions"><button value="close">关闭</button></div>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="/assets/app.js"></script>
+  </body>
+</html>
