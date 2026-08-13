@@ -8,6 +8,7 @@ import {
 import {
   baseSelection,
   createGenerationGate,
+  createSerialExecutor,
   createTransitionGate,
   storeBaseSelection,
 } from "/assets/workbench-state.js";
@@ -69,6 +70,7 @@ const versionGate = createGenerationGate();
 const previewGate = createGenerationGate();
 const languageGate = createGenerationGate();
 const sessionTransitionGate = createTransitionGate();
+const activateVersionSerially = createSerialExecutor();
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitizeUiState(state)));
@@ -859,7 +861,11 @@ async function chooseVersion(versionId, { languageGeneration = null } = {}) {
   renderJdTab();
   renderDocumentToolbar();
   try {
-    await api.activateVersion(versionId);
+    await activateVersionSerially(() => api.activateVersion(versionId));
+    if (!baseActivationGate.isCurrent(baseGeneration)
+      || !versionGate.isCurrent(generation)
+      || !intentIsCurrent()
+      || currentBase?.id !== baseId) return false;
     const versionState = await loadVersions(baseId, versionId);
     if (!baseActivationGate.isCurrent(baseGeneration)
       || !versionGate.isCurrent(generation)

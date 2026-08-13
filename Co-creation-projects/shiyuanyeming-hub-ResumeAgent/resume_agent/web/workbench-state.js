@@ -47,6 +47,18 @@ export function createTransitionGate() {
   };
 }
 
+export function createSerialExecutor() {
+  let tail = Promise.resolve();
+  return function run(task) {
+    const result = tail.then(task);
+    tail = result.then(
+      () => undefined,
+      () => undefined,
+    );
+    return result;
+  };
+}
+
 export function baseSelection(state, baseId) {
   const saved = state.baseSelections?.[baseId];
   if (saved) return { ...saved };

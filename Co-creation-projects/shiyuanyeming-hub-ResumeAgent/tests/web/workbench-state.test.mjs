@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   baseSelection,
   createGenerationGate,
+  createSerialExecutor,
   createTransitionGate,
   storeBaseSelection,
 } from "../../resume_agent/web/workbench-state.js";
@@ -68,6 +69,52 @@ test("language generation makes the last rapid intent win", () => {
   if (languageGate.isCurrent(japaneseIntent)) committedLocale = "ja";
 
   assert.equal(committedLocale, "en");
+});
+
+
+test("serial activation leaves the latest existing language active when the older response is delayed", async () => {
+  const runSerially = createSerialExecutor();
+  const calls = [];
+  let activeLocale = "zh";
+  let releaseJapanese;
+  const japaneseResponse = new Promise((resolve) => {
+    releaseJapanese = resolve;
+  });
+  const activate = async (locale) => {
+    calls.push(locale);
+    if (locale === "ja") await japaneseResponse;
+    activeLocale = locale;
+  };
+
+  const japanese = runSerially(() => activate("ja"));
+  const english = runSerially(() => activate("en"));
+  await Promise.resolve();
+
+  assert.deepEqual(calls, ["ja"]);
+  assert.equal(activeLocale, "zh");
+
+  releaseJapanese();
+  await Promise.all([japanese, english]);
+
+  assert.deepEqual(calls, ["ja", "en"]);
+  assert.equal(activeLocale, "en");
+});
+
+
+test("serial activation continues after an earlier mutation fails", async () => {
+  const runSerially = createSerialExecutor();
+  let activeLocale = "zh";
+
+  const failed = runSerially(async () => {
+    throw new Error("ja activation failed");
+  });
+  const english = runSerially(async () => {
+    activeLocale = "en";
+  });
+
+  await assert.rejects(failed, /ja activation failed/);
+  await english;
+  assert.equal(activeLocale, "en");
 });
 
 
