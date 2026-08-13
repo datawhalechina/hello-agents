@@ -21,7 +21,7 @@ An optional semantic judge can be added later, but it cannot override a failed h
 
 ## Dataset
 
-`evaluation/datasets/mentor_v1.jsonl` contains versioned synthetic cases with stable IDs. No real candidate data is included.
+`resume_agent/evaluation/datasets/mentor_v1.jsonl` is packaged with the CLI and contains versioned synthetic cases with stable IDs. No real candidate data is included.
 
 Question cases contain target, experience state, requested dimension/escalation, and lexical expectations such as `must_include_any`, `must_not_include`, and `expected_question_marks`.
 

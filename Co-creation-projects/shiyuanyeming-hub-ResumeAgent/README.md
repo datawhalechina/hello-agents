@@ -132,6 +132,26 @@ uvicorn resume_agent.api.main:app --reload
 
 运行状态可以通过 `GET /capabilities` 查看。该接口只返回框架、模型名和功能开关，不返回 API Key 或完整供应商地址。
 
+### 评测导师 Agent
+
+项目内置一套版本化、完全由合成数据组成的导师质量基准。它重点检查的不是回答长度，而是这个 Agent 是否真的像一位可靠导师：一次只问一个问题、追问当前证据缺口、不把团队成绩冒认为个人贡献、不捏造数字、保留估算与敏感标记，并让抽取事实可追溯到用户原话。
+
+配置好上述模型环境变量后运行：
+
+```bash
+python -m resume_agent.evaluation.cli \
+  --repeats 3 \
+  --fail-under 0.90 \
+  --output-dir evaluation/reports
+
+# 可编辑安装后也可以使用
+resume-agent-eval --repeats 3 --fail-under 0.90
+```
+
+也可以通过 `--dataset path/to/cases.jsonl` 比较新的提示词或模型。核心指标包括单问题契约通过率、事实维度准确率、证据保留率、无幻觉率、置信度/敏感信息标签准确率、运行成功率和严格案例通过率。`strict_pass_rate` 低于 `--fail-under` 时命令退出码为 1；配置或数据输入错误时为 2，适合接入 CI。
+
+每次运行会生成同名的 JSON 和 Markdown 报告。报告只记录模型名、框架、案例 ID、检查项和安全的异常类别，不保存测试回答、完整提示词、模型原始输出、API Key 或供应商地址。模型运行有随机性时使用 `--repeats`；同一个案例必须在每次重复中都满足确定性安全检查，才适合作为发布依据。
+
 在第二个终端启动 Web 界面：
 
 ```bash

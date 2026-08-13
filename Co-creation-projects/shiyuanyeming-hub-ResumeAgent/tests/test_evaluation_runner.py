@@ -1,5 +1,3 @@
-from uuid import uuid4
-
 import pytest
 
 from resume_agent.domain.models import (

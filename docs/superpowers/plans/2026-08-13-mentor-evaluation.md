@@ -25,7 +25,7 @@
 - Create: `resume_agent/evaluation/models.py`
 - Create: `resume_agent/evaluation/dataset.py`
 - Create: `resume_agent/evaluation/scoring.py`
-- Create: `evaluation/datasets/mentor_v1.jsonl`
+- Create: `resume_agent/evaluation/datasets/mentor_v1.jsonl`
 - Test: `tests/test_evaluation_dataset.py`
 - Test: `tests/test_evaluation_scoring.py`
 
@@ -34,11 +34,11 @@
 - Produces: `load_dataset(path) -> MentorDataset` with unique IDs.
 - Produces: `score_question(case, question) -> CaseScore` and `score_proposal(case, proposal) -> CaseScore`.
 
-- [ ] Write failing schema/load/scoring tests for valid cases, duplicates, malformed JSONL, multiple questions, forbidden wording, wrong dimension, required/forbidden fact fragments, estimates, sensitive labels, and source linkage.
-- [ ] Verify RED because `resume_agent.evaluation` does not exist.
-- [ ] Implement focused Pydantic models, line-numbered dataset errors, and pure named checks.
-- [ ] Add at least 18 synthetic cases covering all six dimensions and adversarial situations.
-- [ ] Run targeted/full tests and commit `feat: add mentor evaluation dataset and scorers`.
+- [x] Write failing schema/load/scoring tests for valid cases, duplicates, malformed JSONL, multiple questions, forbidden wording, wrong dimension, required/forbidden fact fragments, estimates, sensitive labels, and source linkage.
+- [x] Verify RED because `resume_agent.evaluation` does not exist.
+- [x] Implement focused Pydantic models, line-numbered dataset errors, and pure named checks.
+- [x] Add at least 18 synthetic cases covering all six dimensions and adversarial situations.
+- [x] Run targeted/full tests and commit `feat: add mentor evaluation dataset and scorers`.
 
 ### Task 2: Benchmark runner and secret-safe reports
 
@@ -52,10 +52,10 @@
 - Produces: `MentorBenchmark(question_writer, fact_auditor).run(dataset, repeats, metadata) -> BenchmarkReport`.
 - Produces: `write_report(report, output_dir) -> ReportFiles`.
 
-- [ ] Write failing tests for mixed cases, repeat accounting, isolated runtime errors, exact aggregate metrics, safe metadata, JSON/Markdown output, and absence of raw case content.
-- [ ] Verify RED for missing runner/reporting modules.
-- [ ] Implement case-state construction, port invocation, aggregation, error categories, and atomic report writes.
-- [ ] Run targeted/full tests and commit `feat: run repeatable mentor benchmarks`.
+- [x] Write failing tests for mixed cases, repeat accounting, isolated runtime errors, exact aggregate metrics, safe metadata, JSON/Markdown output, and absence of raw case content.
+- [x] Verify RED for missing runner/reporting modules.
+- [x] Implement case-state construction, port invocation, aggregation, error categories, and atomic report writes.
+- [x] Run targeted/full tests and commit `feat: run repeatable mentor benchmarks`.
 
 ### Task 3: Configured CLI, documentation, and real smoke
 
@@ -69,9 +69,9 @@
 - Produces: console script `resume-agent-eval` and module entry `python -m resume_agent.evaluation.cli`.
 - Consumes: `build_mentor_runtime`, bundled dataset, benchmark runner, and reporting.
 
-- [ ] Write failing CLI tests for ready runtime, degraded runtime, invalid repeats/threshold, threshold exit code, and output file paths.
-- [ ] Verify RED for missing CLI.
-- [ ] Implement argparse without hidden network calls, load `.env` with exported-environment precedence, and return exit codes 0 (pass), 1 (quality threshold), 2 (configuration/input error).
-- [ ] Document benchmark purpose, commands, metrics, privacy behavior, and model-comparison workflow.
-- [ ] Run full tests, compileall, `git diff --check`, and a real local fake OpenAI-compatible HelloAgents smoke benchmark.
-- [ ] Commit `feat: add mentor quality benchmark CLI`.
+- [x] Write failing CLI tests for ready runtime, degraded runtime, invalid repeats/threshold, threshold exit code, and output file paths.
+- [x] Verify RED for missing CLI.
+- [x] Implement argparse without hidden network calls, load `.env` with exported-environment precedence, and return exit codes 0 (pass), 1 (quality threshold), 2 (configuration/input error).
+- [x] Document benchmark purpose, commands, metrics, privacy behavior, and model-comparison workflow.
+- [x] Run full tests, compileall, `git diff --check`, and a real local fake OpenAI-compatible HelloAgents smoke benchmark.
+- [x] Commit `feat: add mentor quality benchmark CLI`.

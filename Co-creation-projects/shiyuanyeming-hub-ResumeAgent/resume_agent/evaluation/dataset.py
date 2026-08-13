@@ -10,9 +10,7 @@ from pydantic import TypeAdapter, ValidationError
 from resume_agent.evaluation.models import EvaluationCase, MentorDataset
 
 
-DEFAULT_DATASET_PATH = (
-    Path(__file__).resolve().parents[2] / "evaluation" / "datasets" / "mentor_v1.jsonl"
-)
+DEFAULT_DATASET_PATH = Path(__file__).resolve().parent / "datasets" / "mentor_v1.jsonl"
 _CASE_ADAPTER = TypeAdapter(EvaluationCase)
 
 
