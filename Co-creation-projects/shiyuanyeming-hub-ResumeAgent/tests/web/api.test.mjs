@@ -110,3 +110,62 @@ test("sanitizeUiState keeps selection fields and drops credentials", () => {
     },
   );
 });
+
+
+test("interview methods use exact session contracts", async () => {
+  const calls = [];
+  const api = createApi(async (url, init = {}) => {
+    calls.push([url, init]);
+    return new Response(JSON.stringify({ id: "result" }), {
+      status: init.method === "POST" && url === "/sessions" ? 201 : 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  });
+
+  await api.listSessions("base-1", "experience-1");
+  await api.createSession("base-1", "experience-1");
+  await api.getSession("session-1");
+  await api.currentQuestion("session-1");
+  await api.answer("session-1", "我搭建了看板");
+  await api.confirmProposal("session-1", "proposal-1");
+  await api.rejectProposal("session-1", "proposal-2");
+  await api.recordUnknown("session-1", "result");
+
+  assert.equal(calls[0][0], "/fact-bases/base-1/sessions?experience_id=experience-1");
+  assert.deepEqual(JSON.parse(calls[1][1].body), {
+    fact_base_id: "base-1",
+    active_experience_id: "experience-1",
+  });
+  assert.equal(calls[2][0], "/sessions/session-1");
+  assert.equal(calls[3][0], "/sessions/session-1/current-question");
+  assert.deepEqual(JSON.parse(calls[4][1].body), { message: "我搭建了看板" });
+  assert.equal(calls[5][0], "/sessions/session-1/proposals/proposal-1/confirm");
+  assert.equal(calls[6][0], "/sessions/session-1/proposals/proposal-2/reject");
+  assert.deepEqual(JSON.parse(calls[7][1].body), { dimension: "result" });
+});
+
+
+test("fact methods update profile and request quality", async () => {
+  const calls = [];
+  const api = createApi(async (url, init = {}) => {
+    calls.push([url, init]);
+    return new Response(JSON.stringify({}), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  });
+  const profile = {
+    name: "王明",
+    email: "wang@example.com",
+    phone: "13800000000",
+    location: "东京",
+    links: ["https://example.com"],
+  };
+
+  await api.updateProfile("base-1", profile);
+  await api.experienceQuality("base-1", "experience-1");
+
+  assert.equal(calls[0][1].method, "PATCH");
+  assert.deepEqual(JSON.parse(calls[0][1].body), profile);
+  assert.equal(calls[1][0], "/fact-bases/base-1/experiences/experience-1/quality");
+});

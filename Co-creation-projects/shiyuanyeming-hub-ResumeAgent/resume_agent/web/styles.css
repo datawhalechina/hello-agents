@@ -120,6 +120,17 @@ button:disabled, .button-link.disabled { cursor: not-allowed; opacity: 0.45; }
 .chat-messages { display: flex; flex-direction: column; gap: 10px; }
 .message { border-radius: 10px; line-height: 1.65; padding: 11px 13px; }
 .system-message { background: #f8fafc; border: 1px dashed #d8e0ea; color: var(--muted); }
+.assistant-message { align-self: flex-start; background: var(--accent-soft); border: 1px solid #d6e2ef; max-width: 92%; }
+.user-message { align-self: flex-end; background: #edf6ef; border: 1px solid #d1e5d6; max-width: 92%; }
+.text-button { align-self: flex-start; background: transparent; color: var(--muted); min-height: 30px; padding: 4px 8px; }
+.compact-field { color: var(--muted); display: grid; font-size: 12px; gap: 5px; margin-bottom: 10px; }
+.compact-field select { border: 1px solid var(--line); border-radius: 8px; min-height: 36px; padding: 6px 9px; }
+.proposal-card { border: 1px solid #c9d8e8; border-radius: 10px; display: grid; gap: 8px; padding: 12px; }
+.proposal-dimension { color: var(--muted); font-size: 12px; }
+.proposal-values { margin: 0; padding-left: 20px; }
+.proposal-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.badge { background: var(--accent-soft); border-radius: 10px; color: var(--accent); display: inline-block; font-size: 11px; margin-left: 6px; padding: 1px 7px; }
+.badge.warning { background: #fff5dd; color: var(--warning); }
 
 .chat-composer {
   align-items: stretch;
@@ -158,6 +169,17 @@ button:disabled, .button-link.disabled { cursor: not-allowed; opacity: 0.45; }
   padding: 7px 10px;
 }
 .onboarding-form > button { justify-self: start; margin-top: 4px; }
+.facts-content { display: grid; gap: 12px; }
+.profile-details, .experience-card { border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+.profile-details > summary, .dimension-group > summary { cursor: pointer; font-weight: 600; }
+.profile-form { display: grid; gap: 9px; margin-top: 12px; }
+.profile-form > button { justify-self: start; }
+.experience-card h3 { color: var(--accent); font-size: 15px; margin: 0 0 4px; }
+.quality-caption, .empty-copy { color: var(--muted); font-size: 12px; }
+.dimension-list { display: grid; gap: 6px; margin: 10px 0; }
+.dimension-group { background: #f8fafc; border-radius: 8px; padding: 8px 10px; }
+.dimension-group ul { margin: 8px 0 2px; padding-left: 18px; }
+.fact-value { line-height: 1.5; margin: 5px 0; }
 
 .document-toolbar {
   align-items: center;

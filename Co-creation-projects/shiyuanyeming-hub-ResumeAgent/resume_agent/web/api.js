@@ -75,6 +75,7 @@ export function createApi(fetchImpl = globalThis.fetch) {
     health: () => request("/health"),
     capabilities: () => request("/capabilities"),
     listFactBases: () => request("/fact-bases"),
+    getFactBase: (factBaseId) => request(`/fact-bases/${factBaseId}`),
     createFactBase: (target) => request("/fact-bases", {
       method: "POST",
       body: JSON.stringify({ target }),
@@ -82,6 +83,44 @@ export function createApi(fetchImpl = globalThis.fetch) {
     addExperience: (factBaseId, payload) => request(
       `/fact-bases/${factBaseId}/experiences`,
       { method: "POST", body: JSON.stringify(payload) },
+    ),
+    updateProfile: (factBaseId, profile) => request(
+      `/fact-bases/${factBaseId}/profile`,
+      { method: "PATCH", body: JSON.stringify(profile) },
+    ),
+    experienceQuality: (factBaseId, experienceId) => request(
+      `/fact-bases/${factBaseId}/experiences/${experienceId}/quality`,
+    ),
+    listSessions: (factBaseId, experienceId = "") => {
+      const query = experienceId
+        ? `?experience_id=${encodeURIComponent(experienceId)}`
+        : "";
+      return request(`/fact-bases/${factBaseId}/sessions${query}`);
+    },
+    createSession: (factBaseId, experienceId) => request("/sessions", {
+      method: "POST",
+      body: JSON.stringify({
+        fact_base_id: factBaseId,
+        active_experience_id: experienceId,
+      }),
+    }),
+    getSession: (sessionId) => request(`/sessions/${sessionId}`),
+    currentQuestion: (sessionId) => request(`/sessions/${sessionId}/current-question`),
+    answer: (sessionId, message) => request(`/sessions/${sessionId}/answers`, {
+      method: "POST",
+      body: JSON.stringify({ message }),
+    }),
+    confirmProposal: (sessionId, proposalId) => request(
+      `/sessions/${sessionId}/proposals/${proposalId}/confirm`,
+      { method: "POST" },
+    ),
+    rejectProposal: (sessionId, proposalId) => request(
+      `/sessions/${sessionId}/proposals/${proposalId}/reject`,
+      { method: "POST" },
+    ),
+    recordUnknown: (sessionId, dimension) => request(
+      `/sessions/${sessionId}/unknown`,
+      { method: "POST", body: JSON.stringify({ dimension }) },
     ),
   };
 }
