@@ -25,6 +25,7 @@ from resume_agent.application.question_planner import (
     QuestionPlanner,
 )
 from resume_agent.application.version_service import VersionService
+from resume_agent.api.app import create_app
 from resume_agent.domain.models import (
     CareerFactBase,
     CareerTarget,
@@ -83,5 +84,6 @@ __all__ = [
     "VersionService",
     "VersionStatus",
     "build_mentor_agents",
+    "create_app",
     "evaluate_experience",
 ]

@@ -1,6 +1,6 @@
 """Transport-only request models for the ResumeAgent API."""
 
-from typing import Dict, List
+from typing import List
 from uuid import UUID
 
 from pydantic import BaseModel, Field

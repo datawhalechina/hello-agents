@@ -4,6 +4,9 @@
 # Python
 __pycache__/
 *.pyc
+*.db
+*.db-shm
+*.db-wal
 
 # Jupyter
 .ipynb_checkpoints/

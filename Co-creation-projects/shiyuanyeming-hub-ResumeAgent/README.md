@@ -82,6 +82,21 @@ jupyter lab
 # 打开 main.ipynb，按顺序运行全部单元格
 ```
 
+### 启动 FastAPI 服务
+
+安装开发依赖后运行：
+
+```bash
+uvicorn resume_agent.api.main:app --reload
+```
+
+- API 默认地址：`http://127.0.0.1:8000`
+- OpenAPI 文档：`http://127.0.0.1:8000/docs`
+- 默认数据库：`data/resume_agent.db`
+- 可通过 `RESUME_AGENT_DB=/path/to/file.db` 指定其他数据库
+
+默认入口不会在导入时读取 LLM API Key，因此事实库、版本管理和确定性追问可以离线使用；提交自然语言回答进行事实抽取前，需要通过 `create_app(..., fact_audit_agent=...)` 注入配置好的事实审计 Agent。没有配置时接口会明确返回 HTTP 503，同时保留用户刚提交的消息。
+
 ## 📖 使用示例
 
 1. **快速演示**：直接运行全部单元格，会自动完成「访谈 → 解析 → 三语生成 → 样式画廊 → 润色 → 评审 → PDF 导出」全流程，产物在 `outputs/` 目录
@@ -160,7 +175,8 @@ mentor_agents = build_mentor_agents(audit_agent, question_agent)
 - [x] 粘贴目标 JD，自动标注简历缺失关键词
 - [x] 多版本管理核心（同一事实库派生多个投递版本）
 - [x] 接入结构化 HelloAgents 多智能体提示词
-- [ ] 提供 FastAPI 服务与 Streamlit Web 界面
+- [x] 提供 FastAPI 服务接口与 OpenAPI 文档
+- [ ] 提供 Streamlit Web 界面
 - [ ] 将现有三语渲染器迁移为独立 Python 包，并让 Notebook 调用公开 API
 - [ ] 多模板切换与日文 B5 纸张支持
 - [ ] 上传已有简历（PDF/DOCX）解析导入
