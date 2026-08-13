@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS forums (
     moderator_id INTEGER,
     status VARCHAR(50) DEFAULT 'active',
     summary_history JSONB DEFAULT '[]',
-    start_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    start_time TIMESTAMP WITH TIME ZONE,
     end_time TIMESTAMP WITH TIME ZONE,
     duration_minutes INTEGER DEFAULT 30,
     FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE,

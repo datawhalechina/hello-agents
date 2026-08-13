@@ -12,7 +12,7 @@ def create_new_user(user: UserCreate, db: Any = Depends(get_db)):
     db_user = get_user_by_username(db, username=user.username)
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
-    return create_user(db=db, user=user)
+    return create_user(db=db, user=user.model_copy(update={"role": "user"}))
 
 @router.get("/me", response_model=UserResponse)
 def read_users_me(current_user: Annotated[Any, Depends(get_current_user)]):

@@ -17,7 +17,7 @@
 ## 理由
 
 1.  **原生异步支持 (AsyncIO)**: 多智能体系统涉及大量 I/O 密集型任务（如调用 LLM API、WebSocket 推送），FastAPI 的异步特性通过 `async/await` 能显著提高并发处理能力。
-2.  **AI 生态亲和力**: Python 是 AI/ML 领域的首选语言。使用 Python 作为后端可以无缝集成 LangChain、ZhipuAI SDK 等工具，无需跨语言调用。
+2.  **AI 生态亲和力**: Python 是 AI/ML 领域的首选语言。使用 Python 作为后端可以直接集成 HelloAgents、StepFun 与 MCP 工具，无需跨语言调用。
 3.  **开发效率与类型安全**: 基于 Pydantic 的类型提示提供了自动的数据验证和文档生成 (Swagger UI)，大幅降低了前后端联调成本。
 4.  **性能**: 在 Python web 框架中，FastAPI 的性能仅次于 Starlette，足以满足本系统的实时性需求。
 

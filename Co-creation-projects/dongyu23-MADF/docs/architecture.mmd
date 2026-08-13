@@ -19,7 +19,7 @@ graph TD
         end
         
         WS_Server[WebSocket 服务端]
-        LLM_Client[LLM 统一接口 (ZhipuAI)]
+        Agent_Runtime[HelloAgents Runtime]
     end
     
     subgraph Data [数据层]
@@ -28,8 +28,8 @@ graph TD
     end
     
     subgraph External [外部服务]
-        GLM4[智谱 GLM-4 API]
-        Search[搜索引擎 API]
+        StepFun[StepFun step-3.7-flash]
+        StepSearch[StepSearch MCP]
     end
 
     User <-->|HTTP/WebSocket| Frontend
@@ -39,11 +39,11 @@ graph TD
     API --> Services
     WS_Server <--> Scheduler
     
-    Scheduler --> LLM_Client
-    GodAgent --> LLM_Client
-    GodAgent --> Search
+    Scheduler --> Agent_Runtime
+    GodAgent --> Agent_Runtime
+    GodAgent --> StepSearch
     
-    LLM_Client --> GLM4
+    Agent_Runtime --> StepFun
     
     Services --> SQLite
     Services --> Redis

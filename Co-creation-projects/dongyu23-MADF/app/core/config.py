@@ -22,28 +22,39 @@ class Settings(BaseSettings):
     API_KEY: Optional[str] = None
     MODEL_NAME: Optional[str] = None
     BASE_URL: Optional[str] = None
+
+    @property
+    def has_api_key(self) -> bool:
+        return bool(self.API_KEY or os.environ.get("API_KEY"))
     
     @property
     def final_api_key(self) -> str:
-        key = self.API_KEY or os.environ.get("API_KEY") or os.environ.get("ZHIPUAI_API_KEY")
+        key = self.API_KEY or os.environ.get("API_KEY")
         if not key:
-            raise ValueError("API_KEY is not set. Please set API_KEY in .env or environment variables.")
+            raise ValueError("模型服务尚未配置 API Key，请联系管理员完成配置后重试。")
         return key
 
     @property
     def final_model_name(self) -> str:
-        return self.MODEL_NAME or os.environ.get("MODEL_NAME") or "glm-4.5"
+        return self.MODEL_NAME or os.environ.get("MODEL_NAME") or "step-3.7-flash"
 
     @property
     def final_base_url(self) -> str:
-        return self.BASE_URL or os.environ.get("BASE_URL") or "https://open.bigmodel.cn/api/paas/v4/"
-    
-    # Search API Configuration
-    SERPAPI_API_KEY: Optional[str] = None
+        return self.BASE_URL or os.environ.get("BASE_URL") or "https://api.stepfun.com/step_plan/v1/"
     
     # Security
     SECRET_KEY: str = "MADF_DEFAULT_INSECURE_SECRET_KEY_PLEASE_CHANGE_IN_PROD"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 10080  # 7 days
+    CORS_ORIGINS: str = "http://localhost:5173,http://localhost:8000"
+
+    @property
+    def cors_origins(self) -> list[str]:
+        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+
+    def validate_production_security(self) -> None:
+        if os.environ.get("MADF_ENV", "development").lower() in {"production", "prod"}:
+            if self.SECRET_KEY == "MADF_DEFAULT_INSECURE_SECRET_KEY_PLEASE_CHANGE_IN_PROD":
+                raise ValueError("SECRET_KEY must be overridden in production")
 
     # Database Configuration
     TURSO_DATABASE_URL: Optional[str] = None

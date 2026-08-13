@@ -32,7 +32,7 @@ export const usePersonaStore = defineStore('persona', {
     async fetchPersonas(ownerId?: number) {
       this.loading = true
       try {
-        const params = ownerId ? { owner_id: ownerId } : {}
+        const params = { ...(ownerId ? { owner_id: ownerId } : {}), limit: 500 }
         const res = await request.get('/personas/', { params })
         this.personas = res.data
       } catch (error) {

@@ -25,7 +25,7 @@
                   <template #actions>
                     <a @click="$router.push(`/forums/${item.id}`)">进入</a>
                   </template>
-                  <a-list-item-meta :description="`创建于 ${new Date(item.start_time).toLocaleDateString()}`">
+                  <a-list-item-meta :description="item.start_time ? `开始于 ${new Date(item.start_time).toLocaleDateString()}` : '尚未开始'">
                     <template #title>
                       <a @click="$router.push(`/forums/${item.id}`)" class="list-item-title">{{ item.topic }}</a>
                     </template>

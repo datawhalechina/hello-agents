@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
 from app.crud import create_forum, create_persona, create_message, get_user_by_username
 from app.schemas import ForumCreate, PersonaCreate, MessageCreate
-from utils import get_chat_completion
+from app.agent.agent import run_simple_agent
 
 def create_baseline_forum(topic: str, owner_username: str = "admin"):
     """
@@ -76,14 +76,15 @@ def create_baseline_forum(topic: str, owner_username: str = "admin"):
         4. 保持客观、理性的学术风格。
         """
         
-        messages = [{"role": "user", "content": prompt}]
-        response = get_chat_completion(messages)
+        content = run_simple_agent(
+            "BaselineEvaluationAgent",
+            "你是一个知识渊博、客观严谨的议题分析专家。",
+            prompt,
+        )
         
-        if not response or not response.choices:
+        if not content:
             print("Failed to generate response.")
             return
-
-        content = response.choices[0].message.content
         print("Response generated.")
 
         # 4. Save Message

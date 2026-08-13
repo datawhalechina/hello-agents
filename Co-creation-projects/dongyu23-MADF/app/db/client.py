@@ -199,6 +199,34 @@ class Database:
                 statements = [s.strip() for s in script.split(';') if s.strip()]
                 for stmt in statements:
                     conn.execute(stmt)
+
+                # Existing local databases predate persisted scheduler flags.
+                # Keep startup migration idempotent because schema.sql only creates
+                # tables when they do not exist.
+                if not self.is_remote and not self.is_postgres:
+                    user_columns = fetch_all(conn.execute("PRAGMA table_info(users)"))
+                    if "email" not in {column.name for column in user_columns}:
+                        conn.execute("ALTER TABLE users ADD COLUMN email TEXT")
+                        conn.execute(
+                            "CREATE UNIQUE INDEX IF NOT EXISTS users_email_unique ON users(email)"
+                        )
+
+                    columns = fetch_all(conn.execute("PRAGMA table_info(forums)"))
+                    if "ablation_flags" not in {column.name for column in columns}:
+                        conn.execute(
+                            "ALTER TABLE forums ADD COLUMN ablation_flags TEXT DEFAULT '{}'"
+                        )
+
+                    # Older versions accepted whitespace-only persona names.
+                    # Repair them before response validation is applied so an
+                    # upgraded database remains readable.
+                    conn.execute(
+                        """
+                        UPDATE personas
+                        SET name = '未命名智能体 #' || id
+                        WHERE name IS NULL OR TRIM(name) = ''
+                        """
+                    )
                     
             logger.info("Database initialized successfully.")
         except Exception as e:

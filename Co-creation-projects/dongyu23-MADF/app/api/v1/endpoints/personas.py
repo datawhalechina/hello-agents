@@ -32,10 +32,6 @@ def create_new_persona(
     current_user: Annotated[Any, Depends(get_current_user)],
     db: Any = Depends(get_db)
 ):
-    # If is_public is True, user must be admin or god (implied requirement)
-    if persona.is_public and current_user.role not in ["admin", "god"]:
-        raise HTTPException(status_code=403, detail="Not authorized to create public personas")
-
     new_persona = create_persona(db=db, persona=persona, owner_id=current_user.id)
     
     # CRITICAL: Fix cache pattern to match what delete_keys_pattern expects
@@ -123,7 +119,7 @@ def read_personas(
         return cached_data
 
     rs = db.execute(
-        "SELECT * FROM personas WHERE owner_id = ? LIMIT ? OFFSET ?", 
+        "SELECT * FROM personas WHERE owner_id = ? OR is_public = 1 ORDER BY created_at DESC LIMIT ? OFFSET ?",
         [current_user.id, limit, skip]
     )
     personas = fetch_all(rs)
@@ -178,6 +174,15 @@ def delete_existing_persona(
     if db_persona.owner_id != current_user.id and current_user.role != "god":
         raise HTTPException(status_code=403, detail="Not authorized to delete this persona")
 
+    references = fetch_all(
+        db.execute(
+            "SELECT forum_id FROM forum_participants WHERE persona_id = ? LIMIT 1",
+            [persona_id],
+        )
+    )
+    if references:
+        raise HTTPException(status_code=409, detail="该智能体已被论坛引用，无法删除")
+
     try:
         success = delete_persona(db, persona_id=persona_id)
         
@@ -190,4 +195,4 @@ def delete_existing_persona(
         return {"message": "Persona deleted successfully", "id": persona_id}
     except Exception as e:
         logger.error(f"Delete failed for {persona_id}: {e}")
-        raise HTTPException(status_code=500, detail=f"Delete failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to delete persona")

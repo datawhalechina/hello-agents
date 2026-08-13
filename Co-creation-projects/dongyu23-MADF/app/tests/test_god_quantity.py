@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 import json
 from app.agent.god import God
 
@@ -20,116 +20,68 @@ class TestGodAgentQuantity(unittest.TestCase):
                 "system_prompt": "Test Prompt"
             })
         
-        mock_response = MagicMock()
-        mock_response.choices = [
-            MagicMock(message=MagicMock(content=json.dumps(personas)))
-        ]
-        return mock_response
+        return json.dumps(personas)
 
     def test_quantity_parsing_explicit_digit(self):
         prompt = "生成3位角色"
         expected_n = 3
         
-        import app.agent.god as god_module
-        original_get_chat = god_module.get_chat_completion
-        
-        mock_get_chat = MagicMock()
-        mock_get_chat.return_value = self._mock_response(expected_n)
-        god_module.get_chat_completion = mock_get_chat
-        
-        try:
+        with patch("app.agent.god.run_simple_agent", return_value=self._mock_response(expected_n)) as run_agent:
             personas = self.god.generate_personas(prompt, n=1)
             
             # Verify prompt content contains default instruction
-            call_args = mock_get_chat.call_args
-            messages = call_args[0][0]
-            user_content = messages[1]['content']
+            user_content = run_agent.call_args.args[2]
             self.assertIn("默认生成 1 位角色", user_content)
             self.assertIn("如果指定了数量，请严格按照该数量生成", user_content)
             
             # Verify result (which comes from mock)
             self.assertEqual(len(personas), expected_n)
             
-        finally:
-            god_module.get_chat_completion = original_get_chat
 
     def test_quantity_parsing_chinese_numeral(self):
         prompt = "创建五名角色"
         expected_n = 5
         
-        import app.agent.god as god_module
-        original_get_chat = god_module.get_chat_completion
-        
-        mock_get_chat = MagicMock()
-        mock_get_chat.return_value = self._mock_response(expected_n)
-        god_module.get_chat_completion = mock_get_chat
-        
-        try:
+        with patch("app.agent.god.run_simple_agent", return_value=self._mock_response(expected_n)) as run_agent:
             personas = self.god.generate_personas(prompt, n=1)
             
             # Verify prompt content contains default instruction
-            call_args = mock_get_chat.call_args
-            messages = call_args[0][0]
-            user_content = messages[1]['content']
+            user_content = run_agent.call_args.args[2]
             self.assertIn("默认生成 1 位角色", user_content)
             
             # Verify result
             self.assertEqual(len(personas), expected_n)
             
-        finally:
-            god_module.get_chat_completion = original_get_chat
 
     def test_quantity_parsing_no_explicit(self):
         prompt = "生成一些角色"
         default_n = 2
         
-        import app.agent.god as god_module
-        original_get_chat = god_module.get_chat_completion
-        
-        mock_get_chat = MagicMock()
-        mock_get_chat.return_value = self._mock_response(default_n)
-        god_module.get_chat_completion = mock_get_chat
-        
-        try:
+        with patch("app.agent.god.run_simple_agent", return_value=self._mock_response(default_n)) as run_agent:
             personas = self.god.generate_personas(prompt, n=default_n)
             
             # Verify prompt content contains default instruction
-            call_args = mock_get_chat.call_args
-            messages = call_args[0][0]
-            user_content = messages[1]['content']
+            user_content = run_agent.call_args.args[2]
             self.assertIn(f"默认生成 {default_n} 位角色", user_content)
             
             # Verify result
             self.assertEqual(len(personas), default_n)
             
-        finally:
-            god_module.get_chat_completion = original_get_chat
             
     def test_quantity_parsing_complex_sentence(self):
         prompt = "生成有关认知心理学的3位角色"
         expected_n = 3
         
-        import app.agent.god as god_module
-        original_get_chat = god_module.get_chat_completion
-        
-        mock_get_chat = MagicMock()
-        mock_get_chat.return_value = self._mock_response(expected_n)
-        god_module.get_chat_completion = mock_get_chat
-        
-        try:
+        with patch("app.agent.god.run_simple_agent", return_value=self._mock_response(expected_n)) as run_agent:
             personas = self.god.generate_personas(prompt, n=1)
             
             # Verify prompt content contains default instruction
-            call_args = mock_get_chat.call_args
-            messages = call_args[0][0]
-            user_content = messages[1]['content']
+            user_content = run_agent.call_args.args[2]
             self.assertIn("默认生成 1 位角色", user_content)
             
             # Verify result
             self.assertEqual(len(personas), expected_n)
             
-        finally:
-            god_module.get_chat_completion = original_get_chat
 
 if __name__ == '__main__':
     unittest.main()

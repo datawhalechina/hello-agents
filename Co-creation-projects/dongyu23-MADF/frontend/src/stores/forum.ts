@@ -33,13 +33,14 @@ export interface Forum {
   moderator_id?: number | null
   moderator?: Moderator | null
   status: string
-  start_time: string
+  start_time?: string | null
   summary_history: string[]
   participants?: any[]
   duration_minutes?: number
 }
 
 export interface SystemLog {
+  id?: number
   timestamp: string
   level: 'info' | 'warning' | 'error' | 'thought' | 'speech'
   content: string
@@ -66,6 +67,23 @@ export const useForumStore = defineStore('forum', {
     isManuallyClosed: false
   }),
   actions: {
+    systemLogKey(log: SystemLog) {
+        const timestamp = new Date(log.timestamp).getTime()
+        return `${timestamp}|${log.level}|${log.source || ''}|${log.content}`
+    },
+    mergeSystemLogs(...collections: SystemLog[][]) {
+        const unique = new Map<string, SystemLog>()
+        for (const log of collections.flat()) {
+            const key = this.systemLogKey(log)
+            const existing = unique.get(key)
+            if (!existing || (existing.id == null && log.id != null)) {
+                unique.set(key, log)
+            }
+        }
+        return [...unique.values()].sort(
+            (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        )
+    },
     // --- Persistence ---
     saveToStorage() {
         if (!this.currentForum) return
@@ -165,10 +183,11 @@ export const useForumStore = defineStore('forum', {
         this.isManuallyClosed = false
         this.wsForumId = forumId
         const wsBase = this.resolveWsBase()
-        const wsUrl = `${wsBase}/api/v1/forums/${forumId}/ws`
+        const token = localStorage.getItem('token')
+        const wsUrl = `${wsBase}/api/v1/forums/${forumId}/ws${token ? `?token=${encodeURIComponent(token)}` : ''}`
         const maxReconnectAttempts = 10
 
-        console.log(`[WS Global] Connecting to: ${wsUrl}`)
+        console.log(`[WS Global] Connecting to forum ${forumId}`)
 
         try {
             this.ws = new WebSocket(wsUrl)
@@ -210,6 +229,9 @@ export const useForumStore = defineStore('forum', {
                             content: data.content,
                             source: 'System'
                         })
+                    } else if (data.type === 'status_update' && data.status && this.currentForum) {
+                        this.currentForum.status = data.status
+                        this.thinking = data.status === 'running'
                     }
                 } catch (e) {
                     console.error('[WS Global] Parse Error', e)
@@ -235,8 +257,8 @@ export const useForumStore = defineStore('forum', {
                 }
             }
             
-            this.ws.onerror = (e) => {
-                console.error('[WS Global] Error:', e)
+            this.ws.onerror = () => {
+                console.warn('[WS Global] Connection error')
             }
             
         } catch (e) {
@@ -257,18 +279,7 @@ export const useForumStore = defineStore('forum', {
             
             // Create signature set for O(1) lookup
             // Signature = timestamp + content (source/level might vary slightly but usually consistent)
-            const backendSignatures = new Set(
-                backendLogs.map(l => `${l.timestamp}|${l.content}`)
-            )
-            
-            const uniqueLocalLogs = this.systemLogs.filter(localLog => 
-                !backendSignatures.has(`${localLog.timestamp}|${localLog.content}`)
-            )
-            
-            // Combine and Sort
-            this.systemLogs = [...backendLogs, ...uniqueLocalLogs].sort((a, b) => 
-                new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-            )
+            this.systemLogs = this.mergeSystemLogs(backendLogs, this.systemLogs)
             
         } else {
              // If response is invalid, keep local logs
@@ -289,7 +300,7 @@ export const useForumStore = defineStore('forum', {
       }
     },
     addSystemLog(log: SystemLog) {
-        this.systemLogs.push(log)
+        this.systemLogs = this.mergeSystemLogs(this.systemLogs, [log])
     },
     updateStreamingMessage(chunk: { 
         speaker_name: string, 
@@ -384,7 +395,7 @@ export const useForumStore = defineStore('forum', {
           this.loading = true
       }
       try {
-        const res = await request.get('/forums/')
+        const res = await request.get('/forums/', { params: { limit: 500 } })
         this.forums = res.data
       } catch (error) {
         console.error('Failed to fetch forums:', error)
@@ -455,8 +466,11 @@ export const useForumStore = defineStore('forum', {
             }
 
             this.saveToStorage()
-        } catch (error) {
-            console.error(`Failed to fetch forum ${id}:`, error)
+      } catch (error) {
+            const status = (error as { response?: { status?: number } })?.response?.status
+            if (status !== 401 && status !== 403 && status !== 404) {
+                console.error(`Failed to fetch forum ${id}:`, error)
+            }
             this.currentForum = null
         } finally {
             this.loading = false
@@ -570,10 +584,12 @@ export const useForumStore = defineStore('forum', {
     },
     async startForum(id: number) {
       try {
-        await request.post(`/forums/${id}/start`)
+        const res = await request.post(`/forums/${id}/start`)
         message.success('论坛已开始')
         if (this.currentForum && this.currentForum.id === id) {
             this.currentForum.status = 'running'
+            if (res.data?.start_time) this.currentForum.start_time = res.data.start_time
+            if (res.data?.duration_minutes) this.currentForum.duration_minutes = res.data.duration_minutes
         }
       } catch (error) {
         console.error('Failed to start forum:', error)

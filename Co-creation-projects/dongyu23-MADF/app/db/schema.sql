@@ -2,6 +2,7 @@
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
+    email TEXT UNIQUE,
     password_hash TEXT NOT NULL,
     role TEXT NOT NULL DEFAULT 'user',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -55,7 +56,8 @@ CREATE TABLE IF NOT EXISTS forums (
     moderator_id INTEGER,
     status TEXT DEFAULT 'active',
     summary_history TEXT DEFAULT '[]',
-    start_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    ablation_flags TEXT DEFAULT '{}',
+    start_time DATETIME,
     end_time DATETIME,
     duration_minutes INTEGER DEFAULT 30,
     FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE,

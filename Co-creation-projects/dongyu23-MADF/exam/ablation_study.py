@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
 from app.models import Forum, Message
 from app.crud import get_forum
-from utils import get_chat_completion
+from app.agent.agent import run_simple_agent
 
 # Define the 5 Evaluation Dimensions (Optimized for Multi-Agent Advantages)
 EVALUATION_METRICS = {
@@ -105,11 +105,13 @@ def compare_forums(forum_id_a: int, forum_id_b: int, ablation_desc: str):
         3. **消融结论** (总结该变量对讨论质量的关键影响，例如：“去掉理论库导致观点深度显著下降...”)
         """
 
-        messages = [{"role": "user", "content": prompt}]
-        response = get_chat_completion(messages)
+        result_text = run_simple_agent(
+            "AblationEvaluationAgent",
+            "你是一位公正、专业的多智能体讨论评估专家。",
+            prompt,
+        )
         
-        if response and response.choices:
-            result_text = response.choices[0].message.content
+        if result_text:
             
             # Save result
             os.makedirs("exam/results", exist_ok=True)
@@ -122,7 +124,7 @@ def compare_forums(forum_id_a: int, forum_id_b: int, ablation_desc: str):
             print(f"Ablation study complete. Report saved to {output_file}")
             print(result_text)
         else:
-            print("LLM API call failed.")
+            print("HelloAgents evaluation failed.")
 
     finally:
         db.close()

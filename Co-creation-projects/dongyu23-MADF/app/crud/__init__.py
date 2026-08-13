@@ -9,6 +9,17 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
+
+def _normalize_persona(persona):
+    if persona and isinstance(getattr(persona, "theories", None), str):
+        try:
+            theories = json.loads(persona.theories)
+            if isinstance(theories, list):
+                persona.theories = theories
+        except json.JSONDecodeError:
+            pass
+    return persona
+
 # --- Cache Keys ---
 def user_cache_key(username: str): return f"user:{username}"
 def persona_cache_key(pid: int): return f"persona:{pid}"
@@ -43,8 +54,8 @@ def create_user(db: Any, user: UserCreate):
         created_at = datetime.now()
         rs = db_execute_commit(
             db,
-            "INSERT INTO users (username, password_hash, role, created_at) VALUES (?, ?, ?, ?) RETURNING *",
-            [user.username, pwd_hash, user.role, created_at]
+            "INSERT INTO users (username, email, password_hash, role, created_at) VALUES (?, ?, ?, ?, ?) RETURNING *",
+            [user.username, user.email, pwd_hash, user.role, created_at]
         )
         new_user = fetch_one(rs)
             
@@ -84,7 +95,7 @@ def create_persona(db, persona: PersonaCreate, owner_id: int):
         # Cache Aside: Don't set cache on create. Let the first read populate it.
         # This ensures strict adherence to "DB is source of truth" and lazy loading.
         
-        return new_persona
+        return _normalize_persona(new_persona)
     except Exception as e:
         logger.error(f"Error creating persona: {e}")
         raise
@@ -93,10 +104,11 @@ def get_persona(db, persona_id: int):
     cache_key = persona_cache_key(persona_id)
     cached = cache_service.get_cache(cache_key)
     if cached:
-        return RowObject(cached)
+        return _normalize_persona(RowObject(cached))
 
     rs = db.execute("SELECT * FROM personas WHERE id = ?", [persona_id])
     persona = fetch_one(rs)
+    persona = _normalize_persona(persona)
     if persona:
         cache_service.set_cache(cache_key, persona.__dict__)
     return persona
@@ -126,7 +138,7 @@ def update_persona(db, persona_id: int, updates: PersonaUpdate):
         if updated:
             cache_service.delete_cache(persona_cache_key(persona_id))
             
-        return updated
+        return _normalize_persona(updated)
     except Exception as e:
         logger.error(f"Error updating persona: {e}")
         raise
@@ -164,11 +176,10 @@ def delete_persona(db, persona_id: int):
 def create_forum(db, forum: ForumCreate, creator_id: int):
     try:
         with db_transaction(db) as tx:
-            start_time = datetime.now()
             rs = tx.execute(
                 """
-                INSERT INTO forums (topic, creator_id, moderator_id, status, duration_minutes, start_time, summary_history)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO forums (topic, creator_id, moderator_id, status, duration_minutes, start_time, summary_history, ablation_flags)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 RETURNING *
                 """,
                 [
@@ -177,8 +188,9 @@ def create_forum(db, forum: ForumCreate, creator_id: int):
                     forum.moderator_id,
                     "pending",
                     forum.duration_minutes,
-                    start_time,
-                    "[]"
+                    None,
+                    "[]",
+                    "{}"
                 ]
             )
             db_forum = fetch_one(rs)
@@ -255,7 +267,14 @@ def get_forum(db, forum_id: int):
         
     return forum
 
-def update_forum(db, forum_id: int, summary_history: list = None, status: str = None):
+def update_forum(
+    db,
+    forum_id: int,
+    summary_history: list = None,
+    status: str = None,
+    start_time: datetime = None,
+    ablation_flags: dict = None,
+):
     try:
         set_clauses = []
         values = []
@@ -267,6 +286,14 @@ def update_forum(db, forum_id: int, summary_history: list = None, status: str = 
         if status is not None:
             set_clauses.append("status = ?")
             values.append(status)
+
+        if start_time is not None:
+            set_clauses.append("start_time = ?")
+            values.append(start_time)
+
+        if ablation_flags is not None:
+            set_clauses.append("ablation_flags = ?")
+            values.append(json.dumps(ablation_flags))
             
         if not set_clauses:
             return get_forum(db, forum_id)

@@ -1,5 +1,6 @@
 import json
-from utils import get_chat_completion, parse_json_from_response
+from app.agent.agent import run_simple_agent
+from utils import parse_json_from_response
 
 class God:
     def __init__(self):
@@ -33,9 +34,9 @@ class God:
         ]
         
         try:
-            response = get_chat_completion(messages)
-            if response and response.choices:
-                content = response.choices[0].message.content.strip()
+            content = run_simple_agent("PersonaCountAgent", messages[0]["content"], messages[1]["content"])
+            if content:
+                content = content.strip()
                 # Use regex to find the first number in the output just in case
                 import re
                 # Check for common Chinese number characters just in case the LLM outputs "两位"
@@ -116,10 +117,9 @@ class God:
             {"role": "user", "content": prompt}
         ]
 
-        print(f"正在根据描述生成嘉宾角色...")
-        response = get_chat_completion(messages, json_mode=True)
-        if response and response.choices:
-            content = response.choices[0].message.content
+        print("正在根据描述生成嘉宾角色...")
+        content = run_simple_agent("PersonaGeneratorAgent", messages[0]["content"], messages[1]["content"])
+        if content:
             personas = parse_json_from_response(content)
             if personas and isinstance(personas, list):
                 print(f"成功生成 {len(personas)} 位嘉宾。")

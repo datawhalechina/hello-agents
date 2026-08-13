@@ -1,18 +1,73 @@
 import json
-from utils import get_chat_completion, parse_json_from_response
+
+from hello_agents import Config, HelloAgentsLLM, Message, SimpleAgent
+
+from app.core.config import settings
+from utils import parse_json_from_response
 from app.agent.memory import PrivateMemory
 
-class BaseAgent:
-    def __init__(self, name, system_prompt):
-        self.name = name
-        self.system_prompt = system_prompt
+
+def create_helloagents_llm():
+    return HelloAgentsLLM(
+        model=settings.final_model_name,
+        api_key=settings.final_api_key,
+        base_url=settings.final_base_url,
+        temperature=0.8,
+        max_tokens=4096,
+        timeout=60,
+    )
 
 
-class ModeratorAgent(BaseAgent):
+def create_helloagents_config():
+    return Config(
+        trace_enabled=False,
+        session_enabled=False,
+        skills_enabled=False,
+        todowrite_enabled=False,
+        devlog_enabled=False,
+    )
+
+
+def create_simple_agent(name, system_prompt):
+    return SimpleAgent(
+        name=name,
+        llm=create_helloagents_llm(),
+        system_prompt=system_prompt,
+        config=create_helloagents_config(),
+        enable_tool_calling=False,
+    )
+
+def normalize_framework_history(agent):
+    """Map HelloAgents-only roles to provider-compatible chat roles.
+
+    HelloAgents may compress long conversations into a ``summary`` message.
+    StepFun's OpenAI-compatible endpoint rejects that non-standard role, so
+    keep the summary content but present it as user context before invoking
+    the provider.
+    """
+    for message in getattr(agent, "_history", []):
+        if getattr(message, "role", None) == "summary":
+            message.role = "user"
+
+
+def run_simple_agent(name, system_prompt, input_text):
+    """Run a one-shot task through the public HelloAgents SimpleAgent API."""
+    agent = create_simple_agent(name, system_prompt)
+    normalize_framework_history(agent)
+    return agent.run(input_text)
+
+
+class ModeratorAgent(SimpleAgent):
     def __init__(self, theme, name="主持人", system_prompt=None):
         self.theme = theme
         default_prompt = "你是一场圆桌论坛的专业主持人。你的职责是引导话题、总结发言、并控制流程。"
-        super().__init__(name, system_prompt or default_prompt)
+        super().__init__(
+            name=name,
+            llm=create_helloagents_llm(),
+            system_prompt=system_prompt or default_prompt,
+            config=create_helloagents_config(),
+            enable_tool_calling=False,
+        )
 
     def opening(self, guests):
         guest_intros = "\n".join([f"- {g['name']} ({g['title']}): {g['stance']}" for g in guests])
@@ -32,11 +87,8 @@ class ModeratorAgent(BaseAgent):
         - 请直接输出发言内容，不要包含任何前缀（如“主持人 20:15:20”）。
         - 不要使用脚本格式，就像你在现场说话一样。
         """
-        messages = [
-            {"role": "system", "content": self.system_prompt},
-            {"role": "user", "content": prompt}
-        ]
-        return get_chat_completion(messages, stream=True)
+        normalize_framework_history(self)
+        return self.stream_run(prompt)
 
     def periodic_summary(self, messages):
         """
@@ -55,11 +107,8 @@ class ModeratorAgent(BaseAgent):
         - 请直接输出总结内容，不要包含任何前缀（如“主持人 20:15:20”）。
         - 不要使用脚本格式。
         """
-        messages = [
-            {"role": "system", "content": self.system_prompt},
-            {"role": "user", "content": prompt}
-        ]
-        return get_chat_completion(messages, stream=True)
+        normalize_framework_history(self)
+        return self.stream_run(prompt)
 
     def closing(self, summary_history):
         """
@@ -84,16 +133,19 @@ class ModeratorAgent(BaseAgent):
         - 请直接输出总结内容，不要包含任何前缀（如“主持人 20:15:20”）。
         - 不要使用脚本格式。
         """
-        messages = [
-            {"role": "system", "content": self.system_prompt},
-            {"role": "user", "content": prompt}
-        ]
-        return get_chat_completion(messages, stream=True)
+        normalize_framework_history(self)
+        return self.stream_run(prompt)
 
-class ParticipantAgent(BaseAgent):
+class ParticipantAgent(SimpleAgent):
     def __init__(self, name, persona, n_participants, theme, ablation_flags=None):
         system_prompt = persona.get('system_prompt', "你是一个参与圆桌讨论的嘉宾。")
-        super().__init__(name, system_prompt)
+        super().__init__(
+            name=name,
+            llm=create_helloagents_llm(),
+            system_prompt=system_prompt,
+            config=create_helloagents_config(),
+            enable_tool_calling=False,
+        )
         self.title = persona.get('title', "专家")
         self.bio = persona.get('bio', "无")
         self.theories = persona.get('theories', [])
@@ -154,15 +206,9 @@ class ParticipantAgent(BaseAgent):
 
         """
         
-        messages = [
-            {"role": "system", "content": self.system_prompt},
-            {"role": "user", "content": prompt}
-        ]
-        
-        # Use json_mode=True if supported by model/utils, but here we just ask for JSON text
-        response = get_chat_completion(messages) 
-        if response:
-            content = response.choices[0].message.content
+        normalize_framework_history(self)
+        content = self.run(prompt)
+        if content:
             return self._parse_think_response(content)
         return None
 
@@ -208,7 +254,6 @@ class ParticipantAgent(BaseAgent):
                 
             # Fallback to legacy text parsing if JSON fails
             normalized = content.replace("：", ":")
-            lines = normalized.strip().split('\n')
             
             # Simple keyword check for legacy fallback (simplified)
             raw_upper = normalized.upper()
@@ -219,7 +264,7 @@ class ParticipantAgent(BaseAgent):
             result["mind"] = content
             
             return result
-        except Exception as e:
+        except Exception:
             # Fallback for parsing errors
             return result
 
@@ -279,9 +324,5 @@ class ParticipantAgent(BaseAgent):
         请直接输出发言内容，不要带引号。
         """
         
-        messages = [
-            {"role": "system", "content": self.system_prompt},
-            {"role": "user", "content": prompt}
-        ]
-        
-        return get_chat_completion(messages, stream=True)
+        normalize_framework_history(self)
+        return self.stream_run(prompt)

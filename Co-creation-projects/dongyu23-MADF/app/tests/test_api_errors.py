@@ -1,7 +1,13 @@
-def test_create_persona_user_not_found(client):
-    # Register and get token
-    u = client.post("/api/v1/auth/register", json={"username": "err_user1", "password": "p", "role": "u"}).json()
-    token = client.post("/api/v1/auth/login", data={"username": "err_user1", "password": "p"}).json()["access_token"]
+def _auth_headers(client, username):
+    client.post("/api/v1/auth/register", json={"username": username, "password": "password123"})
+    token = client.post("/api/v1/auth/login", data={"username": username, "password": "password123"}).json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+def test_regular_user_cannot_assign_persona_to_another_owner(client):
+    # Public personas are allowed, but ownership must come from the token.
+    u = client.post("/api/v1/auth/register", json={"username": "err_user1", "password": "password123", "role": "u"}).json()
+    token = client.post("/api/v1/auth/login", data={"username": "err_user1", "password": "password123"}).json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
     
     response = client.post(
@@ -10,13 +16,12 @@ def test_create_persona_user_not_found(client):
         json={"name": "P", "bio": "B", "theories": [], "is_public": True},
         headers=headers
     )
-    # The current implementation might just use current_user.id instead of owner_id param
-    # If owner_id is provided but not found, it should be 404 or just use current_user
-    assert response.status_code in [200, 404]
+    assert response.status_code == 200
+    assert response.json()["owner_id"] == u["id"]
 
-def test_create_forum_creator_not_found(client):
-    u = client.post("/api/v1/auth/register", json={"username": "err_user2", "password": "p", "role": "u"}).json()
-    token = client.post("/api/v1/auth/login", data={"username": "err_user2", "password": "p"}).json()["access_token"]
+def test_create_forum_rejects_empty_participants_before_legacy_creator_param(client):
+    u = client.post("/api/v1/auth/register", json={"username": "err_user2", "password": "password123", "role": "u"}).json()
+    token = client.post("/api/v1/auth/login", data={"username": "err_user2", "password": "password123"}).json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
     
     response = client.post(
@@ -25,29 +30,37 @@ def test_create_forum_creator_not_found(client):
         json={"topic": "T", "participant_ids": []},
         headers=headers
     )
-    assert response.status_code in [200, 404]
+    assert response.status_code == 400
+    assert any("请至少选择一位智能体" in item["msg"] for item in response.json()["detail"])
 
 def test_get_forum_not_found(client):
-    response = client.get("/api/v1/forums/999/messages")
+    assert client.get("/api/v1/forums/999/messages").status_code == 401
+    response = client.get("/api/v1/forums/999/messages", headers=_auth_headers(client, "missing-reader"))
     assert response.status_code == 404
     assert "Forum not found" in response.json()["detail"]
 
 def test_post_message_forum_not_found(client):
-    response = client.post(
+    assert client.post(
         "/api/v1/forums/999/messages",
         json={"forum_id": 999, "persona_id": 1, "speaker_name": "S", "content": "C", "turn_count": 1}
+    ).status_code == 401
+    response = client.post(
+        "/api/v1/forums/999/messages",
+        json={"forum_id": 999, "persona_id": 1, "speaker_name": "S", "content": "C", "turn_count": 1},
+        headers=_auth_headers(client, "missing-writer"),
     )
     assert response.status_code == 404
     assert "Forum not found" in response.json()["detail"]
     
 def test_post_message_persona_not_found(client):
     # Register and login
-    u = client.post("/api/v1/auth/register", json={"username": "msg_user", "password": "p", "role": "u"}).json()
-    token = client.post("/api/v1/auth/login", data={"username": "msg_user", "password": "p"}).json()["access_token"]
+    u = client.post("/api/v1/auth/register", json={"username": "msg_user", "password": "password123", "role": "u"}).json()
+    token = client.post("/api/v1/auth/login", data={"username": "msg_user", "password": "password123"}).json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
     
     # Create forum
-    f = client.post("/api/v1/forums/", json={"topic": "T", "participant_ids": []}, headers=headers).json()
+    persona = client.post("/api/v1/personas/", json={"name": "Message Persona", "bio": "B"}, headers=headers).json()
+    f = client.post("/api/v1/forums/", json={"topic": "T", "participant_ids": [persona["id"]]}, headers=headers).json()
 
     response = client.post(
         f"/api/v1/forums/{f['id']}/messages",

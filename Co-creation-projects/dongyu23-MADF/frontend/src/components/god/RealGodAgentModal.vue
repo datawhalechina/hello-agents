@@ -238,7 +238,16 @@ const handleSend = async () => {
     })
 
     if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        let detail = `角色生成服务请求失败（HTTP ${response.status}）`
+        try {
+          const payload = await response.json()
+          if (typeof payload?.detail === 'string' && payload.detail.trim()) {
+            detail = payload.detail
+          }
+        } catch {
+          // Keep the status-based message when the response is not JSON.
+        }
+        throw new Error(detail)
     }
 
     const reader = response.body?.getReader()
@@ -362,7 +371,7 @@ const handleSend = async () => {
                 
             } else if (event.type === 'error') {
                 items.push({ type: 'error', content: event.content })
-                message.error('生成过程中发生错误')
+                message.error(event.content || '生成过程中发生错误')
             }
             
             scrollToBottom()
@@ -374,7 +383,11 @@ const handleSend = async () => {
     }
 
   } catch (error: any) {
-    assistantMsg.value.items?.push({ type: 'error', content: error.message || '网络请求失败' })
+    const errorMessage = error instanceof Error && error.message
+      ? error.message
+      : '角色生成请求失败，请稍后重试'
+    assistantMsg.value.items?.push({ type: 'error', content: errorMessage })
+    message.error(errorMessage)
   } finally {
     loading.value = false
   }

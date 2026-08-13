@@ -1,4 +1,5 @@
 from typing import Any
+from datetime import datetime, timezone
 from app.crud import (
     create_forum, 
     get_forum, 
@@ -6,7 +7,8 @@ from app.crud import (
     get_forum_messages, 
     get_persona,
     delete_forum,
-    get_forum_participants
+    get_forum_participants,
+    update_forum,
 )
 from app.schemas import ForumCreate, MessageCreate
 from app.core.websockets import manager
@@ -26,6 +28,8 @@ class ForumService:
                 p = get_persona(self.db, pid)
                 if not p:
                     raise HTTPException(status_code=404, detail=f"Persona {pid} not found")
+                if p.owner_id != creator_id and not p.is_public:
+                    raise HTTPException(status_code=403, detail="不能邀请其他用户的私有智能体")
 
         if forum_in.moderator_id:
             rs = self.db.execute("SELECT 1 FROM moderators WHERE id = ?", [forum_in.moderator_id])
@@ -47,10 +51,20 @@ class ForumService:
             raise HTTPException(status_code=403, detail="Not authorized")
             
         if forum.status == "running":
-            raise HTTPException(status_code=400, detail="Forum already running")
+            return {
+                "status": "already_running",
+                "ablation_flags": ablation_flags or {},
+                "start_time": forum.start_time,
+                "duration_minutes": forum.duration_minutes or 30,
+            }
             
-        await scheduler.start_forum(forum_id, ablation_flags)
-        return {"status": "started", "ablation_flags": ablation_flags}
+        flags = ablation_flags or {}
+        # A non-running forum always starts a fresh session. This also repairs
+        # legacy pending rows whose creation timestamp was stored as start_time.
+        started_at = datetime.now(timezone.utc)
+        update_forum(self.db, forum_id, status="running", start_time=started_at, ablation_flags=flags)
+        await scheduler.start_forum(forum_id, flags)
+        return {"status": "started", "ablation_flags": flags, "start_time": started_at, "duration_minutes": forum.duration_minutes or 30}
 
     async def delete_forum(self, forum_id: int, user_id: int, is_admin: bool = False):
         forum = get_forum(self.db, forum_id)
@@ -80,6 +94,17 @@ class ForumService:
         # Ensure we use a new transaction/connection for deletion if needed, 
         # but self.db is injected.
         return delete_forum(self.db, forum_id)
+
+    async def stop_forum(self, forum_id: int, user_id: int, is_admin: bool = False):
+        forum = get_forum(self.db, forum_id)
+        if not forum:
+            raise HTTPException(status_code=404, detail="Forum not found")
+        if forum.creator_id != user_id and not is_admin:
+            raise HTTPException(status_code=403, detail="Not authorized")
+        if forum.status in {"closed", "finished"}:
+            return {"status": "closed"}
+        await scheduler.stop_forum(forum_id)
+        return {"status": "closed"}
 
     async def post_message(self, forum_id: int, msg_in: MessageCreate):
         if msg_in.forum_id != forum_id:

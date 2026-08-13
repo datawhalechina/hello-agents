@@ -1,6 +1,5 @@
 import { vi, beforeAll, afterEach, afterAll } from 'vitest'
 import { server } from './src/mocks/server'
-import 'vitest-canvas-mock'
 
 // Establish API mocking before all tests.
 beforeAll(() => server.listen())

@@ -33,7 +33,7 @@ def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depen
             logger.warning(f"Failed login attempt for user: {form_data.username}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect username or password",
+                detail="用户名或密码错误",
                 headers={"WWW-Authenticate": "Bearer"},
             )
         
@@ -52,7 +52,13 @@ def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depen
 
 @router.post("/register", response_model=UserResponse)
 def register(user: UserCreate, db: Any = Depends(get_db)):
+    if len(user.password) < 8:
+        raise HTTPException(status_code=400, detail="密码至少需要 8 个字符")
     db_user = get_user_by_username(db, user.username)
     if db_user:
-        raise HTTPException(status_code=400, detail="Username already registered")
-    return create_user(db=db, user=user)
+        raise HTTPException(status_code=400, detail="用户名已被注册")
+    if user.email:
+        from app.db.client import fetch_one
+        if fetch_one(db.execute("SELECT id FROM users WHERE email = ?", [user.email])):
+            raise HTTPException(status_code=400, detail="该邮箱已被注册")
+    return create_user(db=db, user=user.model_copy(update={"role": "user"}))

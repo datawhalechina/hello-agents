@@ -41,15 +41,35 @@ export const useGodStore = defineStore('god', {
             while (retries <= maxRetries) {
                 try {
                     // Call backend with extended timeout (120s)
-                    const res = await request.post('/god/generate', {
-                        prompt,
-                        n: 1 
-                    }, {
-                        timeout: 120000
+                    const response = await fetch('/api/v1/god/generate_real', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+                        },
+                        body: JSON.stringify({ prompt, n: 1 })
                     })
-
-                    // The backend returns List[PersonaResponse]
-                    const personas = res.data
+                    if (!response.ok || !response.body) throw new Error(`God generation failed: ${response.status}`)
+                    const reader = response.body.getReader()
+                    const decoder = new TextDecoder()
+                    let buffer = ''
+                    const personas: Persona[] = []
+                    while (true) {
+                        const { done, value } = await reader.read()
+                        if (done) break
+                        buffer += decoder.decode(value, { stream: true })
+                        const parts = buffer.split('\n\n')
+                        buffer = parts.pop() || ''
+                        for (const part of parts) {
+                            if (!part.startsWith('data: ')) continue
+                            const event = JSON.parse(part.slice(6))
+                            if (event.type === 'result') {
+                                const result = Array.isArray(event.content) ? event.content : [event.content]
+                                personas.push(...result)
+                            }
+                            if (event.type === 'error') throw new Error(event.content || 'God generation failed')
+                        }
+                    }
 
                     // Add assistant response
                     this.messages.push({

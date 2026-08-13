@@ -27,10 +27,14 @@ describe('Request Utility', () => {
     )
     
     localStorage.setItem('token', 'old-token')
+    window.history.replaceState({}, '', '/dashboard')
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     try {
       await request.get('/auth-error')
     } catch (e) {
       // Expected error
+    } finally {
+      consoleError.mockRestore()
     }
     expect(localStorage.getItem('token')).toBeNull()
     expect(message.error).toHaveBeenCalledWith(expect.stringContaining('会话已过期'))

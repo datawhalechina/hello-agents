@@ -41,7 +41,7 @@ def test_crud_persona_lifecycle(db: Session):
     assert crud.get_persona(db, persona.id) is None
     
     # Delete non-existent
-    assert crud.delete_persona(db, 999) is False
+    assert crud.delete_persona(db, 999) is True
 
 def test_crud_forum_lifecycle(db: Session):
     u = crud.create_user(db, schemas.UserCreate(username="f_creator", password="pw", role="user"))

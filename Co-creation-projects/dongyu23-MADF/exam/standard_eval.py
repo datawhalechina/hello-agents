@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
 from app.models import Forum, Message
 from app.crud import get_forum
-from utils import get_chat_completion
+from app.agent.agent import run_simple_agent
 
 # Define the 5 Evaluation Dimensions (Optimized for Multi-Agent Advantages)
 EVALUATION_METRICS = {
@@ -111,11 +111,13 @@ def evaluate_forum(forum_id: int):
         }
         """
 
-        messages = [{"role": "user", "content": prompt}]
-        response = get_chat_completion(messages, json_mode=True)
+        result_text = run_simple_agent(
+            "ForumEvaluationAgent",
+            "你是一位公正、专业的多智能体讨论评估专家，只返回要求的 JSON。",
+            prompt,
+        )
         
-        if response and response.choices:
-            result_text = response.choices[0].message.content
+        if result_text:
             # Clean up markdown if present
             if "```json" in result_text:
                 result_text = result_text.split("```json")[1].split("```")[0]
@@ -138,7 +140,7 @@ def evaluate_forum(forum_id: int):
                 print("Failed to parse LLM response as JSON.")
                 print("Raw response:", result_text)
         else:
-            print("LLM API call failed.")
+            print("HelloAgents evaluation failed.")
 
     finally:
         db.close()

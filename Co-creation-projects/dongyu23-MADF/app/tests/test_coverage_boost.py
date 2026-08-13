@@ -1,14 +1,15 @@
 import pytest
 import random
-from fastapi.testclient import TestClient
-from app.main import app
-from app.db.client import db_manager
+from unittest.mock import AsyncMock, patch
+
+from app.crud import create_user
+from app.schemas import UserCreate
 
 @pytest.fixture
-def auth_header(client):
+def auth_header(client, db):
     username = f"user_{random.randint(1, 1000000)}"
-    client.post("/api/v1/auth/register", json={"username": username, "password": "p", "role": "admin"})
-    token = client.post("/api/v1/auth/login", data={"username": username, "password": "p"}).json()["access_token"]
+    create_user(db, UserCreate(username=username, password="password123", role="admin"))
+    token = client.post("/api/v1/auth/login", data={"username": username, "password": "password123"}).json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
 
 def test_coverage_auth(client):
@@ -54,10 +55,12 @@ def test_coverage_users_detailed(client, auth_header):
 
 def test_coverage_forums_edge_cases(client, auth_header):
     # Read forum (hits 78-81)
-    f = client.post("/api/v1/forums/", json={"topic": "T", "participant_ids": []}, headers=auth_header).json()
+    persona = client.post("/api/v1/personas/", json={"name": "Forum Persona", "bio": "B"}, headers=auth_header).json()
+    f = client.post("/api/v1/forums/", json={"topic": "T", "participant_ids": [persona["id"]]}, headers=auth_header).json()
     client.get(f"/api/v1/forums/{f['id']}", headers=auth_header)
     # Start forum (hits 102-107)
-    client.post(f"/api/v1/forums/{f['id']}/start", headers=auth_header)
+    with patch("app.services.forum_service.scheduler.start_forum", new_callable=AsyncMock):
+        client.post(f"/api/v1/forums/{f['id']}/start", headers=auth_header)
     # Messages/Logs fail path
     client.get(f"/api/v1/forums/{f['id']}/messages", headers=auth_header)
     client.get(f"/api/v1/forums/{f['id']}/logs", headers=auth_header)
@@ -65,18 +68,15 @@ def test_coverage_forums_edge_cases(client, auth_header):
     client.delete(f"/api/v1/forums/{f['id']}", headers=auth_header)
 
 def test_coverage_god_detailed(client, auth_header):
-    # LLM parse fail (hits 33)
-    # Mock god.get_persona_count to fail or return 0
-    from app.api.v1.endpoints.god import god
-    original_count = god.get_persona_count
-    god.get_persona_count = lambda *args, **kwargs: 0
-    try:
-        client.post("/api/v1/god/generate", json={"prompt": "test"}, headers=auth_header)
-    finally:
-        god.get_persona_count = original_count
-
-    # Just hit the generator entry point, but don't stream for too long to avoid hangs
-    client.post("/api/v1/god/generate_real", json={"prompt": "Short", "n": 1}, headers=auth_header)
+    events = iter([{"type": "error", "content": "mocked failure"}])
+    with patch("app.api.v1.endpoints.god.settings.API_KEY", "test-key"), patch(
+        "app.api.v1.endpoints.god.RealGodAgent"
+    ) as agent_class:
+        agent_class.return_value.run.return_value = events
+        response = client.post("/api/v1/god/generate_real", json={"prompt": "Short", "n": 1}, headers=auth_header)
+    assert response.status_code == 200
+    assert "mocked failure" in response.text
+    assert "所有智能体角色已生成并保存完毕" not in response.text
 
 def test_coverage_personas_detailed(client, auth_header):
     # Create public
@@ -90,11 +90,36 @@ def test_coverage_personas_detailed(client, auth_header):
     client.delete(f"/api/v1/personas/{p_id}", headers=auth_header)
 
 def test_coverage_god(client, auth_header):
-    # Generate
-    client.post("/api/v1/god/generate", json={"prompt": "Generate 1 person"}, headers=auth_header)
-    # Generate Real (will be mocked or fast-fail)
-    with client.stream("POST", "/api/v1/god/generate_real", json={"prompt": "Test", "n": 1}, headers=auth_header) as response:
-        pass
+    persona = {
+        "name": "Mock Person",
+        "title": "Researcher",
+        "bio": "Bio",
+        "theories": ["Theory"],
+        "stance": "Neutral",
+        "system_prompt": "Act naturally.",
+    }
+    with patch("app.api.v1.endpoints.god.settings.API_KEY", "test-key"), patch(
+        "app.api.v1.endpoints.god.RealGodAgent"
+    ) as agent_class:
+        agent_class.return_value.run.return_value = iter([{"type": "result", "content": [persona]}])
+        with client.stream("POST", "/api/v1/god/generate_real", json={"prompt": "Test", "n": 1}, headers=auth_header) as response:
+            body = response.read().decode("utf-8")
+    assert response.status_code == 200
+    assert "Mock Person" in body
+
+
+def test_god_generation_reports_missing_model_configuration(client, auth_header):
+    with patch("app.api.v1.endpoints.god.settings.API_KEY", None), patch.dict(
+        "os.environ", {"API_KEY": ""}
+    ):
+        response = client.post(
+            "/api/v1/god/generate_real",
+            json={"prompt": "创建哈利波特", "n": 1},
+            headers=auth_header,
+        )
+
+    assert response.status_code == 503
+    assert "模型服务尚未配置" in response.json()["detail"]
 
 def test_coverage_agents(client, auth_header):
     client.get("/api/v1/agents/", headers=auth_header)

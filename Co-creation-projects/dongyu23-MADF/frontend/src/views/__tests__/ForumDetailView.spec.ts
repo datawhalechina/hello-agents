@@ -2,13 +2,14 @@ import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ForumDetailView from '../ForumDetailView.vue'
 import { createTestingPinia } from '@pinia/testing'
-import { useRoute, useRouter } from 'vue-router'
+
+const { pushMock } = vi.hoisted(() => ({ pushMock: vi.fn() }))
 
 // Mock useRoute, useRouter
 vi.mock('vue-router', () => ({
-  useRoute: vi.fn(),
+  useRoute: vi.fn(() => ({ params: { id: '1' } })),
   useRouter: vi.fn(() => ({
-    push: vi.fn()
+    push: pushMock
   }))
 }))
 
@@ -31,11 +32,7 @@ vi.mock('ant-design-vue', () => ({
 
 describe('ForumDetailView', () => {
   it('renders header buttons correctly', async () => {
-    // Setup route params
-    (useRoute as any).mockReturnValue({
-      params: { id: '1' }
-    })
-
+    pushMock.mockClear()
     const wrapper = mount(ForumDetailView, {
       global: {
         plugins: [createTestingPinia({
@@ -70,6 +67,7 @@ describe('ForumDetailView', () => {
             CodeOutlined: true,
             // Stub UI components to simple HTML to verify presence
             'a-button': { template: '<button class="ant-btn"><slot /></button>' },
+            'a-input-search': { template: '<div><slot name="prefix" /></div>' },
             'a-space': { template: '<div><slot /></div>' },
             'a-tag': { template: '<span><slot /></span>' },
             'a-popconfirm': { template: '<div><slot /></div>' },
@@ -92,9 +90,9 @@ describe('ForumDetailView', () => {
 
     // Right header buttons
     const rightButtons = wrapper.findAll('.header-right button')
-    // Should have: Participants, Delete, Logs (Start is hidden for running)
-    // 3 buttons expected
-    expect(rightButtons.length).toBe(3)
+    // Should have: Stop, Participants, Delete, Logs (Start is hidden for running)
+    expect(rightButtons.length).toBe(4)
+    expect(wrapper.text()).toContain('停止论坛')
     
     // 4. Verify Z-Index Logic (Static check of class name or style if inline)
     // Since we used scoped CSS, we can't easily check computed style here without full browser.
@@ -102,7 +100,6 @@ describe('ForumDetailView', () => {
     
     // Simulate click on back button
     await backButton.trigger('click')
-    const router = useRouter()
-    expect(router.push).toHaveBeenCalledWith('/forums')
+    expect(pushMock).toHaveBeenCalledWith('/forums')
   })
 })

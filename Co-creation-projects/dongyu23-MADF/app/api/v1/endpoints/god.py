@@ -13,6 +13,7 @@ from app.agent.real_god import RealGodAgent
 from app.core.async_utils import async_generator_wrapper
 from app.core.cache import cache_service
 from app.services.persona_service import persona_service
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,12 @@ async def generate_real_personas(
     Each persona is generated sequentially to ensure high quality and deep research.
     Returns a StreamingResponse with SSE events.
     """
+    if not settings.has_api_key:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="模型服务尚未配置，暂时无法生成角色。请联系管理员配置 API Key。",
+        )
+
     agent = RealGodAgent()
     user_id = current_user.id
     
@@ -60,11 +67,15 @@ async def generate_real_personas(
     async def event_generator():
         try:
             generated_names_in_session = []
+            saved_persona_count = 0
             
             # Use n=None to allow the agent to auto-detect count from prompt
             target_n = request.n if request.n > 1 else None
             
             async for event in async_generator_wrapper(agent.run(request.prompt, n=target_n, generated_names=generated_names_in_session, db_existing_names=db_existing_names)):
+                if event.get("type") == "error":
+                    yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+                    return
                 
                 # If result, save to DB
                 if event["type"] == "result":
@@ -114,6 +125,7 @@ async def generate_real_personas(
                                     "is_public": saved_p.is_public
                                 }
                                 saved_personas_dicts.append(saved_dict)
+                                saved_persona_count += 1
                                 success_msg = f"✅ 角色 {saved_p.name} 保存成功 (ID: {saved_p.id})"
                                 yield f"data: {json.dumps({'type': 'status', 'content': success_msg}, ensure_ascii=False)}\n\n"
                                 
@@ -122,24 +134,28 @@ async def generate_real_personas(
                             else:
                                 fail_msg = f"角色 {p_data.get('name')} 保存失败，请查看后台日志"
                                 yield f"data: {json.dumps({'type': 'error', 'content': fail_msg}, ensure_ascii=False)}\n\n"
+                                return
                                 
                         except Exception as e:
                             logger.error(f"Error saving real persona: {e}")
-                            err_msg = f"保存异常: {str(e)}"
+                            err_msg = "角色保存失败，请稍后重试"
                             yield f"data: {json.dumps({'type': 'error', 'content': err_msg}, ensure_ascii=False)}\n\n"
+                            return
                     
                     # Update content with saved personas (including IDs)
                     event["content"] = saved_personas_dicts
                 
                 yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
             
-            # Final message after all generations are done
-            final_msg = f"✅ 所有智能体角色已生成并保存完毕。已停止生成。"
-            yield f"data: {json.dumps({'type': 'thought', 'content': final_msg}, ensure_ascii=False)}\n\n"
+            if saved_persona_count:
+                final_msg = "✅ 所有智能体角色已生成并保存完毕。已停止生成。"
+                yield f"data: {json.dumps({'type': 'thought', 'content': final_msg}, ensure_ascii=False)}\n\n"
+            else:
+                yield f"data: {json.dumps({'type': 'error', 'content': '未能生成可保存的角色，请稍后重试'}, ensure_ascii=False)}\n\n"
                     
         except Exception as e:
             logger.error(f"RealGod stream error: {e}")
-            err_msg = f"生成流异常: {str(e)}"
+            err_msg = "角色生成失败，请稍后重试"
             yield f"data: {json.dumps({'type': 'error', 'content': err_msg}, ensure_ascii=False)}\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")

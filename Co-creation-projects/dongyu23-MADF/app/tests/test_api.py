@@ -51,7 +51,7 @@ def test_create_persona(client):
             "name": "Socrates",
             "bio": "Greek philosopher",
             "theories": ["Method", "Ethics"],
-            "is_public": True
+            "is_public": False
         }
     )
     assert response.status_code == 200
@@ -59,6 +59,59 @@ def test_create_persona(client):
     assert data["name"] == "Socrates"
     # Ensure owner_id matches the user from token (which is created first, likely id=1)
     assert data["owner_id"] == 1
+
+def test_persona_name_is_trimmed_and_blank_name_is_rejected(client):
+    headers = get_auth_headers(client, username="persona-validation")
+
+    created = client.post(
+        "/api/v1/personas/",
+        headers=headers,
+        json={"name": "  Trimmed Persona  "},
+    )
+    assert created.status_code == 200
+    assert created.json()["name"] == "Trimmed Persona"
+
+    blank = client.post(
+        "/api/v1/personas/",
+        headers=headers,
+        json={"name": "   "},
+    )
+    assert blank.status_code == 400
+    assert blank.json()["message"] == "请求参数验证失败"
+
+    update = client.put(
+        f"/api/v1/personas/{created.json()['id']}",
+        headers=headers,
+        json={"name": "\t"},
+    )
+    assert update.status_code == 400
+
+def test_database_startup_repairs_legacy_blank_persona_name(db):
+    from app.db.client import db_manager, fetch_one
+
+    db.execute(
+        "INSERT INTO personas (owner_id, name, theories, is_public) VALUES (?, ?, ?, ?)",
+        [1, "   ", "[]", 0],
+    )
+    row = fetch_one(db.execute("SELECT MAX(id) AS id FROM personas"))
+    persona_id = row.id
+    db.close()
+
+    db_manager.init_db()
+    repaired_db = db_manager.get_connection()
+    try:
+        repaired = fetch_one(
+            repaired_db.execute("SELECT name FROM personas WHERE id = ?", [persona_id])
+        )
+        assert repaired.name == f"未命名智能体 #{persona_id}"
+
+        db_manager.init_db()
+        unchanged = fetch_one(
+            repaired_db.execute("SELECT name FROM personas WHERE id = ?", [persona_id])
+        )
+        assert unchanged.name == repaired.name
+    finally:
+        repaired_db.close()
 
 def test_create_forum(client):
     headers = get_auth_headers(client)

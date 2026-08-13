@@ -7,11 +7,35 @@
 </template>
 
 <script setup lang="ts">
+import { onBeforeUnmount, onMounted } from 'vue'
 import { theme } from 'ant-design-vue'
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
 import { useConfigStore } from '@/stores/config'
+import { useAuthStore } from '@/stores/auth'
+import router from '@/router'
 
 const configStore = useConfigStore()
+const authStore = useAuthStore()
+
+const syncAuth = () => {
+  authStore.syncFromStorage()
+  const isAuthPage = router.currentRoute.value.path.startsWith('/auth')
+  if (!authStore.token && !isAuthPage) {
+    router.replace('/auth/login')
+  } else if (authStore.token && isAuthPage) {
+    router.replace('/dashboard')
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('storage', syncAuth)
+  window.addEventListener('madf-auth-changed', syncAuth)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('storage', syncAuth)
+  window.removeEventListener('madf-auth-changed', syncAuth)
+})
 </script>
 
 <style>

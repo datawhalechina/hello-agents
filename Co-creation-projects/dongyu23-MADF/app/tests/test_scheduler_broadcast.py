@@ -9,6 +9,7 @@ class TestForumScheduler(unittest.TestCase):
         # Mock manager
         self.patcher = patch('app.services.forum_scheduler.manager')
         self.mock_manager = self.patcher.start()
+        self.mock_manager.broadcast = AsyncMock()
         
     def tearDown(self):
         self.patcher.stop()
@@ -23,13 +24,7 @@ class TestForumScheduler(unittest.TestCase):
         
         # Mock speak to return a generator of chunks
         def mock_speak(*args):
-            chunks = []
-            for char in "Hello World":
-                chunk = MagicMock()
-                chunk.choices = [MagicMock()]
-                chunk.choices[0].delta.content = char
-                chunks.append(chunk)
-            return chunks
+            return iter("Hello World")
             
         agent.speak = mock_speak
         
@@ -40,11 +35,12 @@ class TestForumScheduler(unittest.TestCase):
         
         with patch('app.services.forum_scheduler.get_forum_participants', return_value=[mock_p]), \
              patch('app.services.forum_scheduler.create_message') as mock_create_msg, \
-             patch('app.services.forum_scheduler.manager.broadcast', new_callable=AsyncMock):
+             patch.object(self.scheduler, '_is_forum_running', return_value=True):
+            mock_create_msg.return_value.id = 1
 
             # Run
             import asyncio
-            asyncio.run(self.scheduler._agent_speak(mock_db, forum_id, agent, thought, context))
+            asyncio.run(self.scheduler._agent_speak(forum_id, agent, thought, context))
             
             # Verify broadcasts
             # We expect len("Hello World") calls to broadcast_chunk

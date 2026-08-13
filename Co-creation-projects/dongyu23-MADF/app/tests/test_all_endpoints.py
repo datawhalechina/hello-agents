@@ -23,6 +23,35 @@ def test_auth_register_login(client):
     token = register_and_login(client)
     assert token is not None
 
+def test_register_rejects_weak_password_and_invalid_email(client):
+    weak = client.post(
+        "/api/v1/auth/register",
+        json={"username": "weak-user", "email": "weak@example.com", "password": "1"},
+    )
+    assert weak.status_code == 400
+    assert weak.json()["detail"] == "密码至少需要 8 个字符"
+
+    invalid_email = client.post(
+        "/api/v1/auth/register",
+        json={"username": "bad-email", "email": "not-an-email", "password": "password123"},
+    )
+    assert invalid_email.status_code == 400
+    assert "请输入有效的邮箱地址" in str(invalid_email.json())
+
+def test_register_rejects_duplicate_email(client):
+    payload = {
+        "username": "email-owner",
+        "email": "owner@example.com",
+        "password": "password123",
+    }
+    assert client.post("/api/v1/auth/register", json=payload).status_code == 200
+    duplicate = client.post(
+        "/api/v1/auth/register",
+        json={**payload, "username": "email-copy"},
+    )
+    assert duplicate.status_code == 400
+    assert duplicate.json()["detail"] == "该邮箱已被注册"
+
 def test_personas_crud(client):
     token = register_and_login(client)
     headers = {"Authorization": f"Bearer {token}"}
@@ -65,7 +94,7 @@ def test_create_forum_invalid_moderator_returns_404(client):
             "theories": ["X"],
             "stance": "S",
             "system_prompt": "SP",
-            "is_public": True
+            "is_public": False
         }
     )
     assert persona_res.status_code == 200
@@ -95,7 +124,7 @@ def test_create_forum_with_duplicate_participants_succeeds(client):
             "theories": ["X"],
             "stance": "S",
             "system_prompt": "SP",
-            "is_public": True
+            "is_public": False
         }
     )
     assert persona_res.status_code == 200
@@ -116,7 +145,7 @@ def test_create_forum_with_duplicate_participants_succeeds(client):
 
 def test_god_generate_unauthorized(client):
     response = client.post(
-        "/api/v1/god/generate",
+        "/api/v1/god/generate_real",
         json={"prompt": "test"}
     )
     assert response.status_code == 401

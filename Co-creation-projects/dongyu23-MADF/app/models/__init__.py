@@ -57,7 +57,7 @@ class Forum(BaseModel):
     moderator_id: Optional[int] = None
     status: str = "active"
     summary_history: Optional[Union[List[Any], str]] = []
-    start_time: datetime
+    start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None
     duration_minutes: int = 30
     

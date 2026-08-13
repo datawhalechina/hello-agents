@@ -1,15 +1,27 @@
 from typing import List, Optional, Any, Union, Dict
 from pydantic import BaseModel, ConfigDict, field_validator
+import re
 from datetime import datetime
 import json
 
 # --- User Schemas ---
 class UserBase(BaseModel):
     username: str
+    email: Optional[str] = None
     role: Optional[str] = "user"
 
 class UserCreate(UserBase):
     password: str
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        normalized = value.strip().lower()
+        if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", normalized):
+            raise ValueError("请输入有效的邮箱地址")
+        return normalized
 
 class UserResponse(UserBase):
     id: int
@@ -34,6 +46,14 @@ class PersonaBase(BaseModel):
     system_prompt: Optional[str] = None
     is_public: bool = False
 
+    @field_validator('name')
+    @classmethod
+    def validate_name(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError('Persona name must not be blank')
+        return value
+
 class PersonaCreate(PersonaBase):
     pass
 
@@ -45,6 +65,16 @@ class PersonaUpdate(BaseModel):
     stance: Optional[str] = None
     system_prompt: Optional[str] = None
     is_public: Optional[bool] = None
+
+    @field_validator('name')
+    @classmethod
+    def validate_name(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return value
+        value = value.strip()
+        if not value:
+            raise ValueError('Persona name must not be blank')
+        return value
 
 class PersonaResponse(PersonaBase):
     id: int
@@ -98,10 +128,39 @@ from .system_log import SystemLogCreate, SystemLogResponse
 class ForumBase(BaseModel):
     topic: str
 
+    @field_validator('topic')
+    @classmethod
+    def validate_topic(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError('讨论主题不能为空')
+        if len(value) > 200:
+            raise ValueError('讨论主题不能超过 200 个字符')
+        return value
+
 class ForumCreate(ForumBase):
     participant_ids: List[int]
     moderator_id: Optional[int] = None # Optional for backward compatibility (can use default)
     duration_minutes: int = 30
+
+    @field_validator('participant_ids')
+    @classmethod
+    def validate_participants(cls, value: List[int]) -> List[int]:
+        unique_ids = list(dict.fromkeys(value))
+        if not unique_ids:
+            raise ValueError('请至少选择一位智能体')
+        if len(unique_ids) > 5:
+            raise ValueError('每个论坛最多选择 5 位智能体')
+        if any(persona_id <= 0 for persona_id in unique_ids):
+            raise ValueError('智能体编号无效')
+        return unique_ids
+
+    @field_validator('duration_minutes')
+    @classmethod
+    def validate_duration(cls, value: int) -> int:
+        if value < 1 or value > 120:
+            raise ValueError('论坛时长必须在 1 到 120 分钟之间')
+        return value
 
 class ForumParticipantResponse(BaseModel):
     persona_id: int
@@ -134,10 +193,11 @@ class ForumResponse(ForumBase):
     creator_id: int
     moderator_id: Optional[int] = None
     status: str
-    start_time: datetime
+    start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None
     duration_minutes: Optional[int] = 30
     summary_history: Optional[Union[List[Any], str]] = [] # Changed to List[Any] for flexibility
+    ablation_flags: Optional[Dict[str, bool]] = {}
     participants: Optional[List[ForumParticipantResponse]] = []
     moderator: Optional[ModeratorResponse] = None # Include moderator info
 
@@ -159,6 +219,17 @@ class ForumResponse(ForumBase):
         elif v is None:
             return []
         return [v] if v else []
+
+    @field_validator('ablation_flags', mode='before')
+    @classmethod
+    def parse_ablation_flags(cls, v: Any) -> Dict[str, bool]:
+        if isinstance(v, str):
+            try:
+                parsed = json.loads(v)
+                return parsed if isinstance(parsed, dict) else {}
+            except json.JSONDecodeError:
+                return {}
+        return v if isinstance(v, dict) else {}
 
 # --- Message Schemas ---
 class MessageBase(BaseModel):

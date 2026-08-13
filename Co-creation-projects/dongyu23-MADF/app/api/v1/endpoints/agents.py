@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from typing import List, Optional
+import logging
 from pydantic import BaseModel
 
 from app.db.session import get_db
@@ -9,6 +10,7 @@ from app.agent.agent import ParticipantAgent
 from app.agent.memory import SharedMemory
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 class AgentChatRequest(BaseModel):
     agent_name: str
@@ -34,8 +36,9 @@ async def chat_with_agent(request: AgentChatRequest):
             n_participants=3, # Default, doesn't affect single-turn much
             theme=request.theme
         )
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to initialize agent: {str(e)}")
+    except Exception:
+        logger.exception("Failed to initialize agent")
+        raise HTTPException(status_code=400, detail="Failed to initialize agent")
 
     # 2. Reconstruct Context
     # We need to convert the list of dicts into the string format expected by agent.think/speak
@@ -62,8 +65,8 @@ async def chat_with_agent(request: AgentChatRequest):
     
     full_content = ""
     if response_stream:
-        for chunk in response_stream:
-            if chunk.choices[0].delta.content:
-                full_content += chunk.choices[0].delta.content
+        for token in response_stream:
+            if token:
+                full_content += token
     
     return AgentChatResponse(content=full_content, thought=thought)

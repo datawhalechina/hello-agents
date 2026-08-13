@@ -6,7 +6,7 @@
             <span class="title">智能体工坊</span>
             <span class="subtitle">管理您的智能体角色，定义个性与认知体系</span>
           </div>
-          <a-space>
+          <a-space class="header-actions">
             <a-button type="primary" ghost @click="showRealGodModal" class="real-god-btn">
               <global-outlined /> 上帝生成真实角色 (联网)
             </a-button>
@@ -324,7 +324,8 @@ const showModal = (record?: Persona) => {
 }
 
 const handleOk = async () => {
-  if (!formState.name) {
+  const name = formState.name.trim()
+  if (!name) {
     message.warning('请输入智能体名称')
     return
   }
@@ -332,6 +333,7 @@ const handleOk = async () => {
   submitting.value = true
   const data = {
     ...formState,
+    name,
     theories: formState.theories_str.split(/[,，]/).map(s => s.trim()).filter(s => s)
   }
   
@@ -439,6 +441,8 @@ const showRealGodModal = () => {
 }
 
 .pagination-wrapper {
+  position: relative;
+  z-index: 2;
   margin-top: 16px;
   padding-top: 0;
   text-align: center;
@@ -513,6 +517,8 @@ const showRealGodModal = () => {
 }
 
 .persona-content {
+  position: relative;
+  z-index: 1;
   margin-top: 0;
   flex: 1;
   overflow: hidden;
@@ -589,5 +595,38 @@ const showRealGodModal = () => {
   text-overflow: ellipsis;
   white-space: nowrap;
   vertical-align: top;
+}
+
+@media (max-width: 768px) {
+  .persona-content-wrapper {
+    padding: 16px 12px;
+  }
+
+  .page-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .header-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+  }
+
+  .header-actions :deep(.ant-space-item),
+  .header-actions :deep(.ant-btn) {
+    width: 100%;
+  }
+
+  .persona-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: minmax(220px, auto);
+  }
+
+  .persona-grid-container {
+    height: auto;
+    min-height: calc(100vh - 320px);
+  }
 }
 </style>

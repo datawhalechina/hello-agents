@@ -6,6 +6,7 @@ import sys
 sys.modules['libsql_client'] = MagicMock()
 
 import asyncio
+from datetime import datetime, timezone
 from app.services.forum_scheduler import ForumScheduler
 from app.agent.agent import ParticipantAgent
 
@@ -20,6 +21,7 @@ class TestSchedulerRobustness(unittest.IsolatedAsyncioTestCase):
         mock_forum.id = forum_id
         mock_forum.status = "running"
         mock_forum.duration_minutes = 10
+        mock_forum.start_time = datetime.now(timezone.utc)
         mock_forum.moderator = None
         mock_forum.summary_history = []
         
@@ -69,6 +71,7 @@ class TestSchedulerRobustness(unittest.IsolatedAsyncioTestCase):
              patch('app.services.forum_scheduler.ForumScheduler._broadcast_system_message', new_callable=AsyncMock), \
              patch('app.services.forum_scheduler.ForumScheduler._broadcast_system_log', new_callable=AsyncMock) as mock_broadcast_log, \
              patch('app.services.forum_scheduler.ForumScheduler._moderator_speak', new_callable=AsyncMock), \
+             patch.object(scheduler, '_is_forum_running', return_value=True), \
              patch('app.services.forum_scheduler.ParticipantAgent', return_value=mock_agent), \
              patch('app.services.forum_scheduler.ModeratorAgent'), \
              patch('app.services.forum_scheduler.SharedMemory'):
@@ -91,7 +94,7 @@ class TestSchedulerRobustness(unittest.IsolatedAsyncioTestCase):
              # 4. Thinking...
              # 5. Error log for agent speak
              
-             error_logs = [call for call in mock_broadcast_log.call_args_list if "API Timeout" in str(call)]
+             error_logs = [call for call in mock_broadcast_log.call_args_list if "发言生成失败" in str(call)]
              self.assertTrue(len(error_logs) > 0, "Should have broadcasted the API error")
              print("Found error logs:", error_logs)
 

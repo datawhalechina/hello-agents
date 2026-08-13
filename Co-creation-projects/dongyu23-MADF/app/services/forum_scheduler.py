@@ -3,6 +3,7 @@ import logging
 import time
 import traceback
 import uuid
+from datetime import datetime
 from typing import Any, Optional
 from app.db.session import db_manager
 from app.crud import (
@@ -14,8 +15,10 @@ from app.crud import (
     update_forum_participant,
     get_persona
 )
+from app.db.client import fetch_all
 from app.schemas import MessageCreate
 from app.agent.agent import ModeratorAgent, ParticipantAgent
+from hello_agents import Message
 from app.agent.memory import SharedMemory
 from app.core.websockets import manager
 # Removed SQLAlchemy models import as we use schemas/dicts
@@ -25,10 +28,85 @@ from contextlib import contextmanager
 
 logger = logging.getLogger(__name__)
 
+
+def restore_framework_history(agent, persisted_messages, self_name=None):
+    """Replay persisted forum messages into a HelloAgents conversation."""
+    for persisted in persisted_messages:
+        role = "assistant" if self_name and persisted.speaker_name == self_name else "user"
+        agent.add_message(
+            Message(
+                content=f"[{persisted.speaker_name}] {persisted.content}",
+                role=role,
+            )
+        )
+
+
+def to_epoch_seconds(value) -> float:
+    """Normalize LibSQL datetime representations for restart recovery."""
+    if isinstance(value, datetime):
+        return value.timestamp()
+    if isinstance(value, (int, float)):
+        # LibSQL persists Python datetimes as millisecond Unix timestamps.
+        return float(value) / 1000 if abs(value) >= 100_000_000_000 else float(value)
+    if isinstance(value, str):
+        try:
+            numeric_value = float(value)
+        except ValueError:
+            return datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp()
+        return numeric_value / 1000 if abs(numeric_value) >= 100_000_000_000 else numeric_value
+    raise TypeError(f"Unsupported forum start_time type: {type(value).__name__}")
+
+
+def forum_deadline_epoch(start_time, duration_minutes: int) -> float:
+    """Return the authoritative forum deadline in epoch seconds."""
+    return to_epoch_seconds(start_time) + int(duration_minutes or 30) * 60
+
+
 class ForumScheduler:
     def __init__(self):
         self.running_tasks = {}
+        self.child_tasks = {}
         self.user_message_queues = {} # forum_id -> asyncio.Queue
+
+    def _spawn_forum_task(self, forum_id: int, coroutine):
+        task = asyncio.create_task(coroutine)
+        tasks = self.child_tasks.setdefault(forum_id, set())
+        tasks.add(task)
+
+        def finish(finished):
+            tasks.discard(finished)
+            if finished.cancelled():
+                return
+            try:
+                finished.result()
+            except Exception:
+                logger.exception("Forum %s background task failed", forum_id)
+
+        task.add_done_callback(finish)
+        return task
+
+    def _is_forum_running(self, forum_id: int) -> bool:
+        with self._get_db() as db:
+            forum = get_forum(db, forum_id)
+            return bool(forum and forum.status == "running")
+
+    async def recover_running_forums(self):
+        with self._get_db() as db:
+            forum_ids = [row.id for row in fetch_all(db.execute("SELECT id FROM forums WHERE status = ?", ["running"]))]
+        for forum_id in forum_ids:
+            await self.start_forum(forum_id, recovering=True)
+        return forum_ids
+
+    async def shutdown(self):
+        """Cancel local tasks while preserving DB state for restart recovery."""
+        main_tasks = list(self.running_tasks.values())
+        child_tasks = [task for tasks in self.child_tasks.values() for task in tasks]
+        for task in main_tasks + child_tasks:
+            task.cancel()
+        if main_tasks or child_tasks:
+            await asyncio.gather(*main_tasks, *child_tasks, return_exceptions=True)
+        self.running_tasks.clear()
+        self.child_tasks.clear()
 
     async def push_user_message(self, forum_id: int, user_name: str, content: str):
         """External API calls this to inject user message"""
@@ -88,18 +166,47 @@ class ForumScheduler:
         
         return processed_any
 
-    async def start_forum(self, forum_id: int, ablation_flags: dict = None):
+    async def _close_for_unavailable_agents(self, forum_id: int):
+        """End a forum when no participant can produce a usable thought."""
+        with self._get_db() as db:
+            if get_forum(db, forum_id):
+                update_forum(db, forum_id, status="closed")
+        await manager.broadcast(forum_id, {
+            "type": "status_update",
+            "status": "closed",
+        })
+        await self._broadcast_system_log(
+            forum_id,
+            "论坛已停止：当前没有可用的智能体响应，请检查模型配置后重新发起讨论。",
+            "error",
+        )
+
+    async def start_forum(
+        self,
+        forum_id: int,
+        ablation_flags: dict = None,
+        recovering: bool = False,
+    ):
         if forum_id in self.running_tasks:
             logger.warning(f"Forum {forum_id} is already running.")
             return
 
-        task = asyncio.create_task(self._run_forum_loop(forum_id, ablation_flags))
+        task = asyncio.create_task(
+            self._run_forum_loop(forum_id, ablation_flags, recovering=recovering)
+        )
         self.running_tasks[forum_id] = task
         
         # Remove task from dict when done
         task.add_done_callback(lambda t: self.running_tasks.pop(forum_id, None))
 
     async def stop_forum(self, forum_id: int):
+        # Close the persisted forum first. In-flight LLM threads cannot be
+        # forcefully cancelled, so every late-result guard must observe the
+        # closed state before local tasks are cancelled and drained.
+        with self._get_db() as db:
+            if get_forum(db, forum_id):
+                update_forum(db, forum_id, status="closed")
+
         if forum_id in self.running_tasks:
             self.running_tasks[forum_id].cancel()
             try:
@@ -107,6 +214,15 @@ class ForumScheduler:
             except asyncio.CancelledError:
                 pass
             logger.info(f"Forum {forum_id} stopped.")
+        children = list(self.child_tasks.pop(forum_id, set()))
+        for task in children:
+            task.cancel()
+        if children:
+            await asyncio.gather(*children, return_exceptions=True)
+        await manager.broadcast(forum_id, {
+            "type": "status_update",
+            "status": "closed",
+        })
 
     @contextmanager
     def _get_db(self):
@@ -120,8 +236,18 @@ class ForumScheduler:
             except:
                 pass
 
-    async def _broadcast_system_log(self, forum_id: int, message: str, level: str = "info", source: str = "System", db: Any = None):
+    async def _broadcast_system_log(
+        self,
+        forum_id: int,
+        message: str,
+        level: str = "info",
+        source: str = "System",
+        db: Any = None,
+        require_running: bool = False,
+    ):
         """Broadcast system log to frontend for 'terminal-like' view and optionally persist"""
+        if require_running and not self._is_forum_running(forum_id):
+            return
         
         # 1. Broadcast immediately (async) so frontend gets it ASAP
         # This is the "Native" passing path - extremely fast via WebSocket
@@ -142,11 +268,32 @@ class ForumScheduler:
 
         # 2. Fire-and-forget persistence (Background Task)
         # Don't wait for Redis/DB write to complete before returning
-        asyncio.create_task(self._persist_log_bg(forum_id, message, level, source, timestamp))
+        self._spawn_forum_task(
+            forum_id,
+            self._persist_log_bg(
+                forum_id,
+                message,
+                level,
+                source,
+                timestamp,
+                require_running=require_running,
+            ),
+        )
 
-    async def _persist_log_bg(self, forum_id: int, message: str, level: str, source: str, timestamp: str):
+    async def _persist_log_bg(
+        self,
+        forum_id: int,
+        message: str,
+        level: str,
+        source: str,
+        timestamp: str,
+        require_running: bool = False,
+    ):
         """Background persistence logic decoupled from main flow"""
         from app.core.cache import cache_service
+
+        if require_running and not self._is_forum_running(forum_id):
+            return
         
         try:
             log_entry = {
@@ -186,7 +333,15 @@ class ForumScheduler:
                         except:
                             pass
 
-            await asyncio.to_thread(persist_log_sync)
+            persist_task = asyncio.create_task(asyncio.to_thread(persist_log_sync))
+            try:
+                await asyncio.shield(persist_task)
+            except asyncio.CancelledError:
+                # Cancelling asyncio.to_thread does not stop its worker thread.
+                # Drain it so stop_forum cannot return while a late DB write is
+                # still running in the executor.
+                await persist_task
+                raise
 
     async def _flush_logs_to_db(self):
         """Batch flush logs from Redis buffer to DB"""
@@ -247,18 +402,18 @@ class ForumScheduler:
         await asyncio.to_thread(batch_insert)
 
     async def _mock_stream_generator(self, content: str):
-        class MockChunk:
-            def __init__(self, text):
-                self.choices = [type('obj', (object,), {'delta': type('obj', (object,), {'content': text})})]
-
         # Simulate streaming
         chunk_size = 5
         for i in range(0, len(content), chunk_size):
-            chunk_text = content[i:i+chunk_size]
-            yield MockChunk(chunk_text)
+            yield content[i:i+chunk_size]
             await asyncio.sleep(0.05)
 
-    async def _run_forum_loop(self, forum_id: int, ablation_flags: dict = None):
+    async def _run_forum_loop(
+        self,
+        forum_id: int,
+        ablation_flags: dict = None,
+        recovering: bool = False,
+    ):
         ablation_flags = ablation_flags or {}
         logger.info(f"Starting forum loop for {forum_id} with flags: {ablation_flags}")
         
@@ -277,11 +432,26 @@ class ForumScheduler:
                     logger.error(f"Forum {forum_id} not found.")
                     return
 
-                # Update status to Running
-                update_forum(db, forum_id, status="running")
+                # ForumService persists the authoritative clock before scheduling.
+                # Recovery and a normal start both consume it without rewriting it.
+                if recovering:
+                    persisted_start_time = forum.start_time
+                    persisted_flags = getattr(forum, "ablation_flags", {}) or {}
+                    if isinstance(persisted_flags, str):
+                        import json
+                        try:
+                            persisted_flags = json.loads(persisted_flags)
+                        except json.JSONDecodeError:
+                            persisted_flags = {}
+                    ablation_flags = persisted_flags if isinstance(persisted_flags, dict) else {}
+                else:
+                    persisted_start_time = forum.start_time
+                if persisted_start_time is None:
+                    raise ValueError(f"Running forum {forum_id} has no persisted start_time")
                 
                 # Initialize Agents
                 participants_db = get_forum_participants(db, forum_id)
+                persisted_messages = get_forum_messages(db, forum_id)
                 
                 moderator_db = forum.moderator
                 
@@ -314,6 +484,11 @@ class ForumScheduler:
                     theme=forum.topic,
                     ablation_flags=ablation_flags
                 )
+
+                # Rehydrate the framework conversation after process restart.
+                # The scheduler still owns turn selection, while HelloAgents
+                # receives the persisted transcript as explicit messages.
+                restore_framework_history(agent, persisted_messages, self_name=agent.name)
                 
                 # Restore memory
                 if not ablation_flags.get("no_private_memory"):
@@ -343,26 +518,34 @@ class ForumScheduler:
             else:
                 moderator = ModeratorAgent(theme=forum.topic)
                 await self._broadcast_system_log(forum_id, "系统默认主持人已就位")
+
+            restore_framework_history(moderator, persisted_messages)
             
             # Speaker Queue for multi-speaker management
             speaker_queue = []
             # Track agents who have spoken in the current "batch" (until queue is cleared)
             batch_spoken_agents = set()
             
-            # Opening
-            await self._broadcast_system_message(forum_id, "论坛开始，主持人正在开场...")
-            await self._broadcast_system_log(forum_id, "主持人正在进行开场白...")
-            await self._flush_logs_to_db() # FLUSH 2
-            
-            await self._moderator_speak(forum_id, moderator, "opening", guests=participants, ablation_flags=ablation_flags)
-            
-            await self._broadcast_system_log(forum_id, "DEBUG: 主持人开场结束，进入主循环", "info")
-            await self._flush_logs_to_db() # FLUSH 3
+            if not recovering:
+                await self._broadcast_system_message(forum_id, "论坛开始，主持人正在开场...")
+                await self._broadcast_system_log(forum_id, "主持人正在进行开场白...")
+                await self._flush_logs_to_db() # FLUSH 2
+
+                await self._moderator_speak(
+                    forum_id,
+                    moderator,
+                    "opening",
+                    guests=participants,
+                    ablation_flags=ablation_flags,
+                )
+
+                await self._broadcast_system_log(forum_id, "DEBUG: 主持人开场结束，进入主循环", "info")
+                await self._flush_logs_to_db() # FLUSH 3
+            else:
+                await self._broadcast_system_log(forum_id, "论坛已从上次运行状态恢复")
             
             # Main Loop
-            start_time = time.time()
-            duration_sec = (forum.duration_minutes or 30) * 60
-            end_time = start_time + duration_sec
+            end_time = forum_deadline_epoch(persisted_start_time, forum.duration_minutes or 30)
             
             turn_count = 0
             fallback_speaker_idx = 0
@@ -391,7 +574,7 @@ class ForumScheduler:
                 current_time = time.time()
                 
                 # 1. Check Time -> Closing
-                if current_time > end_time:
+                if current_time >= end_time:
                     logger.info(f"Forum {forum_id} time up. Closing.")
                     
                     # Push "closed" status to frontend immediately BEFORE moderator starts speaking closing remarks
@@ -503,7 +686,7 @@ class ForumScheduler:
                 # No, because context depends on the previous speaker's FULL message.
                 
                 # Broadcast thinking log - Use create_task to not block thinking
-                asyncio.create_task(self._broadcast_system_log(forum_id, "所有参与者正在思考中...", "info"))
+                self._spawn_forum_task(forum_id, self._broadcast_system_log(forum_id, "所有参与者正在思考中...", "info"))
                 logger.info(f"Forum {forum_id}: Agents start thinking...")
                 
                 async def agent_think(ag):
@@ -519,6 +702,9 @@ class ForumScheduler:
                             }
                         else:
                             thought = await asyncio.to_thread(ag.think, context_str)
+
+                        if not self._is_forum_running(forum_id):
+                            return ag, None
                         
                         if thought:
                             import json
@@ -531,7 +717,11 @@ class ForumScheduler:
                         return ag, thought
                     except Exception as e:
                         logger.error(f"Agent {ag.name} think failed: {e}")
-                        await self._broadcast_system_log(forum_id, f"嘉宾 [{ag.name}] 思考失败: {str(e)}", "error")
+                        await self._broadcast_system_log(
+                            forum_id,
+                            f"嘉宾 [{ag.name}] 思考失败，已跳过本轮。",
+                            "error",
+                        )
                         return ag, None
 
                 # Execute thinking in parallel - NO DB LOCK HELD HERE
@@ -549,7 +739,7 @@ class ForumScheduler:
                 # think_results = await asyncio.gather(*[agent_think(p) for p in participants])
                 
                 # --- NEW: Interruptible Thinking with Polling ---
-                think_tasks = [asyncio.create_task(agent_think(p)) for p in participants]
+                think_tasks = [self._spawn_forum_task(forum_id, agent_think(p)) for p in participants]
                 think_results = []
                 interrupted = False
 
@@ -596,6 +786,15 @@ class ForumScheduler:
                     speaker_queue.clear()
                     # Discard thoughts implicitly by continuing loop
                     continue
+
+                valid_thoughts = [thought for _, thought in think_results if thought]
+                if participants and not valid_thoughts:
+                    logger.error(
+                        "Forum %s has no usable participant thoughts; ending to avoid retry loops.",
+                        forum_id,
+                    )
+                    await self._close_for_unavailable_agents(forum_id)
+                    break
 
                 # Process thoughts (need DB to save thoughts)
                 # Optimization: Do this ASYNC or in background if possible?
@@ -714,6 +913,8 @@ class ForumScheduler:
                 # Fire and forget DB updates for thoughts (using create_task)
                 # This removes the DB write latency from the critical path of "Next Speaker"
                 async def save_thoughts_bg(results, f_id):
+                    if not self._is_forum_running(f_id):
+                        return
                     with self._get_db() as db:
                         # Re-fetch only if needed, or pass IDs.
                         # We need persona_id. We can cache it or fetch once.
@@ -735,18 +936,18 @@ class ForumScheduler:
                                 update_forum_participant(db, f_id, p_db.persona_id, thoughts_history=current + [th])
                 
                 if think_results:
-                    asyncio.create_task(save_thoughts_bg(think_results, forum_id))
+                    self._spawn_forum_task(forum_id, save_thoughts_bg(think_results, forum_id))
 
                 # --- Queue Logic Refinement ---
                 # Broadcasting logs is fast (Redis/WS), keep it.
                 queue_names = [a.name for a in speaker_queue]
                 if queue_names:
                     # Optimized: Use background task for log persistence to avoid blocking
-                    asyncio.create_task(self._broadcast_system_log(forum_id, f"当前发言队列: {', '.join(queue_names)}", "info"))
+                    self._spawn_forum_task(forum_id, self._broadcast_system_log(forum_id, f"当前发言队列: {', '.join(queue_names)}", "info"))
                 
                 if speaker:
                     # Async log to not block speaking
-                    asyncio.create_task(self._broadcast_system_log(forum_id, f"下一位发言: [{speaker.name}]", "info"))
+                    self._spawn_forum_task(forum_id, self._broadcast_system_log(forum_id, f"下一位发言: [{speaker.name}]", "info"))
                     
                     thought = thoughts_map.get(speaker) or {}
                     
@@ -770,7 +971,7 @@ class ForumScheduler:
             logger.error(f"Forum loop crashed: {e}")
             logger.error(traceback.format_exc())
             try:
-                await self._broadcast_system_log(forum_id, f"论坛异常终止: {str(e)}", "error")
+                await self._broadcast_system_log(forum_id, "论坛异常终止，请查看服务端日志", "error")
             except:
                 pass
 
@@ -815,10 +1016,20 @@ class ForumScheduler:
             if gen:
                 try:
                     # Async log
-                    asyncio.create_task(self._broadcast_system_log(forum_id, f"主持人 [{moderator.name}] 正在构思...", "thought"))
+                    self._spawn_forum_task(
+                        forum_id,
+                        self._broadcast_system_log(
+                            forum_id,
+                            f"主持人 [{moderator.name}] 正在构思...",
+                            "thought",
+                            require_running=True,
+                        ),
+                    )
                     
                     first_token = True
                     async for chunk in async_generator_wrapper(gen):
+                        if not self._is_forum_running(forum_id):
+                            return
                         # --- NEW: Interruption Check ---
                         if await self._process_user_messages(forum_id):
                             logger.info(f"Moderator {moderator.name} interrupted by user.")
@@ -829,8 +1040,8 @@ class ForumScheduler:
                             await self._broadcast_system_log(forum_id, f"主持人 [{moderator.name}] 开始发言...", "speech")
                             first_token = False
 
-                        if hasattr(chunk.choices[0].delta, 'content') and chunk.choices[0].delta.content:
-                            token = chunk.choices[0].delta.content
+                        if chunk:
+                            token = chunk
                             content += token
                             await self._broadcast_chunk(forum_id, moderator.name, token, None, moderator_id, stream_id)
                 except Exception as e:
@@ -843,7 +1054,7 @@ class ForumScheduler:
             await self._broadcast_system_log(forum_id, f"主持人发言生成失败: {str(e)}", "error")
             return
 
-        if content:
+        if content and (action == "closing" or self._is_forum_running(forum_id)):
             with self._get_db() as db:
                 msg = create_message(db, MessageCreate(
                     forum_id=forum_id,
@@ -888,6 +1099,9 @@ class ForumScheduler:
                 gen = self._mock_stream_generator(f"Mock speech from {agent.name}. My thought was: {thought.get('mind')}")
             else:
                 gen = await asyncio.to_thread(agent.speak, thought, context)
+
+            if not self._is_forum_running(forum_id):
+                return
             
             if gen:
                 try:
@@ -899,6 +1113,8 @@ class ForumScheduler:
                     thought_content = thought.get('mind') if thought else None
                     
                     async for chunk in async_generator_wrapper(gen):
+                        if not self._is_forum_running(forum_id):
+                            return
                         # --- NEW: Interruption Check ---
                         if await self._process_user_messages(forum_id):
                             logger.info(f"Agent {agent.name} interrupted by user.")
@@ -911,8 +1127,8 @@ class ForumScheduler:
                             await self._broadcast_system_log(forum_id, f"嘉宾 [{agent.name}] 开始发言...", "speech")
                             first_token = False
                             
-                        if hasattr(chunk.choices[0].delta, 'content') and chunk.choices[0].delta.content:
-                            token = chunk.choices[0].delta.content
+                        if chunk:
+                            token = chunk
                             content += token
                             
                             send_thought = None
@@ -923,17 +1139,17 @@ class ForumScheduler:
                             await self._broadcast_chunk(forum_id, agent.name, token, persona_id, None, stream_id, thought=send_thought)
                 except Exception as e:
                     logger.error(f"Error consuming agent generator: {e}")
-                    await self._broadcast_system_log(forum_id, f"嘉宾 [{agent.name}] 发言中断: {str(e)}", "error")
+                    await self._broadcast_system_log(forum_id, f"嘉宾 [{agent.name}] 发言中断，请查看服务端日志", "error")
             else:
                 logger.warning(f"Agent {agent.name} speak returned None")
                 content = "(沉默)"
                 await self._broadcast_system_log(forum_id, f"嘉宾 [{agent.name}] 放弃发言 (API无响应或返回空)", "warning")
         except Exception as e:
             logger.error(f"Agent {agent.name} speak failed: {e}")
-            await self._broadcast_system_log(forum_id, f"嘉宾 [{agent.name}] 发言生成失败: {str(e)}", "error")
+            await self._broadcast_system_log(forum_id, f"嘉宾 [{agent.name}] 发言生成失败，请查看服务端日志", "error")
             return
 
-        if content:
+        if content and self._is_forum_running(forum_id):
             thought_content = None
             if thought:
                 thought_content = thought.get('mind')

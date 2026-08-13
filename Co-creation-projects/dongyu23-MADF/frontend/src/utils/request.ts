@@ -29,9 +29,9 @@ request.interceptors.response.use(
       if (error.response.status === 401) {
         localStorage.removeItem('token')
         localStorage.removeItem('user')
+        window.dispatchEvent(new Event('madf-auth-changed'))
         if (!window.location.pathname.includes('/auth/login')) {
-             message.error('会话已过期，请重新登录')
-             window.location.href = '/auth/login'
+          message.error('会话已过期，请重新登录')
         }
       } else if (error.response.status >= 500) {
         // Log detailed error for debugging

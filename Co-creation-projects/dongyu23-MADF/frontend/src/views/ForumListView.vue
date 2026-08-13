@@ -5,7 +5,7 @@
         <span class="title">圆桌论坛</span>
         <span class="subtitle">创建多智能体讨论组，观察思维碰撞</span>
       </div>
-      <a-button type="primary" size="large" @click="showModal()">
+      <a-button type="primary" size="large" class="create-forum-btn" @click="showModal()">
         <plus-outlined /> 发起新讨论
       </a-button>
     </div>
@@ -18,7 +18,7 @@
       </div>
       <div v-else class="forum-grid">
         <a-card
-          v-for="item in forumStore.forums"
+          v-for="item in paginatedForums"
           :key="item.id"
           hoverable
           class="forum-card"
@@ -33,7 +33,7 @@
             </template>
             <template #description>
               <div class="card-desc">
-                创建时间: {{ new Date(item.start_time).toLocaleString() }}
+                创建时间: {{ item.start_time ? new Date(item.start_time).toLocaleString() : '尚未开始' }}
               </div>
             </template>
             <template #avatar>
@@ -48,7 +48,7 @@
           </a-card-meta>
           
           <div class="card-footer" @click.stop>
-            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+            <div class="card-footer-actions">
               <a-popconfirm 
                 title="确定删除该论坛吗？" 
                 ok-text="确定"
@@ -68,6 +68,14 @@
         <div v-if="forumStore.forums.length === 0 && !forumStore.loading" class="empty-state">
           <a-empty description="暂无正在进行的论坛，发起一个新的话题吧" />
         </div>
+      </div>
+      <div class="pagination-wrapper" v-if="forumStore.forums.length > forumPageSize">
+        <a-pagination
+          v-model:current="forumPage"
+          :page-size="forumPageSize"
+          :total="forumStore.forums.length"
+          :show-size-changer="false"
+        />
       </div>
     </a-spin>
 
@@ -99,6 +107,8 @@
           <a-select
             v-model:value="formState.participant_ids"
             mode="multiple"
+            show-search
+            option-filter-prop="label"
             placeholder="选择参与讨论的智能体"
             :options="personaOptions"
             :loading="personaStore.loading"
@@ -116,8 +126,31 @@
           </div>
         </a-form-item>
 
+        <a-form-item label="主持人" name="moderator_id">
+          <a-select
+            v-model:value="formState.moderator_id"
+            allow-clear
+            show-search
+            option-filter-prop="label"
+            placeholder="使用系统默认主持人"
+            :options="moderatorOptions"
+            :loading="forumStore.loading"
+            size="large"
+          />
+        </a-form-item>
+
         <a-form-item label="论坛时长 (分钟)" name="duration">
-            <a-input-number v-model:value="formState.duration" :min="5" :max="15" />
+            <input
+              v-model.number="formState.duration"
+              class="duration-input"
+              type="number"
+              min="1"
+              max="120"
+              step="1"
+              inputmode="numeric"
+              aria-label="论坛时长 (分钟)"
+            />
+            <div class="field-help">支持 1 到 120 分钟，长时讨论建议 30 分钟以上。</div>
         </a-form-item>
       </a-form>
     </a-modal>
@@ -135,6 +168,8 @@ const forumStore = useForumStore()
 const personaStore = usePersonaStore()
 const visible = ref(false)
 const submitting = ref(false)
+const forumPage = ref(1)
+const forumPageSize = 9
 
 const formState = reactive({
   topic: '',
@@ -161,6 +196,11 @@ const personaOptions = computed(() => {
     label: p.name,
     value: p.id
   }))
+})
+
+const paginatedForums = computed(() => {
+  const start = (forumPage.value - 1) * forumPageSize
+  return forumStore.forums.slice(start, start + forumPageSize)
 })
 
 const getStatusColor = (status: string) => {
@@ -208,8 +248,17 @@ const showModal = async () => {
 }
 
 const handleOk = async () => {
+  formState.topic = formState.topic.trim()
   if (!formState.topic || formState.participant_ids.length === 0) {
     message.warning('请填写完整信息')
+    return
+  }
+  if (formState.participant_ids.length > 5) {
+    message.warning('每个论坛最多选择 5 位智能体')
+    return
+  }
+  if (formState.duration < 1 || formState.duration > 120) {
+    message.warning('论坛时长必须在 1 到 120 分钟之间')
     return
   }
   
@@ -297,6 +346,7 @@ const handleDelete = async (id: number) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-width: 0;
 }
 
 .card-title .topic {
@@ -325,5 +375,55 @@ const handleDelete = async (id: number) => {
   grid-column: 1 / -1;
   padding: 48px 0;
   text-align: center;
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.field-help {
+  margin-top: 6px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 12px;
+}
+
+.card-footer-actions {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  min-width: 0;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .forum-list-page {
+    padding: 20px 12px;
+  }
+
+  .page-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .create-forum-btn {
+    width: 100%;
+  }
+
+  .forum-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .forum-card {
+    min-width: 0;
+  }
+
+  .card-footer-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 }
 </style>

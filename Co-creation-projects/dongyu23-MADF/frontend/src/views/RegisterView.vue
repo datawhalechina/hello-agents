@@ -39,8 +39,26 @@
         </a-form-item>
 
         <a-form-item
+          name="email"
+          :rules="[
+            { required: true, message: '请输入邮箱' },
+            { type: 'email', message: '请输入有效的邮箱地址' }
+          ]"
+        >
+          <a-input
+            v-model:value="formState.email"
+            size="large"
+            placeholder="邮箱"
+            autocomplete="email"
+          />
+        </a-form-item>
+
+        <a-form-item
           name="password"
-          :rules="[{ required: true, message: '请输入密码' }]"
+          :rules="[
+            { required: true, message: '请输入密码' },
+            { min: 8, message: '密码至少需要 8 个字符' }
+          ]"
         >
           <a-input-password
             v-model:value="formState.password"
@@ -110,6 +128,7 @@ import type { Rule } from 'ant-design-vue/es/form'
 const authStore = useAuthStore()
 const formState = reactive({
   username: '',
+  email: '',
   password: '',
   confirmPassword: ''
 })

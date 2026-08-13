@@ -43,6 +43,8 @@ def test_create_forum_with_moderator(client, auth_header):
     assert data["topic"] == "Test Topic"
     assert data["moderator_id"] == mod_id
     assert data["moderator"]["name"] == "Custom Host"
+    assert data["duration_minutes"] == 30
+    assert data["start_time"] is None
 
 def test_create_forum_default_moderator(client, auth_header):
     # Create a persona
@@ -67,3 +69,5 @@ def test_create_forum_default_moderator(client, auth_header):
     assert forum_res.status_code == 200
     data = forum_res.json()
     assert data["moderator_id"] is None
+    assert data["duration_minutes"] == 30
+    assert data["start_time"] is None

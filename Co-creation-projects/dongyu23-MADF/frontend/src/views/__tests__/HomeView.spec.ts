@@ -30,7 +30,10 @@ describe('HomeView', () => {
           createTestingPinia({ createSpy: vi.fn }),
           i18n,
           Antd
-        ]
+        ],
+        stubs: {
+          RouterLink: { template: '<a><slot /></a>' }
+        }
       }
     })
     expect(wrapper.text()).toContain('欢迎回来')

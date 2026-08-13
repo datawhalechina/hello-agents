@@ -12,7 +12,7 @@
       </div>
       <div class="header-right">
         <a-space>
-             <a-button 
+            <a-button
                 v-if="forumStore.currentForum?.status === 'pending'" 
                 type="primary" 
                 @click="handleStart"
@@ -20,6 +20,15 @@
             >
                 <play-circle-outlined /> 开始论坛
             </a-button>
+            <a-popconfirm
+              v-if="forumStore.currentForum?.status === 'running'"
+              title="确定停止该论坛吗？"
+              @confirm="handleStop"
+            >
+              <a-button danger>
+                <pause-circle-outlined /> 停止论坛
+              </a-button>
+            </a-popconfirm>
             <a-button @click="showParticipantModal">
               <team-outlined /> 查看参与者
             </a-button>
@@ -188,7 +197,7 @@ onMounted(async () => {
     }
     
     // 3. Background: Load participant info context (non-blocking)
-    personaStore.fetchPersonas(authStore.user?.id).catch(e => console.warn('Persona fetch failed', e))
+    Promise.resolve(personaStore.fetchPersonas(authStore.user?.id)).catch(e => console.warn('Persona fetch failed', e))
     
     // 4. Background: Connect WS (non-blocking)
     // IMPORTANT: Check if WS is already connected for THIS forum

@@ -1,8 +1,9 @@
-version: '3.8'
-
 services:
   madf:
-    image: frozenfish717/madf:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: madf:local
     container_name: madf-app
     ports:
       - "8000:8000"
@@ -11,8 +12,11 @@ services:
       - REDIS_URL=redis://localhost:6379/0
       - PYTHONPATH=/app
       - API_KEY=${API_KEY}
-      - MODEL_NAME=${MODEL_NAME:-glm-4.5}
-      - BASE_URL=${BASE_URL:-https://open.bigmodel.cn/api/paas/v4/}
+      - MODEL_NAME=${MODEL_NAME:-step-3.7-flash}
+      - BASE_URL=${BASE_URL:-https://api.stepfun.com/step_plan/v1/}
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY must be set}
+      - MADF_ENV=${MADF_ENV:-production}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:8000}
     volumes:
       - madf_data:/app/data
     restart: always
