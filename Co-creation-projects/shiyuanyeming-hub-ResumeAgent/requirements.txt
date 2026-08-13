@@ -1,0 +1,15 @@
+# 核心依赖（1.0.0 起不再提供 [all] extra，直接安装基础包即可）
+hello-agents>=1.0.0
+
+# LLM 相关（hello-agents 底层依赖 OpenAI SDK）
+openai>=1.0.0
+
+# 环境变量管理
+python-dotenv>=1.0.0
+
+# PDF 导出（可选）：优先使用 Playwright 的 Chromium 内核
+# 安装后需执行：playwright install chromium
+playwright>=1.40.0
+
+# 备选 PDF 方案（可选）：Windows 系统可配合 simhei.ttc 使用
+reportlab>=4.0.0

@@ -1,0 +1,12 @@
+# 敏感信息：API 密钥
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
