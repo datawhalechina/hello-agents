@@ -4,7 +4,9 @@ import assert from "node:assert/strict";
 import {
   ApiError,
   createApi,
+  fromWareki,
   sanitizeUiState,
+  toWareki,
 } from "../../resume_agent/web/api.js";
 
 
@@ -168,4 +170,48 @@ test("fact methods update profile and request quality", async () => {
   assert.equal(calls[0][1].method, "PATCH");
   assert.deepEqual(JSON.parse(calls[0][1].body), profile);
   assert.equal(calls[1][0], "/fact-bases/base-1/experiences/experience-1/quality");
+});
+
+
+test("version methods use exact create, activate, style, and preview contracts", async () => {
+  const calls = [];
+  const api = createApi(async (url, init = {}) => {
+    calls.push([url, init]);
+    return new Response(JSON.stringify({ id: "version-1" }), {
+      status: init.method === "POST" && url.endsWith("/versions") ? 201 : 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  });
+  const payload = {
+    name: "东京数据分析师",
+    target_role: "数据分析师",
+    company: "星河科技",
+    raw_jd: "负责经营分析",
+    locale: "ja",
+    selected_experience_ids: ["experience-1"],
+  };
+
+  await api.listVersions("base-1");
+  await api.createVersion("base-1", payload);
+  await api.activateVersion("version-1");
+  await api.setVersionStyle("version-1", "japanese_rirekisho");
+  await api.previewVersion("version-1");
+
+  assert.equal(calls[0][0], "/fact-bases/base-1/versions");
+  assert.equal(calls[1][0], "/fact-bases/base-1/versions");
+  assert.equal(calls[1][1].method, "POST");
+  assert.deepEqual(JSON.parse(calls[1][1].body), payload);
+  assert.equal(calls[2][0], "/versions/version-1/activate");
+  assert.equal(calls[2][1].method, "POST");
+  assert.equal(calls[3][0], "/versions/version-1/style");
+  assert.equal(calls[3][1].method, "PUT");
+  assert.deepEqual(JSON.parse(calls[3][1].body), { style: "japanese_rirekisho" });
+  assert.equal(calls[4][0], "/versions/version-1/preview");
+  assert.equal(api.exportUrl("version-1", "docx"), "/versions/version-1/export?format=docx");
+});
+
+
+test("wareki helpers cover the Heisei and Reiwa boundary", () => {
+  assert.equal(toWareki("2019-05-01"), "令和元年5月1日");
+  assert.equal(fromWareki("平成31年4月30日"), "2019-04-30");
 });

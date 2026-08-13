@@ -26,6 +26,38 @@ function errorCategory(status) {
   return "request";
 }
 
+const JAPANESE_ERAS = [
+  { name: "令和", first: "2019-05-01", offset: 2018 },
+  { name: "平成", first: "1989-01-08", offset: 1988 },
+  { name: "昭和", first: "1926-12-25", offset: 1925 },
+];
+
+export function toWareki(isoDate) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(isoDate).trim());
+  if (!match) return "";
+  const [, yearText, monthText, dayText] = match;
+  const era = JAPANESE_ERAS.find((item) => isoDate >= item.first);
+  if (!era) return "";
+  const eraYear = Number(yearText) - era.offset;
+  return `${era.name}${eraYear === 1 ? "元" : eraYear}年${Number(monthText)}月${Number(dayText)}日`;
+}
+
+export function fromWareki(value) {
+  const match = /^(令和|平成|昭和)(元|\d+)年(\d{1,2})月(\d{1,2})日$/.exec(String(value).trim());
+  if (!match) return "";
+  const [, eraName, eraYearText, monthText, dayText] = match;
+  const era = JAPANESE_ERAS.find((item) => item.name === eraName);
+  const year = era.offset + (eraYearText === "元" ? 1 : Number(eraYearText));
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const iso = `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  const parsed = new Date(`${iso}T00:00:00Z`);
+  if (Number.isNaN(parsed.valueOf()) || parsed.toISOString().slice(0, 10) !== iso) return "";
+  const nextEra = JAPANESE_ERAS[JAPANESE_ERAS.indexOf(era) - 1];
+  if (iso < era.first || (nextEra && iso >= nextEra.first)) return "";
+  return iso;
+}
+
 export function sanitizeUiState(value) {
   const source = value && typeof value === "object" ? value : {};
   const result = {};
@@ -121,6 +153,22 @@ export function createApi(fetchImpl = globalThis.fetch) {
     recordUnknown: (sessionId, dimension) => request(
       `/sessions/${sessionId}/unknown`,
       { method: "POST", body: JSON.stringify({ dimension }) },
+    ),
+    listVersions: (factBaseId) => request(`/fact-bases/${factBaseId}/versions`),
+    createVersion: (factBaseId, payload) => request(
+      `/fact-bases/${factBaseId}/versions`,
+      { method: "POST", body: JSON.stringify(payload) },
+    ),
+    activateVersion: (versionId) => request(`/versions/${versionId}/activate`, {
+      method: "POST",
+    }),
+    setVersionStyle: (versionId, style) => request(`/versions/${versionId}/style`, {
+      method: "PUT",
+      body: JSON.stringify({ style }),
+    }),
+    previewVersion: (versionId) => request(`/versions/${versionId}/preview`),
+    exportUrl: (versionId, format) => (
+      `/versions/${versionId}/export?format=${encodeURIComponent(format)}`
     ),
   };
 }

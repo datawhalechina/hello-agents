@@ -161,13 +161,14 @@ button:disabled, .button-link.disabled { cursor: not-allowed; opacity: 0.45; }
 
 .onboarding-form { display: grid; gap: 10px; }
 .form-field { color: var(--muted); display: grid; font-size: 12px; gap: 5px; }
-.form-field input {
+.form-field input, .form-field textarea {
   border: 1px solid var(--line);
   border-radius: 8px;
   color: var(--ink);
   min-height: 38px;
   padding: 7px 10px;
 }
+.form-field textarea { line-height: 1.5; min-height: 108px; resize: vertical; }
 .onboarding-form > button { justify-self: start; margin-top: 4px; }
 .facts-content { display: grid; gap: 12px; }
 .profile-details, .experience-card { border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
@@ -181,6 +182,24 @@ button:disabled, .button-link.disabled { cursor: not-allowed; opacity: 0.45; }
 .dimension-group ul { margin: 8px 0 2px; padding-left: 18px; }
 .fact-value { line-height: 1.5; margin: 5px 0; }
 
+.jd-content, .tools-content { display: grid; gap: 12px; }
+.version-create, .version-card, .tool-card { border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+.version-create > summary { cursor: pointer; font-weight: 650; }
+.version-form { display: grid; gap: 10px; margin-top: 12px; }
+.version-form > button { justify-self: start; }
+.experience-choice { border: 1px solid var(--line); border-radius: 8px; display: grid; gap: 7px; margin: 0; padding: 10px; }
+.experience-choice legend { color: var(--muted); font-size: 12px; padding: 0 4px; }
+.check-row { align-items: center; display: flex; gap: 7px; line-height: 1.4; }
+.version-list { display: grid; gap: 8px; }
+.version-card.selected { border-color: #b8cce0; background: #f8fafc; }
+.version-card-heading { align-items: center; display: flex; gap: 5px; }
+.version-card p { color: var(--muted); font-size: 12px; margin: 5px 0 10px; }
+.tool-card h3 { color: var(--accent); font-size: 14px; margin: 0 0 6px; }
+.tool-card p { color: var(--muted); line-height: 1.55; margin: 0; }
+.tool-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+.wareki-form { display: grid; gap: 9px; margin-top: 10px; }
+.conversion-result { background: #f8fafc; border-radius: 8px; color: var(--accent); min-height: 36px; padding: 9px 10px; }
+
 .document-toolbar {
   align-items: center;
   border-bottom: 1px solid var(--line);
@@ -193,13 +212,20 @@ button:disabled, .button-link.disabled { cursor: not-allowed; opacity: 0.45; }
 }
 
 .document-toolbar select { border: 1px solid var(--line); border-radius: 8px; min-height: 34px; padding: 6px 10px; }
-.document-switcher { display: flex; gap: 6px; }
+.document-switcher, .document-types { align-items: center; display: flex; gap: 6px; }
+.document-types button { min-height: 30px; padding: 4px 9px; }
+.document-types button.selected { background: var(--accent-soft); border-color: #c8d7e6; color: var(--accent); opacity: 1; }
 .preview-surface { background: #e8ecf1; flex: 1; min-height: 0; overflow: auto; padding: 18px; }
+.preview-warnings { display: grid; gap: 6px; margin: 0 auto 10px; max-width: 760px; }
+.preview-warnings:empty { display: none; }
+.preview-warning { background: #fff8e8; border: 1px solid #ead7a5; border-radius: 8px; color: #7c5a11; font-size: 12px; padding: 8px 10px; }
 .preview-empty { align-items: flex-start; display: flex; justify-content: center; min-height: 100%; }
+.preview-empty[hidden] { display: none; }
 .paper-placeholder { background: #fff; box-shadow: 0 3px 14px rgba(15, 23, 42, 0.1); display: flex; flex-direction: column; gap: 8px; min-height: 720px; padding: 54px; width: min(100%, 760px); }
 .paper-placeholder strong { color: var(--accent); font-size: 22px; }
 .paper-placeholder span { color: var(--muted); }
-#preview-frame { background: #fff; border: 0; min-height: 100%; width: 100%; }
+#preview-frame { background: #fff; border: 0; box-shadow: 0 3px 14px rgba(15, 23, 42, 0.1); display: block; margin: 0 auto; min-height: 1120px; width: min(100%, 900px); }
+#preview-frame[hidden] { display: none; }
 
 dialog { border: 1px solid var(--line); border-radius: 12px; max-width: 420px; padding: 22px; }
 dialog::backdrop { background: rgba(15, 23, 42, 0.3); }

@@ -1,4 +1,10 @@
-import { ApiError, createApi, sanitizeUiState } from "/assets/api.js";
+import {
+  ApiError,
+  createApi,
+  fromWareki,
+  sanitizeUiState,
+  toWareki,
+} from "/assets/api.js";
 
 const STORAGE_KEY = "resume-agent-ui-v1";
 const LANGUAGE_LABELS = {
@@ -15,6 +21,11 @@ const DIMENSIONS = [
   ["result", "结果"],
   ["evidence", "证明与数据"],
 ];
+const STYLE_CATALOG = {
+  zh: ["藏青现代", "经典墨色", "清新青碧"],
+  ja: ["藏青JIS", "墨黑JIS", "蓝灰JIS"],
+  en: ["青灰Teal", "经典黑白", "现代蓝"],
+};
 const api = createApi();
 
 function readState() {
@@ -33,6 +44,9 @@ const state = readState();
 let bases = [];
 let currentBase = null;
 let currentSession = null;
+let versions = [];
+let currentVersion = null;
+let capabilitiesState = null;
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitizeUiState(state)));
@@ -96,11 +110,29 @@ function replaceBase(updated) {
 }
 
 function chooseBase(base) {
+  const changedBase = state.factBaseId && state.factBaseId !== base.id;
   currentBase = base;
   state.factBaseId = base.id;
   const selected = base.experiences.find((item) => item.id === state.experienceId);
   state.experienceId = selected?.id || base.experiences.at(-1)?.id || "";
-  delete state.versionId;
+  if (changedBase) delete state.versionId;
+  saveState();
+}
+
+async function loadVersions() {
+  versions = currentBase ? await api.listVersions(currentBase.id) : [];
+  currentVersion = versions.find((item) => item.id === state.versionId)
+    || versions.find((item) => item.is_active && item.locale === state.locale)
+    || versions.find((item) => item.locale === state.locale)
+    || versions.find((item) => item.is_active)
+    || versions.at(-1)
+    || null;
+  if (currentVersion) {
+    state.versionId = currentVersion.id;
+    state.locale = currentVersion.locale;
+  } else {
+    delete state.versionId;
+  }
   saveState();
 }
 
@@ -122,9 +154,12 @@ async function recoverSession() {
 
 async function activateBase(base) {
   chooseBase(base);
-  await recoverSession();
+  await Promise.all([recoverSession(), loadVersions()]);
   renderConversation();
   await renderFactBase();
+  renderJdTab();
+  renderToolsTab();
+  await renderDocument();
 }
 
 function renderOnboarding() {
@@ -482,6 +517,271 @@ async function renderFactBase() {
   });
 }
 
+async function chooseVersion(versionId) {
+  state.versionId = versionId;
+  saveState();
+  try {
+    await api.activateVersion(versionId);
+    await loadVersions();
+    byId("language-button").textContent = LANGUAGE_LABELS[state.locale];
+    renderJdTab();
+    renderToolsTab();
+    await renderDocument();
+  } catch (error) {
+    showToast(error instanceof ApiError ? error.message : "版本切换失败");
+  }
+}
+
+function versionMeta(version) {
+  const language = LANGUAGE_LABELS[version.locale] || version.locale;
+  const company = version.company || "通用公司";
+  const role = version.target_role || "通用岗位";
+  return `${company} · ${role} · ${language}`;
+}
+
+function renderJdTab() {
+  const root = byId("jd-content");
+  root.className = "jd-content";
+  root.replaceChildren();
+  if (!currentBase) {
+    root.className = "empty-state";
+    root.textContent = "建立档案后可以创建岗位版本。";
+    return;
+  }
+
+  const createDetails = element("details", "version-create");
+  createDetails.open = versions.length === 0;
+  createDetails.append(element("summary", "", versions.length ? "新建岗位版本" : "创建第一个岗位版本"));
+  const form = element("form", "version-form");
+  form.append(
+    field("版本名称", "name", "例如：东京数据分析师", `${currentBase.target?.role || "通用"}版本`),
+    field("目标岗位", "targetRole", "职位名称", currentBase.target?.role || ""),
+    field("目标公司（可选）", "company", "公司名称"),
+    field("岗位描述 JD", "rawJd", "粘贴岗位职责和要求", "", "textarea"),
+  );
+  const experienceGroup = element("fieldset", "experience-choice");
+  experienceGroup.append(element("legend", "", "用于此版本的经历"));
+  for (const experience of currentBase.experiences) {
+    const label = element("label", "check-row");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.name = "experienceIds";
+    checkbox.value = experience.id;
+    checkbox.checked = true;
+    label.append(checkbox, document.createTextNode(`${experience.organization} · ${experience.role}`));
+    experienceGroup.append(label);
+  }
+  form.append(experienceGroup);
+  const submit = element("button", "primary", "创建并预览");
+  submit.type = "submit";
+  form.append(submit);
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const data = new FormData(form);
+    const name = String(data.get("name") || "").trim();
+    if (!name) {
+      showToast("请填写版本名称");
+      return;
+    }
+    submit.disabled = true;
+    try {
+      const version = await api.createVersion(currentBase.id, {
+        name,
+        target_role: String(data.get("targetRole") || "").trim(),
+        company: String(data.get("company") || "").trim(),
+        raw_jd: String(data.get("rawJd") || "").trim(),
+        locale: state.locale,
+        selected_experience_ids: data.getAll("experienceIds").map(String),
+      });
+      state.versionId = version.id;
+      saveState();
+      await chooseVersion(version.id);
+      showToast("岗位版本已创建");
+    } catch (error) {
+      showToast(error instanceof ApiError ? error.message : "版本创建失败");
+      submit.disabled = false;
+    }
+  });
+  createDetails.append(form);
+  root.append(createDetails);
+
+  const list = element("div", "version-list");
+  for (const version of versions) {
+    const card = element("article", `version-card${version.id === currentVersion?.id ? " selected" : ""}`);
+    const heading = element("div", "version-card-heading");
+    heading.append(element("strong", "", version.name));
+    if (version.id === currentVersion?.id) heading.append(element("span", "badge", "当前"));
+    if (version.status === "stale") heading.append(element("span", "badge warning", "事实已更新"));
+    card.append(heading, element("p", "", versionMeta(version)));
+    const use = element("button", "", version.id === currentVersion?.id ? "正在使用" : "使用此版本");
+    use.type = "button";
+    use.disabled = version.id === currentVersion?.id;
+    use.addEventListener("click", () => chooseVersion(version.id));
+    card.append(use);
+    list.append(card);
+  }
+  if (versions.length) root.append(list);
+}
+
+function configureExportLink(id, format, version) {
+  const link = byId(id);
+  if (!version) {
+    link.removeAttribute("href");
+    link.classList.add("disabled");
+    link.setAttribute("aria-disabled", "true");
+    return;
+  }
+  link.href = api.exportUrl(version.id, format);
+  link.classList.remove("disabled");
+  link.setAttribute("aria-disabled", "false");
+}
+
+function renderDocumentToolbar() {
+  const switcher = byId("document-switcher");
+  switcher.replaceChildren();
+  const styleSelect = byId("style-select");
+  styleSelect.replaceChildren();
+
+  if (!currentVersion) {
+    styleSelect.append(new Option("藏青现代"));
+    styleSelect.disabled = true;
+  } else {
+    const versionSelect = document.createElement("select");
+    versionSelect.setAttribute("aria-label", "岗位版本");
+    for (const version of versions) {
+      const option = new Option(version.name, version.id, false, version.id === currentVersion.id);
+      versionSelect.append(option);
+    }
+    versionSelect.addEventListener("change", () => chooseVersion(versionSelect.value));
+    switcher.append(versionSelect);
+    if (currentVersion.locale === "ja") {
+      const documentTypes = element("div", "document-types");
+      const rirekisho = element("button", "selected", "履歴書");
+      const workHistory = element("button", "", "職務経歴書");
+      rirekisho.type = workHistory.type = "button";
+      rirekisho.disabled = true;
+      workHistory.addEventListener("click", () => showToast("当前导出会同时保留日文履历所需信息"));
+      documentTypes.append(rirekisho, workHistory);
+      switcher.append(documentTypes);
+    }
+    const styleNames = STYLE_CATALOG[currentVersion.locale] || STYLE_CATALOG.zh;
+    const selectedStyle = currentVersion.styles?.[currentVersion.locale] || styleNames[0];
+    for (const style of styleNames) {
+      styleSelect.append(new Option(style, style, false, style === selectedStyle));
+    }
+    styleSelect.disabled = false;
+    styleSelect.onchange = async () => {
+      styleSelect.disabled = true;
+      try {
+        const updated = await api.setVersionStyle(currentVersion.id, styleSelect.value);
+        versions = versions.map((item) => item.id === updated.id ? updated : item);
+        currentVersion = updated;
+        await renderDocument();
+        showToast("版式已保存");
+      } catch (error) {
+        showToast(error instanceof ApiError ? error.message : "版式保存失败");
+        styleSelect.disabled = false;
+      }
+    };
+  }
+
+  byId("edit-button").disabled = true;
+  byId("edit-button").title = currentVersion ? "手工编辑将在下一阶段接入" : "请先创建岗位版本";
+  configureExportLink("export-pdf", "pdf", currentVersion);
+  configureExportLink("export-html", "html", currentVersion);
+  configureExportLink("export-markdown", "md", currentVersion);
+  configureExportLink("export-docx", "docx", currentVersion);
+}
+
+async function renderDocument() {
+  renderDocumentToolbar();
+  const empty = byId("preview-empty");
+  const frame = byId("preview-frame");
+  const warnings = byId("preview-warnings");
+  warnings.replaceChildren();
+  frame.hidden = true;
+  frame.removeAttribute("srcdoc");
+  empty.hidden = false;
+  const placeholder = empty.querySelector(".paper-placeholder span");
+  if (!currentVersion) {
+    placeholder.textContent = "创建岗位版本后，简历会显示在这里。";
+    return;
+  }
+
+  const requestedId = currentVersion.id;
+  placeholder.textContent = "正在生成预览…";
+  try {
+    const rendered = await api.previewVersion(requestedId);
+    if (currentVersion?.id !== requestedId) return;
+    for (const warning of rendered.warnings || []) {
+      warnings.append(element("div", "preview-warning", warning.message));
+    }
+    frame.srcdoc = rendered.html;
+    empty.hidden = true;
+    frame.hidden = false;
+  } catch (error) {
+    placeholder.textContent = error instanceof ApiError ? error.message : "预览生成失败";
+  }
+}
+
+function toolExportLink(label, format) {
+  const link = element("a", "button-link", label);
+  if (currentVersion) link.href = api.exportUrl(currentVersion.id, format);
+  else {
+    link.classList.add("disabled");
+    link.setAttribute("aria-disabled", "true");
+  }
+  return link;
+}
+
+function renderToolsTab() {
+  const root = byId("tools-content");
+  root.className = "tools-content";
+  root.replaceChildren();
+
+  const service = element("section", "tool-card");
+  service.append(
+    element("h3", "", "运行状态"),
+    element("p", "", capabilitiesState?.status === "ready"
+      ? "导师访谈与事实提炼可用。"
+      : "导师当前离线，事实库、版本与导出仍可使用。"),
+  );
+  root.append(service);
+
+  const exports = element("section", "tool-card");
+  exports.append(element("h3", "", "当前版本导出"));
+  const exportActions = element("div", "tool-actions");
+  exportActions.append(
+    toolExportLink("HTML", "html"),
+    toolExportLink("Markdown", "md"),
+    toolExportLink("DOCX", "docx"),
+    toolExportLink("PDF", "pdf"),
+  );
+  exports.append(exportActions);
+  root.append(exports);
+
+  const wareki = element("section", "tool-card");
+  wareki.append(element("h3", "", "和暦换算"));
+  const form = element("form", "wareki-form");
+  const western = field("公历日期", "western", "2019-05-01");
+  const japanese = field("和暦日期", "japanese", "平成31年4月30日");
+  const result = element("output", "conversion-result", "输入一侧日期后换算");
+  const actions = element("div", "tool-actions");
+  const toJapanese = element("button", "", "转为和暦");
+  const toWestern = element("button", "", "转为公历");
+  toJapanese.type = toWestern.type = "button";
+  toJapanese.addEventListener("click", () => {
+    result.textContent = toWareki(western.querySelector("input").value) || "日期格式不正确";
+  });
+  toWestern.addEventListener("click", () => {
+    result.textContent = fromWareki(japanese.querySelector("input").value) || "和暦格式或日期不正确";
+  });
+  actions.append(toJapanese, toWestern);
+  form.append(western, japanese, actions, result);
+  wareki.append(form);
+  root.append(wareki);
+}
+
 async function createSample() {
   byId("sample-button").disabled = true;
   try {
@@ -504,11 +804,29 @@ async function createSample() {
   }
 }
 
-function cycleLanguage() {
+async function cycleLanguage() {
   const index = LANGUAGE_ORDER.indexOf(state.locale);
   state.locale = LANGUAGE_ORDER[(index + 1) % LANGUAGE_ORDER.length];
   byId("language-button").textContent = LANGUAGE_LABELS[state.locale];
   saveState();
+  if (!currentBase) return;
+  try {
+    let version = versions.find((item) => item.locale === state.locale);
+    if (!version) {
+      const role = currentBase.target?.role || "通用";
+      version = await api.createVersion(currentBase.id, {
+        name: `${LANGUAGE_LABELS[state.locale]} · ${role}`,
+        target_role: role,
+        company: "",
+        raw_jd: "",
+        locale: state.locale,
+        selected_experience_ids: currentBase.experiences.map((item) => item.id),
+      });
+    }
+    await chooseVersion(version.id);
+  } catch (error) {
+    showToast(error instanceof ApiError ? error.message : "语言版本切换失败");
+  }
 }
 
 async function boot() {
@@ -521,11 +839,13 @@ async function boot() {
       api.listFactBases(),
     ]);
     bases = loadedBases;
+    capabilitiesState = capabilities;
     setServiceStatus(capabilities);
     const base = bases.find((item) => item.id === state.factBaseId) || bases.at(-1) || null;
     if (base) await activateBase(base);
     else renderOnboarding();
   } catch (error) {
+    capabilitiesState = null;
     setServiceStatus(null);
     renderOnboarding();
     showToast(error instanceof ApiError ? error.message : "页面初始化失败");
@@ -537,6 +857,8 @@ byId("primary-tabs").addEventListener("click", (event) => {
   if (!button) return;
   selectTab(button.dataset.tab);
   if (button.dataset.tab === "facts") renderFactBase();
+  if (button.dataset.tab === "jd") renderJdTab();
+  if (button.dataset.tab === "tools") renderToolsTab();
 });
 byId("settings-button").addEventListener("click", () => byId("settings-dialog").showModal());
 byId("sample-button").addEventListener("click", createSample);
