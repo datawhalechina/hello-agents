@@ -78,6 +78,13 @@ class SQLiteFactBaseRepository:
             raise KeyError(f"fact base not found: {fact_base_id}")
         return CareerFactBase.model_validate_json(row["payload"])
 
+    def list(self) -> List[CareerFactBase]:
+        with self.store.connect() as connection:
+            rows = connection.execute(
+                "SELECT payload FROM fact_bases ORDER BY rowid"
+            ).fetchall()
+        return [CareerFactBase.model_validate_json(row["payload"]) for row in rows]
+
     def save(self, base: CareerFactBase, expected_revision: int) -> None:
         with self.store.connect() as connection:
             cursor = connection.execute(
@@ -126,6 +133,16 @@ class SQLiteSessionRepository:
         if row is None:
             raise KeyError(f"interview session not found: {session_id}")
         return InterviewSession.model_validate_json(row["payload"])
+
+    def list(self, fact_base_id: UUID) -> List[InterviewSession]:
+        with self.store.connect() as connection:
+            rows = connection.execute(
+                "SELECT payload FROM interview_sessions WHERE fact_base_id = ? ORDER BY rowid",
+                (str(fact_base_id),),
+            ).fetchall()
+        return [
+            InterviewSession.model_validate_json(row["payload"]) for row in rows
+        ]
 
     def save(self, session: InterviewSession) -> None:
         with self.store.connect() as connection:

@@ -172,6 +172,13 @@ class InterviewMessage(BaseModel):
         return stripped
 
 
+class InterviewQuestion(BaseModel):
+    dimension: QualityDimension
+    text: str
+    priority: float
+    escalation: str
+
+
 class InterviewSession(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     fact_base_id: UUID
@@ -181,6 +188,7 @@ class InterviewSession(BaseModel):
     pending_proposals: Dict[UUID, FactProposal] = Field(default_factory=dict)
     attempts: Dict[QualityDimension, int] = Field(default_factory=dict)
     skipped_dimensions: Set[QualityDimension] = Field(default_factory=set)
+    current_question: Optional[InterviewQuestion] = None
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)
 

@@ -1,6 +1,6 @@
 """Application operations for the canonical career fact base."""
 
-from typing import Optional
+from typing import List, Optional
 from uuid import UUID
 
 from resume_agent.application.ports import FactBaseRepository
@@ -18,6 +18,9 @@ class FactBaseService:
 
     def get(self, fact_base_id: UUID) -> CareerFactBase:
         return self.repository.get(fact_base_id)
+
+    def list(self) -> List[CareerFactBase]:
+        return self.repository.list()
 
     def add_experience(
         self,

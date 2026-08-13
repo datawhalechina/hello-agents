@@ -42,6 +42,7 @@ from resume_agent.domain.models import (
     InterviewSession,
     ResumeVersion,
 )
+from resume_agent.domain.quality import QualityReport, evaluate_experience
 from resume_agent.infrastructure.sqlite_repositories import (
     SQLiteFactBaseRepository,
     SQLiteSessionRepository,
@@ -136,6 +137,14 @@ def create_app(
         return container.fact_bases.create(request.target)
 
     @app.get(
+        "/fact-bases",
+        response_model=list[CareerFactBase],
+        tags=["fact-bases"],
+    )
+    def list_fact_bases() -> list[CareerFactBase]:
+        return container.fact_bases.list()
+
+    @app.get(
         "/fact-bases/{fact_base_id}",
         response_model=CareerFactBase,
         tags=["fact-bases"],
@@ -159,6 +168,18 @@ def create_app(
             request.role,
         )
 
+    @app.get(
+        "/fact-bases/{fact_base_id}/experiences/{experience_id}/quality",
+        response_model=QualityReport,
+        tags=["fact-bases"],
+    )
+    def get_experience_quality(
+        fact_base_id: UUID,
+        experience_id: UUID,
+    ) -> QualityReport:
+        base = container.fact_bases.get(fact_base_id)
+        return evaluate_experience(base.get_experience(experience_id))
+
     @app.post(
         "/sessions",
         response_model=InterviewSession,
@@ -179,6 +200,17 @@ def create_app(
     def get_session(session_id: UUID) -> InterviewSession:
         return container.interviews.get_session(session_id)
 
+    @app.get(
+        "/fact-bases/{fact_base_id}/sessions",
+        response_model=list[InterviewSession],
+        tags=["interviews"],
+    )
+    def list_sessions(
+        fact_base_id: UUID,
+        experience_id: Optional[UUID] = None,
+    ) -> list[InterviewSession]:
+        return container.interviews.list_sessions(fact_base_id, experience_id)
+
     @app.post(
         "/sessions/{session_id}/answers",
         response_model=InterviewTurn,
@@ -194,6 +226,14 @@ def create_app(
     )
     def confirm(session_id: UUID, proposal_id: UUID) -> InterviewTurn:
         return container.interviews.confirm(session_id, proposal_id)
+
+    @app.post(
+        "/sessions/{session_id}/proposals/{proposal_id}/reject",
+        response_model=InterviewSession,
+        tags=["interviews"],
+    )
+    def reject(session_id: UUID, proposal_id: UUID) -> InterviewSession:
+        return container.interviews.reject(session_id, proposal_id)
 
     @app.post(
         "/sessions/{session_id}/unknown",
@@ -215,6 +255,14 @@ def create_app(
         tags=["interviews"],
     )
     def next_question(session_id: UUID) -> Optional[MentorQuestion]:
+        return container.interviews.next_question(session_id)
+
+    @app.get(
+        "/sessions/{session_id}/current-question",
+        response_model=Optional[MentorQuestion],
+        tags=["interviews"],
+    )
+    def current_question(session_id: UUID) -> Optional[MentorQuestion]:
         return container.interviews.next_question(session_id)
 
     @app.post(

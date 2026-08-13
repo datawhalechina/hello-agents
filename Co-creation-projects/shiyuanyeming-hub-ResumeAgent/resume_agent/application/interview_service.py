@@ -20,6 +20,7 @@ from resume_agent.application.question_planner import (
 from resume_agent.domain.models import (
     CareerFactBase,
     FactProposal,
+    InterviewQuestion,
     InterviewMessage,
     InterviewSession,
     QualityDimension,
@@ -27,11 +28,7 @@ from resume_agent.domain.models import (
 )
 
 
-class MentorQuestion(BaseModel):
-    dimension: QualityDimension
-    text: str
-    priority: float
-    escalation: str
+MentorQuestion = InterviewQuestion
 
 
 class InterviewTurn(BaseModel):
@@ -83,6 +80,21 @@ class InterviewService:
     def get_session(self, session_id: UUID) -> InterviewSession:
         return self.sessions.get(session_id)
 
+    def list_sessions(
+        self,
+        fact_base_id: UUID,
+        experience_id: Optional[UUID] = None,
+    ) -> List[InterviewSession]:
+        self.fact_bases.get(fact_base_id)
+        sessions = self.sessions.list(fact_base_id)
+        if experience_id is not None:
+            sessions = [
+                session
+                for session in sessions
+                if session.active_experience_id == experience_id
+            ]
+        return sessions
+
     def answer(self, session_id: UUID, message: str) -> InterviewTurn:
         session = self.sessions.get(session_id)
         base = self.fact_bases.get(session.fact_base_id)
@@ -90,6 +102,7 @@ class InterviewService:
             raise ValueError("an active experience is required before deepening")
 
         session.messages.append(InterviewMessage(role="user", content=message))
+        session.current_question = None
         session.updated_at = utc_now()
         self.sessions.save(session)
         proposal = self.audit_agent.propose(message, session, base)
@@ -121,12 +134,22 @@ class InterviewService:
             session.messages.append(
                 InterviewMessage(role="assistant", content=question.text)
             )
+            session.current_question = question
         session.updated_at = utc_now()
         self.sessions.save(session)
         return InterviewTurn(
             question=question,
             questions=[question.text] if question is not None else [],
         )
+
+    def reject(self, session_id: UUID, proposal_id: UUID) -> InterviewSession:
+        session = self.sessions.get(session_id)
+        if proposal_id not in session.pending_proposals:
+            raise KeyError(f"proposal not pending: {proposal_id}")
+        del session.pending_proposals[proposal_id]
+        session.updated_at = utc_now()
+        self.sessions.save(session)
+        return self.sessions.get(session_id)
 
     def record_unknown(
         self,
@@ -139,6 +162,11 @@ class InterviewService:
         skipped = attempts >= 2
         if skipped:
             session.skipped_dimensions.add(dimension)
+        if (
+            session.current_question is not None
+            and session.current_question.dimension is dimension
+        ):
+            session.current_question = None
         session.updated_at = utc_now()
         self.sessions.save(session)
         return UnknownOutcome(
@@ -149,12 +177,15 @@ class InterviewService:
 
     def next_question(self, session_id: UUID) -> Optional[MentorQuestion]:
         session = self.sessions.get(session_id)
+        if session.current_question is not None:
+            return session.current_question
         base = self.fact_bases.get(session.fact_base_id)
         question = self._make_question(session, base)
         if question is not None:
             session.messages.append(
                 InterviewMessage(role="assistant", content=question.text)
             )
+            session.current_question = question
             session.updated_at = utc_now()
             self.sessions.save(session)
         return question
