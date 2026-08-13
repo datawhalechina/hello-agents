@@ -6,6 +6,7 @@ from uuid import UUID
 import httpx
 from pydantic import BaseModel
 
+from resume_agent.agents.runtime import AgentCapabilityStatus
 from resume_agent.application.interview_service import (
     InterviewTurn,
     MentorQuestion,
@@ -100,6 +101,13 @@ class HttpResumeAgentClient:
 
     def health(self) -> bool:
         return self._request("GET", "/health").get("status") == "ok"
+
+    def capabilities(self) -> AgentCapabilityStatus:
+        return self._model(
+            AgentCapabilityStatus,
+            "GET",
+            "/capabilities",
+        )
 
     def list_fact_bases(self) -> list[CareerFactBase]:
         return [CareerFactBase.model_validate(item) for item in self._request("GET", "/fact-bases")]

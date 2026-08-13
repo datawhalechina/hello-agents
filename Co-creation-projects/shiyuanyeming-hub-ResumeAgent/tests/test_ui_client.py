@@ -83,3 +83,28 @@ def test_mutation_is_not_automatically_retried():
         client_for(handler).create_fact_base()
 
     assert attempts == 1
+
+
+def test_client_parses_agent_capabilities():
+    client = client_for(
+        lambda request: httpx.Response(
+            200,
+            json={
+                "status": "ready",
+                "api": True,
+                "mentor": True,
+                "fact_audit": True,
+                "question_writer": True,
+                "rendering": True,
+                "exports": ["html", "md", "docx", "pdf"],
+                "framework": "HelloAgents",
+                "model": "deepseek-chat",
+                "reason": "",
+            },
+        )
+    )
+
+    status = client.capabilities()
+
+    assert status.mentor is True
+    assert status.model == "deepseek-chat"

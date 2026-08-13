@@ -8,6 +8,7 @@ from resume_agent.domain.models import (
     CareerTarget,
     ResumeVersion,
 )
+from resume_agent.agents.runtime import AgentCapabilityStatus
 from resume_agent.rendering.models import RenderedResume, RenderWarning
 
 
@@ -194,3 +195,35 @@ def test_evidence_workspace_saves_candidate_profile_explicitly():
 
     assert not test.exception
     assert client.updated_profiles[0].name == "王明"
+
+
+class CapabilityDemoClient(OnlineDemoClient):
+    def __init__(self, capabilities):
+        super().__init__([CareerFactBase(target=CareerTarget(role="产品经理"))])
+        self.agent_capabilities = capabilities
+
+    def capabilities(self):
+        return self.agent_capabilities
+
+
+def test_sidebar_shows_ready_mentor_model():
+    client = CapabilityDemoClient(AgentCapabilityStatus.ready("deepseek-chat"))
+
+    test = AppTest.from_function(run_app, args=(client,)).run()
+
+    assert not test.exception
+    assert any("导师 Agent 已启用" in item.value for item in test.sidebar.success)
+    assert any("deepseek-chat" in item.value for item in test.sidebar.caption)
+
+
+def test_mentor_warns_before_answer_when_agent_is_degraded():
+    client = CapabilityDemoClient(
+        AgentCapabilityStatus.offline("LLM_API_KEY is required")
+    )
+
+    test = AppTest.from_function(run_app, args=(client,)).run()
+
+    assert not test.exception
+    assert any("导师 Agent 未启用" in item.value for item in test.sidebar.warning)
+    assert any("暂时不能提炼" in item.value for item in test.warning)
+    assert not any("无法连接 ResumeAgent API" in item.value for item in test.error)

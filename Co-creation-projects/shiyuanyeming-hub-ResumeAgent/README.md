@@ -70,12 +70,37 @@ python3 -m pip install -e '.[dev]'
 python3 -m pytest -q
 ```
 
+只运行 Web、事实库和简历导出（不安装 LLM Agent）可以使用：
+
+```bash
+python3 -m pip install -e '.[web]'
+```
+
+运行完整导师产品使用：
+
+```bash
+python3 -m pip install -e '.[agents,web]'
+```
+
 ### 配置 API 密钥
 
 ```bash
 cp .env.example .env
 # 编辑 .env，填入 LLM_API_KEY（默认 DeepSeek，也可换其他 OpenAI 兼容服务）
 ```
+
+标准 API 入口会读取项目目录下的 `.env`，但不会覆盖终端中已经导出的环境变量。需要配置：
+
+| 变量 | 说明 |
+|---|---|
+| `LLM_MODEL_ID` | 模型 ID，例如 `deepseek-chat` |
+| `LLM_API_KEY` | API 密钥；兼容旧变量 `DEEPSEEK_API_KEY` |
+| `LLM_BASE_URL` | OpenAI 兼容服务的 HTTP(S) 地址 |
+| `LLM_TIMEOUT` | 请求超时秒数，默认 60 |
+| `LLM_TEMPERATURE` | 事实抽取温度，默认 0.2 |
+| `LLM_MAX_TOKENS` | 单次最大输出 token，默认 2048 |
+
+占位密钥、缺失配置和非法地址不会被接受。API 启动时只构造 Agent，不会自动调用模型或消耗额度。
 
 ### 运行项目
 
@@ -103,7 +128,9 @@ uvicorn resume_agent.api.main:app --reload
 - 默认数据库：`data/resume_agent.db`
 - 可通过 `RESUME_AGENT_DB=/path/to/file.db` 指定其他数据库
 
-默认入口不会在导入时读取 LLM API Key，因此事实库、版本管理和确定性追问可以离线使用；提交自然语言回答进行事实抽取前，需要通过 `create_app(..., fact_audit_agent=...)` 注入配置好的事实审计 Agent。没有配置时接口会明确返回 HTTP 503，同时保留用户刚提交的消息。
+默认入口会按上述环境变量自动构造 HelloAgents 事实审计 Agent 和导师追问 Agent。每次结构化调用都会创建新的 `SimpleAgent`，不共享框架对话历史，避免候选人会话互相污染。没有配置时，事实库、版本管理、预览和导出仍可离线使用；Web 侧边栏会提前显示“导师 Agent 未启用”，提交需要事实抽取的回答时接口仍会明确返回 HTTP 503，同时保留用户刚提交的消息。
+
+运行状态可以通过 `GET /capabilities` 查看。该接口只返回框架、模型名和功能开关，不返回 API Key 或完整供应商地址。
 
 在第二个终端启动 Web 界面：
 

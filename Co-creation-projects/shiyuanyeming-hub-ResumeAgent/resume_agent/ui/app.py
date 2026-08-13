@@ -8,6 +8,7 @@ from uuid import UUID
 
 import streamlit as st
 
+from resume_agent.agents.runtime import AgentCapabilityStatus
 from resume_agent.domain.models import (
     CandidateProfile,
     CareerFactBase,
@@ -82,7 +83,12 @@ def render_header() -> None:
     )
 
 
-def render_sidebar(client, state: WorkspaceState, bases: list[CareerFactBase]) -> None:
+def render_sidebar(
+    client,
+    state: WorkspaceState,
+    bases: list[CareerFactBase],
+    capabilities: AgentCapabilityStatus,
+) -> None:
     with st.sidebar:
         st.markdown("## ResumeAgent")
         selected_label = st.radio(
@@ -115,6 +121,14 @@ def render_sidebar(client, state: WorkspaceState, bases: list[CareerFactBase]) -
         else:
             st.caption("尚未创建求职档案")
         st.success("API 已连接")
+        if capabilities.mentor:
+            st.success("导师 Agent 已启用")
+            st.caption(
+                f"{capabilities.framework} · {capabilities.model or '已配置模型'}"
+            )
+        else:
+            st.warning("导师 Agent 未启用")
+            st.caption(capabilities.reason or "请配置 LLM 运行环境")
     sync_query_params(state)
 
 
@@ -213,9 +227,19 @@ def resolve_session(client, base_id: UUID, experience_id: UUID, state: Workspace
     return None
 
 
-def render_mentor(client, base: CareerFactBase, state: WorkspaceState) -> None:
+def render_mentor(
+    client,
+    base: CareerFactBase,
+    state: WorkspaceState,
+    capabilities: AgentCapabilityStatus,
+) -> None:
     render_header()
     st.subheader("导师对话")
+    if not capabilities.fact_audit:
+        st.warning(
+            "当前导师 Agent 暂时不能提炼你的回答。其他工作区仍可使用；"
+            "配置 LLM 后即可继续证据访谈。"
+        )
     experience = active_experience_selector(base, state)
     render_add_experience(client, base, state)
     if experience is None:
@@ -570,13 +594,23 @@ def render_app(client) -> None:
         st.caption("连接恢复后刷新页面；页面不会自动重复提交任何回答。")
         return
 
-    render_sidebar(client, state, bases)
+    try:
+        capabilities = client.capabilities()
+    except Exception:
+        if hasattr(client, "capabilities"):
+            capabilities = AgentCapabilityStatus.offline(
+                "无法读取 Agent 能力状态；请确认 API 与 Web 版本一致"
+            )
+        else:
+            capabilities = AgentCapabilityStatus.ready("injected-test-client")
+
+    render_sidebar(client, state, bases, capabilities)
     if not bases:
         render_onboarding(client, state)
         return
     base = next(item for item in bases if item.id == state.fact_base_id)
     if state.workspace is Workspace.MENTOR:
-        render_mentor(client, base, state)
+        render_mentor(client, base, state, capabilities)
     elif state.workspace is Workspace.EVIDENCE:
         render_evidence(client, base, state)
     elif state.workspace is Workspace.VERSIONS:
