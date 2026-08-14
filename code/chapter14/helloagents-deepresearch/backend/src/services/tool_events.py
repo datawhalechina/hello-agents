@@ -58,18 +58,17 @@ class ToolCallTracker:
             if note_id is None:
                 note_id = self._extract_note_id(result_text)
 
-        event = ToolCallEvent(
-            id=len(self._events) + 1,
-            agent=agent_name,
-            tool=tool_name,
-            raw_parameters=raw_parameters,
-            parsed_parameters=parsed_parameters,
-            result=result_text,
-            task_id=task_id,
-            note_id=note_id,
-        )
-
         with self._lock:
+            event = ToolCallEvent(
+                id=len(self._events) + 1,
+                agent=agent_name,
+                tool=tool_name,
+                raw_parameters=raw_parameters,
+                parsed_parameters=parsed_parameters,
+                result=result_text,
+                task_id=task_id,
+                note_id=note_id,
+            )
             self._events.append(event)
 
         logger.info(
