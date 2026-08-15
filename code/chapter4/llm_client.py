@@ -1,7 +1,7 @@
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
-from typing import List, Dict
+from typing import List, Dict, Iterator
 
 # 加载 .env 文件中的环境变量
 load_dotenv()
@@ -19,7 +19,7 @@ class HelloAgentsLLM:
         apiKey = apiKey or os.getenv("LLM_API_KEY")
         baseUrl = baseUrl or os.getenv("LLM_BASE_URL")
         timeout = timeout or int(os.getenv("LLM_TIMEOUT", 60))
-        
+
         if not all([self.model, apiKey, baseUrl]):
             raise ValueError("模型ID、API密钥和服务地址必须被提供或在.env文件中定义。")
 
@@ -37,7 +37,7 @@ class HelloAgentsLLM:
                 temperature=temperature,
                 stream=True,
             )
-            
+
             # 处理流式响应
             print("✅ 大语言模型响应成功:")
             collected_content = []
@@ -54,16 +54,39 @@ class HelloAgentsLLM:
             print(f"❌ 调用LLM API时发生错误: {e}")
             return None
 
+    def stream_think(self, messages: List[Dict[str, str]], temperature: float = 0) -> Iterator[str]:
+        """
+        以生成器方式流式返回模型响应，每个 yield 是一段 delta.content。
+        不主动打印，由调用方决定如何展示。
+        """
+        print(f"🧠 正在调用 {self.model} 模型...")
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=temperature,
+                stream=True,
+            )
+            for chunk in response:
+                if not chunk.choices:
+                    continue
+                content = chunk.choices[0].delta.content
+                if not content:
+                    continue
+                yield content
+        except Exception as e:
+            print(f"❌ 调用LLM API时发生错误: {e}")
+
 # --- 客户端使用示例 ---
 if __name__ == '__main__':
     try:
         llmClient = HelloAgentsLLM()
-        
+
         exampleMessages = [
             {"role": "system", "content": "You are a helpful assistant that writes Python code."},
             {"role": "user", "content": "写一个快速排序算法"}
         ]
-        
+
         print("--- 调用LLM ---")
         responseText = llmClient.think(exampleMessages)
         if responseText:
