@@ -132,8 +132,8 @@ class DeepResearchAgent:
             logger.info("No TODO items generated; falling back to single task")
             state.todo_items = [self.planner.create_fallback_task(state)]
 
-        for task in state.todo_items:
-            self._execute_task(state, task, emit_stream=False)
+        for _event in self._run_waves(state, emit_stream=False):
+            pass
 
         report = self.reporting.generate_report(state)
         self._drain_tool_events(state)
@@ -159,110 +159,8 @@ class DeepResearchAgent:
         if not state.todo_items:
             state.todo_items = [self.planner.create_fallback_task(state)]
 
-        channel_map: dict[int, dict[str, Any]] = {}
-        for index, task in enumerate(state.todo_items, start=1):
-            token = f"task_{task.id}"
-            task.stream_token = token
-            channel_map[task.id] = {"step": index, "token": token}
-
-        yield {
-            "type": "todo_list",
-            "tasks": [self._serialize_task(t) for t in state.todo_items],
-            "step": 0,
-        }
-
-        event_queue: Queue[dict[str, Any]] = Queue()
-
-        def enqueue(
-            event: dict[str, Any],
-            *,
-            task: TodoItem | None = None,
-            step_override: int | None = None,
-        ) -> None:
-            payload = dict(event)
-            target_task_id = payload.get("task_id")
-            if task is not None:
-                target_task_id = task.id
-                payload["task_id"] = task.id
-
-            channel = channel_map.get(target_task_id) if target_task_id is not None else None
-            if channel:
-                payload.setdefault("step", channel["step"])
-                payload["stream_token"] = channel["token"]
-            if step_override is not None:
-                payload["step"] = step_override
-            event_queue.put(payload)
-
-        def tool_event_sink(event: dict[str, Any]) -> None:
-            enqueue(event)
-
-        self._set_tool_event_sink(tool_event_sink)
-
-        threads: list[Thread] = []
-
-        def worker(task: TodoItem, step: int) -> None:
-            try:
-                enqueue(
-                    {
-                        "type": "task_status",
-                        "task_id": task.id,
-                        "status": "in_progress",
-                        "title": task.title,
-                        "intent": task.intent,
-                        "note_id": task.note_id,
-                        "note_path": task.note_path,
-                    },
-                    task=task,
-                )
-
-                for event in self._execute_task(state, task, emit_stream=True, step=step):
-                    enqueue(event, task=task)
-            except Exception as exc:  # pragma: no cover - defensive guardrail
-                logger.exception("Task execution failed", exc_info=exc)
-                enqueue(
-                    {
-                        "type": "task_status",
-                        "task_id": task.id,
-                        "status": "failed",
-                        "detail": str(exc),
-                        "title": task.title,
-                        "intent": task.intent,
-                        "note_id": task.note_id,
-                        "note_path": task.note_path,
-                    },
-                    task=task,
-                )
-            finally:
-                enqueue({"type": "__task_done__", "task_id": task.id})
-
-        for task in state.todo_items:
-            step = channel_map.get(task.id, {}).get("step", 0)
-            thread = Thread(target=worker, args=(task, step), daemon=True)
-            threads.append(thread)
-            thread.start()
-
-        active_workers = len(state.todo_items)
-        finished_workers = 0
-
-        try:
-            while finished_workers < active_workers:
-                event = event_queue.get()
-                if event.get("type") == "__task_done__":
-                    finished_workers += 1
-                    continue
-                yield event
-
-            while True:
-                try:
-                    event = event_queue.get_nowait()
-                except Empty:
-                    break
-                if event.get("type") != "__task_done__":
-                    yield event
-        finally:
-            self._set_tool_event_sink(None)
-            for thread in threads:
-                thread.join()
+        for event in self._run_waves(state, emit_stream=True):
+            yield event
 
         report = self.reporting.generate_report(state)
         final_step = len(state.todo_items) + 1
@@ -282,6 +180,188 @@ class DeepResearchAgent:
             "note_path": state.report_note_path,
         }
         yield {"type": "done"}
+
+    # ------------------------------------------------------------------
+    # Wave-based execution with gap-aware re-planning
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _collect_gaps(todo_items: list[TodoItem]) -> list[TodoItem]:
+        """Return tasks that were skipped/failed or produced empty summaries."""
+        gaps = []
+        for task in todo_items:
+            if task.status in ("skipped", "failed"):
+                gaps.append(task)
+            elif task.status == "completed":
+                summary = (task.summary or "").strip()
+                if not summary or summary == "暂无可用信息":
+                    gaps.append(task)
+        return gaps
+
+    def _run_waves(
+        self,
+        state: SummaryState,
+        *,
+        emit_stream: bool = False,
+    ) -> Iterator[dict[str, Any]]:
+        """Execute research in bounded waves with gap-aware re-planning.
+
+        Wave 0 executes the initial todo list; after each wave, skipped /
+        failed / empty-summary tasks are re-planned into a new wave until no
+        gaps remain or ``max_web_research_loops`` waves have run. Yields
+        stream events when ``emit_stream`` is True, otherwise nothing.
+        """
+        channel_map: dict[int, dict[str, Any]] = {}
+        for index, task in enumerate(state.todo_items, start=1):
+            task.stream_token = f"task_{task.id}"
+            channel_map[task.id] = {"step": index, "token": task.stream_token}
+
+        if emit_stream:
+            yield {
+                "type": "todo_list",
+                "tasks": [self._serialize_task(t) for t in state.todo_items],
+                "step": 0,
+            }
+
+        # Gaps that have already been re-planned once are not collected again
+        # in later waves (their follow-up tasks may still fail and become new
+        # gaps), which keeps the loop bounded without an infinite re-plan.
+        handled_gap_ids: set[int] = set()
+
+        for wave in range(self.config.max_web_research_loops):
+            pending = [t for t in state.todo_items if t.status in ("pending", "in_progress")]
+            if not pending:
+                break
+
+            if emit_stream:
+                event_queue: Queue[dict[str, Any]] = Queue()
+
+                def enqueue(
+                    event: dict[str, Any],
+                    *,
+                    task: TodoItem | None = None,
+                    step_override: int | None = None,
+                ) -> None:
+                    payload = dict(event)
+                    target_task_id = payload.get("task_id")
+                    if task is not None:
+                        target_task_id = task.id
+                        payload["task_id"] = task.id
+
+                    channel = channel_map.get(target_task_id) if target_task_id is not None else None
+                    if channel:
+                        payload.setdefault("step", channel["step"])
+                        payload["stream_token"] = channel["token"]
+                    if step_override is not None:
+                        payload["step"] = step_override
+                    event_queue.put(payload)
+
+                def tool_event_sink(event: dict[str, Any]) -> None:
+                    enqueue(event)
+
+                self._set_tool_event_sink(tool_event_sink)
+
+                threads: list[Thread] = []
+
+                def worker(task: TodoItem, step: int) -> None:
+                    try:
+                        enqueue(
+                            {
+                                "type": "task_status",
+                                "task_id": task.id,
+                                "status": "in_progress",
+                                "title": task.title,
+                                "intent": task.intent,
+                                "note_id": task.note_id,
+                                "note_path": task.note_path,
+                            },
+                            task=task,
+                        )
+
+                        for event in self._execute_task(state, task, emit_stream=True, step=step):
+                            enqueue(event, task=task)
+                    except Exception as exc:  # pragma: no cover - defensive guardrail
+                        logger.exception("Task execution failed", exc_info=exc)
+                        task.status = "failed"
+                        enqueue(
+                            {
+                                "type": "task_status",
+                                "task_id": task.id,
+                                "status": "failed",
+                                "detail": str(exc),
+                                "title": task.title,
+                                "intent": task.intent,
+                                "note_id": task.note_id,
+                                "note_path": task.note_path,
+                            },
+                            task=task,
+                        )
+                    finally:
+                        enqueue({"type": "__task_done__", "task_id": task.id})
+
+                for task in pending:
+                    step = channel_map.get(task.id, {}).get("step", 0)
+                    thread = Thread(target=worker, args=(task, step), daemon=True)
+                    threads.append(thread)
+                    thread.start()
+
+                active_workers = len(pending)
+                finished_workers = 0
+
+                try:
+                    while finished_workers < active_workers:
+                        event = event_queue.get()
+                        if event.get("type") == "__task_done__":
+                            finished_workers += 1
+                            continue
+                        yield event
+
+                    while True:
+                        try:
+                            event = event_queue.get_nowait()
+                        except Empty:
+                            break
+                        if event.get("type") != "__task_done__":
+                            yield event
+                finally:
+                    self._set_tool_event_sink(None)
+                    for thread in threads:
+                        thread.join()
+            else:
+                # _execute_task is a generator: it must be consumed to run the
+                # task body even when emit_stream=False (non-stream mode yields
+                # nothing, so iterating is a no-op apart from executing it).
+                # Task-level failures are isolated and the task is marked
+                # "failed" (a gap), so later waves can re-plan it instead of
+                # aborting the whole research run.
+                for task in pending:
+                    try:
+                        for _event in self._execute_task(state, task, emit_stream=False):
+                            pass
+                    except Exception as exc:  # noqa: BLE001 - defensive guardrail
+                        logger.exception("Task execution failed", exc_info=exc)
+                        task.status = "failed"
+
+            gaps = [t for t in self._collect_gaps(state.todo_items) if t.id not in handled_gap_ids]
+            if not gaps or wave == self.config.max_web_research_loops - 1:
+                break
+
+            new_tasks = self.planner.replan_todo_list(state, gaps)
+            if not new_tasks:
+                break
+            handled_gap_ids.update(t.id for t in gaps)
+
+            for task in new_tasks:
+                step = len(channel_map) + 1
+                task.stream_token = f"task_{task.id}"
+                channel_map[task.id] = {"step": step, "token": task.stream_token}
+            state.todo_items.extend(new_tasks)
+
+            if emit_stream:
+                yield {
+                    "type": "todo_list",
+                    "tasks": [self._serialize_task(t) for t in state.todo_items],
+                    "step": 0,
+                }
 
     # ------------------------------------------------------------------
     # Execution helpers
