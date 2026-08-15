@@ -108,3 +108,36 @@ report_writer_instructions = """
 - 如需在报告层面沉淀结果，可创建新的 `conclusion` 类型笔记，例如：`[TOOL_CALL:note:{"action":"create","title":"研究报告：{研究主题}","note_type":"conclusion","tags":["deep_research","report"],"content":"...报告要点..."}]`。
 </NOTES>
 """
+
+
+replan_instructions = """
+<CONTEXT>
+当前日期：{current_date}
+研究主题：{research_topic}
+</CONTEXT>
+
+<COMPLETED>
+以下任务已研究完成，请勿重复：
+{completed}
+</COMPLETED>
+
+<GAPS>
+以下任务因检索无结果或执行失败而未完成。请针对每个缺口给出 1 条更可行的检索查询，并保证新任务与已完成任务互补、不重复：
+{gaps}
+</GAPS>
+
+<FORMAT>
+请严格以 JSON 格式回复：
+{{
+  "tasks": [
+    {{
+      "title": "任务名称（10字内，突出重点）",
+      "intent": "任务要解决的核心问题",
+      "query": "建议使用的检索关键词（须与上一轮不同，更具体或换角度）"
+    }}
+  ]
+}}
+</FORMAT>
+
+如果缺口任务没有可行方案，请输出空数组：{{"tasks": []}}
+"""
