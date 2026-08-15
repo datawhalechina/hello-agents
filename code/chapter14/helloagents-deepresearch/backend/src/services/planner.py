@@ -11,7 +11,7 @@ from hello_agents import ToolAwareSimpleAgent
 
 from models import SummaryState, TodoItem
 from config import Configuration
-from prompts import get_current_date, todo_planner_instructions
+from prompts import get_current_date, replan_instructions, todo_planner_instructions
 from utils import strip_thinking_tokens
 
 logger = logging.getLogger(__name__)
@@ -76,6 +76,80 @@ class PlanningService:
             intent="收集主题的核心背景与最新动态",
             query=f"{state.research_topic} 最新进展" if state.research_topic else "基础背景梳理",
         )
+
+    def replan_todo_list(self, state: SummaryState, gaps: list[TodoItem]) -> list[TodoItem]:
+        """Generate a second-wave task list covering unresolved gaps.
+
+        Reuses _extract_tasks() for parsing; assigns ids continuing from the
+        maximum existing task id so wave-2 tasks never collide with wave-1
+        ids used by channel_map / stream tokens.
+        """
+        prompt = replan_instructions.format(
+            current_date=get_current_date(),
+            research_topic=state.research_topic,
+            completed=self._format_completed(state.todo_items),
+            gaps=self._format_gaps(gaps),
+        )
+
+        response = self._agent.run(prompt)
+        self._agent.clear_history()
+
+        logger.info("Re-planner raw output (truncated): %s", response[:500])
+
+        tasks_payload = self._extract_tasks(response)
+        start_id = max((task.id for task in state.todo_items), default=0) + 1
+
+        todo_items: list[TodoItem] = []
+        for idx, item in enumerate(tasks_payload, start=1):
+            title = str(item.get("title") or f"补充任务{idx}").strip()
+            intent = str(item.get("intent") or "补齐研究缺口").strip()
+            query = str(item.get("query") or state.research_topic).strip()
+
+            if not query:
+                query = state.research_topic
+
+            todo_items.append(
+                TodoItem(
+                    id=start_id + idx - 1,
+                    title=title,
+                    intent=intent,
+                    query=query,
+                )
+            )
+
+        logger.info("Re-planner produced %d follow-up tasks", len(todo_items))
+        return todo_items
+
+    @staticmethod
+    def _format_completed(todo_items: list[TodoItem]) -> str:
+        """Render completed tasks (id/title/query + summary) as prompt context.
+
+        Tasks whose summary is missing or the placeholder "暂无可用信息" are
+        treated as gaps and intentionally excluded.
+        """
+        blocks = []
+        for task in todo_items:
+            if task.status != "completed":
+                continue
+            summary = (task.summary or "").strip()
+            if not summary or summary == "暂无可用信息":
+                continue
+            blocks.append(
+                f"- 任务 {task.id}《{task.title}》查询:{task.query}\n"
+                f"  总结:{summary[:500]}"
+            )
+        return "\n".join(blocks) if blocks else "暂无已完成任务"
+
+    @staticmethod
+    def _format_gaps(gaps: list[TodoItem]) -> str:
+        """Render gap tasks (id/title/intent/query/status) as prompt context."""
+        blocks = []
+        for task in gaps:
+            blocks.append(
+                f"- 任务 {task.id}《{task.title}》意图:{task.intent} "
+                f"原查询:{task.query} 状态:{task.status}"
+            )
+        return "\n".join(blocks) if blocks else "暂无缺口"
 
     # ------------------------------------------------------------------
     # Parsing helpers
