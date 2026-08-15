@@ -19,7 +19,7 @@ class HelloAgentsLLM:
         apiKey = apiKey or os.getenv("LLM_API_KEY")
         baseUrl = baseUrl or os.getenv("LLM_BASE_URL")
         timeout = timeout or int(os.getenv("LLM_TIMEOUT", 60))
-
+        
         if not all([self.model, apiKey, baseUrl]):
             raise ValueError("模型ID、API密钥和服务地址必须被提供或在.env文件中定义。")
 
@@ -37,7 +37,7 @@ class HelloAgentsLLM:
                 temperature=temperature,
                 stream=True,
             )
-
+            
             # 处理流式响应
             print("✅ 大语言模型响应成功:")
             collected_content = []
@@ -81,12 +81,12 @@ class HelloAgentsLLM:
 if __name__ == '__main__':
     try:
         llmClient = HelloAgentsLLM()
-
+        
         exampleMessages = [
             {"role": "system", "content": "You are a helpful assistant that writes Python code."},
             {"role": "user", "content": "写一个快速排序算法"}
         ]
-
+        
         print("--- 调用LLM ---")
         responseText = llmClient.think(exampleMessages)
         if responseText:
