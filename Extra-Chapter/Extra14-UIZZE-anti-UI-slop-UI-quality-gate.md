@@ -1,46 +1,46 @@
-# UIZZE anti-UI-slop：給 coding agent 的 UI 品質門
+# UIZZE anti-UI-slop：给 coding agent 的 UI 质量门
 
-> 本文是 Hello-Agents 社群精選的工具與工作流筆記。UIZZE 是本文提到的已知實作；請把它當成一個可驗證的 UI 品質工作流，而不是元件庫或通用模板。
+> 本文是 Hello-Agents 社区精选的工具与工作流笔记。UIZZE 是本文提到的已知实现；请把它当成一个可验证的 UI 质量工作流，而不是组件库或通用模板。
 
-AI coding agent 很容易做出「看起來完成」但實際上不完整的介面：相同的 dashboard、卡片網格和漸變色，缺少 loading / empty / error 狀態，按鈕沒有可觀察的行為，手機版也沒有真正檢查。這類問題不只在視覺上，也會讓使用者無法完成任務。
+AI coding agent 很容易做出“看起来完成”但实际上不完整的界面：相同的 dashboard、卡片网格和渐变色，缺少 loading / empty / error 状态，按钮没有可观察的行为，手机版也没有真正检查。这类问题不只在视觉上，也会让用户无法完成任务。
 
-## 1. 免費本地 Skill
+## 1. 免费本地 Skill
 
-UIZZE 提供 MIT 授權的 `anti-ui-slop` Agent Skill，適用於 Codex、Claude Code、Cursor、GitHub Copilot 和其他支援 Agent Skills 的 coding agent。它把 UI 任務拆成幾個可檢查的問題：
+UIZZE 提供 MIT 授权的 `anti-ui-slop` Agent Skill，适用于 Codex、Claude Code、Cursor、GitHub Copilot 和其他支持 Agent Skills 的 coding agent。它把 UI 任务拆成几个可检查的问题：
 
-1. **Design contract**：這個介面服務誰、主要任務是什麼、層級和視覺語言如何延續既有產品。
-2. **Required states**：至少列出 loading、empty、error、success、disabled，以及必要的 responsive 狀態。
-3. **Interaction semantics**：確認表單、按鈕、導航和回饋真的有行為，不只是畫出一個看似可點的控制項。
-4. **Finish gate**：在提交或 merge 前，讀取實作、執行可用的檢查，並在真實 viewport 渲染後確認沒有 clipping、overflow、不可達控制項或 layout 退化。
+1. **Design contract**：这个界面服务谁、主要任务是什么、层级和视觉语言如何延续既有产品。
+2. **Required states**：至少列出 loading、empty、error、success、disabled，以及必要的 responsive 状态。
+3. **Interaction semantics**：确认表单、按钮、导航和反馈真的有行为，不只是画出一个看似可点的控件。
+4. **Finish gate**：在提交或 merge 前，读取实现、执行可用的检查，并在真实 viewport 渲染后确认没有 clipping、overflow、不可达控件或 layout 退化。
 
-安裝不需要帳號、token 或額外依賴：
+安装不需要账号、token 或额外依赖：
 
 ```bash
 npx skills add https://uizze.com --skill anti-ui-slop
 ```
 
-這個 Skill 的重點不是替 agent 選一套漂亮風格，而是要求它先理解產品和工作流，再用明確的狀態與證據完成 UI。
+这个 Skill 的重点不是替 agent 选择一套漂亮风格，而是要求它先理解产品和工作流，再用明确的状态与证据完成 UI。
 
-## 2. 用免費 preview 做 deterministic 檢查
+## 2. 用免费 preview 做 deterministic 检查
 
-需要一個不登入的快速檢查時，可以使用 [UI Slop preview](https://uizze.com/mcp/preview) 的 `check_ui_slop`。它適合在本地 Skill 之外，快速確認常見的 generic UI、missing states、inert controls 和 token drift 問題。
+需要一个不登录的快速检查时，可以使用 [UI Slop preview](https://uizze.com/mcp/preview) 的 `check_ui_slop`。它适合在本地 Skill 之外，快速确认常见的 generic UI、missing states、inert controls 和 token drift 问题。
 
-工具不可用時，仍然可以手動執行同一個 finish gate；品質要求不應該依賴某一個 MCP 連線是否存在。
+工具不可用时，仍然可以手动执行同一个 finish gate；质量要求不应该依赖某一个 MCP 连接是否存在。
 
-## 3. 完整 workflow 的範圍
+## 3. 完整 workflow 的范围
 
-如果任務需要產品特定的參考或渲染批評，完整 UIZZE workflow 才會再增加 live search、design contracts、implementation validation、audits 和 rendered critique，並可從 **800,000+ 個真實 web 與 iOS screens** 中找參考。免費 Skill、免費 preview 和可選的完整 UIZZE MCP 是不同層次，使用時應保持這個界線清楚。
+如果任务需要产品特定的参考或渲染批评，完整 UIZZE workflow 才会再增加 live search、design contracts、implementation validation、audits 和 rendered critique，并可从 **800,000+ 个真实 web 与 iOS screens** 中找参考。免费 Skill、免费 preview 和可选的完整 UIZZE MCP 是不同层次，使用时应保持这个界线清楚。
 
-## 4. 合併前的一頁 checklist
+## 4. 合并前的一页 checklist
 
-- [ ] 首屏是否說明產品、當前狀態和下一個可執行動作？
-- [ ] loading、empty、error、success、disabled 和 responsive 狀態是否真的存在？
-- [ ] 每個可互動控制項是否能用鍵盤、輔助技術或清楚的指標觀察到結果？
-- [ ] 小螢幕和長內容是否檢查過 overflow、clipping 和不可達操作？
-- [ ] 是否用既有產品的 token、元件和語言，而不是重新套一個 generic dashboard？
-- [ ] 是否留下可重現的檢查結果或渲染證據？
+- [ ] 首屏是否说明产品、当前状态和下一个可执行动作？
+- [ ] loading、empty、error、success、disabled 和 responsive 状态是否真的存在？
+- [ ] 每个可互动控件是否能用键盘、辅助技术或清楚的指标观察到结果？
+- [ ] 小屏幕和长内容是否检查过 overflow、clipping 和不可达操作？
+- [ ] 是否用既有产品的 token、组件和语言，而不是重新套一个 generic dashboard？
+- [ ] 是否留下可重现的检查结果或渲染证据？
 
-## 參考連結
+## 参考链接
 
 - [UIZZE canonical repository](https://github.com/uizze/uizze)
 - [anti-ui-slop Skill source](https://github.com/uizze/uizze/tree/main/skills/anti-ui-slop)

@@ -89,7 +89,7 @@
 | [06-GUI Agent科普与实战](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra06-GUIAgent科普与实战.md)                | GUI Agent科普与多场景实战 |
 | [07-环境配置](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra07-环境配置.md)                | 环境配置 |
 | [08-如何写出好的Skill](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra08-如何写出好的Skill.md) | Skill 写作最佳实践 |
-| [14-UIZZE anti-UI-slop：UI 品質門](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra14-UIZZE-anti-UI-slop-UI-quality-gate.md) | 面向 coding agent 的 UI design contract、狀態、互動與 finish gate 工作流 |
+| [14-UIZZE anti-UI-slop：UI 质量门](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra14-UIZZE-anti-UI-slop-UI-quality-gate.md) | 面向 coding agent 的 UI design contract、状态、互动与 finish gate 工作流 |
 | [09-Agent应用开发实践踩坑与经验分享](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra09-Agent应用开发实践踩坑与经验分享.md) | Code Agent 应用开发踩坑与经验总结 |
 | [10-Agent Self-Evolution智能体自进化](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra10-Agent自进化.md) | Agent 自进化四类闭环与代表项目 |
 | [11-WebAgent科普与实战](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra11-WebAgent科普与实战.md) | Web Agent 原理、反爬实战与 HelloAgents 集成 |
