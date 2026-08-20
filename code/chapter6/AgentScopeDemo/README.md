@@ -44,7 +44,7 @@ $env:DASHSCOPE_API_KEY="your-api-key-here"
 set DASHSCOPE_API_KEY=your-api-key-here
 ```
 
-获取 API Key：https://dashscope.console.aliyun.com/apiKey
+获取 API Key：https://bailian.console.aliyun.com/cn-beijing?tab=model#/api-key
 
 ### 3. 运行游戏
 
