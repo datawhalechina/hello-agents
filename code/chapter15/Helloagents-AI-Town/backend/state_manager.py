@@ -31,6 +31,7 @@ class NPCStateManager:
         # 后台任务
         self._update_task: Optional[asyncio.Task] = None
         self._running = False
+        self._update_lock = asyncio.Lock()
         
         print(f"📊 NPC状态管理器初始化完成 (更新间隔: {update_interval}秒)")
     
@@ -79,24 +80,27 @@ class NPCStateManager:
     
     async def _update_npc_states(self):
         """更新NPC状态"""
-        try:
-            print(f"\n🔄 [{datetime.now().strftime('%H:%M:%S')}] 开始批量更新NPC对话...")
-            
-            # 批量生成对话
-            new_dialogues = self.batch_generator.generate_batch_dialogues()
-            
-            # 更新状态
-            self.current_dialogues = new_dialogues
-            self.last_update = datetime.now()
-            self.next_update_time = datetime.now()
-            
-            # 打印更新结果
-            print("📝 NPC对话已更新:")
-            for npc_name, dialogue in new_dialogues.items():
-                print(f"   - {npc_name}: {dialogue}")
-            
-        except Exception as e:
-            print(f"❌ 更新NPC状态失败: {e}")
+        async with self._update_lock:
+            try:
+                print(f"\n🔄 [{datetime.now().strftime('%H:%M:%S')}] 开始批量更新NPC对话...")
+
+                # 在线程中运行同步LLM调用，避免阻塞事件循环
+                new_dialogues = await asyncio.to_thread(
+                    self.batch_generator.generate_batch_dialogues
+                )
+
+                # 更新状态
+                self.current_dialogues = new_dialogues
+                self.last_update = datetime.now()
+                self.next_update_time = datetime.now()
+
+                # 打印更新结果
+                print("📝 NPC对话已更新:")
+                for npc_name, dialogue in new_dialogues.items():
+                    print(f"   - {npc_name}: {dialogue}")
+
+            except Exception as e:
+                print(f"❌ 更新NPC状态失败: {e}")
     
     def get_current_state(self) -> Dict:
         """获取当前状态"""
