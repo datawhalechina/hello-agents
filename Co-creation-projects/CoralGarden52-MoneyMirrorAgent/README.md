@@ -12,7 +12,6 @@ MoneyMirrorAgent 面向日常个人账单场景，接收用户提供的 CSV 交�
 
 - 想了解自己消费结构和行为模式的个人用户；
 - 希望围绕预算、储蓄或某一消费类别制定行动计划的用户；
-- 需要使用自有 CSV 账单进行本地分析和长期记录的用户。
 
 ## ✨ 核心功能
 
@@ -35,7 +34,6 @@ MoneyMirrorAgent 面向日常个人账单场景，接收用户提供的 CSV 交�
 - **数据处理**：Python 标准库、CSV、日期处理和统计计算
 - **长期存储**：SQLite
 - **交互方式**：Python CLI 和流式终端对话
-- **测试工具**：pytest、compileall
 
 ### Agent 架构
 
@@ -99,8 +97,6 @@ LLM_CONTEXT_MAX_TOKENS=100000
 LLM_TEMPERATURE=0.2
 ```
 
-请将 API Key 仅保存在本地 `.env` 文件中，不要提交到 Git 仓库。
-
 ### 运行项目
 
 使用 `--csv` 指定账单路径，项目不会依赖固定文件名，用户可以替换为自己的 CSV 文件：
@@ -151,6 +147,18 @@ python main.py --csv /path/to/your_transactions.csv \
 
 ### CLI 分步引导
 
+启动终端分步对话：
+
+```bash
+python main.py --interactive --csv data/sample_01.csv
+```
+
+也可以替换为自己的账单路径：
+
+```bash
+python main.py --interactive --csv /path/to/your_transactions.csv
+```
+
 ```text
 MoneyMirrorAgent> 这份账单中观察到深夜餐饮支出较集中。
 MoneyMirrorAgent> 你想先从减少深夜外卖、控制周末消费，还是检查连续扣费开始？
@@ -166,9 +174,7 @@ MoneyMirrorAgent> 我们先设定一个本周可完成的小目标。最容易�
 
 - **数据与推理分工明确**：金额和统计由 Python 完成，大模型负责理解、解释、规划和表达。
 - **真实信号驱动行动**：消费人格和 Money Quest 来自账单中的实际行为特征。
-- **Memory 影响后续流程**：分类纠正、目标、预算、Quest 和对话会被保存，并参与后续分析。
 - **对话逐步推进**：MoneyMirrorAgent 通过观察、建议和追问引导用户，完成交流后再生成月报。
-- **文件名可追溯**：报告使用输入 CSV 的文件名作为前缀，方便区分不同账单。
 
 ## 📊 性能评估
 
@@ -194,11 +200,11 @@ MoneyMirrorAgent> 我们先设定一个本周可完成的小目标。最容易�
 1. 保持确定性计算与大模型推理职责分离；
 2. 为新增工具、Agent 或数据格式补充测试；
 3. 不提交 `.env`、API Key、SQLite 数据库和运行生成文件；
-4. 同步更新 README 和 ExecPlan。
+4. 同步更新 README。
 
 ## 📄 许可证
 
-本项目随 Hello-Agents 共创目录遵循 CC BY-NC-SA 4.0 License。
+本项目采用MIT许可证。
 
 ## 👤 作者
 

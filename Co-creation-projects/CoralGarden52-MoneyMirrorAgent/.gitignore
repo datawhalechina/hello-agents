@@ -24,3 +24,4 @@ __pycache__/
 src/memory/__pycache__/
 tests/__pycache__/
 tool-output
+docs
