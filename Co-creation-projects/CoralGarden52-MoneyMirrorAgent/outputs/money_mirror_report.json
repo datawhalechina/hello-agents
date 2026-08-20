@@ -1,0 +1,738 @@
+{
+  "user_id": "demo_user",
+  "month": "2026-07",
+  "transactions": [
+    {
+      "transaction_id": "0a8479aa1bf2ef78",
+      "occurred_at": "2026-06-05T09:00",
+      "merchant": "公司工资",
+      "amount": 7200.0,
+      "kind": "income",
+      "category": "收入",
+      "note": "六月工资到账",
+      "source": "data/sample_02.csv",
+      "category_confidence": 1.0
+    },
+    {
+      "transaction_id": "64cb81ba471c6d1f",
+      "occurred_at": "2026-06-05T10:00",
+      "merchant": "房东-六月房租",
+      "amount": 2200.0,
+      "kind": "expense",
+      "category": "住房",
+      "note": "固定住房",
+      "source": "data/sample_02.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "c391b26ef3f71e94",
+      "occurred_at": "2026-06-08T12:30",
+      "merchant": "健康餐厅",
+      "amount": 85.0,
+      "kind": "expense",
+      "category": "餐饮",
+      "note": "午餐",
+      "source": "data/sample_02.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "9766268fdf6d4080",
+      "occurred_at": "2026-06-11T12:30",
+      "merchant": "健康餐厅",
+      "amount": 82.0,
+      "kind": "expense",
+      "category": "餐饮",
+      "note": "午餐",
+      "source": "data/sample_02.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "6232161e1f3d0d5c",
+      "occurred_at": "2026-06-15T08:20",
+      "merchant": "地铁月票",
+      "amount": 120.0,
+      "kind": "expense",
+      "category": "交通",
+      "note": "通勤",
+      "source": "data/sample_02.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "89f212aa90c6519f",
+      "occurred_at": "2026-06-17T19:00",
+      "merchant": "健身房月卡",
+      "amount": 199.0,
+      "kind": "expense",
+      "category": "健身",
+      "note": "运动",
+      "source": "data/sample_02.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "84813fdda4faadbe",
+      "occurred_at": "2026-06-20T14:00",
+      "merchant": "技术书店",
+      "amount": 260.0,
+      "kind": "expense",
+      "category": "学习",
+      "note": "学习资料",
+      "source": "data/sample_02.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "ae7df570d553dd41",
+      "occurred_at": "2026-06-24T12:30",
+      "merchant": "健康餐厅",
+      "amount": 86.0,
+      "kind": "expense",
+      "category": "餐饮",
+      "note": "午餐",
+      "source": "data/sample_02.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "268905b1a38ce794",
+      "occurred_at": "2026-07-06T09:00",
+      "merchant": "公司工资",
+      "amount": 7200.0,
+      "kind": "income",
+      "category": "收入",
+      "note": "七月工资到账",
+      "source": "data/sample_02.csv",
+      "category_confidence": 1.0
+    },
+    {
+      "transaction_id": "de52201c359d8c00",
+      "occurred_at": "2026-07-06T10:00",
+      "merchant": "房东-七月房租",
+      "amount": 2200.0,
+      "kind": "expense",
+      "category": "住房",
+      "note": "固定住房",
+      "source": "data/sample_02.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "bd82c407edac7b33",
+      "occurred_at": "2026-07-08T12:30",
+      "merchant": "健康餐厅",
+      "amount": 88.0,
+      "kind": "expense",
+      "category": "餐饮",
+      "note": "午餐",
+      "source": "data/sample_02.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "866f8d4cdb8a731d",
+      "occurred_at": "2026-07-11T12:30",
+      "merchant": "健康餐厅",
+      "amount": 86.0,
+      "kind": "expense",
+      "category": "餐饮",
+      "note": "午餐",
+      "source": "data/sample_02.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "df2b4e3eaf97936e",
+      "occurred_at": "2026-07-14T08:20",
+      "merchant": "地铁月票",
+      "amount": 120.0,
+      "kind": "expense",
+      "category": "交通",
+      "note": "通勤",
+      "source": "data/sample_02.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "15edf8bb951e26d8",
+      "occurred_at": "2026-07-17T19:00",
+      "merchant": "健身房月卡",
+      "amount": 199.0,
+      "kind": "expense",
+      "category": "健身",
+      "note": "运动",
+      "source": "data/sample_02.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "a026850dbf09bb4e",
+      "occurred_at": "2026-07-19T14:00",
+      "merchant": "设计课程平台",
+      "amount": 320.0,
+      "kind": "expense",
+      "category": "学习",
+      "note": "在线课程",
+      "source": "data/sample_02.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "7671c327ace86a54",
+      "occurred_at": "2026-07-22T12:30",
+      "merchant": "健康餐厅",
+      "amount": 90.0,
+      "kind": "expense",
+      "category": "餐饮",
+      "note": "午餐",
+      "source": "data/sample_02.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "e1fbe106ef487e37",
+      "occurred_at": "2026-07-26T12:30",
+      "merchant": "健康餐厅",
+      "amount": 87.0,
+      "kind": "expense",
+      "category": "餐饮",
+      "note": "午餐",
+      "source": "data/sample_02.csv",
+      "category_confidence": 0.92
+    }
+  ],
+  "summary": {
+    "transaction_count": 9,
+    "income": 7200.0,
+    "expense": 3190.0,
+    "balance": 4010.0,
+    "savings_rate": 55.69,
+    "average_expense": 398.75,
+    "active_days": 8
+  },
+  "category_breakdown": {
+    "住房": 2200.0,
+    "餐饮": 351.0,
+    "学习": 320.0,
+    "健身": 199.0,
+    "交通": 120.0
+  },
+  "trends": {
+    "daily": {
+      "2026-07-06": 2200.0,
+      "2026-07-08": 88.0,
+      "2026-07-11": 86.0,
+      "2026-07-14": 120.0,
+      "2026-07-17": 199.0,
+      "2026-07-19": 320.0,
+      "2026-07-22": 90.0,
+      "2026-07-26": 87.0
+    },
+    "weekly": {
+      "2026-07-06": 2374.0,
+      "2026-07-13": 639.0,
+      "2026-07-20": 177.0
+    },
+    "monthly": {
+      "2026-07": 3190.0
+    }
+  },
+  "patterns": {
+    "late_night": {
+      "count": 0,
+      "amount": 0,
+      "share": 0.0
+    },
+    "weekend": {
+      "count": 3,
+      "amount": 493.0,
+      "share": 15.45
+    },
+    "payday_window": {
+      "count": 2,
+      "amount": 2288.0,
+      "share": 71.72
+    },
+    "frequent_small": {
+      "count": 0,
+      "amount": 0,
+      "average": 0.0
+    },
+    "category_spikes": {
+      "住房": 2200.0,
+      "餐饮": 351.0,
+      "学习": 320.0,
+      "健身": 199.0,
+      "交通": 120.0
+    }
+  },
+  "anomalies": [],
+  "subscriptions": [
+    {
+      "merchant": "健身房月卡",
+      "months": [
+        "2026-06",
+        "2026-07"
+      ],
+      "occurrences": 2,
+      "typical_amount": 199.0,
+      "category": "健身",
+      "low_value_flag": false,
+      "message": "连续多月的会员或续费扣款，建议检查是否仍有使用价值"
+    }
+  ],
+  "persona": {
+    "primary": "稳健规划玩家",
+    "archetype": "steady_planner",
+    "score": 85.0,
+    "confidence": 0.85,
+    "labels": [
+      "稳健规划玩家",
+      "学习投入玩家"
+    ],
+    "secondary": [
+      {
+        "archetype": "learning_investor",
+        "name": "学习投入玩家",
+        "score": 59.49,
+        "confidence": 0.59,
+        "evidence": [
+          "学习消费占比 10.0%",
+          "有学习消费的月份数 2"
+        ]
+      }
+    ],
+    "evidence": [
+      "储蓄率 55.7%",
+      "工资到账后消费占比 71.7%",
+      "深夜消费占比 0.0%"
+    ],
+    "feature_vector": {
+      "night": 0.0,
+      "weekend": 36.25,
+      "frequent_small": 0.0,
+      "flexible_spend": 0.0,
+      "food": 27.51,
+      "subscription": 11.67,
+      "learning": 62.66,
+      "learning_consistency": 50.0,
+      "savings": 100.0,
+      "planning": 75.0,
+      "planning_inverse": 25.0,
+      "impulse": 30.0
+    },
+    "narrative": "你是“稳健规划玩家”，可以叫“月光绝缘体”——稳定原型匹配分 85.0，生活节奏稳到像自带一张消费蓝图。数据也印证：储蓄率 55.7%，工资到账后的消费占 71.7%，深夜消费 0.0%，说明你习惯先把钱和计划安排明白，再慢慢享受生活。"
+  },
+  "budget": {
+    "month": "2026-07",
+    "categories": {
+      "交通": {
+        "bucket": "necessary",
+        "historical_median": 120.0,
+        "recommended": 116.4,
+        "rationale": "必要支出，参考历史中位数并保留缓冲"
+      },
+      "住房": {
+        "bucket": "fixed",
+        "historical_median": 2200.0,
+        "recommended": 2200.0,
+        "rationale": "固定支出，原则上不做大幅削减"
+      },
+      "健身": {
+        "bucket": "necessary",
+        "historical_median": 199.0,
+        "recommended": 193.03,
+        "rationale": "必要支出，参考历史中位数并保留缓冲"
+      },
+      "学习": {
+        "bucket": "necessary",
+        "historical_median": 260.0,
+        "recommended": 252.2,
+        "rationale": "必要支出，参考历史中位数并保留缓冲"
+      },
+      "餐饮": {
+        "bucket": "necessary",
+        "historical_median": 253.0,
+        "recommended": 245.41,
+        "rationale": "必要支出，参考历史中位数并保留缓冲"
+      }
+    },
+    "recommended_total": 3007.04,
+    "historical_months": [
+      "2026-06"
+    ],
+    "principle": "基于历史中位数，固定支出不削减，必要/弹性/可选支出分层温和调整"
+  },
+  "goals": [],
+  "quests": [
+    {
+      "quest_id": "subscription_hunter",
+      "title": "订阅大扫除",
+      "description": "发现一笔疑似连续扣费，可能已经悄悄溜走好久啦。咱们一起来翻翻账本，看看它是不是还在为你发光发热，还是该和它说再见咯。\n🧩 小提示：打开订阅列表，找出那笔疑似扣费，确认自己是否还在用；不用的就痛痛快快取消掉，让钱包松口气。\n🎯 已核验目标：检查 1 项疑似连续扣费，并仅保留仍会使用的服务。",
+      "quest_type": "subscription_review",
+      "target": 1.0,
+      "progress": 0.0,
+      "unit": "项",
+      "exp_reward": 90,
+      "status": "active",
+      "evidence": "需要用户在后续 CLI 引导中确认完成"
+    },
+    {
+      "quest_id": "learning_loot_log",
+      "title": "学习小侦探",
+      "description": "有一笔学习相关的开销，但不知道它有没有真正帮到你。像小侦探一样去查一查，看看这门课或资料到底有没有被翻牌，顺便给自己定个下次学习的小约定。\n🧩 小提示：找出那笔学习支出对应的服务，记录今天有没有使用它，并顺手在日历上标一个下次使用的时间点，让每一分钱都花在成长上。\n🎯 已核验目标：记录 1 次学习服务是否真正被使用，并标注下次使用时间。",
+      "quest_type": "manual",
+      "target": 1.0,
+      "progress": 0,
+      "unit": "次",
+      "exp_reward": 70,
+      "status": "active",
+      "evidence": "等待用户更新进度"
+    }
+  ],
+  "achievements": [
+    {
+      "key": "savings_rate_20",
+      "title": "储蓄率破 20%",
+      "description": "储蓄率首次达到或超过 20%。",
+      "unlocked": true
+    },
+    {
+      "key": "zero_spend_start",
+      "title": "零消费日初体验",
+      "description": "完成至少一个零消费日。",
+      "unlocked": false
+    },
+    {
+      "key": "quest_ready",
+      "title": "任务上线",
+      "description": "已生成基于真实账单的 Money Quest。",
+      "unlocked": true
+    },
+    {
+      "key": "late_night_awareness",
+      "title": "深夜雷达启动",
+      "description": "已识别深夜消费行为并生成应对任务。",
+      "unlocked": false
+    },
+    {
+      "key": "zero_spend_streak_3",
+      "title": "三日无消费连击",
+      "description": "连续 3 天没有支出记录。",
+      "unlocked": true
+    }
+  ],
+  "gamification": {
+    "level": 1,
+    "total_exp": 0,
+    "exp_gained_this_cycle": 0,
+    "current_streak_days": 3,
+    "longest_streak_days": 3
+  },
+  "reflection": {
+    "month": "2026-07",
+    "previous_month": "2026-06",
+    "has_previous_snapshot": true,
+    "budget_deviations": [
+      {
+        "category": "交通",
+        "planned": 116.4,
+        "actual": 120.0,
+        "difference": 3.6,
+        "on_budget": false
+      },
+      {
+        "category": "住房",
+        "planned": 2200.0,
+        "actual": 2200.0,
+        "difference": 0.0,
+        "on_budget": true
+      },
+      {
+        "category": "健身",
+        "planned": 193.03,
+        "actual": 199.0,
+        "difference": 5.97,
+        "on_budget": false
+      },
+      {
+        "category": "学习",
+        "planned": 252.2,
+        "actual": 320.0,
+        "difference": 67.8,
+        "on_budget": false
+      },
+      {
+        "category": "餐饮",
+        "planned": 245.41,
+        "actual": 351.0,
+        "difference": 105.59,
+        "on_budget": false
+      }
+    ],
+    "quest_completion": {
+      "completed": 0,
+      "total": 2
+    },
+    "goal_progress": {},
+    "effective": [
+      "预算和任务均基于实际账单计算"
+    ],
+    "needs_adjustment": [
+      "餐饮",
+      "学习",
+      "健身",
+      "交通"
+    ],
+    "next_strategy": [
+      "优先为 餐饮 保留明确额度，而不是一刀切禁止消费。",
+      "下阶段只保留 2 个可执行任务，降低任务负担。"
+    ],
+    "next_cycle_month": "2026-08",
+    "next_cycle_budget": {
+      "source": "monthly_reflection",
+      "categories": {
+        "交通": {
+          "bucket": "necessary",
+          "historical_median": 120.0,
+          "recommended": 126.0,
+          "rationale": "Reflection 根据实际偏差增加缓冲，避免对一次性消费一刀切"
+        },
+        "住房": {
+          "bucket": "fixed",
+          "historical_median": 2200.0,
+          "recommended": 2200.0,
+          "rationale": "固定支出，原则上不做大幅削减"
+        },
+        "健身": {
+          "bucket": "necessary",
+          "historical_median": 199.0,
+          "recommended": 208.95,
+          "rationale": "Reflection 根据实际偏差增加缓冲，避免对一次性消费一刀切"
+        },
+        "学习": {
+          "bucket": "necessary",
+          "historical_median": 260.0,
+          "recommended": 336.0,
+          "rationale": "Reflection 根据实际偏差增加缓冲，避免对一次性消费一刀切"
+        },
+        "餐饮": {
+          "bucket": "necessary",
+          "historical_median": 253.0,
+          "recommended": 368.12,
+          "rationale": "Reflection 根据实际偏差增加缓冲，避免对一次性消费一刀切"
+        }
+      }
+    },
+    "next_cycle_quests": [
+      {
+        "quest_id": "carry_subscription_hunter",
+        "title": "延续：订阅大扫除",
+        "quest_type": "subscription_review",
+        "target": 1.0,
+        "unit": "项",
+        "exp_reward": 90,
+        "reason": "上周期未完成，Reflection 建议降低摩擦后继续"
+      },
+      {
+        "quest_id": "carry_learning_loot_log",
+        "title": "延续：学习小侦探",
+        "quest_type": "manual",
+        "target": 1.0,
+        "unit": "次",
+        "exp_reward": 70,
+        "reason": "上周期未完成，Reflection 建议降低摩擦后继续"
+      },
+      {
+        "quest_id": "reflection_餐饮",
+        "title": "餐饮缓冲预算挑战",
+        "quest_type": "category_limit",
+        "target": 368.12,
+        "unit": "餐饮",
+        "exp_reward": 100,
+        "reason": "根据本月最大预算偏差生成"
+      }
+    ],
+    "narrative": "按计划-实际-调整来看，本月储蓄率55.69%稳健，但餐饮（实际351元，超支105.59元）和学习（实际320元，超支67.8元）是主要失血点，且两项任务均未完成。下一周期先砍餐饮弹性支出、回归245.41元预算线，同时把学习花费与任务进度挂钩，避免“花钱未推进”。完成这2项任务前暂不开启新的非必要支出，下周期再检验调整效果。"
+  },
+  "agent_trace": [
+    {
+      "agent": "MoneyMirrorCoordinator",
+      "architecture": "Transaction → Pattern → Persona → Goal → Quest → Reflection",
+      "runtime": {
+        "available": true,
+        "enabled": true,
+        "reason": "已启用 Hello-Agents + OpenAI 兼容 LLM：deepseek-v4-flash",
+        "registry_name": "HelloAgents ToolRegistry (8 MoneyMirror tools)",
+        "paradigms": [
+          "ReActAgent",
+          "PlanSolveAgent",
+          "ReflectionAgent",
+          "Context Engineering"
+        ],
+        "registered_tools": [
+          "CSVImportTool",
+          "TransactionCategoryTool",
+          "StatisticsTool",
+          "AnomalyDetectionTool",
+          "BudgetCalculatorTool",
+          "GoalProjectionTool",
+          "SubscriptionDetectorTool",
+          "QuestProgressTool"
+        ],
+        "provider": "OpenAI-compatible",
+        "model": "deepseek-v4-flash",
+        "base_url": "https://api.deepseek.com"
+      }
+    },
+    {
+      "agent": "TransactionAgent",
+      "paradigm": "ReActAgent-style: inspect transaction → consult memory/rules → resolve only uncertainty",
+      "classification_sources": {
+        "income_rule": 2,
+        "keyword_rule": 15
+      }
+    },
+    {
+      "agent": "PatternAgent",
+      "paradigm": "PlanAndSolveAgent-style: plan metrics → call statistical tools → return evidence",
+      "tools": [
+        "StatisticsTool",
+        "AnomalyDetectionTool",
+        "SubscriptionDetectorTool"
+      ],
+      "evidence": {
+        "late_night_count": 0,
+        "anomaly_count": 0,
+        "subscription_count": 1
+      },
+      "planning_note": "下一步应把唯一订阅项作为消费模式解读重点，同时确认夜间消费与异常项均为0，无需额外排查。"
+    },
+    {
+      "agent": "PersonaAgent",
+      "paradigm": "Feature vector → configurable scoring → evidence validation → LLM narrative",
+      "config_path": "/home/nyc/hello-agents/Co-creation-projects/CoralGarden52-MoneyMirrorAgent/src/config/personas.json",
+      "grounded_metrics": {
+        "savings_rate": 55.69,
+        "late_night_share": 0.0,
+        "late_night_count": 0,
+        "weekend_share": 15.45,
+        "weekend_count": 3,
+        "payday_share": 71.72,
+        "frequent_small_count": 0,
+        "frequent_small_share": 0.0,
+        "food_share": 11.0,
+        "flexible_spend_share": 0.0,
+        "subscription_share": 0.0,
+        "subscription_count": 1,
+        "learning_share": 10.03,
+        "learning_active_months": 2,
+        "impulse": 30.0
+      },
+      "feature_vector": {
+        "night": 0.0,
+        "weekend": 36.25,
+        "frequent_small": 0.0,
+        "flexible_spend": 0.0,
+        "food": 27.51,
+        "subscription": 11.67,
+        "learning": 62.66,
+        "learning_consistency": 50.0,
+        "savings": 100.0,
+        "planning": 75.0,
+        "planning_inverse": 25.0,
+        "impulse": 30.0
+      },
+      "candidates": [
+        {
+          "archetype": "steady_planner",
+          "name": "稳健规划玩家",
+          "score": 85.0,
+          "evidence_valid": true
+        },
+        {
+          "archetype": "learning_investor",
+          "name": "学习投入玩家",
+          "score": 59.49,
+          "evidence_valid": true
+        },
+        {
+          "archetype": "weekend_experience",
+          "name": "周末体验玩家",
+          "score": 23.56,
+          "evidence_valid": false
+        },
+        {
+          "archetype": "subscription_collector",
+          "name": "数字订阅整理师",
+          "score": 14.34,
+          "evidence_valid": false
+        },
+        {
+          "archetype": "frequent_small_spend",
+          "name": "高频小额行动派",
+          "score": 10.13,
+          "evidence_valid": false
+        },
+        {
+          "archetype": "late_night_focus",
+          "name": "夜行消费探索者",
+          "score": 7.5,
+          "evidence_valid": false
+        }
+      ],
+      "llm_role": "仅生成年轻化解释，不决定人格原型、分数或证据"
+    },
+    {
+      "agent": "GoalAgent",
+      "paradigm": "PlanAndSolveAgent-style goal feasibility projection",
+      "tools": [
+        "GoalProjectionTool"
+      ],
+      "goal_count": 0,
+      "planning_note": "由于当前没有已验证的工具输出可引用，无法给出具体金额；一般做法是：将目标投影与当前实际值的差额，按剩余月份分解为每月需执行的可操作储蓄额，并绑定到发薪日自动转账或支出限额规则上，作为下一步的具体行动。"
+    },
+    {
+      "agent": "QuestAgent",
+      "paradigm": "规则发现真实信号 → PlanSolveAgent 动态编排 → Python 强校验与进度计算",
+      "tools": [
+        "StatisticsTool",
+        "BudgetCalculatorTool",
+        "SubscriptionDetectorTool",
+        "QuestProgressTool"
+      ],
+      "signal_catalog": [
+        {
+          "signal_id": "subscriptions",
+          "priority": "required",
+          "verified_observation": "发现 1 项疑似连续扣费。",
+          "locked_constraint": "检查 1 项疑似连续扣费，并仅保留仍会使用的服务。",
+          "completion_source": "用户 CLI 确认后由 SQLite Memory 记录"
+        },
+        {
+          "signal_id": "learning_followthrough",
+          "priority": "optional",
+          "verified_observation": "学习类支出为 ¥320.00，占本月支出 10.03%。",
+          "locked_constraint": "记录 1 次学习服务是否真正被使用，并标注下次使用时间。",
+          "completion_source": "用户 CLI 确认后由 SQLite Memory 记录"
+        }
+      ],
+      "llm_orchestration": {
+        "candidate_count": 2,
+        "accepted_signal_ids": [
+          "subscriptions",
+          "learning_followthrough"
+        ],
+        "validation": {
+          "attempts": 1,
+          "repaired": false,
+          "rejected": []
+        },
+        "numeric_authority": "Python only: target / progress / EXP / status are derived from locked blueprints and QuestProgressTool."
+      },
+      "quest_evidence": [
+        "需要用户在后续 CLI 引导中确认完成",
+        "等待用户更新进度"
+      ]
+    },
+    {
+      "agent": "ReflectionAgent",
+      "paradigm": "ReflectionAgent-style: plan → actual → deviation → adjustment",
+      "context_sources": [
+        "SQLiteMemory: previous snapshot",
+        "budget",
+        "quest outcomes",
+        "goal projection"
+      ]
+    }
+  ]
+}

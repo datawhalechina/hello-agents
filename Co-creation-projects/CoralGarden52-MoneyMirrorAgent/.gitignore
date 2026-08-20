@@ -3,8 +3,6 @@
 outputs/*.db
 outputs/*.sqlite
 outputs/*.sqlite3
-outputs/*.json
-outputs/*.md
 
 # Python
 __pycache__/
