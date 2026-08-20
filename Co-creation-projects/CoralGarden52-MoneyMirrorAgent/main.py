@@ -72,7 +72,7 @@ def _parse_goal(specification: str) -> Goal:
     )
 
 def parser() -> argparse.ArgumentParser:
-    command = argparse.ArgumentParser(description="MoneyMirrorAgent: 游戏化个人财务行为智能体")
+    command = argparse.ArgumentParser(description="MoneyMirrorAgent: 智能理财助手")
     command.add_argument("--interactive", action="store_true", help="分析账单后进入 LLM 引导对话，输入 /done 后生成最终 Markdown")
     command.add_argument("--csv", type=Path, required=True, metavar="账单CSV", help="要分析的 CSV 账单路径（必填）")
     command.add_argument("--month", help="指定分析月份，例如 2026-07")
