@@ -15,17 +15,21 @@ def test_calculator_tool():
 
     # 简单测试用例
     test_cases = [
-        "2 + 3",           # 基本加法
-        "10 - 4",          # 基本减法
-        "5 * 6",           # 基本乘法
-        "15 / 3",          # 基本除法
-        "sqrt(16)",        # 平方根
+        ("2 + 3", "5"),  # 基本加法
+        ("10 - 4", "6"),  # 基本减法
+        ("5 * 6", "30"),  # 基本乘法
+        ("15 / 3", "5.0"),  # 基本除法
+        ("sqrt(16)", "4.0"),  # 平方根
+        ("-5 + 2", "-3"),  # 一元负号
+        ("+5 * 2", "10"),  # 一元正号
+        ("2 * -3", "-6"),  # 二元运算中的负数
     ]
 
-    for i, expression in enumerate(test_cases, 1):
+    for i, (expression, expected) in enumerate(test_cases, 1):
         print(f"测试 {i}: {expression}")
         result = registry.execute_tool("my_calculator", expression)
         print(f"结果: {result}\n")
+        assert result == expected
 
 def test_with_simple_agent():
     """测试与SimpleAgent的集成"""
