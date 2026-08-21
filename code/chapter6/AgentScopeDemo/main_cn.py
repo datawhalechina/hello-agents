@@ -106,7 +106,13 @@ class ThreeKingdomsWerewolfGame:
                 self.hunter.append(agent)
             else:
                 self.villagers.append(agent)
-        
+
+        if len(self.werewolves) > 1:
+            async with MsgHub(self.werewolves):
+                await self.moderator.announce(
+                    f"狼人们注意，你们分别是：{'、'.join(w.name for w in self.werewolves)}"
+                )
+
         # 游戏开始公告
         await self.moderator.announce(
             f"三国狼人杀游戏开始！参与者：{format_player_list(self.alive_players)}"
@@ -153,7 +159,7 @@ class ThreeKingdomsWerewolfGame:
                     # 如果返回无效,随机选择一个目标
                     print(f"⚠️ {self.werewolves[i].name} 的击杀投票无效,随机选择目标")
                     import random
-                    valid_targets = [p.name for p in self.alive_players if p.name not in [w.name for w in self.werewolves]]
+                    valid_targets = [p.name for p in self.alive_players]
                     votes[self.werewolves[i].name] = random.choice(valid_targets) if valid_targets else None
             
             killed_player, _ = majority_vote_cn(votes)
