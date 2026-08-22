@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能API测试助手</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background: #f0f2f5;
+            padding: 30px;
+            color: #333;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 25px; color: #2c3e50; }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .card h2 { font-size: 18px; margin-bottom: 15px; color: #2c3e50; }
+
+        label { display: block; margin: 12px 0 6px; font-weight: bold; font-size: 14px; }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: Consolas, monospace;
+            font-size: 13px;
+            resize: vertical;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .btn-row { margin-top: 18px; display: flex; gap: 12px; }
+        button {
+            padding: 11px 22px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.85; }
+        .btn-primary { background: #4CAF50; color: #fff; font-weight: bold; }
+        .btn-secondary { background: #e0e0e0; color: #333; }
+        button:disabled { background: #aaa; cursor: not-allowed; }
+
+        .summary { display: flex; gap: 25px; flex-wrap: wrap; margin-bottom: 18px; }
+        .summary .item { font-size: 16px; }
+        .summary .passed { color: #4CAF50; font-weight: bold; }
+        .summary .failed { color: #e74c3c; font-weight: bold; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #e0e0e0; padding: 10px; text-align: left; font-size: 14px; }
+        th { background: #4CAF50; color: #fff; }
+        tr:nth-child(even) { background: #fafafa; }
+        .tag-pass { color: #4CAF50; font-weight: bold; }
+        .tag-fail { color: #e74c3c; font-weight: bold; }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #4CAF50;
+            font-size: 16px;
+        }
+        .error {
+            display: none;
+            background: #fdecea;
+            color: #c0392b;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 智能API测试助手</h1>
+
+        <!-- 输入区 -->
+        <div class="card">
+            <h2>① 输入 API 信息</h2>
+            <label>OpenAPI 文档（粘贴 yaml/json）：</label>
+            <textarea id="openapiText" placeholder="在此粘贴 OpenAPI 文档内容..."></textarea>
+
+            <label>目标 API 基础地址（base_url）：</label>
+            <input type="text" id="baseUrl" placeholder="例如：https://jsonplaceholder.typicode.com">
+
+            <div class="btn-row">
+                <button class="btn-primary" id="btnTest" onclick="startTest()">🚀 开始测试</button>
+                <button class="btn-secondary" onclick="fillExample()">📝 填入示例</button>
+            </div>
+        </div>
+
+        <!-- 错误提示 -->
+        <div class="error" id="errorBox"></div>
+
+        <!-- 加载中 -->
+        <div class="loading" id="loadingBox">⏳ 正在测试中，请稍候（含 LLM 生成用例，可能需要几秒）...</div>
+
+        <!-- 结果区 -->
+        <div class="card" id="resultCard" style="display:none;">
+            <h2>② 测试结果</h2>
+            <div class="summary" id="summaryBox"></div>
+            <table id="resultTable">
+                <thead>
+                    <tr>
+                        <th>用例名称</th>
+                        <th>类型</th>
+                        <th>状态码</th>
+                        <th>耗时(秒)</th>
+                        <th>结果</th>
+                        <th>错误信息</th>
+                    </tr>
+                </thead>
+                <tbody id="resultBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 示例文档内容（和 api.yaml 一致）
+        const EXAMPLE_DOC = `openapi: 3.0.0
+info:
+  title: JSONPlaceholder 测试API
+  description: 用于测试智能API测试助手的示例文档
+  version: 1.0.0
+paths:
+  /users:
+    get:
+      summary: 获取用户列表
+      responses:
+        '200':
+          description: 成功返回用户列表
+  /posts:
+    get:
+      summary: 获取帖子列表
+      responses:
+        '200':
+          description: 成功返回帖子列表
+`;
+
+        function fillExample() {
+            document.getElementById("openapiText").value = EXAMPLE_DOC;
+            document.getElementById("baseUrl").value = "https://jsonplaceholder.typicode.com";
+            hideError();
+        }
+
+        function showError(msg) {
+            const box = document.getElementById("errorBox");
+            box.textContent = msg;
+            box.style.display = "block";
+        }
+        function hideError() {
+            document.getElementById("errorBox").style.display = "none";
+        }
+
+        function startTest() {
+            const openapiText = document.getElementById("openapiText").value.trim();
+            const baseUrl = document.getElementById("baseUrl").value.trim();
+
+            // 前端校验
+            if (!openapiText) { showError("请粘贴 OpenAPI 文档内容，或点击「填入示例」"); return; }
+            if (!baseUrl) { showError("请填写目标 API 基础地址"); return; }
+
+            hideError();
+            // 显示加载中，禁用按钮
+            document.getElementById("loadingBox").style.display = "block";
+            document.getElementById("resultCard").style.display = "none";
+            document.getElementById("btnTest").disabled = true;
+
+            fetch("/api/test", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    openapi_text: openapiText,
+                    base_url: baseUrl,
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                renderResult(data);
+            })
+            .catch(err => {
+                showError("请求失败：" + err);
+            })
+            .finally(() => {
+                document.getElementById("loadingBox").style.display = "none";
+                document.getElementById("btnTest").disabled = false;
+            });
+        }
+
+        function renderResult(data) {
+            const summary = data.summary;
+            const results = data.results || [];
+
+            // 渲染统计
+            document.getElementById("summaryBox").innerHTML = `
+                <span class="item">总用例：<b>${summary.total}</b></span>
+                <span class="item passed">通过：${summary.passed}</span>
+                <span class="item failed">失败：${summary.failed}</span>
+                <span class="item">通过率：${summary.pass_rate}%</span>
+            `;
+
+            // 渲染表格
+            let rows = "";
+            for (const r of results) {
+                const passed = r.passed;
+                const statusCode = (r.result && r.result.status_code != null) ? r.result.status_code : "-";
+                const elapsed = (r.result && r.result.elapsed != null) ? r.result.elapsed : "-";
+                const errors = (r.errors && r.errors.length) ? r.errors.join("; ") : "-";
+                rows += `
+                    <tr>
+                        <td>${r.case.name || "-"}</td>
+                        <td>${r.case.case_type || "-"}</td>
+                        <td>${statusCode}</td>
+                        <td>${elapsed}</td>
+                        <td class="${passed ? 'tag-pass' : 'tag-fail'}">${passed ? "✅ 通过" : "❌ 失败"}</td>
+                        <td>${errors}</td>
+                    </tr>
+                `;
+            }
+            document.getElementById("resultBody").innerHTML = rows;
+            document.getElementById("resultCard").style.display = "block";
+        }
+    </script>
+</body>
+</html>

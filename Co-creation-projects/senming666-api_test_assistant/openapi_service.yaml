@@ -1,0 +1,114 @@
+openapi: 3.0.0
+info:
+  title: 智能API测试助手 - 服务接口
+  description: |
+    本项目自身暴露给前端（frontend/index.html）的后端服务接口。
+    前端通过这些接口，把"OpenAPI 文档 + 目标 API 地址"发给后端，
+    后端跑完 5 个 Agent 的流水线后，把测试结果返回给前端。
+
+    这正好演示了本工具的核心用途：拿一份 OpenAPI 文档去测接口——
+    现在这份文档描述的是"测试助手自己"的接口，实现"自己测自己"。
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: 本地开发服务器（运行 python server.py 后启动）
+paths:
+  /:
+    get:
+      summary: 获取前端页面
+      description: 返回测试助手的前端可视化页面（frontend/index.html）
+      responses:
+        '200':
+          description: 成功返回前端 HTML 页面
+          content:
+            text/html:
+              schema:
+                type: string
+  /api/test:
+    post:
+      summary: 执行智能 API 测试
+      description: |
+        核心接口。传入一份 OpenAPI 文档和目标 API 的基础地址，
+        后端自动完成「解析文档 → 生成用例 → 执行测试 → 验证结果 → 统计汇总」全流程。
+      requestBody:
+        required: true
+        description: |
+          请求体必须是一个 JSON 对象，且必须包含以下两个字符串字段（缺一不可，
+          字段名拼写错误或缺失都会返回 422）：
+          - openapi_text：要测试的 OpenAPI 文档内容
+          - base_url：目标 API 的基础地址
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - openapi_text
+                - base_url
+              properties:
+                openapi_text:
+                  type: string
+                  description: OpenAPI 文档内容（支持 yaml 或 json 文本）
+                base_url:
+                  type: string
+                  description: 目标 API 的基础地址，如 https://jsonplaceholder.typicode.com
+            example:
+              openapi_text: |
+                openapi: 3.0.0
+                info:
+                  title: 示例
+                  version: 1.0.0
+                paths:
+                  /users:
+                    get:
+                      summary: 获取用户列表
+                      responses:
+                        '200':
+                          description: 成功
+              base_url: https://jsonplaceholder.typicode.com
+      responses:
+        '200':
+          description: 测试完成，返回汇总统计和每个用例的验证结果
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - summary
+                  - results
+                properties:
+                  summary:
+                    type: object
+                    description: 汇总统计
+                    properties:
+                      total:
+                        type: integer
+                        description: 用例总数
+                      passed:
+                        type: integer
+                        description: 通过数
+                      failed:
+                        type: integer
+                        description: 失败数
+                      pass_rate:
+                        type: number
+                        description: 通过率（百分比，保留 1 位小数）
+                  results:
+                    type: array
+                    description: 每个用例的验证结果
+                    items:
+                      type: object
+                      properties:
+                        case:
+                          type: object
+                          description: 原始测试用例（含 name / case_type / path / method / expected_status 等）
+                        result:
+                          type: object
+                          description: 实际执行结果（含 status_code / elapsed / body / error 等）
+                        passed:
+                          type: boolean
+                          description: 该用例是否通过
+                        errors:
+                          type: array
+                          description: 失败原因列表（通过时为空）
+                          items:
+                            type: string
