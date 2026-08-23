@@ -35,15 +35,16 @@ ENV/
 # Jupyter
 .ipynb_checkpoints/
 
-# Data files
-*.csv
+# Data files (保留示例数据)
+data/*.csv
+!data/sample_data.csv
 *.xlsx
 *.xls
 *.json
-!data/sample.csv
 
-# Output files
-outputs/
+# Output files (保留目录结构)
+outputs/*
+!outputs/.gitkeep
 *.pdf
 *.tex
 *.aux
@@ -66,10 +67,11 @@ outputs/
 .DS_Store
 Thumbs.db
 
-# Knowledge base (large files)
-knowledge/
+# Knowledge base (保留示例文档)
+knowledge/*
 !knowledge/.gitkeep
+!knowledge/example_knowledge.md
 
-# Templates
-templates/
+# Templates (保留目录结构)
+templates/*
 !templates/.gitkeep
