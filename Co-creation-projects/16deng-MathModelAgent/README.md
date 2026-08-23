@@ -48,11 +48,22 @@ cp .env.example .env
 
 ### 运行项目
 
+**方式1：Jupyter Notebook**
+
 ```bash
 # 启动Jupyter Notebook
 jupyter lab
 
 # 打开main.ipynb并运行
+```
+
+**方式2：Web界面（推荐）**
+
+```bash
+# 启动Web界面
+python run_web.py
+
+# 访问 http://localhost:8501
 ```
 
 ## 使用示例

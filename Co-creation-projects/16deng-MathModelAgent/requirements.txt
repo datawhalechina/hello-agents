@@ -29,6 +29,9 @@ python-dotenv>=1.0.0
 tqdm>=4.65.0
 pydantic>=2.0.0
 
+# Web界面
+streamlit>=1.30.0
+
 # 可选：更好的LaTeX支持
 # pip install texlive-pictures
 # pip install tikzplotlib
