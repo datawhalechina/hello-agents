@@ -508,8 +508,9 @@ The last step, and the key to forming a closed loop, is to add the `Action` itse
             self.history.append(f"Action: {action}")
             self.history.append(f"Observation: {observation}")
 
-        # Loop ends
-        print("Maximum steps reached, process terminated.")
+        else:
+            # Only a natural loop exit means that max_steps was reached.
+            print("Maximum steps reached, process terminated.")
         return None
 ```
 
