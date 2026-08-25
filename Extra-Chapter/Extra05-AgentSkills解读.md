@@ -357,7 +357,7 @@ skills/mysql-employees-analysis/
 
 这个技能的 Frontmatter（元数据层）：
 
-```markdown
+````markdown
 ---
 name: mysql-employees-analysis
 description: >
@@ -432,6 +432,7 @@ tags: [database, mysql, sql, employees, analysis]
 ```python
 # 示例调用（智能体会自动转换为工具调用）
 result = execute_sql(query="SELECT ...")
+```
 
 
 ### 第四步：解读结果
@@ -446,17 +447,18 @@ result = execute_sql(query="SELECT ...")
 
 ### 模式 1：基础信息查询
 
-
+```sql
 -- 查询特定员工的基本信息
 SELECT emp_no, CONCAT(first_name, ' ', last_name) AS full_name,
        gender, birth_date, hire_date
 FROM employees
 WHERE emp_no = <员工号>;
+```
 
 
 ### 模式 2：当前状态查询
 
-
+```sql
 -- 查询当前薪资最高的员工（TOP 10）
 SELECT e.emp_no,
        CONCAT(e.first_name, ' ', e.last_name) AS name,
@@ -466,22 +468,24 @@ JOIN salaries s ON e.emp_no = s.emp_no
 WHERE s.to_date = '9999-01-01'  -- 当前薪资
 ORDER BY s.salary DESC
 LIMIT 10;
+```
 
 
 ### 模式 3：历史趋势分析
 
-
+```sql
 -- 查询某员工的薪资变化历史
 SELECT emp_no, salary, from_date, to_date,
        salary - LAG(salary) OVER (ORDER BY from_date) AS increase
 FROM salaries
 WHERE emp_no = <员工号>
 ORDER BY from_date;
+```
 
 
 ### 模式 4：跨表关联查询
 
-
+```sql
 -- 查询各部门的平均薪资（当前）
 SELECT d.dept_name,
        COUNT(DISTINCT de.emp_no) AS emp_count,
@@ -493,11 +497,12 @@ WHERE de.to_date = '9999-01-01'  -- 当前在职
   AND s.to_date = '9999-01-01'   -- 当前薪资
 GROUP BY d.dept_name
 ORDER BY avg_salary DESC;
+```
 
 
 ### 模式 5：复杂业务分析
 
-
+```sql
 -- 分析"话语权"：综合管理层级、薪资、任职时长
 WITH manager_hierarchy AS (
     -- 统计每个经理管理的下属数
@@ -537,6 +542,7 @@ LEFT JOIN manager_hierarchy mh ON e.emp_no = mh.emp_no
 WHERE cs.salary > 60000  -- 过滤低薪员工
 ORDER BY influence_score DESC
 LIMIT 20;
+```
 
 
 ## 注意事项
@@ -576,7 +582,7 @@ LIMIT 20;
 - 注意区分"历史"和"当前"状态
 - 检查 JOIN 条件是否遗漏
 - 验证聚合函数的使用是否正确
-```
+````
 
 这个 SKILL.md 文件展示了一个完整技能的结构：
 - 清晰的元数据（智能体用于发现和匹配）
