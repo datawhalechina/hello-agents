@@ -98,7 +98,7 @@ class ReporterAgent:
         """
         summary = self.summarize(validated_results)
         template = Template(HTML_TEMPLATE)
-        return template.render(summary=summary, results=v alidated_results)
+        return template.render(summary=summary, results=validated_results)
 
     def generate_markdown(self, validated_results):
         """生成 Markdown 报告
