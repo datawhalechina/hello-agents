@@ -76,28 +76,34 @@ class ProjectAssistant(SimpleAgent):
         return response
 
     def _retrieve_relevant_notes(self, query: str, limit: int = 3) -> List[Dict]:
-        """检索相关笔记"""
+        """检索相关笔记，优先保留 blocker 和 action 类型。"""
         try:
             # 优先检索 blocker 和 action 类型的笔记
             blockers_raw = self.note_tool.run({
                 "action": "list",
                 "note_type": "blocker",
-                "limit": 2
+                "limit": 1,
+            })
+            actions_raw = self.note_tool.run({
+                "action": "list",
+                "note_type": "action",
+                "limit": 1,
             })
 
             # 通用搜索
             search_results_raw = self.note_tool.run({
                 "action": "search",
                 "query": query,
-                "limit": limit
+                "limit": limit,
             })
 
             blockers = self._ensure_list_of_dicts(blockers_raw)
+            actions = self._ensure_list_of_dicts(actions_raw)
             search_results = self._ensure_list_of_dicts(search_results_raw)
 
-            # 合并并去重
+            # 合并并按笔记 ID 去重
             all_notes = {}
-            for note in blockers + search_results:
+            for note in blockers + actions + search_results:
                 if not isinstance(note, dict):
                     continue
                 note_id = (
@@ -107,7 +113,9 @@ class ProjectAssistant(SimpleAgent):
                     or note.get("title")
                     or str(hash(str(note)))
                 )
-                all_notes[note_id] = note
+                if note_id not in all_notes:
+                    all_notes[note_id] = note
+
             return list(all_notes.values())[:limit]
 
         except Exception as e:
