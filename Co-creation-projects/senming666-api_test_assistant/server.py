@@ -11,7 +11,7 @@ import sys
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -51,32 +51,42 @@ def test_api(req: TestRequest):
     接收前端传来的 {openapi_text, base_url}，
     依次调用 5 个 Agent，返回测试结果。
     """
-    # ① 解析文档（用 parse_text，因为前端传的是文本）
-    parser = ParserAgent()
-    endpoints = parser.parse_text(req.openapi_text)
+    try:
+        # ① 解析文档（用 parse_text，因为前端传的是文本）
+        parser = ParserAgent()
+        endpoints = parser.parse_text(req.openapi_text)
 
-    # ② 生成用例
-    generator = GeneratorAgent()
-    all_cases = []
-    for endpoint in endpoints:
-        all_cases.extend(generator.generate(endpoint))
+        # 文档里没有解析出任何接口，直接返回明确错误
+        if not endpoints:
+            raise HTTPException(status_code=400, detail="未能解析出任何接口，请检查 OpenAPI 文档内容")
 
-    # ③ 执行测试
-    executor = ExecutorAgent()
-    execution_results = executor.execute(all_cases, req.base_url)
+        # ② 生成用例
+        generator = GeneratorAgent()
+        all_cases = []
+        for endpoint in endpoints:
+            all_cases.extend(generator.generate(endpoint))
 
-    # ④ 验证结果
-    validator = ValidatorAgent()
-    validated_results = validator.validate(execution_results)
+        # ③ 执行测试
+        executor = ExecutorAgent()
+        execution_results = executor.execute(all_cases, req.base_url)
 
-    # ⑤ 统计汇总
-    reporter = ReporterAgent()
-    summary = reporter.summarize(validated_results)
+        # ④ 验证结果
+        validator = ValidatorAgent()
+        validated_results = validator.validate(execution_results)
 
-    return {
-        "summary": summary,
-        "results": validated_results,
-    }
+        # ⑤ 统计汇总
+        reporter = ReporterAgent()
+        summary = reporter.summarize(validated_results)
+
+        return {
+            "summary": summary,
+            "results": validated_results,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        # LLM 调用失败、网络异常等，返回 500 并给出友好提示，避免无信息崩溃
+        raise HTTPException(status_code=500, detail=f"测试执行失败：{e}")
 
 
 @app.get("/")

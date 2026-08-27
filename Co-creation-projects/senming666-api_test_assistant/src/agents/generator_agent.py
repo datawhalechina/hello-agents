@@ -42,13 +42,22 @@ class GeneratorAgent:
         # 注意：1.0.0 的 invoke 返回 LLMResponse 对象，用 .content 拿文本
         test_cases = self._parse_response(response.content)
 
+        # LLM 输出不可靠，可能返回非列表（dict/字符串），直接返回空列表兜底
+        if not isinstance(test_cases, list):
+            return []
+
         # 把 path 和 method 注入到每个用例里
         # （这些是确定性信息，直接从 endpoint 拿，不让 LLM 生成，避免拼错）
+        # 顺便过滤掉非 dict 的异常元素，避免 case["path"] 报错
+        cleaned = []
         for case in test_cases:
+            if not isinstance(case, dict):
+                continue
             case["path"] = endpoint["path"]
             case["method"] = endpoint["method"]
+            cleaned.append(case)
 
-        return test_cases
+        return cleaned
 
     def _build_prompt(self, endpoint):
         """构造提示词，让 LLM 输出结构化的测试用例"""

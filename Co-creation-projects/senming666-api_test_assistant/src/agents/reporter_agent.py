@@ -48,8 +48,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         <tr>
             <td>{{ r.case.name }}</td>
             <td>{{ r.case.case_type }}</td>
-            <td>{{ r.result.status_code }}</td>
-            <td>{{ r.result.elapsed }}</td>
+            <td>{{ r.result.status_code | default('-', true) }}</td>
+            <td>{{ r.result.elapsed | default('-', true) }}</td>
             <td class="{{ 'passed' if r.passed else 'failed' }}">
                 {{ '通过' if r.passed else '失败' }}
             </td>
@@ -98,7 +98,7 @@ class ReporterAgent:
         """
         summary = self.summarize(validated_results)
         template = Template(HTML_TEMPLATE)
-        return template.render(summary=summary, results=validated_results)
+        return template.render(summary=summary, results=v alidated_results)
 
     def generate_markdown(self, validated_results):
         """生成 Markdown 报告
@@ -127,8 +127,11 @@ class ReporterAgent:
             result = r["result"]
             name = case.get("name", "-")
             case_type = case.get("case_type", "-")
-            status_code = result.get("status_code", "-")
-            elapsed = result.get("elapsed", "-")
+            # 请求失败时 status_code / elapsed 是 None，表格里应显示 "-" 而不是 "None"
+            status_code = result.get("status_code")
+            status_code = "-" if status_code is None else status_code
+            elapsed = result.get("elapsed")
+            elapsed = "-" if elapsed is None else elapsed
             mark = "✅ 通过" if r["passed"] else "❌ 失败"
             errors = "; ".join(r["errors"]) if r["errors"] else "-"
             # Markdown 表格里出现 | 或换行会破坏表格结构，做简单转义

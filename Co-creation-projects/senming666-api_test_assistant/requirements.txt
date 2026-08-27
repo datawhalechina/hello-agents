@@ -5,6 +5,15 @@
 # 核心依赖
 hello-agents>=1.0.0
 
+# HTTP 请求：真实调用目标接口
+requests>=2.31.0
+
+# OpenAPI 文档解析（YAML 格式）
+PyYAML>=6.0
+
+# 环境变量加载（读取 .env 里的 LLM 配置）
+python-dotenv>=1.0.0
+
 # JSON Schema 校验：用来验证接口返回的数据结构是否符合文档约定
 jsonschema>=4.19.0
 
