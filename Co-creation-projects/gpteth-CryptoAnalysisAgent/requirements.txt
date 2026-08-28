@@ -1,0 +1,21 @@
+# Core dependencies
+hello-agents[all]>=0.2.7
+
+# Data processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# HTTP requests
+requests>=2.31.0
+aiohttp>=3.9.0
+
+# Environment variables
+python-dotenv>=1.0.0
+
+# Visualization (optional, for notebook display)
+matplotlib>=3.7.0
+
+# Jupyter
+jupyter>=1.0.0
+jupyterlab>=4.0.0
+ipywidgets>=8.0.0
