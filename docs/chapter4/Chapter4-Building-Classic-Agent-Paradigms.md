@@ -231,7 +231,15 @@ def search(query: str) -> str:
         
         # Intelligent parsing: prioritize finding the most direct answer
         if "answer_box_list" in results:
-            return "\n".join(results["answer_box_list"])
+            answers = [
+                box["answer"]
+                for box in results["answer_box_list"]
+                if isinstance(box, dict)
+                and isinstance(box.get("answer"), str)
+                and box["answer"]
+            ]
+            if answers:
+                return "\n".join(answers)
         if "answer_box" in results and "answer" in results["answer_box"]:
             return results["answer_box"]["answer"]
         if "knowledge_graph" in results and "description" in results["knowledge_graph"]:
@@ -250,7 +258,7 @@ def search(query: str) -> str:
         return f"Error occurred during search: {e}"
 ```
 
-In the above code, it first checks whether `answer_box` (Google's answer summary box) or `knowledge_graph` (knowledge graph) information exists. If it does, it directly returns these most precise answers. If not, it falls back to returning summaries of the first three regular search results. This "intelligent parsing" can provide higher-quality information input for the LLM.
+In the code above, it first checks for `answer_box_list` or `answer_box` (Google answer boxes), as well as `knowledge_graph` information. Because `answer_box_list` contains answer-box objects, the code extracts each non-empty `answer` field before joining the text. If the list has no usable answer, it continues to the other result types instead of returning an empty string. Only when none of these direct sources is available does it fall back to summaries of the first three organic results. This "intelligent parsing" can provide higher-quality information input for the LLM.
 
 (2) Building a General Tool Executor
 
@@ -1307,4 +1315,3 @@ At this point, we have mastered the core technologies for building individual ag
 [2] Wang L, Xu W, Lan Y, et al. Plan-and-solve prompting: Improving zero-shot chain-of-thought reasoning by large language models[J]. arXiv preprint arXiv:2305.04091, 2023.
 
 [3] Shinn N, Cassano F, Gopinath A, et al. Reflexion: Language agents with verbal reinforcement learning[J]. Advances in Neural Information Processing Systems, 2023, 36: 8634-8652.
-

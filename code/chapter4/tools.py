@@ -30,7 +30,15 @@ def search(query: str) -> str:
         
         # 智能解析：优先寻找最直接的答案
         if "answer_box_list" in results:
-            return "\n".join(results["answer_box_list"])
+            answers = [
+                box["answer"]
+                for box in results["answer_box_list"]
+                if isinstance(box, dict)
+                and isinstance(box.get("answer"), str)
+                and box["answer"]
+            ]
+            if answers:
+                return "\n".join(answers)
         if "answer_box" in results and "answer" in results["answer_box"]:
             return results["answer_box"]["answer"]
         if "knowledge_graph" in results and "description" in results["knowledge_graph"]:
