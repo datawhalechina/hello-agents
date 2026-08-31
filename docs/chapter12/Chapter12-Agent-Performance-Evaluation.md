@@ -224,37 +224,35 @@ The BFCL dataset uses JSON format, with each test sample containing the followin
 - `function`: List of available functions (including function signatures and descriptions)
 - `ground_truth`: Standard answer (expected function call)
 
-**(2) AST Matching Explanation**
+**(2) Function Call Matching**
 
-BFCL uses **AST Matching (Abstract Syntax Tree Matching)** as the core evaluation algorithm, so let's understand the evaluation strategy below.
+BFCL parses model output into structured function calls, then validates function names, parameter types, and parameter values instead of comparing raw strings. The BFCL v4 path in HelloAgents `0.2.3` likewise compares parsed argument dictionaries by key, so keyword argument order does not affect the result.
 
-BFCL uses Abstract Syntax Tree (AST) for intelligent matching, rather than simple string matching. The core idea of AST matching is: **Parse function calls into syntax trees, then compare tree structure and node values**.
-
-Given predicted function call $P$ and standard answer $G$, the AST matching function is defined as:
+Given a predicted function call $P$ and ground truth $G$, the matching condition can be summarized as:
 
 $$
-\text{AST\_Match}(P, G) = \begin{cases}
-1 & \text{if } \text{AST}(P) \equiv \text{AST}(G) \\
+\text{Match}(P, G) = \begin{cases}
+1 & \text{if } \text{Name}(P) = \text{Name}(G) \land \text{Args}(P) \models \text{Args}(G) \\
 0 & \text{otherwise}
 \end{cases}
 $$
 
-Where $\text{AST}(x)$ represents parsing function call into abstract syntax tree, $\equiv$ represents syntax tree equivalence.
+Here, $\text{Args}(P) \models \text{Args}(G)$ means that the predicted arguments satisfy the names, types, and acceptable values specified by the ground truth.
 
-Two syntax trees are equivalent if they satisfy three core conditions: function names must be completely identical (exact match), parameter key-value pair sets are equal (ignoring order), and each parameter value is semantically equivalent (e.g., `2+3` is equivalent to `5`). In the specific matching process, function name matching requires exact string matching, for example `get_weather` and `get_temperature` are considered different functions. Parameter matching uses AST for intelligent comparison, allowing different parameter orders (`f(a=1, b=2)` is equivalent to `f(b=2, a=1)`), allowing equivalent expressions (`f(x=2+3)` is equivalent to `f(x=5)`), and also allowing different string representations (`f(s="hello")` is equivalent to `f(s='hello')`). For multi-function call scenarios, the matching algorithm requires calling the same number of functions, each function call must match, but call order can differ (using set matching).
+Structured argument matching must not be confused with Python AST structure comparison. Because arguments are looked up by key, `f(a=1, b=2)` and `f(b=2, a=1)` can match on the BFCL v4 path. However, `ast.dump()` compares syntax-tree structure and does not evaluate arbitrary expressions, so `f(x=2+3)` and `f(x=5)` do not match. The legacy string-format fallback in HelloAgents `0.2.3` directly compares `ast.dump()` output and does not normalize keyword order either. An evaluator should not use `eval()` to execute model-generated expressions.
 
-**AST Matching Examples:**
+**Matching Examples:**
 
 ```python
-# Example 1: Different parameter order (match successful)
+# Example 1: Different parameter order (BFCL v4 argument dictionaries match)
 Prediction: get_weather(city="Beijing", unit="celsius")
 Standard: get_weather(unit="celsius", city="Beijing")
 Result: ✅ Match successful
 
-# Example 2: Equivalent expression (match successful)
+# Example 2: Different syntax structure (expressions are not evaluated)
 Prediction: calculate(x=2+3)
 Standard: calculate(x=5)
-Result: ✅ Match successful
+Result: ❌ Match failed
 
 # Example 3: Wrong function name (match failed)
 Prediction: get_temperature(city="Beijing")
@@ -833,36 +831,31 @@ class BFCLMetrics:
         }
 ````
 
-**AST Matching Implementation**:
+**BFCL v4 Argument Matching Implementation**:
 
-AST matching is the core technology of BFCL evaluation. It is more intelligent than simple string matching and can identify semantically equivalent function calls:
+The BFCL v4 path in HelloAgents `0.2.3` looks up each predicted value by parameter name and checks it against the acceptable values in the ground truth. This behavior can be verified in the [HelloAgents V0.2.3 evaluator source](https://github.com/jjyaoao/HelloAgents/blob/9a1af1bf968f8cd1974da227ce8782857d1afee8/hello_agents/evaluation/benchmarks/bfcl/evaluator.py). The official BFCL evaluator additionally validates types and values against the function schema; see BFCL's [`ast_checker.py`](https://github.com/ShishirPatil/gorilla/blob/6ea57973c7a6097fd7c5915698c54c17c5b1b6c8/berkeley-function-call-leaderboard/bfcl_eval/eval_checker/ast_eval/ast_checker.py). The relevant HelloAgents core logic is shown below. Because the arguments are dictionaries, insertion order is irrelevant, and expressions inside predicted values are never executed:
 
 ```python
-def _ast_match(self, pred_call: Dict, true_call: Dict) -> bool:
-    """Match function calls using AST
+def _compare_parameters(self, pred_params: Dict, exp_params: Dict) -> bool:
+    """Compare predicted arguments with acceptable BFCL v4 values."""
+    for param_name, expected_values in exp_params.items():
+        if param_name not in pred_params:
+            if not isinstance(expected_values, list) or "" not in expected_values:
+                return False
+            continue
 
-    Advantages of AST matching:
-    1. Ignore parameter order: func(a=1, b=2) equivalent to func(b=2, a=1)
-    2. Recognize equivalent expressions: 2+3 equivalent to 5
-    3. Ignore whitespace and format differences
-    """
-    # 1. Function name must match exactly
-    if pred_call.get("name") != true_call.get("name"):
-        return False
+        pred_value = pred_params[param_name]
+        if isinstance(expected_values, list):
+            if pred_value not in expected_values:
+                if str(pred_value) not in [str(v) for v in expected_values]:
+                    return False
+        elif (
+            pred_value != expected_values
+            and str(pred_value) != str(expected_values)
+        ):
+            return False
 
-    # 2. Convert parameters to AST nodes
-    pred_args = self._args_to_ast(pred_call.get("arguments", {}))
-    true_args = self._args_to_ast(true_call.get("arguments", {}))
-
-    # 3. Compare AST nodes
-    return ast.dump(pred_args) == ast.dump(true_args)
-
-def _args_to_ast(self, args: Dict[str, Any]) -> ast.AST:
-    """Convert parameter dictionary to AST node"""
-    # Construct a virtual function call
-    code = f"func({', '.join(f'{k}={repr(v)}' for k, v in args.items())})"
-    tree = ast.parse(code)
-    return tree.body[0].value  # Return Call node
+    return True
 ```
 
 **(4) Tool Encapsulation: BFCLEvaluationTool**
@@ -2684,7 +2677,7 @@ We established a three-tier evaluation system, comprehensively covering differen
 
 **(2) Core Technical Points**
 
-In technical implementation, we adopted six core technical points. First is modular design, evaluation system adopts three-tier architecture: data layer (Dataset responsible for data loading and management), evaluation layer (Evaluator responsible for executing evaluation flow), and metrics layer (Metrics responsible for calculating various evaluation metrics). Second is tool encapsulation, all evaluation functions are encapsulated as Tools, can be directly called by agents, integrated into workflows, or used through unified interface. Third is AST matching technology, using abstract syntax tree matching for function calls, more intelligent than simple string matching, able to ignore parameter order, recognize equivalent expressions, and ignore format differences. Fourth is multimodal support, GAIA evaluation supports text questions, attachment files, image inputs and other multimodal data. Fifth is LLM Judge evaluation, using LLM as judge to evaluate generated data quality, providing multi-dimensional scoring (correctness, clarity, difficulty matching, completeness), automated evaluation flow, detailed evaluation reports, and supporting custom evaluation dimensions and standards. Sixth is Win Rate comparison evaluation, evaluating generation quality through pairwise comparison (generated data vs reference data), LLM judges which is better and calculates win rate statistics, close to 50% indicates equivalent quality.
+In technical implementation, we adopted six core technical points. First is modular design, evaluation system adopts three-tier architecture: data layer (Dataset responsible for data loading and management), evaluation layer (Evaluator responsible for executing evaluation flow), and metrics layer (Metrics responsible for calculating various evaluation metrics). Second is tool encapsulation, all evaluation functions are encapsulated as Tools, can be directly called by agents, integrated into workflows, or used through unified interface. Third is structured function-call matching, which parses model output and validates function names, parameter types, and acceptable values. The BFCL v4 argument-dictionary path is insensitive to keyword argument order but does not execute arbitrary expressions. Fourth is multimodal support, GAIA evaluation supports text questions, attachment files, image inputs and other multimodal data. Fifth is LLM Judge evaluation, using LLM as judge to evaluate generated data quality, providing multi-dimensional scoring (correctness, clarity, difficulty matching, completeness), automated evaluation flow, detailed evaluation reports, and supporting custom evaluation dimensions and standards. Sixth is Win Rate comparison evaluation, evaluating generation quality through pairwise comparison (generated data vs reference data), LLM judges which is better and calculates win rate statistics, close to 50% indicates equivalent quality.
 
 **(3) Extension Directions**
 
@@ -2759,4 +2752,3 @@ In the next chapter, we will explore how to apply the HelloAgents framework to a
 [8] Zhou, X., Zhu, H., Mathur, L., Zhang, R., Yu, H., Qi, Z., ... & Neubig, G. (2023). SOTOPIA: Interactive Evaluation for Social Intelligence in Language Agents. arXiv preprint arXiv:2310.11667.
 
 [9] Mathematical Association of America. (2024). American Invitational Mathematics Examination (AIME). Retrieved from https://www.maa.org/math-competitions/invitational-competitions/aime
-
