@@ -1,8 +1,9 @@
+import importlib
 import os
 import sys
 import types
 import unittest
-
+from typing import ClassVar
 
 dotenv = types.ModuleType("dotenv")
 dotenv.load_dotenv = lambda: None
@@ -10,7 +11,7 @@ sys.modules["dotenv"] = dotenv
 
 
 class FakeSerpApiClient:
-    response = {}
+    response: ClassVar[dict] = {}
 
     def __init__(self, params):
         self.params = params
@@ -23,7 +24,7 @@ serpapi = types.ModuleType("serpapi")
 serpapi.SerpApiClient = FakeSerpApiClient
 sys.modules["serpapi"] = serpapi
 
-from tools import search  # noqa: E402
+search = importlib.import_module("tools").search
 
 
 class SearchAnswerBoxListTest(unittest.TestCase):
