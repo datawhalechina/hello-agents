@@ -224,7 +224,7 @@ def _gather(
     user_query: str,
     conversation_history: Optional[List[Message]] = None,
     system_instructions: Optional[str] = None,
-    custom_packets: Optional[List[ContextPacket]] = None
+    additional_packets: Optional[List[ContextPacket]] = None
 ) -> List[ContextPacket]:
     """Collect all candidate information
 
@@ -232,7 +232,7 @@ def _gather(
         user_query: User query
         conversation_history: Conversation history
         system_instructions: System instructions
-        custom_packets: Custom information packages
+        additional_packets: Additional information packages
 
     Returns:
         List[ContextPacket]: Candidate information list
@@ -291,9 +291,9 @@ def _gather(
                 metadata={"type": "conversation_history", "role": msg.role}
             ))
 
-    # 5. Add custom information packages
-    if custom_packets:
-        packets.extend(custom_packets)
+    # 5. Add additional information packages
+    if additional_packets:
+        packets.extend(additional_packets)
 
     print(f"[ContextBuilder] Collected {len(packets)} candidate information packages")
     return packets
@@ -867,7 +867,7 @@ def run(self, user_input: str) -> str:
     # 3. Pass notes when building context
     context = self.context_builder.build(
         user_query=user_input,
-        custom_packets=note_packets,
+        additional_packets=note_packets,
         ...
     )
 ```
@@ -1364,7 +1364,7 @@ class ProjectAssistant(SimpleAgent):
             user_query=user_input,
             conversation_history=self.conversation_history,
             system_instructions=self._build_system_instructions(),
-            custom_packets=note_packets
+            additional_packets=note_packets
         )
 
         # 4. Call LLM
@@ -2017,7 +2017,7 @@ packets = [
 # Include this information when building context
 context = context_builder.build(
     user_query="How to refactor the user service module?",
-    custom_packets=packets
+    additional_packets=packets
 )
 ```
 
@@ -2146,7 +2146,7 @@ class CodebaseMaintainer:
             user_query=user_input,
             conversation_history=self.conversation_history,
             system_instructions=self._build_system_instructions(mode),
-            custom_packets=note_packets + pre_context
+            additional_packets=note_packets + pre_context
         )
 
         # Step 4: Call LLM
@@ -2809,4 +2809,3 @@ In the next chapter, we will explore agent communication protocols and learn how
 [1] Anthropic. Effective Context Engineering for AI Agents. `https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents`
 
 [2] David Kim. Context-Engineering (GitHub). `https://github.com/davidkimai/Context-Engineering`
-
