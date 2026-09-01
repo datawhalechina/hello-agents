@@ -208,7 +208,7 @@ grpo_result_str = rl_tool.run({
     "output_dir": "./models/quick_test_grpo",
     "max_samples": 5,       # Only use 5 samples for quick test
     "num_epochs": 1,
-    "batch_size": 2,        # Must be divisible by num_generations(8), use 2
+    "batch_size": 2,        # With 4 accumulation steps, the generation batch is 2 × processes × 4, divisible by 8
     "use_lora": True
 })
 
