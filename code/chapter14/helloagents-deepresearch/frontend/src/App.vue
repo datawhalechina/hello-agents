@@ -343,38 +343,8 @@ import {
   type ResearchStreamEvent
 } from "./services/api";
 
-interface SourceItem {
-  title: string;
-  url: string;
-  snippet: string;
-  raw: string;
-}
-
-interface ToolCallLog {
-  eventId: number;
-  agent: string;
-  tool: string;
-  parameters: Record<string, unknown>;
-  result: string;
-  noteId: string | null;
-  notePath: string | null;
-  timestamp: number;
-}
-
-interface TodoTaskView {
-  id: number;
-  title: string;
-  intent: string;
-  query: string;
-  status: string;
-  summary: string;
-  sourcesSummary: string;
-  sourceItems: SourceItem[];
-  notices: string[];
-  noteId: string | null;
-  notePath: string | null;
-  toolCalls: ToolCallLog[];
-}
+import type { SourceItem, ToolCallLog, TodoTaskView } from "./types/todo";
+import { mergeTodoTasks } from "./utils/todoMerge";
 
 const form = reactive({
   topic: "",
@@ -717,49 +687,13 @@ const handleSubmit = async () => {
             ? (event.tasks as Record<string, unknown>[])
             : [];
 
-          todoTasks.value = tasks.map((item, index) => {
-            const rawId =
-              typeof item.id === "number"
-                ? item.id
-                : typeof item.id === "string"
-                ? Number(item.id)
-                : index + 1;
-            const id = Number.isFinite(rawId) ? Number(rawId) : index + 1;
-            const noteId =
-              typeof item.note_id === "string" && item.note_id.trim()
-                ? item.note_id.trim()
-                : null;
-            const notePath =
-              typeof item.note_path === "string" && item.note_path.trim()
-                ? item.note_path.trim()
-                : null;
-
-            return {
-              id,
-              title:
-                typeof item.title === "string" && item.title.trim()
-                  ? item.title.trim()
-                  : `任务${id}`,
-              intent:
-                typeof item.intent === "string" && item.intent.trim()
-                  ? item.intent.trim()
-                  : "探索与主题相关的关键信息",
-              query:
-                typeof item.query === "string" && item.query.trim()
-                  ? item.query.trim()
-                  : form.topic.trim(),
-              status:
-                typeof item.status === "string" && item.status.trim()
-                  ? item.status.trim()
-                  : "pending",
-              summary: "",
-              sourcesSummary: "",
-              sourceItems: [],
-              notices: [],
-              noteId,
-              notePath,
-              toolCalls: []
-            } as TodoTaskView;
+          // The backend re-broadcasts the full cumulative task list when a
+          // re-planning wave adds follow-up tasks. Merge by task id so the
+          // runtime state (summary / sources / notices / tool calls) of
+          // already-known tasks survives, while new tasks are appended.
+          todoTasks.value = mergeTodoTasks(todoTasks.value, tasks, {
+            fallbackIntent: "探索与主题相关的关键信息",
+            fallbackQuery: form.topic.trim()
           });
 
           if (todoTasks.value.length) {

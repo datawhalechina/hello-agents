@@ -31,7 +31,12 @@ def _make_wave_agent(max_waves: int, execute, replan):
     agent.planner = SimpleNamespace(replan_todo_list=replan)
     agent._set_tool_event_sink = lambda sink: None
     agent._execute_task = execute
-    agent._serialize_task = lambda t: {"id": t.id, "title": t.title, "status": t.status}
+    agent._serialize_task = lambda t: {
+        "id": t.id,
+        "title": t.title,
+        "status": t.status,
+        "summary": t.summary,
+    }
     return agent
 
 
@@ -232,21 +237,29 @@ def test_run_waves_skips_replan_when_no_gaps() -> None:
 
 def test_run_waves_stream_yields_second_todo_list_event() -> None:
     def execute(state, task, emit_stream=False, step=None):
-        if task.id == 99:
-            task.status = "completed"
-            task.summary = "ok"
-        else:
+        if task.id == 2:
             task.status = "skipped"  # leave a gap so re-planning triggers
+        else:
+            task.status = "completed"
+            task.summary = f"第{task.id}波总结"
         if emit_stream:
-            return [{"type": "task_status", "task_id": task.id, "status": task.status}]
+            return [
+                {
+                    "type": "task_status",
+                    "task_id": task.id,
+                    "status": task.status,
+                    "summary": task.summary,
+                }
+            ]
         return []
 
     def replan(state, gaps):
+        assert [g.id for g in gaps] == [2]
         return [_task(99)]
 
     agent = _make_wave_agent(max_waves=3, execute=execute, replan=replan)
     state = SummaryState(research_topic="测试主题")
-    state.todo_items = [_task(1)]
+    state.todo_items = [_task(1), _task(2)]
 
     events = list(agent._run_waves(state, emit_stream=True))
     types = [e["type"] for e in events]
@@ -255,6 +268,27 @@ def test_run_waves_stream_yields_second_todo_list_event() -> None:
     assert types.count("todo_list") == 2  # wave 0 + re-planned wave broadcast
     assert types.count("task_status") >= 1
     assert any(e["status"] == "skipped" for e in events if e["type"] == "task_status")
+
+    # The second (cumulative) todo_list must keep wave-1 data intact and add
+    # the follow-up task — this guards the SSE contract that the frontend
+    # relies on when merging by task id.
+    second = [e for e in events if e["type"] == "todo_list"][-1]
+    by_id = {t["id"]: t for t in second["tasks"]}
+    assert by_id[1]["summary"] == "第1波总结"
+    assert by_id[1]["status"] == "completed"
+    assert by_id[2]["status"] == "skipped"
+    assert 99 in by_id
+    # The follow-up task is announced as pending in the cumulative snapshot
+    # and completes afterwards through its own task_status event.
+    assert by_id[99]["status"] == "pending"
+    followup_completed = [
+        e
+        for e in events
+        if e["type"] == "task_status"
+        and e.get("task_id") == 99
+        and e.get("status") == "completed"
+    ]
+    assert followup_completed
 
 
 # ---------------------------------------------------------------------------
