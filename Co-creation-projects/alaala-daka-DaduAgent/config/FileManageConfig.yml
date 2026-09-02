@@ -1,0 +1,87 @@
+# ============================================================
+# 文件管理工具配置
+# 控制 file_manage 工具的模式、安全边界、大小限制等
+# ============================================================
+
+encoding: utf-8
+
+# 操作模式: "manual"（手动确认）或 "auto"（自动执行）
+#   manual: 读操作自由，写/删/建目录前必须通过 ask_for_answer 获取用户批准
+#   auto:   自由 CRUD，但禁止删除文件夹、修改系统配置等明显风险操作
+mode: auto
+
+# 允许操作的根目录列表（相对于项目根目录）
+# 安全默认：仅允许 uploads/（用户上传文件的落盘目录）。
+# 部署到服务器后 Agent 只能读写该目录内的文件，无法触碰 config/、源码、sessions/ 等。
+# 如需调整，可添加子目录如 "workspace/", "output/"；所有文件操作必须在这些目录内，否则被拒绝。
+allowed_paths:
+  - "uploads"
+
+# 全局禁止模式（glob 格式，匹配绝对路径）
+# 在 manual 和 auto 模式下均生效，无例外
+blocked_patterns:
+  - "**/.env"
+  - "**/.git/**"
+  - "**/.venv/**"
+  - "**/venv/**"
+  - "**/__pycache__/**"
+  - "**/*.pyc"
+  - "**/*.exe"
+  - "**/*.dll"
+  - "**/*.so"
+  - "**/*.dylib"
+  - "**/node_modules/**"
+  - "**/.claude/**"
+  - "**/.pytest_cache/**"
+  - "**/.mypy_cache/**"
+  - "**/.ruff_cache/**"
+  - "**/Chromadb/**"
+
+# 文件读取大小上限（字节）
+max_file_size_read: 1048576    # 1 MB
+
+# 文件写入/追加大小上限（字节）
+max_file_size_write: 5242880   # 5 MB
+
+# 写入/追加允许的文件扩展名
+# 读操作不受此限制
+allowed_write_extensions:
+  - ".txt"
+  - ".md"
+  - ".py"
+  - ".yaml"
+  - ".yml"
+  - ".json"
+  - ".csv"
+  - ".html"
+  - ".css"
+  - ".js"
+  - ".ts"
+  - ".log"
+  - ".jsonl"
+  - ".toml"
+  - ".cfg"
+  - ".ini"
+
+# 递归搜索最大目录深度
+max_directory_depth: 20
+
+# Auto 模式额外拦截的前缀（操作系统敏感路径）
+# 即使不在 blocked_patterns 中，匹配这些前缀的操作也会被拦截
+auto_mode_blocked_prefixes:
+  - "/etc/"
+  - "/sys/"
+  - "/proc/"
+  - "/boot/"
+  - "C:\\Windows"
+  - "C:\\Windows\\System32"
+  - "~/.ssh"
+  - "~/.gnupg"
+
+# 文件操作日志目录（相对于项目根目录）
+file_ops_log_dir: "logs/file_operations"
+
+# uploads/ 定时清理（聊天附件等临时文件；知识库文件有 file_record 记录，受保护）
+uploads_cleanup_enabled: true
+uploads_cleanup_interval_days: 3    # 清理任务运行周期（天）
+uploads_cleanup_retention_days: 3   # 删除 mtime 超过该天数未修改的文件

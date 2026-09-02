@@ -1,0 +1,7 @@
+# SystemConfig.example.yml — 模板文件
+# 复制此文件为 SystemConfig.yml 并填入真实 API key
+# 也可以设置环境变量: DEEPSEEK_API_KEY, TAVILY_API_KEY
+
+encoding: utf-8
+deepseek_api_key: "your-deepseek-api-key-here"
+tavily_api_key: "your-tavily-api-key-here"

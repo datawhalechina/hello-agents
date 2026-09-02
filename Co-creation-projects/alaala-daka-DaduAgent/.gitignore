@@ -1,0 +1,28 @@
+# ── 密钥与隐私数据（严禁提交）──
+.env
+config/SystemConfig.yml
+config/ModelConfig.yml
+logs/
+sessions/
+uploads/
+Chromadb/
+*.log
+
+# ── 运行时生成文件 ──
+vector_uploader_service/file_record.jsonl
+vector_uploader_service/md5_value_storage.txt
+
+# ── Python ──
+__pycache__/
+*.py[oc]
+.pytest_cache/
+.venv/
+
+# ── 前端 ──
+frontend/node_modules/
+frontend/dist/
+frontend/tsconfig.tsbuildinfo
+
+# ── 覆盖仓库根目录 .gitignore 的 test_*.py 规则 ──
+# 保证本项目的 pytest 测试可以正常提交
+!test_*.py

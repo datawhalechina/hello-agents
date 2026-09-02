@@ -1,0 +1,5 @@
+embedding_model_name: text-embedding-v4
+collection_name: knowledge_base
+persist_directory: Chromadb/knowledge_file
+reflection_collection_name: agent_reflections
+separators: ["\n\n", "\n","|" ,"。", "？", "！", "，", ".", "?", "!", "," , " ", ""]
