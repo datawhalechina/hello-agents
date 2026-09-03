@@ -1,0 +1,4 @@
+hello-agents[all]
+pandas
+matplotlib
+python-dotenv
