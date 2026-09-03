@@ -36,7 +36,8 @@ def test_replace_path_params_multiple():
 
 def test_execute_one_url_join_and_param_removal():
     class FakeClient:
-        def request(self, method, url, headers=None, params=None, body=None):
+        def request(self, method, url, headers=None, params=None, body=None,
+                    files=None, content_type="application/json"):
             return {"method": method, "url": url, "params": params, "body": body}
 
     ex = _executor()
@@ -49,3 +50,33 @@ def test_execute_one_url_join_and_param_removal():
     assert out["result"]["url"] == "https://httpbin.org/status/200"
     assert out["result"]["params"] == {}
     assert out["result"]["method"] == "GET"
+
+
+def test_execute_one_passes_headers_and_files():
+    """执行时全局认证头与 multipart 文件要原样透传给工具"""
+    captured = {}
+
+    class FakeClient:
+        def request(self, method, url, headers=None, params=None, body=None,
+                    files=None, content_type="application/json"):
+            captured["headers"] = headers
+            captured["files"] = files
+            captured["content_type"] = content_type
+            return {"method": method, "url": url}
+
+    ex = _executor()
+    ex.http_client = FakeClient()
+    case = {
+        "path": "/api/files/images",
+        "method": "POST",
+        "params": {},
+        "body": {},
+        "files": {"file": ("a.png", b"x", "image/png")},
+        "content_type": "multipart/form-data",
+    }
+
+    ex.execute_one(case, "http://x", headers={"Authorization": "Bearer token"})
+
+    assert captured["headers"] == {"Authorization": "Bearer token"}
+    assert captured["files"] == {"file": ("a.png", b"x", "image/png")}
+    assert captured["content_type"] == "multipart/form-data"

@@ -72,7 +72,7 @@ class ReporterAgent:
             validated_results: ValidatorAgent 返回的验证结果列表
 
         Returns:
-            统计信息字典：总数、通过、失败、通过率
+            统计信息字典：总数、通过、失败、跳过、通过率
         """
         total = len(validated_results)
         passed = sum(1 for r in validated_results if r["passed"])

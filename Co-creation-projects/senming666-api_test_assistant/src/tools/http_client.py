@@ -33,7 +33,8 @@ class HttpClient:
         self.timeout = timeout
         self.max_retries = max_retries
 
-    def request(self, method, url, headers=None, params=None, body=None):
+    def request(self, method, url, headers=None, params=None, body=None,
+                files=None, content_type="application/json"):
         """发送 HTTP 请求（带自动重试）
 
         Args:
@@ -41,7 +42,9 @@ class HttpClient:
             url: 完整的请求地址
             headers: 请求头字典，如 {"Authorization": "Bearer xxx"}
             params: 查询参数（URL 中 ? 后面的部分）
-            body: 请求体（POST/PUT 等要发送的 JSON 数据）
+            body: 请求体（JSON 时的 dict，或表单字段）
+            files: 上传的文件，格式 {"字段名": ("文件名", 字节内容, "MIME")}，传了就走 multipart
+            content_type: 请求体媒体类型，如 "application/json" / "multipart/form-data"
 
         Returns:
             标准化结果字典：
@@ -63,7 +66,7 @@ class HttpClient:
         last_error = None
         for attempt in range(self.max_retries + 1):
             try:
-                return self._do_request(method, url, headers, params, body)
+                return self._do_request(method, url, headers, params, body, files, content_type)
             except requests.RequestException as e:
                 last_error = e
                 # 如果不是最后一次，休息 1 秒再重试
@@ -73,18 +76,36 @@ class HttpClient:
         # 所有重试都失败，返回错误结果
         return self._error_result(f"请求失败（已重试 {self.max_retries} 次）: {last_error}")
 
-    def _do_request(self, method, url, headers, params, body):
-        """真正执行一次请求（不重试，被 request 方法调用）"""
+    def _do_request(self, method, url, headers, params, body, files, content_type):
+        """真正执行一次请求（不重试，被 request 方法调用）
+
+        根据请求体类型选择序列化方式：
+        - 有 files：multipart 文件上传（body 作为表单字段，files 作为文件字段）
+        - content_type 是 multipart：纯表单字段（无文件）
+        - 其它：JSON 请求体
+        """
         start = time.time()
 
-        response = requests.request(
-            method=method,
-            url=url,
-            headers=headers,
-            params=params,
-            json=body,          # 自动把 dict 转成 JSON 格式
-            timeout=self.timeout,
-        )
+        kwargs = {
+            "method": method,
+            "url": url,
+            "headers": headers,
+            "params": params,
+            "timeout": self.timeout,
+        }
+
+        if files is not None:
+            # multipart/form-data：文件字段走 files，普通字段走 data
+            kwargs["data"] = body or {}
+            kwargs["files"] = files
+        elif content_type and "multipart" in content_type.lower():
+            # multipart 但没有文件（纯表单字段）
+            kwargs["data"] = body or {}
+        elif body is not None:
+            # 默认 JSON 请求体，自动把 dict 转成 JSON 格式
+            kwargs["json"] = body
+
+        response = requests.request(**kwargs)
 
         elapsed = time.time() - start
 

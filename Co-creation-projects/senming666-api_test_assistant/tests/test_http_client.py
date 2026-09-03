@@ -49,6 +49,40 @@ def test_request_success():
     assert r["body"] == {"ok": True}
 
 
+def test_request_multipart_uses_files_not_json():
+    resp = Mock()
+    resp.status_code = 201
+    resp.json.return_value = {"id": "img1"}
+
+    files = {"file": ("a.png", b"pngbytes", "image/png")}
+    with patch("requests.request", return_value=resp) as mock_req:
+        r = HttpClient(max_retries=0).request(
+            "POST", "http://x", body={"desc": "hi"}, files=files
+        )
+
+    assert r["success"] is True
+    # multipart 场景：走 data + files，而不是 json=
+    kwargs = mock_req.call_args.kwargs
+    assert "json" not in kwargs
+    assert kwargs["files"] == files
+    assert kwargs["data"] == {"desc": "hi"}
+
+
+def test_request_multipart_no_file_uses_form_data():
+    resp = Mock()
+    resp.status_code = 200
+    resp.json.return_value = {}
+
+    with patch("requests.request", return_value=resp) as mock_req:
+        HttpClient(max_retries=0).request(
+            "POST", "http://x", body={"k": "v"}, content_type="multipart/form-data"
+        )
+
+    kwargs = mock_req.call_args.kwargs
+    assert "json" not in kwargs
+    assert kwargs["data"] == {"k": "v"}
+
+
 def test_request_retry_then_success(monkeypatch):
     import requests.exceptions
 

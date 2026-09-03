@@ -83,12 +83,15 @@ class ExecutorAgent:
         url = base_url.rstrip("/") + "/" + path.lstrip("/")
 
         # 3. 调用工具发请求（params 已移除路径参数）
+        # 认证头从全局 headers 传入；multipart 上传的文件从 case["files"] 传入
         response = self.http_client.request(
             method=case["method"],
             url=url,
             headers=headers,
             params=params,
             body=case.get("body"),
+            files=case.get("files"),
+            content_type=case.get("content_type", "application/json"),
         )
 
         # 3. 把"用例"和"结果"打包在一起返回

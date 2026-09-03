@@ -1,0 +1,3 @@
+# 依赖与构建产物不入库
+node_modules/
+dist/

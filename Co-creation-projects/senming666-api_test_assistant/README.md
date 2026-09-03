@@ -33,7 +33,7 @@
 - ✅ **真实 HTTP 调用**：带超时控制和自动重试，真实反映目标接口的行为
 - ✅ **自动结果校验**：状态码比对 + JSON Schema 结构校验
 - ✅ **双格式报告**：HTML + Markdown 两种格式 + 通过率统计，一眼定位失败用例
-- ✅ **前端可视化**：FastAPI + 原生网页，粘贴文档点按钮即可测试
+- ✅ **前端可视化**：FastAPI + Vue3 工程化前端，粘贴文档点按钮即可测试
 - ✅ **命令行入口**：`python main.py` 一键跑完整个流程
 - ✅ **URL 抓取**：`--url` 参数直接抓取网络上的 OpenAPI 文档，无需先下载
 - ✅ **认证请求头**：`--header` 参数传入 Authorization / API Key，能测需要鉴权的接口
@@ -43,7 +43,7 @@
 - **Hello-Agents** 框架（`hello-agents>=1.0.0`，多 Agent 架构）
 - **LLM**：OpenAI 兼容接口（支持 DeepSeek / 各类中转站），通过 `HelloAgentsLLM()` 调用
 - **Web 服务**：FastAPI + Uvicorn（把测试能力暴露成 HTTP 接口）
-- **前端**：原生 HTML + JavaScript（`fetch` 调用后端）
+- **前端**：Vue3 + Vite + Element Plus + axios（`npm run dev` 开发 / `npm run build` 打包）
 - **文档解析**：PyYAML + JSON（解析 OpenAPI 文档）
 - **结构校验**：jsonschema（校验响应体结构）
 - **报告渲染**：Jinja2（HTML 报告模板）
@@ -86,9 +86,15 @@ python main.py --file api.yaml --base-url https://jsonplaceholder.typicode.com
 **方式 2：Web 前端（可视化）**
 
 ```bash
+cd frontend
+npm install                 # 首次运行安装前端依赖
+npm run build               # 构建 Vue 前端，生成 frontend/dist/
+cd ..
 python server.py
 # 浏览器打开 http://localhost:8000
 ```
+
+`server.py` 只托管 Vue 构建产物。首次运行或修改前端代码后，需要重新执行 `npm run build`。
 
 **方式 3：Jupyter Notebook（教学演示）**
 
@@ -96,6 +102,21 @@ python server.py
 jupyter lab
 # 打开 main.ipynb 并逐格运行
 ```
+
+**方式 4：Docker 容器化部署（可选，免装本地环境）**
+
+项目自带多阶段构建的 `Dockerfile`（Node 阶段编译前端 + Python 阶段运行后端），一条命令打成镜像：
+
+```bash
+docker build -t api-test-assistant .
+
+# 运行时把 .env 的密钥注入容器（密钥不进镜像，只在本机运行时读取）
+docker run -d --name api-test-assistant -p 8000:8000 --env-file .env api-test-assistant
+# 浏览器打开 http://localhost:8000
+```
+
+> 若目标后端也跑在 Docker 里，把本容器挂到同一网络，即可用「容器名」当地址去测它：
+> `docker network connect <网络名> api-test-assistant`，界面里目标地址填如 `http://chat-backend-1:8000`。
 
 ## 📖 使用示例
 
@@ -134,44 +155,90 @@ python main.py --url https://httpbin.org/spec.json --base-url https://httpbin.or
 python main.py --url https://httpbin.org/spec.json --base-url https://httpbin.org --header "Authorization: Bearer your-token"
 ```
 
-### Web 前端方式
+### Web 前端方式（Vue3）
 
-1. `python server.py` 启动后端
-2. 浏览器打开 `http://localhost:8000`
-3. 点「📝 填入示例」自动填入示例文档，或粘贴你自己的 OpenAPI 文档
-4. 填目标 API 地址，点「🚀 开始测试」，页面下方展示结果表格和通过率
+前端是 Vue3 工程，支持生产模式和开发模式两种运行方式：
+
+**生产模式（部署）**
+```bash
+cd frontend && npm run build   # 打包 → frontend/dist/
+cd ..
+python server.py               # 启动后端，自动托管 dist
+# 浏览器打开 http://localhost:8000
+```
+
+**开发模式（改代码热更新）**
+```bash
+python server.py               # 终端1：后端在 8000
+cd frontend                    # 终端2
+npm install                     # 首次运行安装前端依赖
+npm run dev                     # Vite 开发服务器在 5173（/api 自动代理到 8000）
+# 浏览器打开 http://localhost:5173
+```
+
+打开后：选择「粘贴文档」并填入 OpenAPI 文档，或选择「URL 抓取」直接填写网络上的 OpenAPI 文档地址；
+再填写目标 API 地址，点「🚀 开始测试」，下方展示统计卡片与用例明细（点行可展开看请求/响应详情）。
 
 ## 📂 项目结构
 
 ```
 senming666-api_test_assistant/
-├── README.md                  # 项目说明（本文件）
-├── requirements.txt           # Python 依赖清单
-├── main.ipynb                 # Jupyter 演示入口
-├── main.py                    # 命令行入口，串起 5 个 Agent
-├── server.py                  # FastAPI 服务，同时托管前端页面
-├── .env.example               # 配置模板（提交到 GitHub，无密钥）
-├── .env                       # 真实配置（含密钥，绝不外传）
-├── api.yaml                   # 示例：被测目标文档（JSONPlaceholder）
-├── openapi_service.yaml       # 本项目自身服务的接口文档
-├── httpbin.json               # 示例：被测目标文档（httpbin.org）
-├── frontend/
-│   └── index.html             # 前端可视化页面
-├── reports/                   # 测试报告输出目录
-└── src/                       # 源代码
+├── README.md                       # 项目说明（本文件）
+├── requirements.txt                # Python 运行依赖
+├── requirements-dev.txt            # Python 开发依赖（pytest）
+├── pytest.ini                      # pytest 配置
+├── main.py                         # 命令行入口，串起 5 个 Agent
+├── main.ipynb                      # Jupyter 演示入口
+├── server.py                       # FastAPI 服务，托管 Vue 构建产物
+├── .env.example                    # LLM 配置模板（不含真实密钥）
+├── .env                            # 本地真实配置，不应提交到代码仓库
+├── api.yaml                        # 示例：被测目标文档（JSONPlaceholder）
+├── httpbin.json                    # 示例：被测目标文档（httpbin.org）
+├── openapi_service.yaml            # 本项目自身服务的 OpenAPI 文档
+├── frontend/                       # Vue3 + Vite + Element Plus 前端工程
+│   ├── index.html                  # Vite HTML 入口和 Vue 挂载点
+│   ├── package.json                # 前端依赖和 npm scripts
+│   ├── package-lock.json           # 前端依赖锁定文件
+│   ├── vite.config.js              # Vite 配置、路径别名和 /api 代理
+│   └── src/
+│       ├── main.js                 # Vue 应用入口，注册 Element Plus
+│       ├── App.vue                 # 根组件，编排页面状态
+│       ├── api/
+│       │   ├── request.js          # axios 实例和统一错误处理
+│       │   └── test.js             # 调用后端测试接口
+│       ├── components/
+│       │   ├── ApiTestForm.vue     # 文档粘贴、URL 抓取和测试参数表单
+│       │   ├── ResultSummary.vue   # 测试汇总展示
+│       │   └── ResultTable.vue     # 用例明细和请求响应展示
+│       ├── constants/
+│       │   └── exampleDoc.js       # 示例文档和展示映射
+│       ├── utils/
+│       │   └── format.js            # 数据展示格式化
+│       └── styles/
+│           └── index.css            # 全局样式
+├── reports/                        # HTML 和 Markdown 测试报告输出目录
+├── tests/                          # Python 单元测试
+│   ├── test_parser_agent.py
+│   ├── test_generator_agent.py
+│   ├── test_executor_agent.py
+│   ├── test_validator_agent.py
+│   ├── test_reporter_agent.py
+│   ├── test_schema_validator.py
+│   └── test_http_client.py
+└── src/                            # Python 核心源代码
     ├── __init__.py
-    ├── config.py              # 配置常量（超时/重试/并发等）
-    ├── tools/                 # 工具层（无大脑，只干活）
+    ├── config.py                   # 配置常量（超时/重试/并发等）
+    ├── tools/                      # 工具层：HTTP 请求和结果校验
     │   ├── __init__.py
-    │   ├── http_client.py     # HTTP 请求工具（超时+重试）
-    │   └── schema_validator.py # 结果校验工具（状态码+JSON Schema）
-    └── agents/                # 智能体层（流水线）
+    │   ├── http_client.py           # HTTP 请求工具（超时+重试）
+    │   └── schema_validator.py      # 状态码和 JSON Schema 校验
+    └── agents/                     # Agent 流水线
         ├── __init__.py
-        ├── parser_agent.py    # ① 解析 Agent：读懂 OpenAPI 文档
-        ├── generator_agent.py # ② 生成 Agent：用 LLM 生成用例（唯一用 LLM）
-        ├── executor_agent.py  # ③ 执行 Agent：真实调用接口
-        ├── validator_agent.py # ④ 验证 Agent：判断结果对错
-        └── reporter_agent.py  # ⑤ 报告 Agent：生成 HTML 报告
+        ├── parser_agent.py         # ① 解析 OpenAPI 文档
+        ├── generator_agent.py      # ② 用 LLM 生成测试用例
+        ├── executor_agent.py       # ③ 真实调用目标接口
+        ├── validator_agent.py      # ④ 验证接口返回结果
+        └── reporter_agent.py       # ⑤ 生成测试报告
 ```
 
 ## 🎯 项目亮点
@@ -180,7 +247,7 @@ senming666-api_test_assistant/
 - **智能与确定性结合**：只有 GeneratorAgent 用 LLM（想"测什么"），其余 4 个 Agent 是确定性逻辑（更可靠、更省 token）
 - **数据穿层设计**：用例在流水线中逐层包裹新字段（case → +result → +passed/errors），每层职责单一
 - **真实可跑**：不依赖 mock，直接对公网 API 发起真实请求，结果可信
-- **全栈完整**：后端（FastAPI）+ 前端（原生网页）+ 命令行 + Notebook 四种入口
+- **全栈完整**：后端（FastAPI）+ Vue3 前端 + 命令行 + Notebook 四种入口
 
 ## 📊 性能评估
 
@@ -249,4 +316,3 @@ MIT License
 ## 🙏 致谢
 
 感谢 Datawhale 社区和 Hello-Agents 项目！
-

@@ -33,21 +33,33 @@ paths:
       requestBody:
         required: true
         description: |
-          请求体必须是一个 JSON 对象，且必须包含以下两个字符串字段（缺一不可，
-          字段名拼写错误或缺失都会返回 422）：
-          - openapi_text：要测试的 OpenAPI 文档内容
-          - base_url：目标 API 的基础地址
+          请求体必须包含 base_url，以及 openapi_text 和 openapi_url 中的一个。
+          两个文档来源字段不能同时提供，字段缺失或类型错误会返回 422。
         content:
           application/json:
             schema:
               type: object
               required:
-                - openapi_text
                 - base_url
+              oneOf:
+                - required:
+                    - openapi_text
+                  not:
+                    required:
+                      - openapi_url
+                - required:
+                    - openapi_url
+                  not:
+                    required:
+                      - openapi_text
               properties:
                 openapi_text:
                   type: string
                   description: OpenAPI 文档内容（支持 yaml 或 json 文本）
+                openapi_url:
+                  type: string
+                  format: uri
+                  description: OpenAPI 文档 URL，由后端直接抓取
                 base_url:
                   type: string
                   description: 目标 API 的基础地址，如 https://jsonplaceholder.typicode.com

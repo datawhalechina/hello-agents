@@ -24,6 +24,15 @@ TEST_CASES_PER_ENDPOINT = 3
 # 用例类型：正常 / 边界 / 异常
 CASE_TYPES = ["normal", "boundary", "error"]
 
+# ============ 测试数据配置 ============
+
+# 1x1 透明 PNG 的最小合法图片（base64 编码）
+# 文件上传接口（multipart/form-data）需要一个真实文件才能通过后端的内容校验，
+# 用这个最小合法图片作为占位测试文件，避免生成器拿不到二进制内容。
+MINIMAL_PNG_BASE64 = (
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+)
+
 # ============ 报告配置 ============
 
 # 测试报告的输出目录
