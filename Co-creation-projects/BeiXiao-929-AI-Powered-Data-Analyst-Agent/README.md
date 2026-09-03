@@ -24,8 +24,8 @@
 
 ## 技术亮点
 
-- 基于 Hello-Agents 的 **ReCo 范式**（Reasoning-Acting-Observation 循环）实现多工具自主规划调用
-- 自定义 4 个继承 `BaseTool` 的数据分析工具（csv_loader / data_stats / data_cleaner / data_visualizer），覆盖分析全流程
+- 基于 Hello-Agents 1.x 的 **ReAct 范式**（Reasoning-Acting-Observation 循环 / Function Calling）实现多工具自主规划调用
+- 自定义 4 个数据分析工具（csv_loader / data_stats / data_cleaner / data_visualizer），遵循 1.x 新版 `Tool` + `ToolRegistry` + `ToolResponse` 协议，覆盖分析全流程
 - **智能图表选型**：通过系统提示词将「对比→柱状图、趋势→折线图、占比→饼图、分布→直方图」的选型经验注入 Agent
 - **工具层健壮性设计**：description 中内置参数格式示例，`run()` 内做路径清洗与容错解析，容忍 LLM 输出的格式抖动
 - 附带 **8 项工具层自动化测试**，覆盖正常与异常输入
@@ -48,11 +48,13 @@
 git clone https://github.com/你的用户名/hello-agents.git
 cd hello-agents/Co-creation-projects/DataAnalystAgent
 
-# 2. 安装依赖
+# 2. 安装依赖（hello-agents >= 1.0.0，新版 API）
 pip install -r requirements.txt
 
-# 3. 配置 API Key
-echo "ZHIPU_API_KEY=your_api_key_here" > .env
+# 3. 配置 API Key（重要：1.x 读取 LLM_API_KEY，不是 ZHIPU_API_KEY）
+echo "LLM_MODEL_ID=glm-4-flash" > api.env
+echo "LLM_API_KEY=your_api_key_here" >> api.env
+echo "LLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4" >> api.env
 
 # 4. 启动 Jupyter 运行 main.ipynb
 jupyter lab main.ipynb
