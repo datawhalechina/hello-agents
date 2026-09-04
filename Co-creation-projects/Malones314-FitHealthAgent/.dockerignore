@@ -1,0 +1,49 @@
+# Docker 构建上下文排除清单。
+#
+# 没有这个文件时，Dockerfile 里的 `COPY . .` 会把 data/ 一起打进镜像层——
+# 个人健康数据被固化进镜像，而且镜像里那份还会与挂载出来的那份混淆（DATA-10）。
+# 注意 .dockerignore 与 .gitignore 是两套机制，git 忽略了不代表 docker 会忽略。
+
+# ── 运行时数据：只能来自挂载卷，绝不进镜像 ──────────────────────────────
+data/
+
+# ── 机密 ────────────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── 版本控制与 IDE ──────────────────────────────────────────────────────
+.git/
+.gitignore
+.idea/
+.vscode/
+.agents/
+
+# ── Python 缓存与测试产物 ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.test-tmp/
+.tmp-tests/
+
+# ── 本地开发杂物 ────────────────────────────────────────────────────────
+*.log
+tool-output/
+dist/
+memory/todos/
+memory/traces/
+memory/sessions/
+
+# ── 容器里用不到的东西 ──────────────────────────────────────────────────
+tests/
+scripts/
+docker-compose*.yml
+Dockerfile
+LICENSE
+*.md
+!README.md

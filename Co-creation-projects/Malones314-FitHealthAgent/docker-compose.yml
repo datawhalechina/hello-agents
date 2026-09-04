@@ -1,0 +1,56 @@
+# FitHealthAgent —— 默认（持久化）配置
+#
+# DATA-10 的核心修复就是下面 volumes 里那一行 `./data:/app/data`。
+# 原来这里只挂了 `./:/app`（为了源码热重载），数据能留下来纯属顺带；
+# 一旦有人按正常方式跑镜像——不挂源码——所有健康数据都写在容器可写层，
+# **容器重建即全量丢失**。现在数据卷是显式的、独立于源码挂载的。
+#
+# 开发时想要热重载：
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# 首次使用：
+#   1. cp .env.example .env 并填好各 API key；
+#   2. 若 hello-agents 不在你的 PyPI 索引里，把 wheel 放进 vendor/；
+#   3. docker compose up -d --build
+
+services:
+  fithealth:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # 发布版使用 Python 3.12；若镜像已预装 hello-agents，可在部署时覆盖。
+        BASE_IMAGE: python:3.12-bookworm
+    image: fit_health_agent:v1
+    container_name: fit_health_agent
+    restart: unless-stopped
+    ports:
+      # 个人自用：只绑本机回环，不对局域网暴露
+      - "127.0.0.1:9999:9999"
+    env_file:
+      - .env
+    environment:
+      PYTHONUNBUFFERED: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONPATH: /app
+      TZ: Asia/Shanghai
+      # 所有 store 都从这里取数据目录（ARCH-03），与下面的挂载点必须一致
+      FITHEALTH_DATA_DIR: /app/data
+    volumes:
+      # ★ DATA-10：唯一需要持久化的目录。JSON 存储、health.db、原始导入文件、
+      #   1Hz 心率流旁挂文件全在这里；容器重建、镜像重建都不会影响它。
+      - ./data:/app/data
+    working_dir: /app
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:9999/health/storage-status', timeout=4).status == 200 else 1)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    # SQLite 在 bind mount 上对文件锁敏感，日志里出现 database is locked 时
+    # 先看 /health/storage-status 是否报告了降级（DATA-09）。
+    stop_grace_period: 20s
