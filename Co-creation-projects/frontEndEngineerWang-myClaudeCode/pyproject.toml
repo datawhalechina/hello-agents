@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "coding-assistant"
+version = "0.1.0"
+description = "An interactive AI coding assistant CLI (Claude Code style)"
+readme = "README.zh.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "anthropic>=0.49.0",
+    "python-dotenv>=1.0.0",
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+coding-assistant = "coding_assistant.cli:main"
+coding-assistant-web = "coding_assistant.web:main"
+
+[tool.setuptools.packages.find]
+include = ["coding_assistant*"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+coding_assistant = ["web_static/*.html", "web_static/*.css", "web_static/*.js"]

@@ -1,0 +1,34 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.env
+.env.local
+.pytest_cache/
+
+# Build artifacts
+build/
+dist/
+*.spec
+
+# IDE / OS junk
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Runtime state
+.mailboxes/
+.memory/
+.scheduled_tasks.json
+.task_outputs/
+.tasks/
+.transcripts/
+.worktrees/
+
+# WorkBuddy local data (project-scoped)
+.token_usage/
+.web_sessions/
+.workbuddy/
+issue.txt
