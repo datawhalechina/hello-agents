@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coding Assistant</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">✦</span><div><strong>Agent Harness</strong><small>coding assistant</small></div></div>
+      <button id="new-chat" class="primary full">＋ 新建对话</button>
+      <div class="sidebar-label">对话历史</div>
+      <div id="conversation-list" class="conversation-list"></div>
+      <div class="sidebar-footer">浏览器工作台 · 本地存储</div>
+    </aside>
+
+    <main class="main-panel">
+      <header class="topbar">
+        <div class="title-wrap"><h1 id="conversation-title">新对话</h1><span id="status-pill" class="status idle">空闲</span></div>
+        <div class="workdir-control"><label for="workdir">工作目录</label><input id="workdir" placeholder="例如 D:\\projects\\demo"><button id="save-settings" class="ghost">保存</button></div>
+      </header>
+
+      <nav class="tabs"><button class="tab active" data-tab="chat">对话</button><button class="tab" data-tab="debug">调试 Trace <span id="debug-count" class="count">0</span></button></nav>
+
+      <section id="chat-view" class="view active"><div id="messages" class="messages"><div class="empty-state"><div class="empty-icon">◌</div><h2>开始一段新的协作</h2><p>告诉 Agent 你想完成什么，它会在当前工作目录中读取、修改和验证代码。</p></div></div><form id="composer" class="composer"><textarea id="prompt" rows="3" placeholder="输入任务，Enter 发送，Shift+Enter 换行…"></textarea><div class="composer-footer"><span>模型调用与工具结果会自动记录到“调试 Trace”</span><button id="send" class="primary" type="submit">发送 <span>↵</span></button></div></form></section>
+      <section id="debug-view" class="view">
+        <div style="display: flex;justify-content: space-between;margin-bottom: 10px;">
+          <div id="token-metrics" class="token-metrics"></div>
+          <button id="refresh-debug" class="ghost">↻ 刷新</button>
+        </div>
+        <div id="debug-events" class="debug-events"></div></section>
+    </main>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>
+

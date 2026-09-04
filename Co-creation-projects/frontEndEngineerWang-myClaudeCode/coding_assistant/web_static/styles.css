@@ -1,0 +1,5 @@
+
+.token-metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; padding:16px 20px 0; }
+.token-metrics > div { background:#111827; border:1px solid #263244; border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; gap:4px; }
+.token-metrics span { color:#94a3b8; font-size:12px; }
+.token-metrics strong { color:#e2e8f0; font-size:18px; }
