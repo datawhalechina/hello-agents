@@ -299,7 +299,7 @@ These three vectors are all obtained by multiplying the original word embedding 
 
 - Prepare "exam questions" and "materials": For each word in the sentence, generate its $Q,K,V$ vectors through weight matrices.
 - Calculate relevance scores: To calculate the new representation of word $A$, use word $A$'s $Q$ vector to perform dot product operations with the $K$ vectors of all words in the sentence (including $A$ itself). This score reflects the importance of other words for understanding word $A$.
-- Stabilization and normalization: Divide all obtained scores by a scaling factor $\sqrt{d_{k}}$ ($d_{k}$ is the dimension of the $K$ vector) to prevent gradients from being too small, then use the Softmax function to convert scores into weights that sum to 1, which is the normalization process.
+- Stabilization and normalization: Divide the attention scores by the scaling factor $\sqrt{d_{k}}$ ($d_{k}$ is the dimension of the $K$ vector). As $d_{k}$ increases, unscaled dot products tend to have larger magnitudes, which can push Softmax into saturated regions and produce very small gradients. Scaling by $\sqrt{d_{k}}$ keeps the score scale under control, reduces Softmax saturation, and stabilizes training; Softmax then converts the scores into weights that sum to 1.
 - Weighted sum: Multiply the weights obtained in the previous step by each word's corresponding $V$ vector, then add all results together. The final vector is the new representation of word $A$ after integrating global contextual information.
 
 This process can be summarized by a concise formula:
