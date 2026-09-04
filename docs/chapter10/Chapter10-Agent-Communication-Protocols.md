@@ -768,6 +768,20 @@ async def test_streamable_http_transport():
 # asyncio.run(test_streamable_http_transport())
 ```
 
+**Try a hosted Streamable HTTP server**
+
+To try this transport without starting a server, run the [Parallel Search MCP example](../../code/chapter10/04_ParallelSearchMCP.py). It uses this chapter's `MCPClient` to connect to `https://search.parallel.ai/mcp`, discover tools, call `web_search`, and extract a public page with `web_fetch`. It needs neither a Parallel account/API key nor an LLM API key.
+
+After installing this chapter's HelloAgents version, run from the repository root:
+
+```bash
+python code/chapter10/04_ParallelSearchMCP.py
+```
+
+Running the example sends its queries, requested URLs, objectives, and a random task identifier to Parallel. Free anonymous access is rate limited. The script only makes these calls when run and does not register tools with an agent or change existing search providers. If you later expose the tools to an agent, it may invoke them during its work. See the [Parallel Search MCP documentation](https://docs.parallel.ai/integrations/mcp/search-mcp) for service details.
+
+`MCPClient.call_tool` returns the tool's text content in this example. Search results include source URLs and excerpts; fetch results may include both successful pages and per-URL errors. Inspect those errors before using the extracted content, and treat retrieved text as external data rather than instructions.
+
 ### 10.2.4 Using MCP Tools in Agents
 
 Previously, we learned how to use the MCP client directly. But in practical applications, we prefer to have agents **automatically** call MCP tools rather than manually writing calling code. HelloAgents provides the `MCPTool` wrapper, allowing MCP servers to seamlessly integrate into the agent's tool chain.
