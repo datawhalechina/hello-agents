@@ -1,0 +1,2 @@
+# 开发依赖：运行单元测试（python -m pytest）
+pytest>=7.0.0
