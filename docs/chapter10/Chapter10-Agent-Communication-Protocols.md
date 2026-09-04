@@ -158,7 +158,7 @@ Let's first look at the learning content for Chapter 10:
 hello_agents/
 ├── protocols/                          # Communication protocol module
 │   ├── mcp/                            # MCP protocol implementation (Model Context Protocol)
-│   │   ├── client.py                   # MCP client (supports 5 transport methods)
+│   │   ├── client.py                   # MCP client (stdio / Streamable HTTP)
 │   │   ├── server.py                   # MCP server (FastMCP wrapper)
 │   │   └── utils.py                    # Utility functions (create_context/parse_context)
 │   ├── a2a/                            # A2A protocol implementation (Agent-to-Agent Protocol)
@@ -210,7 +210,6 @@ print("A2A tool created successfully")
 
 This simple example demonstrates the core functionality of the three protocols. In the following sections, we will deeply learn the detailed usage and best practices of each protocol.
 
-
 ## 10.2 MCP Protocol in Practice
 
 Now, let's dive into MCP and master how to enable agents to access external tools and resources.
@@ -253,46 +252,31 @@ Suppose you are using Claude Desktop and asking: "What documents are on my deskt
 
 The advantage of this architectural design lies in **separation of concerns**: The Host focuses on user experience, the Client focuses on protocol communication, and the Server focuses on specific functionality implementation. Developers only need to focus on developing the corresponding MCP Server without caring about the implementation details of the Host and Client.
 
-**(3) Core Capabilities of MCP**
+**(3) MCP mechanisms: capability negotiation, not “automatic tools for a model”**
 
-As shown in Table 10.2, the MCP protocol provides three core capabilities, forming a complete tool access framework:
+MCP uses UTF-8 JSON-RPC 2.0 messages. A Client must first send `initialize`; the peers negotiate the protocol version and their capabilities, then the Client sends `initialized` before normal operation begins. Disconnecting the underlying transport ends the session.
 
-<div align="center">
-  <p>Table 10.2 MCP Core Capabilities</p>
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-table-2.png" alt="" width="85%"/>
-</div>
+Capabilities are directional and optional—an undeclared capability must not be assumed:
 
-The difference between these three capabilities is: **Tools are active** (execute operations), **Resources are passive** (provide data), **Prompts are instructive** (provide templates).
+| Provider | Mechanism | Meaning |
+| --- | --- | --- |
+| Server → Client | **Tools** | Executable operations with descriptions and JSON Schemas; discover with `tools/list`, invoke with `tools/call`, and receive change notifications. |
+| Server → Client | **Resources** | URI-addressed context data, including templates and optional subscriptions. Resources are not automatically inserted into model context. |
+| Server → Client | **Prompts** | Discoverable, parameterized prompt templates. The Host decides whether and how to present or use them. |
+| Client → Server | **Roots** | Filesystem boundaries exposed by the Client. A Server must respect them; roots are not blanket authorization to access arbitrary files. |
+| Client → Server | **Sampling / Elicitation** | A Server can ask the Host to call a model or collect user input, while model selection, permissions, and UI remain under Client/Host control. |
 
-**(4) MCP Workflow**
+The protocol also has `ping`, progress notifications, and cancellation. MCP specifies messages, capabilities, and boundaries; it does **not** require a model to select a tool, prescribe a provider-specific function-calling mapping, or waive user approval.
 
-Let's understand the complete workflow of MCP through a specific example, as shown in Figure 10.6:
+**(4) What a tool call actually looks like**
 
-<div align="center">
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-6.png" alt="" width="85%"/>
-  <p>Figure 10.6 MCP Case Demonstration</p>
-</div>
+1. Client and Server complete `initialize` / `initialized` and record capabilities.
+2. A tool-capable Client requests `tools/list`. The Host may map schemas to its model provider's tool format, or merely show them to the user.
+3. If Host policy permits and a model or user chooses a tool, the Client sends `tools/call`. Sensitive calls should show inputs and request confirmation.
+4. The Server validates input and authorization, executes, and returns content or structured output. Business execution failures are tool results (`isError: true`); protocol failures are JSON-RPC errors.
+5. The Host decides whether to return the result to the model and continue the loop. Thus “discover → model call → result” is a common Host pattern, not mandatory MCP automation.
 
-A key question is: **How does Claude (or other LLMs) decide which tools to use?**
-
-When a user asks a question, the complete tool selection process is as follows:
-
-1. **Tool Discovery Phase**: After the MCP Client connects to the Server, it first calls `list_tools()` to obtain description information for all available tools (including tool name, function description, parameter definition)
-
-2. **Context Building**: The Client converts the tool list into a format the LLM can understand and adds it to the system prompt. For example:
-   ```
-   You can use the following tools:
-   - read_file(path: str): Read the content of the file at the specified path
-   - search_code(query: str, language: str): Search in the codebase
-   ```
-
-3. **Model Reasoning**: The LLM analyzes the user's question and available tools, deciding whether to call tools and which tool to call. This decision is based on the tool descriptions and current conversation context
-
-4. **Tool Execution**: If the LLM decides to use a tool, the Client executes the selected tool through the MCP Server and obtains the result
-
-5. **Result Integration**: The tool execution result is sent back to the LLM, which combines the result to generate the final answer
-
-This process is **fully automated**, and the LLM will decide whether to use and how to use tools based on the quality of tool descriptions. Therefore, writing clear and accurate tool descriptions is crucial.
+**Security boundary:** access control for remote Servers belongs at the transport layer. HTTP deployments can use MCP's OAuth 2.1 authorization specification; stdio servers normally read credentials from their controlled environment. Use least privilege, validate inputs and outputs, constrain roots, and retain approval and audit for write, delete, send, and other high-risk tools.
 
 **(5) Differences Between MCP and Function Calling**
 
@@ -592,109 +576,47 @@ print(result)
 
 ```
 
-### 10.2.3 MCP Transport Methods Explained
+### 10.2.3 Current MCP transports: two standards; everything else is an implementation detail
 
-An important feature of the MCP protocol is **transport agnosticism**. This means the MCP protocol itself does not depend on specific transport methods and can run on different communication channels. HelloAgents, based on FastMCP 2.0, provides complete transport method support, allowing you to choose the most appropriate transport mode based on actual scenarios.
+MCP separates its message format from its transport, but the **current specification defines only two standard Client–Server transports**: `stdio` and `Streamable HTTP`. A memory transport is a test double; passing command arguments still uses stdio; SSE is an optional event stream within Streamable HTTP, not a third transport.
 
-**(1) Transport Methods Overview**
+| Standard transport | Best fit | Semantics and cautions |
+| --- | --- | --- |
+| **stdio** | Local integrations, plug-ins started by an IDE/desktop Host, development | The Client launches the Server subprocess. Newline-delimited JSON-RPC requests, notifications, and responses use stdin/stdout. stdout must contain protocol messages only; logs belong on stderr. The process lifetime is the connection lifetime. |
+| **Streamable HTTP** | Remote services, multiple clients, production deployment | The Server exposes one MCP endpoint supporting POST and GET (for example, `https://api.example.com/mcp`). POST carries Client messages; a GET or POST response may use SSE to stream multiple Server messages, enabling notifications, Server-initiated requests, and resumability. `MCP-Session-Id` may maintain stateful sessions. |
 
-HelloAgents' `MCPClient` supports five transport methods, each with different use cases, as shown in Table 10.4:
+**Legacy compatibility:** the 2024-11-05 `HTTP + SSE` transport (separate SSE and POST endpoints) is deprecated. New Servers should implement Streamable HTTP; they may retain the old endpoints only for older Clients. Do not treat generic REST HTTP, WebSocket, or an SDK's label such as “HTTP transport” as an MCP standard: it either implements Streamable HTTP or is a custom transport whose interoperability depends on both parties.
 
-<div align="center">
-  <p>Table 10.4 MCP Transport Methods Comparison</p>
-  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/10-figures/10-table-4.png" alt="" width="85%"/>
-</div>
-
-**(2) Transport Method Usage Examples**
+**(1) stdio: a local subprocess**
 
 ```python
 from hello_agents.tools import MCPTool
 
-# 1. Memory Transport - Memory transport (for testing)
-# No parameters specified, uses built-in demo server
-mcp_tool = MCPTool()
+# Command arguments do not create another transport.
+mcp_tool = MCPTool(
+    server_command=["python", "examples/mcp_example_server.py", "--debug"]
+)
 
-# 2. Stdio Transport - Standard input/output transport (local development)
-# Use command list to start local server
-mcp_tool = MCPTool(server_command=["python", "examples/mcp_example_server.py"])
-
-# 3. Stdio Transport with Args - Command transport with parameters
-# Can pass additional parameters
-mcp_tool = MCPTool(server_command=["python", "examples/mcp_example_server.py", "--debug"])
-
-# 4. Stdio Transport - Community server (npx method)
-# Use npx to start community MCP server
-mcp_tool = MCPTool(server_command=["npx", "-y", "@modelcontextprotocol/server-filesystem", "."])
-
-# 5. HTTP/SSE/StreamableHTTP Transport
-# Note: MCPTool is mainly for Stdio and Memory transport
-# For HTTP/SSE and other remote transports, recommend using MCPClient directly
+# A community server uses stdio too.
+filesystem = MCPTool(
+    server_command=["npx", "-y", "@modelcontextprotocol/server-filesystem", "."]
+)
 ```
 
-**(3) Memory Transport**
+stdio has no network authorization flow by default. Servers should obtain credentials from their controlled process environment and must never write debug output to stdout, which would corrupt the message stream.
 
-Use case: Unit testing, rapid prototyping
-
-```python
-from hello_agents.tools import MCPTool
-
-# Use built-in demo server (Memory transport)
-mcp_tool = MCPTool()
-
-# List available tools
-result = mcp_tool.run({"action": "list_tools"})
-print(result)
-
-# Call tool
-result = mcp_tool.run({
-    "action": "call_tool",
-    "tool_name": "add",
-    "arguments": {"a": 10, "b": 20}
-})
-print(result)
-```
-
-**(4) Stdio Transport - Standard Input/Output Transport**
-
-Use case: Local development, debugging, Python script servers
+**(2) Streamable HTTP: a remote MCP endpoint**
 
 ```python
-from hello_agents.tools import MCPTool
-
-# Method 1: Use custom Python server
-mcp_tool = MCPTool(server_command=["python", "my_mcp_server.py"])
-
-# Method 2: Use community server (file system)
-mcp_tool = MCPTool(server_command=["npx", "-y", "@modelcontextprotocol/server-filesystem", "."])
-
-# List tools
-result = mcp_tool.run({"action": "list_tools"})
-print(result)
-
-# Call tool
-result = mcp_tool.run({
-    "action": "call_tool",
-    "tool_name": "read_file",
-    "arguments": {"path": "README.md"}
-})
-print(result)
-```
-
-**(5) HTTP Transport**
-
-Use case: Production environment, remote services, microservice architecture
-
-```python
-# Note: MCPTool is mainly for Stdio and Memory transport
-# For HTTP/SSE and other remote transports, recommend using underlying MCPClient
-
 import asyncio
 from hello_agents.protocols import MCPClient
 
-async def test_http_transport():
-    # Connect to remote HTTP MCP server
-    client = MCPClient("http://api.example.com/mcp")
-
+async def use_remote_server():
+    # Exact constructor options depend on the SDK version.
+    client = MCPClient(
+        "https://api.example.com/mcp",
+        transport_type="streamable_http",
+    )
     async with client:
         # Get server information
         tools = await client.list_tools()
@@ -708,65 +630,12 @@ async def test_http_transport():
         print(f"Remote processing result: {result}")
 
 # Note: Requires actual HTTP MCP server
-# asyncio.run(test_http_transport())
+# asyncio.run(use_remote_server())
 ```
 
-**(6) SSE Transport - Server-Sent Events Transport**
+A remote deployment must use HTTPS and validate every request's `Origin` to prevent DNS rebinding; a local HTTP Server should bind only to a loopback address. A protected Server should follow MCP's OAuth 2.1 authorization flow, discover its authorization server, and receive an access token on every HTTP request. Never place tokens in URLs or pass them through to downstream services. A session ID is not an authentication credential and still needs secure handling.
 
-Use case: Real-time communication, streaming processing, long connections
-
-```python
-# Note: MCPTool is mainly for Stdio and Memory transport
-# For SSE transport, recommend using underlying MCPClient
-
-import asyncio
-from hello_agents.protocols import MCPClient
-
-async def test_sse_transport():
-    # Connect to SSE MCP server
-    client = MCPClient(
-        "http://localhost:8080/sse",
-        transport_type="sse"
-    )
-
-    async with client:
-        # SSE is especially suitable for streaming processing
-        result = await client.call_tool("stream_process", {
-            "input": "Large data processing request",
-            "stream": True
-        })
-        print(f"Streaming processing result: {result}")
-
-# Note: Requires MCP server supporting SSE
-# asyncio.run(test_sse_transport())
-```
-
-**(7) StreamableHTTP Transport - Streaming HTTP Transport**
-
-Use case: HTTP scenarios requiring bidirectional streaming communication
-
-```python
-# Note: MCPTool is mainly for Stdio and Memory transport
-# For StreamableHTTP transport, recommend using underlying MCPClient
-
-import asyncio
-from hello_agents.protocols import MCPClient
-
-async def test_streamable_http_transport():
-    # Connect to StreamableHTTP MCP server
-    client = MCPClient(
-        "http://localhost:8080/mcp",
-        transport_type="streamable_http"
-    )
-
-    async with client:
-        # Supports bidirectional streaming communication
-        tools = await client.list_tools()
-        print(f"StreamableHTTP server tools: {len(tools)} tools")
-
-# Note: Requires MCP server supporting StreamableHTTP
-# asyncio.run(test_streamable_http_transport())
-```
+**Selection rule:** prefer stdio when the Host can start a Server for one local user; use Streamable HTTP for independently deployed or multi-client services. Implement legacy HTTP+SSE only for compatibility. A custom transport must define its own authentication, framing, and reconnect semantics.
 
 ### 10.2.4 Using MCP Tools in Agents
 
@@ -1093,7 +962,7 @@ Here are some particularly interesting case TODOs for reference:
    # - Generate project reports
    ```
 
-5. **Content Creation Workflow (YouTube + Notion + Spotify)**
+4. **Content Creation Workflow (YouTube + Notion + Spotify)**
 
    ```python
    # Agent can:
@@ -2415,7 +2284,7 @@ You now have mastered the core knowledge of agent communication protocols. Keep 
 
    - In the MCP server implementation in Section 10.2.3, we defined core methods such as `list_tools` and `call_tool`. Please extend this implementation by adding a new MCP server that provides the following tools: (1) Database query tool; (2) Data visualization tool; (3) Report generation tool. Require that tools can collaborate to complete complex data analysis tasks.
    - The MCP protocol supports two important concepts: "Resources" and "Prompts", but this chapter mainly focuses on "Tools". Please consult the MCP official documentation to understand the design purposes of Resources and Prompts, and design an application scenario showing how to use these three core concepts to build a more powerful agent system.
-   - MCP uses JSON-RPC 2.0 as the underlying communication protocol and communicates between processes via stdio. Please analyze: What are the advantages and limitations of this design? If you need to support remote MCP servers (accessed via HTTP/WebSocket), how should the current implementation be extended?
+   - MCP uses JSON-RPC 2.0 messages and standardizes two transports: stdio and Streamable HTTP. Compare their trade-offs and security boundaries; then explain legacy HTTP+SSE compatibility and which authentication, framing, and reconnection semantics a custom transport such as WebSocket must define itself.
 
 3. A2A (Agent-to-Agent Protocol) supports conversational collaboration between agents. Based on the content in Section 10.3, please complete the following extended practice:
 
@@ -2439,7 +2308,7 @@ You now have mastered the core knowledge of agent communication protocols. Keep 
 
 ## References
 
-[1] Anthropic. (2024). *Model Context Protocol*. Retrieved October 7, 2025, from https://modelcontextprotocol.io/
+[1] Model Context Protocol. (2025-11-25). *MCP Specification: Transports, Lifecycle, Authorization*. https://modelcontextprotocol.io/specification/2025-11-25/
 
 [2] The A2A Project. (2025). *A2A Protocol: An open protocol for agent-to-agent communication*. Retrieved October 7, 2025, from https://a2a-protocol.org/
 
