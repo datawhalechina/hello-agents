@@ -37,15 +37,25 @@ def format_player_list(players: List[AgentBase], show_roles: bool = False) -> st
         return "、".join([p.name for p in players])
 
 
-def majority_vote_cn(votes: Dict[str, str]) -> tuple[str, int]:
-    """中文版多数投票统计"""
+def majority_vote_cn(votes: Dict[str, str]) -> tuple[Optional[str], int]:
+    """中文版多数投票统计，需超过半数（严格多数）才能生效"""
     if not votes:
-        return "无人", 0
-    
-    vote_counts = Counter(votes.values())
-    most_voted = vote_counts.most_common(1)[0]
-    
-    return most_voted[0], most_voted[1]
+        return None, 0
+
+    total_voters = len(votes)
+    # 仅统计有效（非 None / 非弃票）的票
+    vote_counts = Counter(v for v in votes.values() if v)
+    if not vote_counts:
+        return None, 0
+
+    top_target, top_count = vote_counts.most_common(1)[0]
+
+    # 严格多数门槛：得票必须 > 总投票人数的半数（如 6 人需 ≥4 票）
+    if top_count > total_voters / 2:
+        return top_target, top_count
+
+    # 未达严格多数（含平票），本轮无人出局
+    return None, top_count
 
 
 def check_winning_cn(alive_players: List[AgentBase], roles: Dict[str, str]) -> Optional[str]:
@@ -133,7 +143,10 @@ class GameModerator(AgentBase):
     
     async def vote_result_announcement(self, voted_out: str, vote_count: int) -> Msg:
         """投票结果公告"""
-        content = f"投票结果：{voted_out}以{vote_count}票被淘汰出局。"
+        if not voted_out:
+            content = f"投票结果：无人达到过半票数，本轮无人被淘汰（最高 {vote_count} 票）。"
+        else:
+            content = f"投票结果：{voted_out}以{vote_count}票被淘汰出局。"
         return await self.announce(content)
     
     async def game_over_announcement(self, winner: str) -> Msg:

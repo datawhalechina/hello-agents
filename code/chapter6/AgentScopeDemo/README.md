@@ -46,6 +46,12 @@ set DASHSCOPE_API_KEY=your-api-key-here
 
 获取 API Key：https://dashscope.console.aliyun.com/apiKey
 
+或者配置到.env文件中
+```bash
+cd chapter6/AgentScopeDemo
+cp .env.example .env
+```
+
 ### 3. 运行游戏
 
 ```bash
