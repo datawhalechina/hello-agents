@@ -42,7 +42,7 @@ class ReActAgent:
             history_str = "\n".join(self.history)
             prompt = REACT_PROMPT_TEMPLATE.format(tools=tools_desc, question=question, history=history_str)
 
-            messages = [{"role": "user", "content": prompt}]
+            messages = [{"role": "system", "content": prompt}]
             response_text = self.llm_client.think(messages=messages)
             if not response_text:
                 print("错误：LLM未能返回有效响应。"); break
