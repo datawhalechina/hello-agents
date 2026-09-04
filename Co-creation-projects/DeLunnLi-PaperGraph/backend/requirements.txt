@@ -1,0 +1,23 @@
+# FastAPI
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+python-multipart>=0.0.6
+python-dotenv>=1.0.0
+
+# HTTP / search API
+requests>=2.31.0
+httpx>=0.27.0
+feedparser>=6.0.10
+
+# Async
+anyio>=4.0.0
+
+# AI/Agent framework
+hello-agents>=1.0.0
+
+# PDF text extraction
+pymupdf>=1.24.0
+pymupdf4llm>=0.0.5
+ftfy>=6.0.0
