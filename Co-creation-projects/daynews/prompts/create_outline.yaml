@@ -1,0 +1,22 @@
+input: 
+    topic: ${topic}
+    news_time_limit: ${news_time_limit}
+instruct:
+    task: prepare news collection outline according {input.topic} and {input.news_time_limit}
+    output language: ${language}
+output:
+    report_title:
+        $type: str
+        $desc: generate a title for this news collection like "news about sports", "news about finance"
+    column_list:
+        $type:
+            - column_title:
+                  $type: str
+                  $desc: title of this column even if this is the only one column
+              column_requirement:
+                  $type: str
+                  $desc: describe recheck standard about the contents in this column to make sure all contents are aimed at the requirement of {input}'s topic
+              search_keywords:
+                  $type: str
+                  $desc: search keywords for this column splited by space. make sure the filed keyword about {input} is included in keywords.
+        $desc: the number of columns <= ${max_column_num}

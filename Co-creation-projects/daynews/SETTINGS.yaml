@@ -1,0 +1,32 @@
+# Debug Settings
+IS_DEBUG: false
+# Proxy Settings
+#MODEL_PROXY: http://127.0.0.1:7890
+#TOOL_PROXY: http://127.0.0.1:7890
+#PROXY: http://127.0.0.1:7890
+# Model Settings
+MODEL_PROVIDER: OAIClient
+MODEL_URL: https://ai-proxy.bhznjns.qzz.io/v1
+MODEL_AUTH:
+  api_key: "sk-"
+MODEL_OPTIONS:
+  model: gpt-4.1
+  stream: false
+# Application Settings
+MAX_COLUMN_NUM: 3
+OUTPUT_LANGUAGE: Chinese
+MAX_SEARCH_RESULTS: 8
+SLEEP_TIME: 5
+# News time limit: 'd' as day,'w' as week,'m' as month
+NEWS_TIME_LIMIT: d
+# Outline Settings - 使用自定义大纲绕过 Agently 框架 Bug
+USE_CUSTOMIZE_OUTLINE: true
+CUSTOMIZE_OUTLINE:
+  report_title: "Today's AI News Collection"
+  column_list:
+    - column_title: Latest AI News
+      column_requirement: The content is related to AI, and the time is within 24 hours
+      search_keywords: AI artificial intelligence news latest today
+    - column_title: Hot AI Topics
+      column_requirement: The content is related to AI, and the interaction is high
+      search_keywords: AI artificial intelligence trending hot popular
