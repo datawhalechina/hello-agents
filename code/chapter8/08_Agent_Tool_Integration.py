@@ -9,7 +9,8 @@ from dotenv import load_dotenv
 load_dotenv()
 import time
 from hello_agents import SimpleAgent, HelloAgentsLLM, ToolRegistry
-from hello_agents.tools import MemoryTool, RAGTool
+from memory_tool import MemoryTool
+from rag_tool import RAGTool
 
 class AgentIntegrationDemo:
     """Agent工具集成演示类"""

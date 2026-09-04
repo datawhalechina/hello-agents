@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 from datetime import datetime
 from typing import List
-from hello_agents.tools import MemoryTool
+from memory_tool import MemoryTool
 
 def memory_tool_execute_demo():
     """MemoryTool execute方法演示"""
@@ -36,6 +36,7 @@ def add_memory_demo(memory_tool):
     result = memory_tool.run({
         "action":"add",
         "content":"正在学习HelloAgents框架的记忆系统",
+
         "memory_type":"working",
         "importance":0.7,
         "task_type":"learning"

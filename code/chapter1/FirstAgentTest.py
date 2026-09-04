@@ -23,7 +23,6 @@ Action的格式必须是以下之一：
 请开始吧！
 """
 
-
 import requests
 
 def get_weather(city: str) -> str:
@@ -32,7 +31,7 @@ def get_weather(city: str) -> str:
     """
     # API端点，我们请求JSON格式的数据
     url = f"https://wttr.in/{city}?format=j1"
-    
+
     try:
         # 发起网络请求
         response = requests.get(url)
@@ -145,7 +144,7 @@ import re
 API_KEY = "YOUR_API_KEY"
 BASE_URL = "YOUR_BASE_URL"
 MODEL_ID = "YOUR_MODEL_ID"
-os.environ['TAVILY_API_KEY'] = "YOUR_TAVILY_API_KEY"
+os.environ['TAVILY_API_KEY'] = "TAVILY_API_KEY"
 
 llm = OpenAICompatibleClient(
     model=MODEL_ID,
@@ -171,6 +170,7 @@ for i in range(5): # 设置最大循环次数
     # 模型可能会输出多余的Thought-Action，需要截断
     match = re.search(r'(Thought:.*?Action:.*?)(?=\n\s*(?:Thought:|Action:|Observation:)|\Z)', llm_output, re.DOTALL)
     if match:
+        #如果匹配成功
         truncated = match.group(1).strip()
         if truncated != llm_output.strip():
             llm_output = truncated

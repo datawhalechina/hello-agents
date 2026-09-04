@@ -6,7 +6,7 @@ from typing import List, Dict
 
 # 加载 .env 文件中的环境变量，处理文件不存在异常
 try:
-    load_dotenv()
+    load_dotenv() #尝试加载.env文件
 except FileNotFoundError:
     print("警告：未找到 .env 文件，将使用系统环境变量。")
 except Exception as e:
@@ -42,8 +42,8 @@ class Planner:
         print(f"✅ 计划已生成:\n{response_text}")
         
         try:
-            plan_str = response_text.split("```python")[1].split("```")[0].strip()
-            plan = ast.literal_eval(plan_str)
+            plan_str = response_text.split("```python")[1].split("```")[0].strip()#- `split("```python")[1]`：把文本按 ` ```python ` 切开，取后面的部分- `.split("```")[0]`：再按 ` ``` ` 切开，取前面的部分
+            plan = ast.literal_eval(plan_str)#它只能把 “长得像列表 / 字典 / 数字” 的字符串，变成真的列表 / 字典 / 数字。它绝对不会运行任何函数、任何命令、任何代码！
             return plan if isinstance(plan, list) else []
         except (ValueError, SyntaxError, IndexError) as e:
             print(f"❌ 解析计划时出错: {e}")
@@ -83,6 +83,8 @@ class Executor:
         final_answer = ""
         
         print("\n--- 正在执行计划 ---")
+        #这个 for 循环会自动遍历 plan 里的所有步骤，
+        #自动定位当前是哪一步，自动把内容放进 step。
         for i, step in enumerate(plan, 1):
             print(f"\n-> 正在执行步骤 {i}/{len(plan)}: {step}")
             prompt = EXECUTOR_PROMPT_TEMPLATE.format(
@@ -102,8 +104,8 @@ class Executor:
 class PlanAndSolveAgent:
     def __init__(self, llm_client: HelloAgentsLLM):
         self.llm_client = llm_client
-        self.planner = Planner(self.llm_client)
-        self.executor = Executor(self.llm_client)
+        self.planner = Planner(self.llm_client)#建的一个类的对象
+        self.executor = Executor(self.llm_client)#建的一个类的对象
 
     def run(self, question: str):
         print(f"\n--- 开始处理问题 ---\n问题: {question}")
@@ -120,6 +122,8 @@ if __name__ == '__main__':
         llm_client = HelloAgentsLLM()
         agent = PlanAndSolveAgent(llm_client)
         question = "一个水果店周一卖出了15个苹果。周二卖出的苹果数量是周一的两倍。周三卖出的数量比周二少了5个。请问这三天总共卖出了多少个苹果？"
+        # question="帮我写一个五一假期去大连的旅游攻略，5.1从中午12点开始，5.4晚上8点结束。请帮我规划一下行程，告诉我每天应该去哪些景点，吃什么美食，住处已经定了，在开发区。"
+
         agent.run(question)
     except ValueError as e:
         print(e)

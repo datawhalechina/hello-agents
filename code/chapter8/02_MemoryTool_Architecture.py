@@ -9,8 +9,8 @@ from dotenv import load_dotenv
 load_dotenv()
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from hello_agents.tools import MemoryTool
-from hello_agents.memory import MemoryConfig
+from memory_tool import MemoryTool
+from memory import MemoryConfig
 
 class MemoryToolArchitectureDemo:
     """MemoryTool架构演示类"""

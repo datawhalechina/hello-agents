@@ -6,7 +6,7 @@
 """
 
 import time
-from hello_agents.tools import RAGTool
+from rag_tool import RAGTool
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -245,7 +245,10 @@ Transformer的核心是自注意力机制（Self-Attention），它允许模型�
             print(f"MQE搜索耗时: {mqe_time:.3f}秒")
             print(f"基础结果: {basic_result[:150]}...")
             print(f"MQE结果: {mqe_result[:150]}...")
-            print(f"性能对比: MQE搜索耗时是基础搜索的 {mqe_time/basic_time:.1f} 倍")
+            if basic_time > 0:
+                print(f"性能对比: MQE搜索耗时是基础搜索的 {mqe_time/basic_time:.1f} 倍")
+            else:
+                print("性能对比: 搜索速度过快，无法精确对比")
     
     def demonstrate_hyde_search(self):
         """演示假设文档嵌入（HyDE）搜索"""
@@ -383,8 +386,11 @@ Transformer的核心是自注意力机制（Self-Attention），它允许模型�
         
         print(f"基础搜索平均耗时: {basic_avg:.3f}秒")
         print(f"高级搜索平均耗时: {advanced_avg:.3f}秒")
-        print(f"性能比值: {advanced_avg/basic_avg:.1f}x")
-        print(f"分析: 高级搜索通过多策略提升检索质量，耗时增加 {((advanced_avg/basic_avg-1)*100):.0f}%")
+        if basic_avg > 0:
+            print(f"性能比值: {advanced_avg/basic_avg:.1f}x")
+            print(f"分析: 高级搜索通过多策略提升检索质量，耗时增加 {((advanced_avg/basic_avg-1)*100):.0f}%")
+        else:
+            print("性能比值: 搜索速度过快，无法精确对比")
         
         # 获取系统统计
         stats = self.rag_tool.run({"action":"stats"})

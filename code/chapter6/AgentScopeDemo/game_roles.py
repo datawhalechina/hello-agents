@@ -57,7 +57,7 @@ class GameRoles:
         "孙权": "年轻有为，善于决断，话语果决"
     }
     
-    @classmethod
+    @classmethod#这是一个装饰器，它把下面这个普通函数变成了一个类方法。
     def get_role_desc(cls, role: str) -> str:
         """获取角色描述"""
         return cls.ROLES.get(role, {}).get("description", "未知角色")
