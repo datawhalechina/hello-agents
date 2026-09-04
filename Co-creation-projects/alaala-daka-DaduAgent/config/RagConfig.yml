@@ -1,0 +1,45 @@
+embedding_model_name: text-embedding-v4
+md5_storage_path: vector_uploader_service/md5_value_storage.txt
+file_record_path: vector_uploader_service/file_record.jsonl
+rag_summarize_model_name: deepseek-v4-flash
+# RAG 检索参数：retrieve_k 为向量召回数，rerank_top_k 为 Reranker 重排后保留给 Agent 的条数
+retrieve_k: 10
+rerank_top_k: 5
+# 知识库支持上传的文件扩展名（文本/代码类，可随时增删）
+# 注意：此列表面向文本类文件，.pdf 走 PyPDFLoader、.docx 走 Docx2txtLoader，
+# 其余扩展名一律按纯文本读取，请勿加入二进制格式（如 .png/.zip）。
+support_extensions:
+  - ".txt"
+  - ".md"
+  - ".markdown"
+  - ".pdf"
+  - ".docx"
+  - ".py"
+  - ".js"
+  - ".ts"
+  - ".tsx"
+  - ".jsx"
+  - ".java"
+  - ".go"
+  - ".rs"
+  - ".c"
+  - ".h"
+  - ".cpp"
+  - ".hpp"
+  - ".cs"
+  - ".rb"
+  - ".php"
+  - ".swift"
+  - ".kt"
+  - ".sh"
+  - ".bash"
+  - ".sql"
+  - ".html"
+  - ".css"
+  - ".json"
+  - ".yaml"
+  - ".yml"
+  - ".toml"
+  - ".ini"
+  - ".cfg"
+  - ".xml"

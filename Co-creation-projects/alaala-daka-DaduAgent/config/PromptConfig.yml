@@ -1,0 +1,4 @@
+system_prompt_path: prompt/system_prompt.txt
+rag_prompt_path: prompt/rag_prompt.txt
+report_prompt_path: prompt/report_prompt.txt
+spliter_prompt_path: prompt/spliter_prompt.txt

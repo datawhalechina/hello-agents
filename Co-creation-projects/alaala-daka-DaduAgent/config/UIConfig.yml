@@ -1,0 +1,7 @@
+# UIConfig.yml — 前端 UI 设置（独立于 Agent 逻辑）
+theme: light                 # light | dark | auto
+language: zh                 # zh | en
+sidebar_width: 280           # px
+config_panel_default: closed # closed | open
+font_size: 14                # base font size
+code_font_size: 13           # code block font size

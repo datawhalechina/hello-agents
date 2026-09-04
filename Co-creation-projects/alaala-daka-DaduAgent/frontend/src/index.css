@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── 磨砂玻璃基础类 ── */
+.glass {
+  background: rgba(236, 237, 240, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+.glass-light {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* ── 自定义滚动条 ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #D2D2D7;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #AEAEB2;
+}
+
+/* ── 呼吸动画边框（流式生成时 input 边框）── */
+@layer utilities {
+  .animate-breathe-border {
+    animation: breathe 2.5s ease-in-out infinite;
+  }
+}
+
+@keyframes breathe {
+  0%, 100% { box-shadow: 0 0 0 1px #0066CC; }
+  50% { box-shadow: 0 0 0 1px #A78BFA; }
+}
+
+/* ── Markdown 渲染样式 ── */
+.markdown-body h1 { @apply text-xl font-semibold mt-4 mb-2; }
+.markdown-body h2 { @apply text-lg font-semibold mt-3 mb-2; }
+.markdown-body h3 { @apply text-base font-semibold mt-3 mb-1; }
+.markdown-body p { @apply my-2 leading-relaxed; }
+.markdown-body ul { @apply list-disc pl-5 my-2; }
+.markdown-body ol { @apply list-decimal pl-5 my-2; }
+.markdown-body li { @apply my-1; }
+.markdown-body a { @apply text-[#0066CC] underline; }
+.markdown-body blockquote { @apply border-l-2 border-[#D2D2D7] pl-3 my-2 text-[#6E6E73] italic; }
+.markdown-body table { @apply w-full my-2 border-collapse; }
+.markdown-body th { @apply border border-[#E5E5EA] px-3 py-1.5 bg-[#F5F5F7] text-left text-sm font-medium; }
+.markdown-body td { @apply border border-[#E5E5EA] px-3 py-1.5 text-sm; }
+.markdown-body code:not(pre code) { @apply bg-[#F0F0F2] px-1.5 py-0.5 rounded text-sm font-mono text-[#FF3B30]; }
+.markdown-body pre { @apply my-3 rounded-lg overflow-hidden; }
+/* GFM 任务列表（模型直接输出 `- [ ]`/`- [x]` 时兜底渲染为复选框） */
+.markdown-body ul.contains-task-list { @apply list-none pl-0; }
+.markdown-body .task-list-item { @apply flex items-start gap-1.5; }
+.markdown-body .task-list-item input[type="checkbox"] { @apply mt-[0.3rem] accent-[#0066CC]; }
