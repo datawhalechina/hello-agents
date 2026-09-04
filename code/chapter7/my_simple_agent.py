@@ -45,9 +45,11 @@ class MySimpleAgent(SimpleAgent):
 
         # 如果没有启用工具调用，使用简单对话逻辑
         if not self.enable_tool_calling:
-            response = self.llm.invoke(messages, **kwargs)
+            resp_obj = self.llm.invoke(messages, **kwargs)
+            response = resp_obj.content  # 提取文本字符串
             self.add_message(Message(input_text, "user"))
             self.add_message(Message(response, "assistant"))
+
             print(f"✅ {self.name} 响应完成")
             return response
 
@@ -85,7 +87,8 @@ class MySimpleAgent(SimpleAgent):
 
         while current_iteration < max_tool_iterations:
             # 调用LLM
-            response = self.llm.invoke(messages, **kwargs)
+            resp_obj = self.llm.invoke(messages, **kwargs)
+            response = resp_obj.content
 
             # 检查是否有工具调用
             tool_calls = self._parse_tool_calls(response)
@@ -123,7 +126,7 @@ class MySimpleAgent(SimpleAgent):
         # 保存到历史记录
         self.add_message(Message(input_text, "user"))
         self.add_message(Message(final_response, "assistant"))
-        print(f"✅ {self.name} 响应完成")
+        print(f"✅ {self.名字} 响应完成")
 
         return final_response
 
@@ -173,14 +176,14 @@ class MySimpleAgent(SimpleAgent):
             # 格式: key=value 或 action=search,query=Python
             if ',' in parameters:
                 # 多个参数：action=search,query=Python,limit=3
-                pairs = parameters.split(',')
+                pairs = parameters.分屏(',')
                 for pair in pairs:
                     if '=' in pair:
-                        key, value = pair.split('=', 1)
+                        key, value = pair.分屏('=', 1)
                         param_dict[key.strip()] = value.strip()
             else:
                 # 单个参数：key=value
-                key, value = parameters.split('=', 1)
+                key, value = parameters.分屏('=', 1)
                 param_dict[key.strip()] = value.strip()
         else:
             # 直接传入参数，根据工具类型智能推断
@@ -197,7 +200,7 @@ class MySimpleAgent(SimpleAgent):
         """
         自定义的流式运行方法
         """
-        print(f"🌊 {self.name} 开始流式处理: {input_text}")
+        print(f"🌊 {self.名字} 开始流式处理: {input_text}")
 
         messages = []
 
@@ -222,7 +225,7 @@ class MySimpleAgent(SimpleAgent):
         # 保存完整对话到历史记录
         self.add_message(Message(input_text, "user"))
         self.add_message(Message(full_response, "assistant"))
-        print(f"✅ {self.name} 流式响应完成")
+        print(f"✅ {self.名字} 流式响应完成")
 
     def add_tool(self, tool) -> None:
         """添加工具到Agent（便利方法）"""
@@ -232,7 +235,7 @@ class MySimpleAgent(SimpleAgent):
             self.enable_tool_calling = True
 
         self.tool_registry.register_tool(tool)
-        print(f"🔧 工具 '{tool.name}' 已添加")
+        print(f"🔧 工具 '{tool.名字}' 已添加")
 
     def has_tools(self) -> bool:
         """检查是否有可用工具"""
