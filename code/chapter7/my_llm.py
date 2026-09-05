@@ -33,7 +33,8 @@ class MyLLM(HelloAgentsLLM):
             self.timeout = kwargs.get('timeout', 60)
             
             # 使用获取的参数创建OpenAI客户端实例
-            self._client = OpenAI(api_key=self.api_key, base_url=self.base_url, timeout=self.timeout)
+            #self._client = OpenAI(api_key=self.api_key, base_url=self.base_url, timeout=self.timeout)
+            self._adapter = create_adapter(api_key=self.api_key, base_url=self.base_url, timeout=self.timeout, model=self.model)
 
         else:
             # 如果不是 modelscope, 则完全使用父类的原始逻辑来处理
