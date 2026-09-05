@@ -56,10 +56,6 @@ cp .env.example .env
 
 ### 运行项目
 
-
-# 启动Jupyter Notebook
-jupyter lab
-
 # 打开main.py并运行
 
 
