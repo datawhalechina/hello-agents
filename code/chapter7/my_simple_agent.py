@@ -210,19 +210,21 @@ class MySimpleAgent(SimpleAgent):
         messages.append({"role": "user", "content": input_text})
 
         # 流式调用LLM
+        # 客户端中途断开时，web框架会关闭生成器，在 yield 处抛出 GeneratorExit，
+        # 循环之后的代码不会执行。因此把历史保存放进 finally，
+        # 保证正常结束和中途断开都能把已生成的内容存入历史记录。
         full_response = ""
         print("📝 实时响应: ", end="")
-        for chunk in self.llm.stream_invoke(messages, **kwargs):
-            full_response += chunk
-            print(chunk, end="", flush=True)
-            yield chunk
-
-        print()  # 换行
-
-        # 保存完整对话到历史记录
-        self.add_message(Message(input_text, "user"))
-        self.add_message(Message(full_response, "assistant"))
-        print(f"✅ {self.name} 流式响应完成")
+        try:
+            for chunk in self.llm.stream_invoke(messages, **kwargs):
+                full_response += chunk
+                print(chunk, end="", flush=True)
+                yield chunk
+        finally:
+            print()  # 换行
+            self.add_message(Message(input_text, "user"))
+            self.add_message(Message(full_response, "assistant"))
+            print(f"✅ {self.name} 流式响应完成（已生成 {len(full_response)} 字符）")
 
     def add_tool(self, tool) -> None:
         """添加工具到Agent（便利方法）"""
