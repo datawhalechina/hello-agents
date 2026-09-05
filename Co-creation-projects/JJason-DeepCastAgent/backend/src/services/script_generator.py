@@ -92,6 +92,8 @@ class ScriptGenerationService:
                 },
             )
             
+            if not response.choices or response.choices[0].message is None:
+                raise ValueError("LLM returned empty or filtered response")
             content = response.choices[0].message.content
             logger.info("Received structured response (%d chars)", len(content) if content else 0)
             
