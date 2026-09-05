@@ -954,7 +954,7 @@ print(f"Available tools: {basic_agent.list_tools()}")
 print(f"\nConversation history: {len(basic_agent.get_history())} messages")
 ```
 
-In this section, by inheriting the `Agent` base class, we successfully built a fully functional basic conversational agent `MySimpleAgent` that follows framework specifications. It not only supports basic conversation but also has optional tool calling capabilities, streaming response, and convenient tool management methods.
+In this section, by extending the framework's `SimpleAgent` class and overriding its core methods, we successfully built a fully functional basic conversational agent `MySimpleAgent` that follows framework specifications. It not only supports basic conversation but also has optional tool calling capabilities, streaming response, and convenient tool management methods. Note that the `stream_run` implementation in this section is intended for pure conversational streaming and does not go through the multi-round tool-calling logic in `_run_with_tools`.
 
 ### 7.4.2 ReActAgent
 
