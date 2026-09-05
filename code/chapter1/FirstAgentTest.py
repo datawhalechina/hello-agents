@@ -38,7 +38,7 @@ def get_weather(city: str) -> str:
         response = requests.get(url)
         # 检查响应状态码是否为200 (成功)
         response.raise_for_status() 
-        # 解析返回的JSON数据
+        # 解析返回的JSON数据 
         data = response.json()
         
         # 提取当前天气状况
@@ -139,13 +139,17 @@ class OpenAICompatibleClient:
             return "错误：调用语言模型服务时出错。"
 
 import re
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # --- 1. 配置LLM客户端 ---
 # 请根据您使用的服务，将这里替换成对应的凭证和地址
-API_KEY = "YOUR_API_KEY"
-BASE_URL = "YOUR_BASE_URL"
-MODEL_ID = "YOUR_MODEL_ID"
-os.environ['TAVILY_API_KEY'] = "YOUR_TAVILY_API_KEY"
+API_KEY = os.getenv("OPENAI_API_KEY")
+BASE_URL = os.getenv("OPENAI_BASE_URL")
+MODEL_ID = os.getenv("MODEL_NAME")
+os.environ['TAVILY_API_KEY'] = os.getenv("TAVILY_API_KEY")
 
 llm = OpenAICompatibleClient(
     model=MODEL_ID,
@@ -189,7 +193,7 @@ for i in range(5): # 设置最大循环次数
     action_str = action_match.group(1).strip()
 
     if action_str.startswith("Finish"):
-        final_answer = re.match(r"Finish\[(.*)\]", action_str).group(1)
+        final_answer = re.search(r"Finish\[(.*)\]", action_str, re.DOTALL).group(1)
         print(f"任务完成，最终答案: {final_answer}")
         break
     
