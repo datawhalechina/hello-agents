@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# 环境变量
+.env
+
+# 数据与缓存
+data/
+*.jsonl
+!backend/**/__init__.py
+
+# 保留 backend/memory 目录（根仓库 .gitignore 全局排除了 memory/）
+!backend/memory/
+!backend/memory/**
+
+# 前端
+frontend/node_modules/
+frontend/dist/
+frontend/tsconfig.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+.trae/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 日志
+日志.docx
