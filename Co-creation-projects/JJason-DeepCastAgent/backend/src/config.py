@@ -106,6 +106,26 @@ class Configuration(BaseModel):
         title="TTS 模型",
         description="TTS 服务的模型标识符",
     )
+    minimax_api_key: str | None = Field(
+        default=None,
+        title="MiniMax API Key",
+        description="API key for first-party MiniMax speech generation",
+    )
+    minimax_tts_region: str = Field(
+        default="global_en",
+        title="MiniMax TTS Region",
+        description="MiniMax speech endpoint region (global_en or cn_zh)",
+    )
+    minimax_tts_model: str = Field(
+        default="speech-2.8-hd",
+        title="MiniMax TTS Model",
+        description="MiniMax speech model identifier",
+    )
+    minimax_tts_audio_format: str = Field(
+        default="mp3",
+        title="MiniMax TTS Audio Format",
+        description="MiniMax speech audio format (mp3, wav, flac, or pcm)",
+    )
     audio_output_dir: str = Field(
         default=str(BACKEND_ROOT / "output" / "audio"),
         title="音频输出目录",

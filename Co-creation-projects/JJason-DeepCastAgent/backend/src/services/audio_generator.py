@@ -13,6 +13,24 @@ from config import Configuration
 
 logger = logging.getLogger(__name__)
 
+MINIMAX_TTS_CONFIG = {
+    "endpoints": {
+        "global_en": "https://api.minimax.io/v1/t2a_v2",
+        "cn_zh": "https://api.minimaxi.com/v1/t2a_v2",
+    },
+    "models": (
+        "speech-2.8-hd",
+        "speech-2.8-turbo",
+        "speech-2.6-hd",
+        "speech-2.6-turbo",
+        "speech-02-hd",
+        "speech-02-turbo",
+        "speech-01-hd",
+        "speech-01-turbo",
+    ),
+    "audio_formats": ("mp3", "wav", "flac", "pcm"),
+}
+
 
 class AudioGenerationService:
     """处理与 TTS 服务的交互以生成音频文件。"""
@@ -65,7 +83,7 @@ class AudioGenerationService:
         if not self._config.ffmpeg_path:
             logger.error("FFmpeg path not configured. Audio generation will fail.")
             return []
-        if not self._config.tts_api_key:
+        if not self._api_key():
             logger.warning("TTS API key not configured. Skipping audio generation.")
             return []
 
@@ -89,7 +107,8 @@ class AudioGenerationService:
                 logger.warning("Unknown role: %s. Using default voice.", role)
                 voice_id = "xiayu" # Fallback
             
-            file_name = f"{task_id}_{index:03d}_{role}.mp3"
+            suffix = self._audio_format() if self._is_minimax() else "mp3"
+            file_name = f"{task_id}_{index:03d}_{role}.{suffix}"
             file_path = self._output_dir / file_name
             
             logger.info("[TTS %d/%d] 正在为 %s 生成语音: %s...", index + 1, total, role, content[:20])
@@ -150,31 +169,44 @@ class AudioGenerationService:
             return True
 
         headers = {
-            "Authorization": f"Bearer {self._config.tts_api_key}",
+            "Authorization": f"Bearer {self._api_key()}",
             "Content-Type": "application/json"
         }
-        
-        payload = {
-            "model": self._config.tts_model,
-            "input": text,
-            "voice": voice,
-            "speed": 1.0
-        }
+
+        if self._is_minimax():
+            payload = {
+                "model": self._config.minimax_tts_model,
+                "text": text,
+                "stream": False,
+                "output_format": "hex",
+                "voice_setting": {"voice_id": voice},
+                "audio_setting": {"format": self._audio_format()},
+            }
+            endpoint = self._minimax_endpoint()
+        else:
+            payload = {
+                "model": self._config.tts_model,
+                "input": text,
+                "voice": voice,
+                "speed": 1.0
+            }
+            endpoint = self._config.tts_base_url
         
         try:
             logger.debug("Calling TTS API for voice %s: %s...", voice, text[:20])
             # Use configurable timeout if available; default to 300 seconds for robustness.
             timeout = self._config.tts_timeout
             response = requests.post(
-                self._config.tts_base_url,
+                endpoint,
                 json=payload,
                 headers=headers,
                 timeout=timeout
             )
             
             if response.status_code == 200:
+                audio = self._decode_minimax_audio(response.json()) if self._is_minimax() else response.content
                 with open(output_path, "wb") as f:
-                    f.write(response.content)
+                    f.write(audio)
                 return True
             else:
                 logger.error(
@@ -187,3 +219,34 @@ class AudioGenerationService:
         except Exception as e:
             logger.exception("Exception during TTS API call: %s", e)
             return False
+
+    def _is_minimax(self) -> bool:
+        return bool(self._config.minimax_api_key)
+
+    def _api_key(self) -> str | None:
+        if self._is_minimax():
+            return self._config.minimax_api_key or self._config.tts_api_key
+        return self._config.tts_api_key
+
+    def _audio_format(self) -> str:
+        audio_format = self._config.minimax_tts_audio_format.lower()
+        if audio_format not in MINIMAX_TTS_CONFIG["audio_formats"]:
+            raise ValueError(f"Unsupported MiniMax audio format: {audio_format}")
+        return audio_format
+
+    def _minimax_endpoint(self) -> str:
+        region = self._config.minimax_tts_region.lower()
+        endpoint = MINIMAX_TTS_CONFIG["endpoints"].get(region)
+        if endpoint is None:
+            raise ValueError(f"Unsupported MiniMax region: {region}")
+        return endpoint
+
+    @staticmethod
+    def _decode_minimax_audio(payload: dict) -> bytes:
+        base_response = payload.get("base_resp") or {}
+        if base_response.get("status_code") != 0:
+            raise ValueError(base_response.get("status_msg") or "MiniMax TTS request failed")
+        data = payload.get("data") or {}
+        if data.get("status") != 2 or not data.get("audio"):
+            raise ValueError("MiniMax TTS response did not contain completed audio")
+        return bytes.fromhex(data["audio"])
