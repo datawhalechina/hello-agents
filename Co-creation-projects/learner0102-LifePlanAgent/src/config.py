@@ -3,7 +3,7 @@ import os
 load_dotenv()
 
 # LLM大模型配置
-LLM_MODEL = "qwen3.7-max-2026-06-08"
+LLM_MODEL = "填写你要用的大模型"
 LLM_API_KEY = os.getenv("API_KEY")
 LLM_BASE_URL = os.getenv("BASE_URL")
 LLM_TEMPERATURE = 0.3
