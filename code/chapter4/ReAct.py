@@ -51,7 +51,7 @@ class ReActAgent:
             if thought: print(f"🤔 思考: {thought}")
             if not action: print("警告：未能解析出有效的Action，流程终止。"); break
             
-            if action.startswith("Finish"):
+            if action.startswith("`Finish"):
                 # 如果是Finish指令，提取最终答案并结束
                 final_answer = self._parse_action_input(action)
                 print(f"🎉 最终答案: {final_answer}")
@@ -82,10 +82,12 @@ class ReActAgent:
         return thought, action
 
     def _parse_action(self, action_text: str):
-        match = re.match(r"(\w+)\[(.*)\]", action_text, re.DOTALL)
+        action_text = action_text.strip().strip('`').strip()
+        match = re.match(r"^(\w+)\[(.*)\]$", action_text, re.DOTALL)
         return (match.group(1), match.group(2)) if match else (None, None)
 
     def _parse_action_input(self, action_text: str):
+        action_text = action_text.strip().strip('`').strip()
         match = re.match(r"\w+\[(.*)\]", action_text, re.DOTALL)
         return match.group(1) if match else ""
 
