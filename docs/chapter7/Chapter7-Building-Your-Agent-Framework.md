@@ -149,8 +149,6 @@ print(response)
 print(f"Number of historical messages: {len(agent.get_history())}")
 ```
 
-
-
 ## 7.2 HelloAgentsLLM Extension
 
 The content of this section will be an iterative upgrade based on the `HelloAgentsLLM` created in Section 4.1.3. We will transform this basic client into a more adaptive model invocation hub. This upgrade mainly revolves around the following three goals:
@@ -356,7 +354,6 @@ The `_auto_detect_provider` method is responsible for automatically inferring th
 1. **Highest Priority: Check Environment Variables for Specific Service Providers** This is the most direct and reliable basis for judgment. The framework will sequentially check whether environment variables such as `MODELSCOPE_API_KEY`, `OPENAI_API_KEY`, `ZHIPU_API_KEY`, etc. exist. Once any one is found, it will immediately determine the corresponding service provider.
 
 2. **Second Highest Priority: Determine Based on `base_url`** If the user has not set a specific service provider's key but has set the generic `LLM_BASE_URL`, the framework will parse this URL instead.
-
    - **Domain Matching**: Identify cloud service providers by checking whether the URL contains characteristic strings such as `"api-inference.modelscope.cn"`, `"api.openai.com"`, etc.
 
    - **Port Matching**: Identify local deployment solutions by checking whether the URL contains standard ports for local services such as `:11434` (Ollama), `:8000` (VLLM), etc.
@@ -453,8 +450,6 @@ Compared to the basic implementation in Section 4.1.3, the current HelloAgentsLL
 </div>
 
 As shown in Table 7.1 above, this evolution embodies an important principle of framework design: **start simple, gradually improve**. We enhanced functional completeness while maintaining interface simplicity.
-
-
 
 ## 7.3 Framework Interface Implementation
 
@@ -1285,10 +1280,10 @@ As shown in Table 7.2, through this framework refactoring, we not only maintaine
 FunctionCallAgent is an Agent introduced in hello-agents after version 0.2.8, based on OpenAI's native function calling mechanism. It demonstrates how to build an Agent using OpenAI's function calling capabilities.
 It supports the following features:
 
-- _build_tool_schemas: Constructs OpenAI function calling schema through tool descriptions
-- _extract_message_content: Extracts text content from OpenAI responses
-- _parse_function_call_arguments: Parses JSON string parameters returned by the model
-- _convert_parameter_types: Converts parameter types
+- \_build_tool_schemas: Constructs OpenAI function calling schema through tool descriptions
+- \_extract_message_content: Extracts text content from OpenAI responses
+- \_parse_function_call_arguments: Parses JSON string parameters returned by the model
+- \_convert_parameter_types: Converts parameter types
 
 These features enable native OpenAI Function Calling capabilities, providing stronger robustness compared to prompt-constrained approaches.
 
@@ -1366,7 +1361,7 @@ When building an extensible tool system, we need to first establish a set of sta
 
 The Tool base class is the core abstraction of the entire tool system, defining the interface specifications that all tools must follow:
 
-````python
+```python
 class Tool(ABC):
     """Tool base class"""
 
@@ -1383,14 +1378,15 @@ class Tool(ABC):
     def get_parameters(self) -> List[ToolParameter]:
         """Get tool parameter definitions"""
         pass
-````
+```
+
 This design embodies the core idea of object-oriented design: through the unified `run` method interface, all tools can be executed in a consistent manner, accepting dictionary parameters and returning string results, ensuring framework consistency. At the same time, tools have self-description capabilities. Through the `get_parameters` method, they can clearly tell callers what parameters they need. This introspection mechanism provides a foundation for automated documentation generation and parameter validation. The design of metadata such as name and description gives the tool system good discoverability and understandability.
 
 (2) ToolParameter Parameter Definition System
 
 To support complex parameter validation and documentation generation, we designed the ToolParameter class:
 
-````python
+```python
 class ToolParameter(BaseModel):
     """Tool parameter definition"""
     name: str
@@ -1398,14 +1394,15 @@ class ToolParameter(BaseModel):
     description: str
     required: bool = True
     default: Any = None
-````
+```
+
 This design allows tools to precisely describe their parameter requirements, supporting type checking, default value setting, and automatic documentation generation.
 
 (3) Implementation of ToolRegistry
 
 ToolRegistry is the management hub of the tool system, providing core functions such as tool registration, discovery, and execution. In this section, we mainly use the following functions:
 
-````python
+```python
 class ToolRegistry:
     """HelloAgents tool registry"""
 
@@ -1437,7 +1434,8 @@ class ToolRegistry:
             "func": func
         }
         print(f"✅ Tool '{name}' registered.")
-````
+```
+
 ToolRegistry supports two registration methods:
 
 1. **Tool Object Registration**: Suitable for complex tools, supports complete parameter definition and validation
@@ -1447,7 +1445,7 @@ ToolRegistry supports two registration methods:
 
 The registry provides rich tool management functions:
 
-````python
+```python
 def get_tools_description(self) -> str:
     """Get formatted description string of all available tools"""
     descriptions = []
@@ -1461,7 +1459,8 @@ def get_tools_description(self) -> str:
         descriptions.append(f"- {name}: {info['description']}")
 
     return "\n".join(descriptions) if descriptions else "No tools available"
-````
+```
+
 The description string generated by this method can be directly used to build the Agent's prompt, letting the Agent know what tools are available.
 
 ### 7.5.2 Custom Tool Development
@@ -1623,7 +1622,7 @@ pip install "hello-agents[search]==0.1.1"
 
 The SearchTool built into the HelloAgents framework demonstrates how to design an advanced multi-source search tool:
 
-````python
+```python
 class SearchTool(Tool):
     """
     Intelligent hybrid search tool
@@ -1644,14 +1643,15 @@ class SearchTool(Tool):
         self.serpapi_key = serpapi_key or os.getenv("SERPAPI_API_KEY")
         self.available_backends = []
         self._setup_backends()
-````
+```
+
 The core idea of this design is to automatically select the best search backend based on available API keys and dependency libraries.
 
 (2) Integration Strategy for TAVILY and SERPAPI Search Sources
 
 The framework implements intelligent backend selection logic:
 
-````python
+```python
 def _search_hybrid(self, query: str) -> str:
     """Hybrid search - intelligently select the best search source"""
     # Prioritize Tavily (AI-optimized search)
@@ -1674,14 +1674,15 @@ def _search_hybrid(self, query: str) -> str:
 
     # If both are unavailable, prompt user to configure API
     return "❌ No available search sources, please configure TAVILY_API_KEY or SERPAPI_API_KEY environment variables"
-````
+```
+
 This design embodies the core concept of high-availability systems: through degradation mechanisms, the system can gradually degrade from the optimal search source to available alternatives. When all search sources are unavailable, it clearly prompts the user to configure the correct API keys.
 
 (3) Unified Formatting of Search Results
 
 Different search engines return results in different formats. The framework handles this through a unified formatting method:
 
-````python
+```python
 def _search_tavily(self, query: str) -> str:
     """Search using Tavily"""
     response = self.tavily_client.search(
@@ -1699,7 +1700,7 @@ def _search_tavily(self, query: str) -> str:
         result += f"    Source: {item.get('url', '')}\n\n"
 
     return result
-````
+```
 
 Based on the framework's design philosophy, we can create our own advanced search tool. This time we use a class-based approach to demonstrate different implementation methods. Create `my_advanced_search.py`:
 
@@ -2092,8 +2093,6 @@ async def test_parallel_execution():
 
 Based on the above design and implementation experience, we can summarize the core concepts of tool system development: At the design level, each tool should follow the single responsibility principle, focusing on specific functionality while maintaining interface uniformity, and treating comprehensive exception handling and security-first input validation as basic requirements. In terms of performance optimization, use asynchronous execution to improve concurrent processing capabilities while reasonably managing external connections and system resources.
 
-
-
 ## 7.6 Chapter Summary
 
 Before formally summarizing, we want to share good news with everyone: For all methods and functions implemented in this chapter, complete test cases are provided in the GitHub repository. You can visit [this link](https://github.com/datawhalechina/hello-agents/tree/main/code/chapter7) to view and run these test codes. This directory contains demonstrations of four Agent paradigms, integration tests of the tool system, usage examples of advanced features, and interactive Agent experiences. If you want to verify whether your implementation is correct or want to deeply understand the actual usage of the framework, these test cases will be valuable references.
@@ -2106,11 +2105,9 @@ More importantly, the construction of Chapter 7 is not the endpoint but provides
 
 Next, we will explore together how to add RAG systems and Memory mechanisms to the framework. Stay tuned for Chapter 8!
 
-
 ## Exercises
 
 1. This chapter built the `HelloAgents` framework and explained "why we need to build our own Agent framework." Please analyze:
-
    - Section 7.1.1 mentioned four main limitations of current mainstream frameworks. Combined with your actual experience using a framework in [Chapter 6 exercises](../chapter6/第六章%20框架开发实践.md#习题) or actual projects, explain how these problems affect development efficiency.
    - `HelloAgents` proposes the design philosophy of "everything is a tool," abstracting modules like `Memory`, `RAG`, and `MCP` as tools. What are the advantages of this design? Are there any limitations? Please provide examples.
    - Comparing the agent code implemented from scratch in Chapter 4 with the framework implementation in this chapter, what specific improvements does the framework bring? If you were to design a framework, what design principles would you prioritize?
@@ -2118,13 +2115,11 @@ Next, we will explore together how to add RAG systems and Memory mechanisms to t
 2. In Section 7.2, we extended `HelloAgentsLLM` to support multiple model providers and local model invocation.
 
    > <strong>Hint</strong>: This is a practical exercise, hands-on operation is recommended
-
-   - Referring to the example in Section 7.2.1, try adding support for a new model provider to `HelloAgentsLLM` (such as `Gemini`, `Anthropic`, `Kim`). Implement it through inheritance and enable automatic detection of that provider's environment variables.
+   - Referring to the example in Section 7.2.1, try adding support for a new model provider to `HelloAgentsLLM` (such as `Gemini`, `Anthropic`, `Kimi`). Implement it through inheritance and enable automatic detection of that provider's environment variables.
    - Section 7.2.3 introduced three priorities of the automatic detection mechanism. Please analyze: If both `OPENAI_API_KEY` and `LLM_BASE_URL="http://localhost:11434/v1"` are set, which provider will the framework ultimately choose? Is this priority design reasonable?
    - Besides `VLLM` and `Ollama` introduced in this chapter, there are other local model deployment solutions like `SGLang`. Please first search for and understand the basic information and characteristics of `SGLang`, then compare `VLLM`, `SGLang`, and `Ollama` in terms of ease of use, resource consumption, inference speed, and inference accuracy.
 
 3. In Section 7.3, we implemented the `Message` class, `Config` class, and `Agent` base class. Please analyze:
-
    - The `Message` class uses `Pydantic`'s `BaseModel` for data validation. What are the advantages of this design in practical applications?
    - The `Agent` base class defines two methods: `run` and `_execute`, where `run` is the public interface and `_execute` is an abstract method. What is this design pattern called? What are its benefits?
    - In the `Config` class, we used the singleton pattern. Please explain what the singleton pattern is, why configuration management needs to use the singleton pattern, and what problems would arise if the singleton pattern is not used.
@@ -2132,20 +2127,16 @@ Next, we will explore together how to add RAG systems and Memory mechanisms to t
 4. In Section 7.4, we implemented four `Agent` paradigms in a framework manner.
 
    > <strong>Hint</strong>: This is a practical exercise, hands-on operation is recommended
-
    - Comparing the `ReActAgent` implemented from scratch in Chapter 4 with the framework-based `ReActAgent` in this chapter, list 3 specific improvements and explain how these improvements enhance code maintainability and extensibility.
    - `ReflectionAgent` implements an "execute-reflect-optimize" loop. Please extend this implementation by adding a "quality scoring" mechanism: After each reflection, have the `LLM` score the current version's output, and only continue optimization if the score is below a threshold; otherwise, terminate early.
    - Please design and implement a new `Agent` paradigm called `Tree-of-Thought Agent`, which should inherit from the `Agent` base class and be able to generate multiple possible thinking paths at each step, then select the optimal path to continue.
 
 5. In Section 7.5, we built the tool system. Please consider the following questions:
-
    - The `BaseTool` class defines an `execute` abstract method that all tools must implement. Please explain why all tools should be forced to implement a unified interface. If a tool needs to return multiple values (such as a search tool returning title, summary, and link), how should it be designed?
    - Section 7.5.3 implemented tool chains (`ToolChain`). Please design a practical application scenario that requires chaining at least 3 tools and draw the execution flow diagram of the tool chain.
    - The asynchronous tool executor (`AsyncToolExecutor`) uses a thread pool to execute tools in parallel. Please analyze: Under what circumstances can parallel tool execution bring performance improvements?
 
 6. Framework extensibility is one of the important considerations in design. You now need to extend the `HelloAgents` framework to implement some interesting new features and characteristics.
-
    - First, add a "streaming output" feature to `HelloAgents` so that the `Agent` can return intermediate results in real-time when generating responses (similar to the typing effect in the `ChatGPT` user interface). Please design the implementation plan for this feature and explain which classes and methods need to be modified.
    - Then add a "multi-turn conversation management" feature to the framework that can automatically manage conversation history, support conversation branching and backtracking. How would you design this? What new classes are needed? How to integrate with the existing `Message` system?
    - Finally, please design a "plugin system" for `HelloAgents` that allows third-party developers to extend framework functionality through plugins (such as adding new `Agent` types, new tool types, etc.) without modifying the framework's core code. Draw the architecture diagram of the plugin system and explain the key interfaces.
-
