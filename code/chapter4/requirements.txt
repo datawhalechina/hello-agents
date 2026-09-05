@@ -1,0 +1,3 @@
+openai 
+python-dotenv
+serpapi == 1.0.2

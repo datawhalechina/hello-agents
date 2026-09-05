@@ -181,7 +181,7 @@ For the goal set in this section—answering questions about "Huawei's latest ph
 First, you need to install the library:
 
 ```bash
-pip install google-search-results
+pip install serpapi
 ```
 
 At the same time, you need to go to the [SerpApi official website](https://serpapi.com/) to register a free account, obtain your API key, and add it to the `.env` file in our project root directory:
@@ -205,7 +205,7 @@ A well-defined tool should contain the following three core elements:
 Our first tool is the `search` function, which receives a query string and then returns search results.
 
 ```python
-from serpapi import SerpApiClient
+from serpapi import search as serp_search
 
 def search(query: str) -> str:
     """
@@ -226,8 +226,8 @@ def search(query: str) -> str:
             "hl": "zh-cn", # Language code
         }
         
-        client = SerpApiClient(params)
-        results = client.get_dict()
+        client = serp_search(params)
+        results = client.as_dict()
         
         # Intelligent parsing: prioritize finding the most direct answer
         if "answer_box_list" in results:
