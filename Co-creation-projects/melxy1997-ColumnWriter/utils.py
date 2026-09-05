@@ -165,7 +165,7 @@ class JSONExtractor:
                         parsed = JSONExtractor._parse_json_with_retry(json_str)
                         if isinstance(parsed, dict):
                             json_candidates.append((parsed, len(parsed)))
-                    except:
+                    except Exception:
                         pass
                     i = brace_end
                 else:

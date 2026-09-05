@@ -407,7 +407,7 @@ class NPCAgentManager:
                 for mem_type in ["working", "episodic"]:
                     try:
                         memory_manager.clear_memory_type(mem_type)
-                    except:
+                    except Exception:
                         pass
                 print(f"✅ 已清空{npc_name}的所有记忆")
 

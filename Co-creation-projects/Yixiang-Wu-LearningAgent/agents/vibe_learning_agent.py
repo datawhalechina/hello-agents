@@ -411,7 +411,7 @@ class VibeLearningAgent(SimpleAgent):
         try:
             # 尝试直接解析
             return json.loads(text)
-        except:
+        except Exception:
             # 失败则返回默认值
             return {
                 "score": 0.5,

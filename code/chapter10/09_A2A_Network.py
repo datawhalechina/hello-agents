@@ -36,7 +36,7 @@ def write_article(text: str) -> str:
         data = eval(content)
         topic = data.get("topic", "未知主题")
         findings = data.get("findings", "无研究结果")
-    except:
+    except Exception:
         topic = "未知主题"
         findings = content
     

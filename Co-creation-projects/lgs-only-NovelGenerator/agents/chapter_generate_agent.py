@@ -90,7 +90,7 @@ class ChapterGenerateAgent:
                 content = '\n'.join(lines[1:]).strip()
             
             return content
-        except:
+        except Exception:
             return content
 
     def get_memories(self, novel_id: str):

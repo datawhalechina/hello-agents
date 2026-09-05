@@ -161,7 +161,7 @@ class NPCBatchGenerator:
                     
                     if isinstance(dialogues, dict):
                         return dialogues
-            except:
+            except Exception:
                 pass
             
             print(f"⚠️  无法解析响应: {response[:100]}...")

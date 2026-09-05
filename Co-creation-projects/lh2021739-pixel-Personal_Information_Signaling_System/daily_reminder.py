@@ -84,14 +84,14 @@ class DailyReminder:
         if not PIL_AVAILABLE:
             try:
                 messagebox.showerror("错误", "Pillow 未安装，无法显示图片\n请运行: pip install Pillow")
-            except:
+            except Exception:
                 print("❌ 错误: Pillow 未安装，无法显示图片\n💡 请运行: pip install Pillow")
             return
         
         if not self.load_image():
             try:
                 messagebox.showerror("错误", "未找到人物图片文件\n请将图片放在 assets/ 目录下\n支持的名称: person.png, person.jpg, reminder.png")
-            except:
+            except Exception:
                 print("❌ 错误: 未找到人物图片文件\n💡 请将图片放在 assets/ 目录下")
             return
         
@@ -188,7 +188,7 @@ class DailyReminder:
                     try:
                         self.window.attributes('-alpha', alpha)
                         self.window.after(30, fade_out)
-                    except:
+                    except Exception:
                         pass
                 else:
                     if self.window:
@@ -203,7 +203,7 @@ class DailyReminder:
                 error_msg = f"未找到 write_report.py\n路径: {write_report_script}"
                 try:
                     messagebox.showerror("错误", error_msg)
-                except:
+                except Exception:
                     print(f"❌ {error_msg}")
                 return
             
@@ -218,7 +218,7 @@ class DailyReminder:
             error_msg = f"启动写日报失败: {e}"
             try:
                 messagebox.showerror("错误", error_msg)
-            except:
+            except Exception:
                 print(f"❌ {error_msg}")
     
     def show_system_notification(self):
@@ -230,7 +230,7 @@ class DailyReminder:
                 message="该写日报啦！点击通知打开写日报。",
                 timeout=10
             )
-        except:
+        except Exception:
             print("📝 写日报提醒：该写日报啦！")
 
 

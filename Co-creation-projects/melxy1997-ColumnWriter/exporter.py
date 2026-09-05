@@ -122,7 +122,7 @@ class ColumnExporter:
                         try:
                             start_time = datetime.fromisoformat(start_time)
                             end_time = datetime.fromisoformat(end_time)
-                        except:
+                        except Exception:
                             pass
 
                     if isinstance(start_time, datetime) and isinstance(end_time, datetime):

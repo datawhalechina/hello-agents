@@ -400,7 +400,7 @@ class CodebaseMaintainer:
         # 获取笔记摘要
         try:
             note_summary = self.note_tool.run({"action": "summary"})
-        except:
+        except Exception:
             note_summary = {}
 
         return {

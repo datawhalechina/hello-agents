@@ -185,7 +185,7 @@ class SimpleAgent(Agent):
         # 获取工具的参数定义
         try:
             tool_params = tool.get_parameters()
-        except:
+        except Exception:
             return param_dict
 
         # 创建参数类型映射
