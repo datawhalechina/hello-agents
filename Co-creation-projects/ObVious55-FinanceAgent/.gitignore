@@ -1,0 +1,48 @@
+# Secrets: keep only the documented template.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python environments and caches.
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Editors and operating-system files.
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Real financial documents are always local-only, regardless of location.
+*.xlsx
+*.xlsm
+*.xls
+*.docx
+*.pdf
+
+# Raw business data, derived records, agent traces, and generated reports.
+data/
+outputs/
+reports/
+*.jsonl
+*.log
+*.db
+*.sqlite
+*.sqlite3
+
+# Acceptance policies are private by default; only the generic demo policy is public.
+config/*.json
+!config/demo_acceptance_policy.json
+
+# Local planning artifacts are not part of the graduation submission.
+docs/superpowers/
