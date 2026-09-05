@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List
 # 假设 llm_client.py 文件已存在，并从中导入 HelloAgentsLLM 类
 from llm_client import HelloAgentsLLM
 
@@ -6,42 +6,28 @@ from llm_client import HelloAgentsLLM
 
 class Memory:
     """
-    一个简单的短期记忆模块，用于存储智能体的行动与反思轨迹。
+    一个简单的短期记忆模块，用于存储智能体的执行记录。
     """
     def __init__(self):
-        # 初始化一个空列表来存储所有记录
-        self.records: List[Dict[str, Any]] = []
+        # 初始化一个空列表来存储所有执行记录
+        self.records: List[str] = []
 
-    def add_record(self, record_type: str, content: str):
+    def add_record(self, content: str):
         """
-        向记忆中添加一条新记录。
+        向记忆中添加一条执行记录。
 
         参数:
-        - record_type (str): 记录的类型 ('execution' 或 'reflection')。
-        - content (str): 记录的具体内容 (例如，生成的代码或反思的反馈)。
+        - content (str): 执行的具体内容 (例如，生成的代码)。
         """
-        self.records.append({"type": record_type, "content": content})
-        print(f"📝 记忆已更新，新增一条 '{record_type}' 记录。")
-
-    def get_trajectory(self) -> str:
-        """
-        将所有记忆记录格式化为一个连贯的字符串文本，用于构建提示词。
-        """
-        trajectory = ""
-        for record in self.records:
-            if record['type'] == 'execution':
-                trajectory += f"--- 上一轮尝试 (代码) ---\n{record['content']}\n\n"
-            elif record['type'] == 'reflection':
-                trajectory += f"--- 评审员反馈 ---\n{record['content']}\n\n"
-        return trajectory.strip()
+        self.records.append(content)
+        print(f"📝 记忆已更新，新增一条执行记录。")
 
     def get_last_execution(self) -> str:
         """
         获取最近一次的执行结果 (例如，最新生成的代码)。
         """
-        for record in reversed(self.records):
-            if record['type'] == 'execution':
-                return record['content']
+        if self.records:
+            return self.records[-1]
         return None
 
 # --- 模块 2: Reflection 智能体 ---
@@ -107,7 +93,7 @@ class ReflectionAgent:
         print("\n--- 正在进行初始尝试 ---")
         initial_prompt = INITIAL_PROMPT_TEMPLATE.format(task=task)
         initial_code = self._get_llm_response(initial_prompt)
-        self.memory.add_record("execution", initial_code)
+        self.memory.add_record(initial_code)
 
         # --- 2. 迭代循环：反思与优化 ---
         for i in range(self.max_iterations):
@@ -118,7 +104,7 @@ class ReflectionAgent:
             last_code = self.memory.get_last_execution()
             reflect_prompt = REFLECT_PROMPT_TEMPLATE.format(task=task, code=last_code)
             feedback = self._get_llm_response(reflect_prompt)
-            self.memory.add_record("reflection", feedback)
+
 
             # b. 检查是否需要停止
             if "无需改进" in feedback or "no need for improvement" in feedback.lower():
@@ -133,7 +119,7 @@ class ReflectionAgent:
                 feedback=feedback
             )
             refined_code = self._get_llm_response(refine_prompt)
-            self.memory.add_record("execution", refined_code)
+            self.memory.add_record(refined_code)
         
         final_code = self.memory.get_last_execution()
         print(f"\n--- 任务完成 ---\n最终生成的代码:\n{final_code}")
@@ -160,4 +146,3 @@ if __name__ == '__main__':
     # 3. 定义任务并运行智能体
     task = "编写一个Python函数，找出1到n之间所有的素数 (prime numbers)。"
     agent.run(task)
-
