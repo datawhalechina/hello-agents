@@ -1,0 +1,9 @@
+hello-agents>=1.0.0
+python-dotenv>=1.0.0
+
+
+# Development / verification
+pytest>=8.0.0
+
+# Chapter 16 notebook entry point
+jupyter>=1.0.0

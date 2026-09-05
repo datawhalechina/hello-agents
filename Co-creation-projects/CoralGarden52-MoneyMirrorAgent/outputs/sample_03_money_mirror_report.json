@@ -1,0 +1,779 @@
+{
+  "user_id": "demo_user",
+  "month": "2026-07",
+  "transactions": [
+    {
+      "transaction_id": "19bedefd5cb8ad0f",
+      "occurred_at": "2026-06-08T09:00",
+      "merchant": "公司工资",
+      "amount": 6800.0,
+      "kind": "income",
+      "category": "收入",
+      "note": "六月工资到账",
+      "source": "data/sample_03.csv",
+      "category_confidence": 1.0
+    },
+    {
+      "transaction_id": "b1e4872d1e856cb9",
+      "occurred_at": "2026-06-08T10:00",
+      "merchant": "房东-六月房租",
+      "amount": 2100.0,
+      "kind": "expense",
+      "category": "住房",
+      "note": "固定住房",
+      "source": "data/sample_03.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "be9ffb5238c0dee7",
+      "occurred_at": "2026-06-13T15:00",
+      "merchant": "万达影院",
+      "amount": 75.0,
+      "kind": "expense",
+      "category": "娱乐",
+      "note": "周末电影",
+      "source": "data/sample_03.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "d8c3d605f2532ea0",
+      "occurred_at": "2026-06-14T19:00",
+      "merchant": "城市餐厅",
+      "amount": 180.0,
+      "kind": "expense",
+      "category": "餐饮",
+      "note": "周末聚餐",
+      "source": "data/sample_03.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "168cd0064e1f3593",
+      "occurred_at": "2026-06-20T16:00",
+      "merchant": "线下书店",
+      "amount": 90.0,
+      "kind": "expense",
+      "category": "学习",
+      "note": "周末阅读",
+      "source": "data/sample_03.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "fe720a3536477ac2",
+      "occurred_at": "2026-06-22T08:20",
+      "merchant": "地铁月票",
+      "amount": 120.0,
+      "kind": "expense",
+      "category": "交通",
+      "note": "通勤",
+      "source": "data/sample_03.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "a56c69fc1c3c93fc",
+      "occurred_at": "2026-07-06T09:00",
+      "merchant": "公司工资",
+      "amount": 6800.0,
+      "kind": "income",
+      "category": "收入",
+      "note": "七月工资到账",
+      "source": "data/sample_03.csv",
+      "category_confidence": 1.0
+    },
+    {
+      "transaction_id": "014e570569ba1507",
+      "occurred_at": "2026-07-06T10:00",
+      "merchant": "房东-七月房租",
+      "amount": 2100.0,
+      "kind": "expense",
+      "category": "住房",
+      "note": "固定住房",
+      "source": "data/sample_03.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "c6552c4de6ab1d5b",
+      "occurred_at": "2026-07-11T14:30",
+      "merchant": "独立咖啡馆",
+      "amount": 78.0,
+      "kind": "expense",
+      "category": "餐饮",
+      "note": "周末咖啡",
+      "source": "data/sample_03.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "4af74193df1ba577",
+      "occurred_at": "2026-07-11T20:00",
+      "merchant": "音乐节门票",
+      "amount": 360.0,
+      "kind": "expense",
+      "category": "娱乐",
+      "note": "周末娱乐",
+      "source": "data/sample_03.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "89acaefd172ba271",
+      "occurred_at": "2026-07-12T13:00",
+      "merchant": "城市餐厅",
+      "amount": 260.0,
+      "kind": "expense",
+      "category": "餐饮",
+      "note": "周末聚餐",
+      "source": "data/sample_03.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "1bc9ae722f87f132",
+      "occurred_at": "2026-07-12T17:00",
+      "merchant": "文创商场",
+      "amount": 420.0,
+      "kind": "expense",
+      "category": "购物",
+      "note": "周末购物",
+      "source": "data/sample_03.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "c41bab59e9eb2bdc",
+      "occurred_at": "2026-07-18T15:00",
+      "merchant": "万达影院",
+      "amount": 85.0,
+      "kind": "expense",
+      "category": "娱乐",
+      "note": "周末电影",
+      "source": "data/sample_03.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "58eb3d824496c01b",
+      "occurred_at": "2026-07-19T19:00",
+      "merchant": "剧本杀",
+      "amount": 168.0,
+      "kind": "expense",
+      "category": "娱乐",
+      "note": "周末娱乐",
+      "source": "data/sample_03.csv",
+      "category_confidence": 0.92
+    },
+    {
+      "transaction_id": "9a624a29e83da8b9",
+      "occurred_at": "2026-07-21T08:20",
+      "merchant": "地铁月票",
+      "amount": 120.0,
+      "kind": "expense",
+      "category": "交通",
+      "note": "通勤",
+      "source": "data/sample_03.csv",
+      "category_confidence": 0.92
+    }
+  ],
+  "summary": {
+    "transaction_count": 9,
+    "income": 6800.0,
+    "expense": 3591.0,
+    "balance": 3209.0,
+    "savings_rate": 47.19,
+    "average_expense": 448.88,
+    "active_days": 6
+  },
+  "category_breakdown": {
+    "住房": 2100.0,
+    "娱乐": 613.0,
+    "购物": 420.0,
+    "餐饮": 338.0,
+    "交通": 120.0
+  },
+  "trends": {
+    "daily": {
+      "2026-07-06": 2100.0,
+      "2026-07-11": 438.0,
+      "2026-07-12": 680.0,
+      "2026-07-18": 85.0,
+      "2026-07-19": 168.0,
+      "2026-07-21": 120.0
+    },
+    "weekly": {
+      "2026-07-06": 3218.0,
+      "2026-07-13": 253.0,
+      "2026-07-20": 120.0
+    },
+    "monthly": {
+      "2026-07": 3591.0
+    }
+  },
+  "patterns": {
+    "late_night": {
+      "count": 0,
+      "amount": 0,
+      "share": 0.0
+    },
+    "weekend": {
+      "count": 6,
+      "amount": 1371.0,
+      "share": 38.18
+    },
+    "payday_window": {
+      "count": 1,
+      "amount": 2100.0,
+      "share": 58.48
+    },
+    "frequent_small": {
+      "count": 0,
+      "amount": 0,
+      "average": 0.0
+    },
+    "category_spikes": {
+      "住房": 2100.0,
+      "娱乐": 613.0,
+      "购物": 420.0,
+      "餐饮": 338.0,
+      "交通": 120.0
+    }
+  },
+  "anomalies": [],
+  "subscriptions": [],
+  "persona": {
+    "primary": "周末体验玩家",
+    "archetype": "weekend_experience",
+    "score": 79.11,
+    "confidence": 0.79,
+    "labels": [
+      "周末体验玩家",
+      "弹性体验玩家",
+      "周末社交发动机"
+    ],
+    "secondary": [
+      {
+        "archetype": "flexible_adventurer",
+        "name": "弹性体验玩家",
+        "score": 74.18,
+        "confidence": 0.74,
+        "evidence": [
+          "娱乐与购物占比 28.8%",
+          "周末消费占比 38.2%",
+          "周末交易笔数 6",
+          "冲动消费特征分 30.0%"
+        ]
+      },
+      {
+        "archetype": "weekend_social",
+        "name": "周末社交发动机",
+        "score": 70.74,
+        "confidence": 0.71,
+        "evidence": [
+          "周末消费占比 38.2%",
+          "周末交易笔数 6",
+          "餐饮消费占比 9.4%",
+          "娱乐与购物占比 28.8%"
+        ]
+      }
+    ],
+    "evidence": [
+      "周末消费占比 38.2%",
+      "周末交易笔数 6",
+      "娱乐与购物占比 28.8%"
+    ],
+    "feature_vector": {
+      "night": 0.0,
+      "weekend": 82.98,
+      "frequent_small": 0.0,
+      "flexible_spend": 71.92,
+      "food": 23.53,
+      "subscription": 0.0,
+      "learning": 6.25,
+      "learning_consistency": 25.0,
+      "savings": 47.19,
+      "planning": 48.59,
+      "planning_inverse": 51.41,
+      "impulse": 30.0,
+      "payday": 100.0,
+      "impulse_inverse": 70.0
+    },
+    "narrative": "你的画像很贴近“周末体验玩家”（也可以叫你“周末享受派”），匹配分79.1，是会把快乐集中安排在休息日的人呢～  \n从证据看，你周末消费占比38.2%、周末有6笔交易，娱乐与购物也占到28.8%，这样专注犒劳自己，真的很会生活呀！"
+  },
+  "budget": {
+    "month": "2026-07",
+    "categories": {
+      "交通": {
+        "bucket": "necessary",
+        "historical_median": 120.0,
+        "recommended": 116.4,
+        "rationale": "必要支出，参考历史中位数并保留缓冲"
+      },
+      "住房": {
+        "bucket": "fixed",
+        "historical_median": 2100.0,
+        "recommended": 2100.0,
+        "rationale": "固定支出，原则上不做大幅削减"
+      },
+      "娱乐": {
+        "bucket": "optional",
+        "historical_median": 75.0,
+        "recommended": 63.75,
+        "rationale": "可选支出，保留真实体验额度并设置温和上限"
+      },
+      "学习": {
+        "bucket": "necessary",
+        "historical_median": 90.0,
+        "recommended": 87.3,
+        "rationale": "必要支出，参考历史中位数并保留缓冲"
+      },
+      "购物": {
+        "bucket": "optional",
+        "historical_median": 0.0,
+        "recommended": 0.0,
+        "rationale": "可选支出，保留真实体验额度并设置温和上限"
+      },
+      "餐饮": {
+        "bucket": "necessary",
+        "historical_median": 180.0,
+        "recommended": 174.6,
+        "rationale": "必要支出，参考历史中位数并保留缓冲"
+      }
+    },
+    "recommended_total": 2542.05,
+    "historical_months": [
+      "2026-06"
+    ],
+    "principle": "基于历史中位数，固定支出不削减，必要/弹性/可选支出分层温和调整"
+  },
+  "goals": [],
+  "quests": [
+    {
+      "quest_id": "娱乐_budget",
+      "title": "娱乐精打细算",
+      "description": "娱乐开销超出动态预算，但别担心，调整节奏就能找回平衡。轻松规划，让每一笔都更从容。\n🧩 小提示：看看本月娱乐记录，挑出可延后的消费，把快乐分散到未来。\n🎯 已核验目标：娱乐支出不高于已核验的动态预算 ¥63.75。",
+      "quest_type": "category_limit",
+      "target": 63.75,
+      "progress": 0.0,
+      "unit": "娱乐",
+      "exp_reward": 120,
+      "status": "active",
+      "evidence": "娱乐 已消费 ¥613.00，预算上限 ¥63.75"
+    },
+    {
+      "quest_id": "weekend_wallet_shield",
+      "title": "周末轻盈计划",
+      "description": "周末消费占比偏高，试着安排免费或低开销活动，享受轻松时光。\n🧩 小提示：规划本周末一次无消费散步或家中游戏，记录感受。\n🎯 已核验目标：周末支出不高于已核验的温和目标 ¥1165.35。",
+      "quest_type": "weekend_spend_limit",
+      "target": 1165.35,
+      "progress": 0.0,
+      "unit": "元",
+      "exp_reward": 110,
+      "status": "active",
+      "evidence": "周末已消费 ¥1371.00，温和上限 ¥1165.35"
+    }
+  ],
+  "achievements": [
+    {
+      "key": "savings_rate_20",
+      "title": "储蓄率破 20%",
+      "description": "储蓄率首次达到或超过 20%。",
+      "unlocked": true
+    },
+    {
+      "key": "zero_spend_start",
+      "title": "零消费日初体验",
+      "description": "完成至少一个零消费日。",
+      "unlocked": false
+    },
+    {
+      "key": "quest_ready",
+      "title": "任务上线",
+      "description": "已生成基于真实账单的 Money Quest。",
+      "unlocked": true
+    },
+    {
+      "key": "late_night_awareness",
+      "title": "深夜雷达启动",
+      "description": "已识别深夜消费行为并生成应对任务。",
+      "unlocked": false
+    },
+    {
+      "key": "zero_spend_streak_3",
+      "title": "三日无消费连击",
+      "description": "连续 3 天没有支出记录。",
+      "unlocked": true
+    }
+  ],
+  "gamification": {
+    "level": 1,
+    "total_exp": 0,
+    "exp_gained_this_cycle": 0,
+    "current_streak_days": 5,
+    "longest_streak_days": 5
+  },
+  "reflection": {
+    "month": "2026-07",
+    "previous_month": "2026-06",
+    "has_previous_snapshot": true,
+    "budget_deviations": [
+      {
+        "category": "交通",
+        "planned": 116.4,
+        "actual": 120.0,
+        "difference": 3.6,
+        "on_budget": false
+      },
+      {
+        "category": "住房",
+        "planned": 2100.0,
+        "actual": 2100.0,
+        "difference": 0.0,
+        "on_budget": true
+      },
+      {
+        "category": "娱乐",
+        "planned": 63.75,
+        "actual": 613.0,
+        "difference": 549.25,
+        "on_budget": false
+      },
+      {
+        "category": "学习",
+        "planned": 87.3,
+        "actual": 0.0,
+        "difference": -87.3,
+        "on_budget": true
+      },
+      {
+        "category": "餐饮",
+        "planned": 174.6,
+        "actual": 338.0,
+        "difference": 163.4,
+        "on_budget": false
+      }
+    ],
+    "quest_completion": {
+      "completed": 0,
+      "total": 2
+    },
+    "goal_progress": {},
+    "effective": [
+      "预算和任务均基于实际账单计算"
+    ],
+    "needs_adjustment": [
+      "娱乐",
+      "餐饮",
+      "交通"
+    ],
+    "next_strategy": [
+      "优先为 娱乐 保留明确额度，而不是一刀切禁止消费。",
+      "下阶段只保留 2 个可执行任务，降低任务负担。"
+    ],
+    "next_cycle_month": "2026-08",
+    "next_cycle_budget": {
+      "source": "monthly_reflection",
+      "categories": {
+        "交通": {
+          "bucket": "necessary",
+          "historical_median": 120.0,
+          "recommended": 126.0,
+          "rationale": "Reflection 根据实际偏差增加缓冲，避免对一次性消费一刀切"
+        },
+        "住房": {
+          "bucket": "fixed",
+          "historical_median": 2100.0,
+          "recommended": 2100.0,
+          "rationale": "固定支出，原则上不做大幅削减"
+        },
+        "娱乐": {
+          "bucket": "optional",
+          "historical_median": 75.0,
+          "recommended": 95.62,
+          "rationale": "Reflection 根据实际偏差增加缓冲，避免对一次性消费一刀切"
+        },
+        "学习": {
+          "bucket": "necessary",
+          "historical_median": 90.0,
+          "recommended": 87.3,
+          "rationale": "必要支出，参考历史中位数并保留缓冲"
+        },
+        "购物": {
+          "bucket": "optional",
+          "historical_median": 0.0,
+          "recommended": 0.0,
+          "rationale": "可选支出，保留真实体验额度并设置温和上限"
+        },
+        "餐饮": {
+          "bucket": "necessary",
+          "historical_median": 180.0,
+          "recommended": 261.9,
+          "rationale": "Reflection 根据实际偏差增加缓冲，避免对一次性消费一刀切"
+        }
+      }
+    },
+    "next_cycle_quests": [
+      {
+        "quest_id": "carry_娱乐_budget",
+        "title": "延续：娱乐精打细算",
+        "quest_type": "category_limit",
+        "target": 63.75,
+        "unit": "娱乐",
+        "exp_reward": 120,
+        "reason": "上周期未完成，Reflection 建议降低摩擦后继续"
+      },
+      {
+        "quest_id": "carry_weekend_wallet_shield",
+        "title": "延续：周末轻盈计划",
+        "quest_type": "weekend_spend_limit",
+        "target": 1165.35,
+        "unit": "元",
+        "exp_reward": 110,
+        "reason": "上周期未完成，Reflection 建议降低摩擦后继续"
+      },
+      {
+        "quest_id": "reflection_娱乐",
+        "title": "娱乐缓冲预算挑战",
+        "quest_type": "category_limit",
+        "target": 95.62,
+        "unit": "娱乐",
+        "exp_reward": 100,
+        "reason": "根据本月最大预算偏差生成"
+      }
+    ],
+    "narrative": "下周期请优先收紧娱乐（超支549.25）和餐饮（超支163.4）两类支出，将娱乐消费控制回63.75的计划水平，避免不必要的聚餐和冲动购物；同时把学习预算87.3真正用起来，安排一项技能或课程任务。最后，本周必须补上2项待办任务，结余和储蓄率虽健康，但任务完成率0/2会拖累长期目标。"
+  },
+  "agent_trace": [
+    {
+      "agent": "MoneyMirrorCoordinator",
+      "architecture": "Transaction → Pattern → Persona → Goal → Quest → Reflection",
+      "runtime": {
+        "available": true,
+        "enabled": true,
+        "reason": "已启用 Hello-Agents + OpenAI 兼容 LLM：deepseek-v4-flash",
+        "registry_name": "HelloAgents ToolRegistry (8 MoneyMirror tools)",
+        "paradigms": [
+          "ReActAgent",
+          "PlanSolveAgent",
+          "ReflectionAgent",
+          "Context Engineering"
+        ],
+        "registered_tools": [
+          "CSVImportTool",
+          "TransactionCategoryTool",
+          "StatisticsTool",
+          "AnomalyDetectionTool",
+          "BudgetCalculatorTool",
+          "GoalProjectionTool",
+          "SubscriptionDetectorTool",
+          "QuestProgressTool"
+        ],
+        "provider": "OpenAI-compatible",
+        "model": "deepseek-v4-flash",
+        "base_url": "https://api.deepseek.com"
+      }
+    },
+    {
+      "agent": "TransactionAgent",
+      "paradigm": "ReActAgent-style: inspect transaction → consult memory/rules → resolve only uncertainty",
+      "classification_sources": {
+        "income_rule": 2,
+        "keyword_rule": 13
+      }
+    },
+    {
+      "agent": "PatternAgent",
+      "paradigm": "PlanAndSolveAgent-style: plan metrics → call statistical tools → return evidence",
+      "tools": [
+        "StatisticsTool",
+        "AnomalyDetectionTool",
+        "SubscriptionDetectorTool"
+      ],
+      "evidence": {
+        "late_night_count": 0,
+        "anomaly_count": 0,
+        "subscription_count": 0
+      },
+      "planning_note": "鉴于已验证的夜间消费、异常交易和订阅扣款计数均为零，下一步应将分析重心转向常规消费类别与时间分布，而非排查异常项。"
+    },
+    {
+      "agent": "PersonaAgent",
+      "paradigm": "Feature vector → configurable scoring → evidence validation → LLM narrative",
+      "config_path": "/home/nyc/hello-agents/Co-creation-projects/CoralGarden52-MoneyMirrorAgent/src/config/personas.json",
+      "grounded_metrics": {
+        "savings_rate": 47.19,
+        "late_night_share": 0.0,
+        "late_night_count": 0,
+        "weekend_share": 38.18,
+        "weekend_count": 6,
+        "payday_share": 58.48,
+        "frequent_small_count": 0,
+        "frequent_small_share": 0.0,
+        "food_share": 9.41,
+        "flexible_spend_share": 28.77,
+        "subscription_share": 0.0,
+        "subscription_count": 0,
+        "learning_share": 0.0,
+        "learning_active_months": 1,
+        "impulse": 30.0
+      },
+      "feature_vector": {
+        "night": 0.0,
+        "weekend": 82.98,
+        "frequent_small": 0.0,
+        "flexible_spend": 71.92,
+        "food": 23.53,
+        "subscription": 0.0,
+        "learning": 6.25,
+        "learning_consistency": 25.0,
+        "savings": 47.19,
+        "planning": 48.59,
+        "planning_inverse": 51.41,
+        "impulse": 30.0,
+        "payday": 100.0,
+        "impulse_inverse": 70.0
+      },
+      "candidates": [
+        {
+          "archetype": "weekend_experience",
+          "name": "周末体验玩家",
+          "score": 79.11,
+          "evidence_valid": true
+        },
+        {
+          "archetype": "flexible_adventurer",
+          "name": "弹性体验玩家",
+          "score": 74.18,
+          "evidence_valid": true
+        },
+        {
+          "archetype": "payday_rhythm",
+          "name": "发薪节奏管理者",
+          "score": 71.29,
+          "evidence_valid": false
+        },
+        {
+          "archetype": "weekend_social",
+          "name": "周末社交发动机",
+          "score": 70.74,
+          "evidence_valid": true
+        },
+        {
+          "archetype": "mindful_minimalist",
+          "name": "清醒消费实践者",
+          "score": 53.52,
+          "evidence_valid": false
+        },
+        {
+          "archetype": "steady_planner",
+          "name": "稳健规划玩家",
+          "score": 48.03,
+          "evidence_valid": false
+        },
+        {
+          "archetype": "savings_sprinter",
+          "name": "储蓄冲刺玩家",
+          "score": 47.68,
+          "evidence_valid": false
+        },
+        {
+          "archetype": "food_routine",
+          "name": "日常餐饮探索家",
+          "score": 25.39,
+          "evidence_valid": false
+        },
+        {
+          "archetype": "learning_consistent",
+          "name": "学习成长玩家",
+          "score": 17.5,
+          "evidence_valid": false
+        },
+        {
+          "archetype": "digital_lifestyle",
+          "name": "数字生活玩家",
+          "score": 16.45,
+          "evidence_valid": false
+        },
+        {
+          "archetype": "learning_investor",
+          "name": "学习投入玩家",
+          "score": 10.94,
+          "evidence_valid": false
+        },
+        {
+          "archetype": "subscription_collector",
+          "name": "数字订阅整理师",
+          "score": 10.28,
+          "evidence_valid": false
+        },
+        {
+          "archetype": "frequent_small_spend",
+          "name": "高频小额行动派",
+          "score": 9.53,
+          "evidence_valid": false
+        },
+        {
+          "archetype": "late_night_focus",
+          "name": "夜行消费探索者",
+          "score": 7.5,
+          "evidence_valid": false
+        }
+      ],
+      "llm_role": "仅生成年轻化解释，不决定人格原型、分数或证据"
+    },
+    {
+      "agent": "GoalAgent",
+      "paradigm": "PlanAndSolveAgent-style goal feasibility projection",
+      "tools": [
+        "GoalProjectionTool"
+      ],
+      "goal_count": 0,
+      "planning_note": "将目标投影与实际余额的差额拆解为本周期可执行的储蓄或支出限额，并即刻设定下一次预算检查点，用工具持续校验进度。"
+    },
+    {
+      "agent": "QuestAgent",
+      "paradigm": "规则发现真实信号 → PlanSolveAgent 动态编排 → Python 强校验与进度计算",
+      "tools": [
+        "StatisticsTool",
+        "BudgetCalculatorTool",
+        "SubscriptionDetectorTool",
+        "QuestProgressTool"
+      ],
+      "signal_catalog": [
+        {
+          "signal_id": "flexible_budget",
+          "priority": "required",
+          "verified_observation": "娱乐本月已支出 ¥613.00；动态预算为 ¥63.75。",
+          "locked_constraint": "娱乐支出不高于已核验的动态预算 ¥63.75。",
+          "completion_source": "Python QuestProgressTool"
+        },
+        {
+          "signal_id": "weekend",
+          "priority": "optional",
+          "verified_observation": "周末消费 6 笔，占本月支出 38.18%。",
+          "locked_constraint": "周末支出不高于已核验的温和目标 ¥1165.35。",
+          "completion_source": "Python QuestProgressTool"
+        }
+      ],
+      "llm_orchestration": {
+        "candidate_count": 2,
+        "accepted_signal_ids": [
+          "flexible_budget",
+          "weekend"
+        ],
+        "validation": {
+          "attempts": 1,
+          "repaired": false,
+          "rejected": []
+        },
+        "numeric_authority": "Python only: target / progress / EXP / status are derived from locked blueprints and QuestProgressTool."
+      },
+      "quest_evidence": [
+        "娱乐 已消费 ¥613.00，预算上限 ¥63.75",
+        "周末已消费 ¥1371.00，温和上限 ¥1165.35"
+      ]
+    },
+    {
+      "agent": "ReflectionAgent",
+      "paradigm": "ReflectionAgent-style: plan → actual → deviation → adjustment",
+      "context_sources": [
+        "SQLiteMemory: previous snapshot",
+        "budget",
+        "quest outcomes",
+        "goal projection"
+      ]
+    }
+  ]
+}
