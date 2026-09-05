@@ -60,7 +60,7 @@ $$P(\text{learns}|\text{agent}) =  \frac{\text{Count(agent learns)}}{\text{Count
 
 $$P(\text{datawhale agent learns}) \approx  P(\text{datawhale}) \cdot  P(\text{agent}|\text{datawhale}) \cdot  P(\text{learns}|\text{agent}) \approx  0.333 \cdot 1 \cdot 0.5 \approx 0.167$$
 
-```Python
+```python
 import collections
 
 # Example corpus, consistent with the corpus in the case explanation above
@@ -132,7 +132,7 @@ Through this method, word vectors can not only capture simple relationships like
 
 A famous example demonstrates the semantic relationships captured by word vectors: `vector('King') - vector('Man') + vector('Woman')` The result of this vector operation is surprisingly close to the position of `vector('Queen')` in the vector space. This is like performing semantic translation: we start from the point "king," subtract the vector of "male," add the vector of "female," and finally arrive at the position of "queen." This proves that word embeddings can learn abstract concepts like "gender" and "royalty."
 
-```Python
+```python
 import numpy as np
 
 # Assume we have learned simplified 2D word vectors
@@ -203,7 +203,7 @@ We can understand this structure as a team with clear division of labor:
 
 To truly understand how Transformer works, the best method is to implement it yourself. In this section, we will adopt a "top-down" approach: first, we build the complete code framework of Transformer, defining all necessary classes and methods. Then, like completing a puzzle, we will implement the specific functions of these classes one by one.
 
-```Python
+```python
 import torch
 import torch.nn as nn
 import math
@@ -317,7 +317,7 @@ It splits the original Q, K, V vectors into h parts along the dimension (h is th
 
 As shown in Figure 3.5, this design allows the model to jointly attend to information from different positions and different representation subspaces, greatly enhancing the model's expressive power. Below is a simple implementation of multi-head attention for reference.
 
-```Python
+```python
 class MultiHeadAttention(nn.Module):
     """
     Multi-head attention mechanism module
@@ -390,7 +390,7 @@ Where $x$ is the output of the attention sublayer. $W_1,b_1,W_2,b_2$ are learnab
 
 In our PyTorch skeleton, we can implement this module with the following code:
 
-```Python
+```python
 class PositionWiseFeedForward(nn.Module):
     """
     Position-wise feed-forward network module
@@ -439,7 +439,7 @@ Where:
 
 Now, let's implement the `PositionalEncoding` module and complete the last part of our Transformer skeleton code.
 
-```Python
+```python
 class PositionalEncoding(nn.Module):
     """
     Add positional encoding to word embedding vectors of input sequence.
@@ -548,7 +548,7 @@ According to the number of examples (Exemplars) we provide to the model, prompts
 
 Case: We directly give the model instructions, requiring it to complete the sentiment classification task.
 
-```Python
+```python
 Text: Datawhale's AI Agent course is excellent!
 Sentiment: Positive
 ```
@@ -557,7 +557,7 @@ Sentiment: Positive
 
 Case: We first give the model a complete "question-answer" pair as a demonstration, then pose our new question.
 
-```Python
+```python
 Text: This restaurant's service is too slow.
 Sentiment: Negative
 
@@ -571,7 +571,7 @@ The model will imitate the given example format and complete "Positive" for the 
 
 Case: We provide multiple examples covering different situations, allowing the model to have a more comprehensive understanding of the task.
 
-```Python
+```python
 Text: This restaurant's service is too slow.
 Sentiment: Negative
 
@@ -592,7 +592,7 @@ Early GPT models (such as GPT-3) were mainly "text completion" models; they were
 
 - **Prompts for "text completion" models (you need to use few-shot prompts to "teach" the model what to do):**
 
-```Plain
+```plain
 This is a program that translates English to Chinese.
 English: Hello
 Chinese: 你好
@@ -602,7 +602,7 @@ Chinese:
 
 - **Prompts for "instruction-tuned" models (you can directly give instructions):**
 
-```Plain
+```plain
 Please translate the following English to Chinese:
 How are you?
 ```
@@ -613,14 +613,14 @@ The emergence of instruction tuning has greatly simplified how we interact with 
 
 **Role-playing** By assigning the model a specific role, we can guide its response style, tone, and knowledge scope, making its output more suitable for specific scenario needs.
 
-```Plain
+```plain
 # Case
 You are now a senior Python programming expert. Please explain what GIL (Global Interpreter Lock) is in Python in a way that even a beginner can understand.
 ```
 
 **In-context Example** This is consistent with the idea of few-shot prompting. By providing clear input-output examples in the prompt, we "teach" the model how to handle our requests, which is especially effective when dealing with complex formats or specific style tasks.
 
-```Plain
+```plain
 # Case
 I need you to extract product names and user sentiment from product reviews. Please output strictly in the JSON format below.
 
@@ -637,7 +637,7 @@ For complex problems requiring logical reasoning, calculation, or multi-step thi
 
 The key to implementing CoT is to add a simple guiding phrase in the prompt, such as "please think step by step" or "Let's think step by step."
 
-```Plain
+```plain
 # Chain-of-Thought Prompt
 A basketball team won 60% of their 80 games in one season. In the next season, they played 15 games and won 12. What is the total winning percentage for both seasons?
 Please think step by step and solve.
@@ -692,7 +692,7 @@ After training ends, when the vocabulary size reaches 10, we get new tokenizatio
 
 Below we use a simple Python code to simulate the above process:
 
-```Python
+```python
 import re, collections
 
 def get_stats(vocab):
@@ -768,13 +768,13 @@ In Chapter 1 of this book, we interacted with large language models through APIs
 
 First, please ensure you have installed the necessary libraries:
 
-```Plain
+```plain
 pip install transformers torch
 ```
 
 In the `transformers` library, we typically use the `AutoModelForCausalLM` and `AutoTokenizer` classes to automatically load weights and tokenizers matching the model. The following code will automatically download required model files and tokenizer configurations from Hugging Face Hub, which may take some time depending on your network speed.
 
-```Python
+```python
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
@@ -796,7 +796,7 @@ print("Model and tokenizer loaded!")
 
 Let's create a dialogue prompt. The Qwen1.5-Chat model follows a specific dialogue template. Then, we can use the `tokenizer` loaded in the previous step to convert the text prompt into numerical IDs (i.e., Token IDs) that the model can understand.
 
-```Python
+```python
 # Prepare dialogue input
 messages = [
     {"role": "system", "content": "You are a helpful assistant."},
@@ -825,7 +825,7 @@ Now we can call the model's `generate()` method to generate an answer. The model
 
 Finally, we need to use the tokenizer's `decode()` method to translate these numerical IDs back into human-readable text.
 
-```Python
+```python
 # Use model to generate answer
 # max_new_tokens controls the maximum number of new Tokens the model can generate
 generated_ids = model.generate(
