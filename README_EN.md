@@ -89,6 +89,7 @@ If you wish to read locally or contribute content, please refer to the learning 
 | [06-GUI Agent Overview and Hands-on Practice](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra06-GUIAgent科普与实战.md)            | GUI Agent concepts and practical tutorials |
 | [07-Environment Configuration](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra07-环境配置.md)            | Environment Configuration |
 | [08-How to Write Good Skills](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra08-如何写出好的Skill.md) | Skill writing best practices |
+| [14-UIZZE anti-UI-slop: UI quality gate](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra14-UIZZE-anti-UI-slop-UI-quality-gate.md) | A coding-agent workflow for design contracts, required states, interaction checks, and a finish gate |
 | [09-Agent Development Pitfalls and Practical Lessons](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra09-Agent应用开发实践踩坑与经验分享.md) | Practical lessons and pitfalls from building a Code Agent |
 | [10-Agent Self-Evolution](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra10-Agent自进化.md) | Four closed loops of agent self-evolution and representative projects |
 | [11-Web Agent: Principles and Practice](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra11-WebAgent科普与实战.md) | Web Agent principles, anti-bot practice, and HelloAgents integration |
