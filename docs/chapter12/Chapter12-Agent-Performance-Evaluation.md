@@ -70,6 +70,7 @@ Evaluates agent comprehensive performance in real-world tasks, including multi-s
 - **GAIA (General AI Assistants)**<sup>[4]</sup>: Jointly launched by Meta AI and Hugging Face, includes 466 real-world problems, divided into Level 1/2/3 difficulty levels, evaluates multi-step reasoning, tool use, file processing, web browsing capabilities, uses Quasi Exact Match algorithm, tasks are realistic and comprehensive.
 - **AgentBench**<sup>[5]</sup>: Launched by Tsinghua University, includes 8 tasks in different domains, comprehensively evaluates agent general capabilities.
 - **WebArena**<sup>[6]</sup>: Launched by CMU, evaluates agent task completion and web interaction capabilities in real web environments.
+- **ClawBench**<sup>[10]</sup> ([project](https://claw-bench.com/), [code](https://github.com/TIGER-AI-Lab/ClawBench)): Evaluates browser agents directly on live websites through 283 tasks across its V1 and V2 suites. Each run is isolated in a container and records five evidence layers: session replay, action screenshots, HTTP traffic, browser actions, and agent messages. The task-completing request is intercepted before reaching the target service and checked against task-specific rules, supporting end-to-end success and failure analysis under website drift.
 
 **(3) Multi-Agent Collaboration Evaluation**
 
@@ -2760,3 +2761,4 @@ In the next chapter, we will explore how to apply the HelloAgents framework to a
 
 [9] Mathematical Association of America. (2024). American Invitational Mathematics Examination (AIME). Retrieved from https://www.maa.org/math-competitions/invitational-competitions/aime
 
+[10] Zhang, Y., Wang, Y., Zhu, Y., et al. (2026). ClawBench: Can AI Agents Complete Everyday Online Tasks? arXiv preprint arXiv:2604.08523. https://arxiv.org/abs/2604.08523.
