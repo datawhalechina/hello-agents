@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d/python-project/HelloAgents-1/Co-creation-projexcts/**)",
+      "Bash(cmd.exe /c \"ren ecust-sl-SmartFileAssistant ecust-sl-SmartStockAssistant\")"
+    ]
+  }
+}

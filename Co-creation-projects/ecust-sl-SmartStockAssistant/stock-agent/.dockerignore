@@ -1,0 +1,27 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+
+# 前端（backend 镜像不需要）
+frontend/node_modules/
+frontend/dist/
+
+# 环境密钥（构建时不应进入镜像）
+.env
+*.env.local
+
+# 文档
+*.md

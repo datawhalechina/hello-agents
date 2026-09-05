@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -u -c ' *)",
+      "Bash(git -C D:/python-project/HelloAgents-1 status --porcelain --untracked-files=all)"
+    ]
+  }
+}
