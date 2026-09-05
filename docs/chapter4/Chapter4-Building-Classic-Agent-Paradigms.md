@@ -358,6 +358,7 @@ The prompt is the cornerstone of the entire ReAct mechanism, providing operation
 # ReAct Prompt Template
 REACT_PROMPT_TEMPLATE = """
 Please note that you are an intelligent assistant capable of calling external tools.
+current_date: {current_date}
 
 Available tools are as follows:
 {tools}
@@ -409,7 +410,9 @@ class ReActAgent:
             # 1. Format prompt
             tools_desc = self.tool_executor.getAvailableTools()
             history_str = "\n".join(self.history)
+            current_date = datetime.now().strftime("%Y-%m-%d")
             prompt = REACT_PROMPT_TEMPLATE.format(
+                current_date=current_date,
                 tools=tools_desc,
                 question=question,
                 history=history_str
