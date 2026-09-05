@@ -1,0 +1,37 @@
+# 核心依赖
+hello-agents[all]>=1.0.0
+
+# RAG知识库
+langchain>=0.1.0
+langchain-community>=0.0.10
+langchain-text-splitters>=0.0.1
+faiss-cpu>=1.7.4
+sentence-transformers>=2.2.2
+
+# 数据分析
+pandas>=2.0.0
+numpy>=1.24.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.14.0
+
+# 联网搜索
+requests>=2.28.0
+beautifulsoup4>=4.12.0
+google-search-results>=2.4.2
+
+# LaTeX生成
+jinja2>=3.1.2
+pdflatex>=0.1.3
+
+# 工具库
+python-dotenv>=1.0.0
+tqdm>=4.65.0
+pydantic>=2.0.0
+
+# Web界面
+streamlit>=1.30.0
+
+# 可选：更好的LaTeX支持
+# pip install texlive-pictures
+# pip install tikzplotlib

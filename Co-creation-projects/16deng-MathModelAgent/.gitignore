@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data files (保留示例数据)
+data/*.csv
+!data/sample_data.csv
+*.xlsx
+*.xls
+*.json
+
+# Output files (保留目录结构)
+outputs/*
+!outputs/.gitkeep
+*.pdf
+*.tex
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Large files
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Knowledge base (保留示例文档)
+knowledge/*
+!knowledge/.gitkeep
+!knowledge/example_knowledge.md
+
+# Templates (保留目录结构)
+templates/*
+!templates/.gitkeep
