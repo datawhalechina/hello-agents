@@ -303,6 +303,18 @@
                 function(hook, vm) {
                     // 在每次路由变化时检查语言偏好
                     hook.beforeEach(function(content) {
+                        // Docsify 子侧边栏(subMaxLevel)复用 compiler.toc 与 cacheTree[path]。
+                        // 若不在新页面编译前清空，可能把上一章的标题树挂到当前章链接下（例如第六章下出现 7.1、7.2）。
+                        if (vm.compiler) {
+                            vm.compiler.resetToc();
+                            if (vm.router && vm.compiler.cacheTree) {
+                                const p = vm.router.getCurrentPath();
+                                if (p) {
+                                    delete vm.compiler.cacheTree[p];
+                                }
+                            }
+                        }
+
                         const preferredLang = localStorage.getItem('preferredLanguage');
                         const currentPath = vm.route.path;
 
