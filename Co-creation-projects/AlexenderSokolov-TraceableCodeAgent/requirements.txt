@@ -1,0 +1,9 @@
+# HelloAgents v1.0.0
+openai>=1.0.0,<2.0.0
+requests>=2.25.0,<3.0.0
+python-dotenv>=0.19.0,<2.0.0
+pydantic>=2.0.0,<3.0.0
+numpy>=2.0.0,<3.0.0
+networkx>=2.6.0,<4.0.0
+tiktoken>=0.5.0
+pyyaml>=6.0.0
