@@ -19,7 +19,7 @@ class Configuration(BaseModel):
     max_web_research_loops: int = Field(
         default=3,
         title="Research Depth",
-        description="Number of research iterations to perform",
+        description="Max number of planning waves (initial plan plus re-plans)",
     )
     local_llm: str = Field(
         default="llama3.2",
