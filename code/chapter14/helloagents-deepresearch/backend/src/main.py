@@ -98,8 +98,8 @@ def create_app() -> FastAPI:
             base_url = config.llm_base_url or "unset"
 
         logger.info(
-            "DeepResearch configuration loaded: provider=%s model=%s base_url=%s search_api=%s "
-            "max_loops=%s fetch_full_page=%s tool_calling=%s strip_thinking=%s api_key=%s",
+            "DeepResearch configuration loaded: provider={} model={} base_url={} search_api={} "
+            "max_loops={} fetch_full_page={} tool_calling={} strip_thinking={} api_key={}",
             config.llm_provider,
             config.resolved_model() or "unset",
             base_url,
