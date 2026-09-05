@@ -101,7 +101,7 @@ def test_custom_prompt():
     # 注册计算器工具
     try:
         from hello_agents import calculate
-        tool_registry.register_function("calculate", calculate, "数学计算工具")
+        tool_registry.register_function("calculate", "数学计算工具", calculate)
     except ImportError:
         pass
     
