@@ -801,6 +801,7 @@ class PlanAndSolveAgent:
         final_answer = self.executor.execute(question, plan)
 
         print(f"\n--- Task Completed ---\nFinal Answer: {final_answer}")
+        return final_answer
 ```
 
 The design of this `PlanAndSolveAgent` class embodies the principle of "composition over inheritance." It doesn't contain complex logic itself but acts as an orchestrator, clearly calling its internal components to complete tasks.
