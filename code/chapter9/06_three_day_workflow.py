@@ -12,8 +12,8 @@ CodebaseMaintainer 三天工作流演示
 import os
 # 配置嵌入模型（三选一）
 # 方案一：TF-IDF（最简单，无需额外依赖）
-os.environ['EMBED_MODEL_TYPE'] = 'tfidf'
-os.environ['EMBED_MODEL_NAME'] = ''  # 重要：必须清空，否则会传递不兼容的参数
+# os.environ['EMBED_MODEL_TYPE'] = 'tfidf'
+# os.environ['EMBED_MODEL_NAME'] = ''  # 重要：必须清空，否则会传递不兼容的参数
 from dotenv import load_dotenv
 load_dotenv()
 # 方案二：本地Transformer（需要: pip install sentence-transformers 和 HF token）
@@ -21,9 +21,9 @@ load_dotenv()
 # os.environ['EMBED_MODEL_NAME'] = 'sentence-transformers/all-MiniLM-L6-v2'
 # os.environ['HF_TOKEN'] = 'your_hf_token_here'  # 或使用 huggingface-cli login
 # 方案三：通义千问（需要API key）
-# os.environ['EMBED_MODEL_TYPE'] = 'dashscope'
-# os.environ['EMBED_MODEL_NAME'] = 'text-embedding-v3'
-# os.environ['EMBED_API_KEY'] = 'your_api_key_here'
+os.environ['EMBED_MODEL_TYPE'] = 'dashscope'
+os.environ['EMBED_MODEL_NAME'] = 'text-embedding-v3'
+os.environ['EMBED_API_KEY'] = 'sk-03b2ece84659427bb9dac123ab142ba5'
 
 from hello_agents import HelloAgentsLLM
 from datetime import datetime
@@ -58,7 +58,7 @@ def day_1_exploration(maintainer):
     # 2. 深入分析某个模块 - Agent 自主决定分析方法
     print("### 2. 分析数据处理模块 ###")
     print("💡 提示：Agent 会自主决定如何分析这个文件\n")
-    response = maintainer.run("请查看 data_processor.py 文件，分析其代码设计")
+    response = maintainer.run("请查看 data_processor.py 文件，分析其代码设计，查看命令使用Windows专属的")
     print(f"\n助手总结:\n{response[:500]}...\n")
 
     # 模拟时间流逝
@@ -87,7 +87,7 @@ def day_2_analysis(maintainer):
     print("### 2. 分析 API 客户端代码 ###")
     print("💡 提示：Agent 会自主决定如何分析这个文件的质量\n")
     response = maintainer.run(
-        "请分析 api_client.py 的代码质量，特别是错误处理部分，给出改进建议"
+        "请分析 api_client.py 的代码质量，特别是错误处理部分，给出改进建议，命令使用Windows专属的"
     )
     print(f"\n助手总结:\n{response[:500]}...\n")
 
@@ -120,7 +120,7 @@ def day_3_planning(maintainer):
     response = maintainer.run(
         "请基于我们的分析，创建一个详细的本周重构计划。"
         "计划应该包括：目标、具体任务清单、时间安排和风险。"
-        "请使用 NoteTool 创建一个 task_state 类型的笔记来记录这个计划。"
+        "请使用 NoteTool 创建一个 task_state 类型的笔记来记录这个计划。命令使用Windows专属的"
     )
     print(f"\n助手总结:\n{response[:500]}...\n")
 
@@ -182,7 +182,7 @@ def demonstrate_cross_session_continuity():
     maintainer_2 = CodebaseMaintainer(
         project_name="demo_codebase",  # 同一个项目
         #实际使用的时候替换代码路径
-        codebase_path="/Users/suntao/Documents/GitHub/hello-agents/code/chapter9/codebase",
+        codebase_path="E:\project\hello-agents-liu\code\chapter9\codebase",
         llm=HelloAgentsLLM()
     )
 
@@ -216,7 +216,7 @@ def demonstrate_tool_synergy():
     maintainer = CodebaseMaintainer(
         project_name="synergy_demo",
         #实际使用的时候替换代码路径
-        codebase_path="/Users/suntao/Documents/GitHub/hello-agents/code/chapter9/codebase",
+        codebase_path="E:\project\hello-agents-liu\code\chapter9\codebase",
         llm=HelloAgentsLLM()
     )
 
@@ -264,7 +264,7 @@ def main():
     maintainer = CodebaseMaintainer(
         project_name="demo_codebase",
         #实际使用的时候替换代码路径
-        codebase_path="/Users/suntao/Documents/GitHub/hello-agents/code/chapter9/codebase",
+        codebase_path="E:\project\hello-agents-liu\code\chapter9\codebase",
         llm=HelloAgentsLLM()
     )
 
