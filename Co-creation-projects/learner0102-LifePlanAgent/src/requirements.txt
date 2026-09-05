@@ -1,0 +1,4 @@
+python==3.12
+hello_agents==0.2.8
+pydantic==2.13.5
+python-dotenv==1.2.3
