@@ -12,6 +12,7 @@ from agentscope.agent import ReActAgent
 from agentscope.model import DashScopeChatModel
 from agentscope.pipeline import MsgHub, sequential_pipeline, fanout_pipeline
 from agentscope.formatter import DashScopeMultiAgentFormatter
+from agentscope.message import Msg
 
 from prompt_cn import ChinesePrompts
 from game_roles import GameRoles
@@ -51,6 +52,11 @@ class ThreeKingdomsWerewolfGame:
         # 女巫道具状态
         self.witch_has_antidote = True
         self.witch_has_poison = True
+        
+    async def broadcast_announcement(self, msg: Msg) -> None:
+        """将主持人公告广播给所有存活玩家，让所有玩家都能听到"""
+        for player in self.alive_players:
+            await player.observe(msg)
         
     async def create_player(self, role: str, character: str) -> ReActAgent:
         """创建具有三国背景的玩家"""
@@ -108,8 +114,10 @@ class ThreeKingdomsWerewolfGame:
                 self.villagers.append(agent)
         
         # 游戏开始公告
-        await self.moderator.announce(
-            f"三国狼人杀游戏开始！参与者：{format_player_list(self.alive_players)}"
+        await self.broadcast_announcement(
+            await self.moderator.announce(
+                f"三国狼人杀游戏开始！参与者：{format_player_list(self.alive_players)}"
+            )
         )
         
         print(f"✅ 游戏设置完成，共{len(self.alive_players)}名玩家")
@@ -247,7 +255,9 @@ class ThreeKingdomsWerewolfGame:
             if hunter_action.metadata.get("shoot"):
                 target = hunter_action.metadata.get("target")
                 if target:
-                    await self.moderator.announce(f"猎人{hunter_agent.name}开枪带走了{target}")
+                    await self.broadcast_announcement(
+                        await self.moderator.announce(f"猎人{hunter_agent.name}开枪带走了{target}")
+                    )
                     return target
                 else:
                     print(f"⚠️ 猎人选择开枪但未指定目标,视为放弃")
@@ -270,7 +280,9 @@ class ThreeKingdomsWerewolfGame:
     
     async def day_phase(self, round_num: int):
         """白天阶段"""
-        await self.moderator.day_announcement(round_num)
+        await self.broadcast_announcement(
+            await self.moderator.day_announcement(round_num)
+        )
         
         # 讨论阶段
         async with MsgHub(
@@ -304,7 +316,9 @@ class ThreeKingdomsWerewolfGame:
                     votes[self.alive_players[i].name] = None
             
             voted_out, vote_count = majority_vote_cn(votes)
-            await self.moderator.vote_result_announcement(voted_out, vote_count)
+            await self.broadcast_announcement(
+                await self.moderator.vote_result_announcement(voted_out, vote_count)
+            )
             
             return voted_out
     
@@ -317,7 +331,9 @@ class ThreeKingdomsWerewolfGame:
                 print(f"\n🌙 === 第{round_num}轮游戏开始 ===")
                 
                 # 夜晚阶段
-                await self.moderator.night_announcement(round_num)
+                await self.broadcast_announcement(
+                    await self.moderator.night_announcement(round_num)
+                )
                 
                 # 狼人击杀
                 killed_player = await self.werewolf_phase(round_num)
@@ -333,12 +349,16 @@ class ThreeKingdomsWerewolfGame:
                 self.update_alive_players(night_deaths)
                 
                 # 死亡公告
-                await self.moderator.death_announcement(night_deaths)
+                await self.broadcast_announcement(
+                    await self.moderator.death_announcement(night_deaths)
+                )
                 
                 # 检查胜利条件
                 winner = check_winning_cn(self.alive_players, self.roles)
                 if winner:
-                    await self.moderator.game_over_announcement(winner)
+                    await self.broadcast_announcement(
+                        await self.moderator.game_over_announcement(winner)
+                    )
                     return
                 
                 # 白天阶段
@@ -354,7 +374,9 @@ class ThreeKingdomsWerewolfGame:
                 # 检查胜利条件
                 winner = check_winning_cn(self.alive_players, self.roles)
                 if winner:
-                    await self.moderator.game_over_announcement(winner)
+                    await self.broadcast_announcement(
+                        await self.moderator.game_over_announcement(winner)
+                    )
                     return
                 
                 print(f"第{round_num}轮结束，存活玩家：{format_player_list(self.alive_players)}")
