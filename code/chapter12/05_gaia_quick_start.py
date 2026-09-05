@@ -49,7 +49,7 @@ results = gaia_tool.run(
 print(f"\n评估结果:")
 print(f"精确匹配率: {results['exact_match_rate']:.2%}")
 print(f"部分匹配率: {results['partial_match_rate']:.2%}")
-print(f"正确数: {results['correct_samples']}/{results['total_samples']}")
+print(f"正确数: {results['exact_matches']}/{results['total_samples']}")
 
 # 运行输出示例：
 # ============================================================
