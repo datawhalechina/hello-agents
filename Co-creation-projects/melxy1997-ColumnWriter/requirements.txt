@@ -4,7 +4,7 @@ pydantic>=2.0.0
 pydantic-settings>=2.0.0
 
 # MCP 支持
-fastmcp>=2.0.0
+fastmcp>=3.2.0,<4
 
 # 搜索功能（可选，至少安装一个）
 tavily-python>=0.3.0  # 推荐
