@@ -47,9 +47,9 @@ class MySimpleAgent(SimpleAgent):
         if not self.enable_tool_calling:
             response = self.llm.invoke(messages, **kwargs)
             self.add_message(Message(input_text, "user"))
-            self.add_message(Message(response, "assistant"))
+            self.add_message(Message(response.content, "assistant"))
             print(f"✅ {self.name} 响应完成")
-            return response
+            return response.content
 
         # 支持多轮工具调用的逻辑
         return self._run_with_tools(messages, input_text, max_tool_iterations, **kwargs)
@@ -88,13 +88,13 @@ class MySimpleAgent(SimpleAgent):
             response = self.llm.invoke(messages, **kwargs)
 
             # 检查是否有工具调用
-            tool_calls = self._parse_tool_calls(response)
+            tool_calls = self._parse_tool_calls(response.content)
 
             if tool_calls:
                 print(f"🔧 检测到 {len(tool_calls)} 个工具调用")
                 # 执行所有工具调用并收集结果
                 tool_results = []
-                clean_response = response
+                clean_response = response.content
 
                 for call in tool_calls:
                     result = self._execute_tool_call(call['tool_name'], call['parameters'])
@@ -113,12 +113,12 @@ class MySimpleAgent(SimpleAgent):
                 continue
 
             # 没有工具调用，这是最终回答
-            final_response = response
+            final_response = response.content
             break
 
         # 如果超过最大迭代次数，获取最后一次回答
         if current_iteration >= max_tool_iterations and not final_response:
-            final_response = self.llm.invoke(messages, **kwargs)
+            final_response = self.llm.invoke(messages, **kwargs).content
 
         # 保存到历史记录
         self.add_message(Message(input_text, "user"))
