@@ -1,0 +1,111 @@
+{
+  "profile": {
+    "name": "李明",
+    "name_kana": "リ メイ",
+    "phone": "138-0000-0000",
+    "email": "liming@example.com",
+    "birth": "2002-03-15",
+    "address": "上海市浦东新区",
+    "nearest_station": "世紀大道駅"
+  },
+  "education": [
+    {
+      "school": "复旦大学",
+      "school_ja": "復旦大学",
+      "school_en": "Fudan University",
+      "major": "经济学",
+      "major_ja": "経済学",
+      "major_en": "Economics",
+      "degree": "本科",
+      "degree_en": "B.A.",
+      "start": "2020-09",
+      "end": "2024-06",
+      "gpa": "3.6/4.0",
+      "honors": "校级奖学金（2022）"
+    }
+  ],
+  "experiences": [
+    {
+      "company": "上海云数科技有限公司",
+      "company_ja": "上海雲数科技有限会社",
+      "company_en": "Shanghai Yunshu Tech Co., Ltd.",
+      "title": "数据分析实习生",
+      "title_ja": "データ分析インターン",
+      "title_en": "Data Analyst Intern",
+      "location": "上海",
+      "start": "2023-07",
+      "end": "2023-09",
+      "bullets": [
+        "负责用户增长数据周报，覆盖日活/留存/转化等核心指标",
+        "搭建自动化看板，周报制作时间从4小时缩短至30分钟",
+        "协助 A/B 实验分析，累计输出实验报告 12 份"
+      ],
+      "metrics": {
+        "team_size": 6,
+        "efficiency": "周报效率提升 87.5%"
+      }
+    },
+    {
+      "company": "杭州某电商集团",
+      "company_ja": "杭州某ECグループ",
+      "company_en": "Hangzhou E-commerce Group",
+      "title": "数据分析师",
+      "title_ja": "データアナリスト",
+      "title_en": "Data Analyst",
+      "location": "杭州",
+      "start": "2024-07",
+      "end": "2026-06",
+      "bullets": [
+        "负责复购率与用户分层分析，设计RFM分层模型覆盖500万用户",
+        "主导转化率提升实验，目标页转化率提升5.2%"
+      ],
+      "metrics": {
+        "users": "500万",
+        "lift": "转化率 +5.2%"
+      }
+    }
+  ],
+  "projects": [],
+  "skills": {
+    "languages": [
+      {
+        "name": "日语",
+        "name_en": "Japanese",
+        "level": "N2"
+      },
+      {
+        "name": "英语",
+        "name_en": "English",
+        "level": "CET-6"
+      }
+    ],
+    "certifications": [
+      {
+        "name": "日本语能力测试 N2",
+        "name_en": "JLPT N2",
+        "name_ja": "日本語能力試験 N2",
+        "date": "2023-12"
+      }
+    ],
+    "tech": [
+      "Python (pandas / matplotlib)",
+      "SQL (MySQL / Hive)",
+      "Tableau",
+      "Excel"
+    ]
+  },
+  "japan_extra": {
+    "motivation": "貴社のデータ駆動型経営の理念に共感し、データ分析の知見を活かして事業成長に貢献したいと考え、志望いたしました。",
+    "self_pr": "3年間のデータ分析経験で培った、課題発見から施策提案まで一気通貫で実行できる力を強みとしています。",
+    "desired_position": "データアナリスト"
+  },
+  "targets": {
+    "role": "数据分析师 / Data Analyst / データアナリスト",
+    "languages": [
+      "zh",
+      "ja",
+      "en"
+    ],
+    "jd": ""
+  }
+}

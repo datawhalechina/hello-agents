@@ -1,0 +1,84 @@
+const SELECTION_KEYS = ["experienceId", "sessionId", "versionId"];
+
+export function createGenerationGate() {
+  let generation = 0;
+  return {
+    next() {
+      generation += 1;
+      return generation;
+    },
+    current() {
+      return generation;
+    },
+    isCurrent(candidate) {
+      return candidate === generation;
+    },
+  };
+}
+
+export function createTransitionGate() {
+  let generation = 0;
+  let transitioning = false;
+  return {
+    begin() {
+      generation += 1;
+      transitioning = true;
+      return generation;
+    },
+    cancel() {
+      generation += 1;
+      transitioning = false;
+      return generation;
+    },
+    current() {
+      return generation;
+    },
+    finish(candidate) {
+      if (candidate !== generation) return false;
+      transitioning = false;
+      return true;
+    },
+    isCurrent(candidate) {
+      return candidate === generation;
+    },
+    isTransitioning() {
+      return transitioning;
+    },
+  };
+}
+
+export function createSerialExecutor() {
+  let tail = Promise.resolve();
+  return function run(task) {
+    const result = tail.then(task);
+    tail = result.then(
+      () => undefined,
+      () => undefined,
+    );
+    return result;
+  };
+}
+
+export function baseSelection(state, baseId) {
+  const saved = state.baseSelections?.[baseId];
+  if (saved) return { ...saved };
+  if (state.factBaseId !== baseId) return {};
+  return Object.fromEntries(
+    SELECTION_KEYS
+      .filter((key) => typeof state[key] === "string" && state[key])
+      .map((key) => [key, state[key]]),
+  );
+}
+
+export function storeBaseSelection(state, baseId, selection) {
+  const safeSelection = Object.fromEntries(
+    SELECTION_KEYS
+      .filter((key) => typeof selection[key] === "string" && selection[key])
+      .map((key) => [key, selection[key]]),
+  );
+  state.baseSelections = {
+    ...(state.baseSelections || {}),
+    [baseId]: safeSelection,
+  };
+  return safeSelection;
+}

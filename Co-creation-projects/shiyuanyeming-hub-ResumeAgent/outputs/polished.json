@@ -1,0 +1,26 @@
+{
+  "bullets_zh": [
+    "撰写用户增长数据周报，覆盖日活/留存/转化等核心指标",
+    "搭建自动化看板，周报制作时间从4小时缩短至30分钟",
+    "协助A/B实验分析，累计输出实验报告12份",
+    "分析复购率与用户分层，设计RFM模型覆盖500万用户",
+    "主导转化率提升实验，目标页转化率提升5.2%"
+  ],
+  "bullets_ja": [
+    "用户增长データの週次レポートを作成し、日次アクティブユーザー数、維持率、コンバージョン率などの主要指標を網羅しました。",
+    "自動化ダッシュボードを構築し、レポート作成時間を4時間から30分に短縮しました。",
+    "A/Bテスト分析を支援し、累計12件の実験レポートを出力しました。",
+    "リピート購入率とユーザーセグメンテーション分析を担当し、500万ユーザーをカバーするRFMセグメンテーションモデルを設計しました。",
+    "コンバージョン率向上の実験を主導し、目標ページのコンバージョン率を5.2%向上させました。"
+  ],
+  "bullets_en": [
+    "Built weekly user growth reports tracking DAU, retention, and conversion metrics",
+    "Automated dashboard creation, reducing report production time from 4 hours to 30 minutes",
+    "Supported A/B experiment analysis, delivering 12 experiment reports cumulatively",
+    "Analyzed repurchase rates and user segmentation, designing an RFM model covering 5 million users",
+    "Led conversion optimization experiments, increasing target page conversion rate by 5.2%"
+  ],
+  "summary_zh": "复旦大学经济学本科，3年数据分析经验，擅长SQL/Python/Tableau，曾搭建自动化看板提升周报效率87.5%，主导实验使转化率提升5.2%，日语N2。",
+  "summary_ja": "復旦大学で経済学を専攻し、2024年に卒業。在学中からデータ分析インターンとしてユーザー成長分析や自動化ダッシュボード構築に携わり、卒業後は杭州のECグループでデータアナリストとしてRFMモデルによる500万ユーザーの分析やコンバージョン率向上施策に従事。データ分析の実務経験3年を有する。",
+  "summary_en": "Data Analyst with 3 years of experience in user growth analysis, dashboard automation, and A/B testing, improving reporting efficiency by 87.5% and increasing conversion rates by 5.2%. Holds a B.A. in Economics from Fudan University (GPA 3.6/4.0) and JLPT N2 certification, with skills in Python, SQL, Tableau, and Excel."
+}

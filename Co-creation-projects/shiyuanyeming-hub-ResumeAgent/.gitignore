@@ -1,0 +1,23 @@
+# 敏感信息：API 密钥
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+*.db
+*.db-shm
+*.db-wal
+
+# Browser tests
+.playwright-cli/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store

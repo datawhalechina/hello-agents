@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "resume-agent-mentor"
+version = "0.1.0"
+description = "Evidence-driven, multi-agent resume mentoring core"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi>=0.115,<1",
+  "pydantic>=2.7,<3",
+  "python-docx>=1.1,<2",
+  "uvicorn>=0.30,<1",
+]
+
+[project.scripts]
+resume-agent-eval = "resume_agent.evaluation.cli:main"
+
+[project.optional-dependencies]
+dev = [
+  "hello-agents>=1,<2",
+  "httpx>=0.28,<1",
+  "httpx2>=2,<3",
+  "python-dotenv>=1,<2",
+  "pytest>=8,<9",
+  "streamlit>=1.61,<2",
+]
+agents = [
+  "hello-agents>=1,<2",
+  "python-dotenv>=1,<2",
+]
+web = [
+  "httpx>=0.28,<1",
+  "streamlit>=1.61,<2",
+]
+
+[tool.setuptools.packages.find]
+include = ["resume_agent*"]
+
+[tool.setuptools.package-data]
+"resume_agent.evaluation" = ["datasets/*.jsonl"]
+"resume_agent.web" = ["*.html", "*.css", "*.js", "*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
