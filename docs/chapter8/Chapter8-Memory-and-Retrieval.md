@@ -212,6 +212,28 @@ EMBED_API_KEY=
 EMBED_BASE_URL=
 ```
 
+The local deployment approach is as follows:
+
+```bash
+# First, check if Docker is installed
+>> docker -v
+   Docker version 27.0.3, build 7d4bcd8
+
+# Start qdrant and neo4j services simultaneously using docker-compose
+>> cd project_to_path/code/chapter8
+>> docker-compose -f docker/docker-compse.yml 
+
+# Configure .env for your local deployment of qdrant and neo4j
+# Comment out cloud configuration and use local Qdrant (requires Docker)
+QDRANT_URL=http://localhost:6333
+QDRANT_API_KEY=
+
+# Comment out cloud configuration and use local Neo4j (requires Docker)
+NEO4J_URI=bolt://localhost:7687
+NEO4J_USERNAME=neo4j
+NEO4J_PASSWORD=hello-agents-password
+```
+
 Learning in this chapter can be done in two ways:
 
 1. **Experiential Learning**: Directly install the framework using `pip`, run example code, and quickly experience various functions
