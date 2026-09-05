@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+httpx
+python-dotenv
+python-multipart
+asyncio
