@@ -76,6 +76,7 @@
 | 社区精选                                                                                                                                      | 内容总结                  |
 | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
 | [00-共创毕业设计](https://github.com/datawhalechina/hello-agents/blob/main/Co-creation-projects)                                             | 社区共创毕业设计项目      |
+| [CodeGraph：AI 代码仓库学习地图](https://github.com/datawhalechina/hello-agents/blob/main/Co-creation-projects/liu66-qing-CodeGraph) | 面向开源项目学习的代码理解 Agentic RAG 实践 |
 | [01-Agent面试题总结](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra01-面试问题总结.md)                          | Agent 岗位相关面试问题    |
 | [01-Agent面试题答案](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra01-参考答案.md)                              | 相关面试问题答案          |
 | [02-上下文工程内容补充](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra02-上下文工程补充知识.md)                 | 上下文工程内容扩展        |
