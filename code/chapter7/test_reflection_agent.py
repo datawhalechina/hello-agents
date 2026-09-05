@@ -21,6 +21,6 @@ code_agent = MyReflectionAgent(
     custom_prompts=code_prompts
 )
 
-# 测试使用
-result = general_agent.run("写一篇关于人工智能发展历程的简短文章")
+# 测试使用（代码生成场景）
+result = code_agent.run("编写一个函数，输入整数 n，返回斐波那契数列第 n 项")
 print(f"最终结果: {result}")
