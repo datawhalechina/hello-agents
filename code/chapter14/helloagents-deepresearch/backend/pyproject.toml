@@ -2,22 +2,21 @@
 name = "helloagents-deep-researcher"
 version = "0.0.1"
 description = "Fully local web research and summarization assistant powered by HelloAgents."
-authors = [
-    { name = "Lance Martin" }
-]
+authors = [{ name = "Lance Martin" }]
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
 requires-python = ">=3.10"
 dependencies = [
     "fastapi>=0.115.0",
     "hello-agents==0.2.9",
     "tavily-python>=0.5.0",
-    "python-dotenv==1.0.1",
+    "python-dotenv>=1.0.1",
     "requests>=2.31.0",
     "openai>=1.12.0",
     "uvicorn[standard]>=0.32.0",
     "ddgs>=9.6.1",
     "loguru>=0.7.3",
+    "huggingface_hub>=0.20.0",  # <-- 修复缺失依赖
 ]
 
 [project.optional-dependencies]
@@ -27,40 +26,11 @@ dev = ["mypy>=1.11.1", "ruff>=0.6.1"]
 requires = ["setuptools>=73.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-packages = ["src"]
-
 [tool.setuptools.package-dir]
 "" = "src"
 
 [tool.setuptools.package-data]
 "*" = ["py.typed"]
 
-[tool.ruff]
-lint.select = [
-    "E",    # pycodestyle
-    "F",    # pyflakes
-    "I",    # isort
-    "D",    # pydocstyle
-    "D401", # First line should be in imperative mood
-    "T201",
-    "UP",
-]
-lint.ignore = [
-    "UP006",
-    "UP007",
-    "UP035",
-    "D417",
-    "E501",
-]
-
-[tool.ruff.lint.per-file-ignores]
-"tests/*" = ["D", "UP"]
-
-[tool.ruff.lint.pydocstyle]
-convention = "google"
-
-[dependency-groups]
-dev = [
-    "ruff>=0.12.7",
-]
+[tool.setuptools.packages.find]
+where = ["src"]

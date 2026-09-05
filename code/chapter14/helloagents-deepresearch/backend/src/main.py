@@ -1,6 +1,11 @@
 """FastAPI entrypoint exposing the DeepResearchAgent via HTTP."""
 
+
 from __future__ import annotations
+# 强制加载 .env 文件（解决不生效问题）
+from dotenv import load_dotenv
+import os
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 import json
 import sys
