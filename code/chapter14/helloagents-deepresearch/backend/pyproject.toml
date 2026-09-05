@@ -18,6 +18,7 @@ dependencies = [
     "uvicorn[standard]>=0.32.0",
     "ddgs>=9.6.1",
     "loguru>=0.7.3",
+    "huggingface-hub",
 ]
 
 [project.optional-dependencies]
@@ -31,7 +32,7 @@ build-backend = "setuptools.build_meta"
 packages = ["src"]
 
 [tool.setuptools.package-dir]
-"" = "src"
+"" = "."
 
 [tool.setuptools.package-data]
 "*" = ["py.typed"]
