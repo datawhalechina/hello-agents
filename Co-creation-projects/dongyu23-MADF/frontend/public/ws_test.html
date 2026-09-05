@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WS Test</title>
+</head>
+<body>
+    <h1>WebSocket Test</h1>
+    <div id="status">Disconnected</div>
+    <div id="log"></div>
+    <script>
+        const log = (msg) => {
+            const div = document.createElement('div');
+            div.textContent = msg;
+            document.getElementById('log').appendChild(div);
+            console.log(msg);
+        };
+
+        const wsUrl = 'ws://localhost:8000/api/v1/forums/1/ws';
+        log('Connecting to ' + wsUrl);
+
+        try {
+            const ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                document.getElementById('status').textContent = 'Connected';
+                log('Connected!');
+                ws.send('ping');
+            };
+
+            ws.onmessage = (e) => {
+                log('Received: ' + e.data);
+            };
+
+            ws.onclose = (e) => {
+                document.getElementById('status').textContent = 'Disconnected';
+                log('Closed: ' + e.code + ' ' + e.reason);
+            };
+
+            ws.onerror = (e) => {
+                log('Error: ' + JSON.stringify(e));
+            };
+        } catch (e) {
+            log('Exception: ' + e);
+        }
+    </script>
+</body>
+</html>

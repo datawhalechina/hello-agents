@@ -1,0 +1,48 @@
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "license": "CC-BY-NC-SA-4.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:unit": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "cypress open",
+    "lint": "eslint . --fix",
+    "type-check": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "@ant-design/icons-vue": "^7.0.1",
+    "ant-design-vue": "^4.2.6",
+    "axios": "^1.6.0",
+    "pinia": "^2.1.0",
+    "sass": "^1.69.0",
+    "vue": "^3.3.0",
+    "vue-i18n": "^9.0.0",
+    "vue-router": "^4.0.0"
+  },
+  "devDependencies": {
+    "@pinia/testing": "^0.1.0",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vitejs/plugin-vue": "^5.2.4",
+    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/ui": "^4.1.10",
+    "@vue/test-utils": "^2.4.0",
+    "@vue/tsconfig": "^0.5.0",
+    "cypress": "^15.20.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-vue": "^9.0.0",
+    "jsdom": "^24.0.0",
+    "msw": "^2.12.10",
+    "prettier": "^3.0.0",
+    "typescript": "~5.4.0",
+    "vite": "^6.4.3",
+    "vitest": "^4.1.10",
+    "vue-tsc": "^2.0.0"
+  }
+}
