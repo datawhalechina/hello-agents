@@ -1488,6 +1488,8 @@ def my_calculate(expression: str) -> str:
         ast.Sub: operator.sub,      # -
         ast.Mult: operator.mul,     # *
         ast.Div: operator.truediv,  # /
+        ast.USub: operator.neg,     # unary -
+        ast.UAdd: operator.pos,     # unary +
     }
 
     # Supported basic functions
@@ -1507,6 +1509,12 @@ def _eval_node(node, operators, functions):
     """Simplified expression evaluation"""
     if isinstance(node, ast.Constant):
         return node.value
+    elif isinstance(node, ast.UnaryOp):
+        operand = _eval_node(node.operand, operators, functions)
+        op = operators.get(type(node.op))
+        if op is None:
+            raise ValueError("Unsupported unary operator")
+        return op(operand)
     elif isinstance(node, ast.BinOp):
         left = _eval_node(node.left, operators, functions)
         right = _eval_node(node.right, operators, functions)
@@ -1555,17 +1563,21 @@ def test_calculator_tool():
 
     # Simple test cases
     test_cases = [
-        "2 + 3",           # Basic addition
-        "10 - 4",          # Basic subtraction
-        "5 * 6",           # Basic multiplication
-        "15 / 3",          # Basic division
-        "sqrt(16)",        # Square root
+        ("2 + 3", "5"),  # Basic addition
+        ("10 - 4", "6"),  # Basic subtraction
+        ("5 * 6", "30"),  # Basic multiplication
+        ("15 / 3", "5.0"),  # Basic division
+        ("sqrt(16)", "4.0"),  # Square root
+        ("-5 + 2", "-3"),  # Unary minus
+        ("+5 * 2", "10"),  # Unary plus
+        ("2 * -3", "-6"),  # Negative operand
     ]
 
-    for i, expression in enumerate(test_cases, 1):
+    for i, (expression, expected) in enumerate(test_cases, 1):
         print(f"Test {i}: {expression}")
         result = registry.execute_tool("my_calculator", expression)
         print(f"Result: {result}\n")
+        assert result == expected
 
 def test_with_simple_agent():
     """Test integration with SimpleAgent"""
@@ -2148,4 +2160,3 @@ Next, we will explore together how to add RAG systems and Memory mechanisms to t
    - First, add a "streaming output" feature to `HelloAgents` so that the `Agent` can return intermediate results in real-time when generating responses (similar to the typing effect in the `ChatGPT` user interface). Please design the implementation plan for this feature and explain which classes and methods need to be modified.
    - Then add a "multi-turn conversation management" feature to the framework that can automatically manage conversation history, support conversation branching and backtracking. How would you design this? What new classes are needed? How to integrate with the existing `Message` system?
    - Finally, please design a "plugin system" for `HelloAgents` that allows third-party developers to extend framework functionality through plugins (such as adding new `Agent` types, new tool types, etc.) without modifying the framework's core code. Draw the architecture diagram of the plugin system and explain the key interfaces.
-
