@@ -10,6 +10,7 @@ class SearchAPI(Enum):
     TAVILY = "tavily"
     DUCKDUCKGO = "duckduckgo"
     SEARXNG = "searxng"
+    KEENABLE = "keenable"
     ADVANCED = "advanced"
 
 
