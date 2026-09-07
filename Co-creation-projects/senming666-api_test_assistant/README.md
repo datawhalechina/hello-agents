@@ -47,6 +47,7 @@
 - **文档解析**：PyYAML + JSON（解析 OpenAPI 文档）
 - **结构校验**：jsonschema（校验响应体结构）
 - **报告渲染**：Jinja2（HTML 报告模板）
+- **容器化**：Docker（多阶段构建 Dockerfile：Node 编译前端 + Python 运行后端，本地部署已验证）
 
 ## 🚀 快速开始
 
@@ -102,21 +103,6 @@ python server.py
 jupyter lab
 # 打开 main.ipynb 并逐格运行
 ```
-
-**方式 4：Docker 容器化部署（可选，免装本地环境）**
-
-项目自带多阶段构建的 `Dockerfile`（Node 阶段编译前端 + Python 阶段运行后端），一条命令打成镜像：
-
-```bash
-docker build -t api-test-assistant .
-
-# 运行时把 .env 的密钥注入容器（密钥不进镜像，只在本机运行时读取）
-docker run -d --name api-test-assistant -p 8000:8000 --env-file .env api-test-assistant
-# 浏览器打开 http://localhost:8000
-```
-
-> 若目标后端也跑在 Docker 里，把本容器挂到同一网络，即可用「容器名」当地址去测它：
-> `docker network connect <网络名> api-test-assistant`，界面里目标地址填如 `http://chat-backend-1:8000`。
 
 ## 📖 使用示例
 
@@ -184,6 +170,9 @@ npm run dev                     # Vite 开发服务器在 5173（/api 自动代�
 ```
 senming666-api_test_assistant/
 ├── README.md                       # 项目说明（本文件）
+├── Dockerfile                      # 多阶段构建：Node 编译前端 + Python 运行后端
+├── .dockerignore                   # 构建镜像时排除本地无用文件
+├── .gitignore                      # Git 忽略规则
 ├── requirements.txt                # Python 运行依赖
 ├── requirements-dev.txt            # Python 开发依赖（pytest）
 ├── pytest.ini                      # pytest 配置
@@ -191,7 +180,7 @@ senming666-api_test_assistant/
 ├── main.ipynb                      # Jupyter 演示入口
 ├── server.py                       # FastAPI 服务，托管 Vue 构建产物
 ├── .env.example                    # LLM 配置模板（不含真实密钥）
-├── .env                            # 本地真实配置，不应提交到代码仓库
+├── .env                            # 本地真实配置，不应提交到代码仓库（仅本机使用）
 ├── api.yaml                        # 示例：被测目标文档（JSONPlaceholder）
 ├── httpbin.json                    # 示例：被测目标文档（httpbin.org）
 ├── openapi_service.yaml            # 本项目自身服务的 OpenAPI 文档
@@ -224,7 +213,10 @@ senming666-api_test_assistant/
 │   ├── test_validator_agent.py
 │   ├── test_reporter_agent.py
 │   ├── test_schema_validator.py
-│   └── test_http_client.py
+│   ├── test_http_client.py
+│   ├── test_server.py
+│   └── fixtures/
+│       └── chat_openapi.json       # 真实业务 OpenAPI 集成夹具
 └── src/                            # Python 核心源代码
     ├── __init__.py
     ├── config.py                   # 配置常量（超时/重试/并发等）
@@ -248,6 +240,7 @@ senming666-api_test_assistant/
 - **数据穿层设计**：用例在流水线中逐层包裹新字段（case → +result → +passed/errors），每层职责单一
 - **真实可跑**：不依赖 mock，直接对公网 API 发起真实请求，结果可信
 - **全栈完整**：后端（FastAPI）+ Vue3 前端 + 命令行 + Notebook 四种入口
+- **容器化（本地部署）**：已配备多阶段构建 Dockerfile（Node 编译前端 + Python 运行后端），并完成本地 Docker 部署验证
 
 ## 📊 性能评估
 
