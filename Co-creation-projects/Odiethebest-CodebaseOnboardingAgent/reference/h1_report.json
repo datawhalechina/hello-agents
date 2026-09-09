@@ -1,0 +1,2449 @@
+{
+  "provenance": {
+    "protocol": "strict-anchor-v2",
+    "evaluation_scope": "deterministic evidence retrieval; no LLM answers",
+    "python": "3.12.13",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "packages": {
+      "sentence-transformers": "5.1.2",
+      "torch": "2.8.0",
+      "transformers": "4.57.6",
+      "numpy": "2.2.6",
+      "rank-bm25": "0.2.2",
+      "pandas": "2.2.3"
+    },
+    "evaluation_sha256": "12175eb6cceb6c8ab0cf28322baadd0d77a59fe49c71961a0ea74712706f21fd",
+    "code_cells_sha256": "d5f5ae4d887e744381e7a69f236db3c5d679b3363c6b498cdb5f04e6a83e7629",
+    "embed_revision": "23d22ea4191fc9d006833d3b62694949f1ffebd1",
+    "device": "cpu",
+    "expansion": {
+      "budget": 14,
+      "seed_count": 6,
+      "rrf_weights": [
+        3,
+        1
+      ]
+    },
+    "max_expand": 12,
+    "corpus": "psf/requests@414f0513c33883adf6f2b46901d4f0b38a455851",
+    "n_files": 19,
+    "n_chunks": 320,
+    "questions_sha256": "e73b5af1803eb04206df9a0eaa80116ea1ab5e35dea4277748af350cd4aa42e6",
+    "embed_model": "flax-sentence-embeddings/st-codesearch-distilroberta-base",
+    "rrf": {
+      "K": 60,
+      "dense": 2.0,
+      "sparse": 1.0
+    },
+    "top_k": 5,
+    "decision_rule": {
+      "treatment": "B4",
+      "controls": [
+        "B2",
+        "B3"
+      ],
+      "strata": [
+        "L2",
+        "L3"
+      ],
+      "min_margin": 0.05,
+      "composite": [
+        "recall@5",
+        "mrr@5",
+        "ndcg@5"
+      ]
+    }
+  },
+  "query_expansion_sensitivity": [
+    {
+      "max_expand": 4,
+      "整体 composite": 0.6721
+    },
+    {
+      "max_expand": 8,
+      "整体 composite": 0.6961
+    },
+    {
+      "max_expand": 12,
+      "整体 composite": 0.6526
+    },
+    {
+      "max_expand": 20,
+      "整体 composite": 0.6562
+    }
+  ],
+  "overall": [
+    {
+      "臂": "B2",
+      "Recall@5": 0.5416666666666667,
+      "MRR@5": 0.6333333333333333,
+      "nDCG@5": 0.47709367151774523,
+      "composite": 0.550697890505915
+    },
+    {
+      "臂": "B3",
+      "Recall@5": 0.6116666666666666,
+      "MRR@5": 0.7166666666666667,
+      "nDCG@5": 0.5547666438469367,
+      "composite": 0.6276999923934233
+    },
+    {
+      "臂": "B4",
+      "Recall@5": 0.6366666666666666,
+      "MRR@5": 0.75,
+      "nDCG@5": 0.577393104084938,
+      "composite": 0.6546865902505349
+    },
+    {
+      "臂": "B3Q",
+      "Recall@5": 0.6616666666666666,
+      "MRR@5": 0.6616666666666666,
+      "nDCG@5": 0.5455832904153158,
+      "composite": 0.6229722079162163
+    },
+    {
+      "臂": "B3Qs",
+      "Recall@5": 0.6616666666666666,
+      "MRR@5": 0.725,
+      "nDCG@5": 0.5712356098156446,
+      "composite": 0.6526340921607704
+    },
+    {
+      "臂": "B4Qs",
+      "Recall@5": 0.5866666666666667,
+      "MRR@5": 0.75,
+      "nDCG@5": 0.5371272115925272,
+      "composite": 0.6245979594197314
+    }
+  ],
+  "per_stratum": [
+    {
+      "层级": "L2",
+      "题数": 5,
+      "B2": 0.6298149364510982,
+      "B3": 0.6591804667169943,
+      "B4": 0.6295287087262446,
+      "B3Q": 0.6931196999268704,
+      "B3Qs": 0.7461885516933883,
+      "B4Qs": 0.5854914806126695,
+      "B4−B2": -0.00028622772485364933,
+      "B4−B3": -0.029651757990749705
+    },
+    {
+      "层级": "L3",
+      "题数": 3,
+      "B2": 0.345494397945132,
+      "B3": 0.4235958908307033,
+      "B4": 0.5629708136723247,
+      "B3Q": 0.4117242145943216,
+      "B3Qs": 0.4117242145943216,
+      "B4Qs": 0.6326341184732202,
+      "B4−B2": 0.21747641572719273,
+      "B4−B3": 0.1393749228416214
+    }
+  ],
+  "decision_checks": [
+    {
+      "stratum": "L2",
+      "comparison": "B4 vs B2",
+      "margin": -0.00028622772485364933,
+      "threshold": 0.05,
+      "passed": false
+    },
+    {
+      "stratum": "L2",
+      "comparison": "B4 vs B3",
+      "margin": -0.029651757990749705,
+      "threshold": 0.05,
+      "passed": false
+    },
+    {
+      "stratum": "L3",
+      "comparison": "B4 vs B2",
+      "margin": 0.21747641572719273,
+      "threshold": 0.05,
+      "passed": true
+    },
+    {
+      "stratum": "L3",
+      "comparison": "B4 vs B3",
+      "margin": 0.1393749228416214,
+      "threshold": 0.05,
+      "passed": true
+    }
+  ],
+  "verdict": "unsupported",
+  "passed": "2/4",
+  "per_question": [
+    {
+      "id": "q01",
+      "taxonomy": "L1",
+      "source": "manual",
+      "B2": {
+        "recall@5": 1.0,
+        "mrr@5": 0.3333333333333333,
+        "ndcg@5": 0.5,
+        "top": [
+          {
+            "id": "auth.py#5",
+            "file": "auth.py",
+            "symbol": "HTTPBasicAuth",
+            "start_line": 85
+          },
+          {
+            "id": "auth.py#19",
+            "file": "auth.py",
+            "symbol": "build_digest_header",
+            "start_line": 157
+          },
+          {
+            "id": "auth.py#2",
+            "file": "auth.py",
+            "symbol": "_basic_auth_str",
+            "start_line": 34
+          },
+          {
+            "id": "auth.py#14",
+            "file": "auth.py",
+            "symbol": "HTTPDigestAuth",
+            "start_line": 124
+          },
+          {
+            "id": "auth.py#12",
+            "file": "auth.py",
+            "symbol": "HTTPProxyAuth",
+            "start_line": 116
+          }
+        ]
+      },
+      "B3": {
+        "recall@5": 1.0,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.6309297535714575,
+        "top": [
+          {
+            "id": "auth.py#5",
+            "file": "auth.py",
+            "symbol": "HTTPBasicAuth",
+            "start_line": 85
+          },
+          {
+            "id": "auth.py#2",
+            "file": "auth.py",
+            "symbol": "_basic_auth_str",
+            "start_line": 34
+          },
+          {
+            "id": "auth.py#14",
+            "file": "auth.py",
+            "symbol": "HTTPDigestAuth",
+            "start_line": 124
+          },
+          {
+            "id": "auth.py#12",
+            "file": "auth.py",
+            "symbol": "HTTPProxyAuth",
+            "start_line": 116
+          },
+          {
+            "id": "utils.py#41",
+            "file": "utils.py",
+            "symbol": "get_auth_from_url",
+            "start_line": 1070
+          }
+        ]
+      },
+      "B4": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0,
+        "top": [
+          {
+            "id": "auth.py#2",
+            "file": "auth.py",
+            "symbol": "_basic_auth_str",
+            "start_line": 34
+          },
+          {
+            "id": "auth.py#19",
+            "file": "auth.py",
+            "symbol": "build_digest_header",
+            "start_line": 157
+          },
+          {
+            "id": "models.py#29",
+            "file": "models.py",
+            "symbol": "prepare_cookies",
+            "start_line": 699
+          },
+          {
+            "id": "auth.py#5",
+            "file": "auth.py",
+            "symbol": "HTTPBasicAuth",
+            "start_line": 85
+          },
+          {
+            "id": "auth.py#14",
+            "file": "auth.py",
+            "symbol": "HTTPDigestAuth",
+            "start_line": 124
+          }
+        ]
+      },
+      "B3Q": {
+        "recall@5": 1.0,
+        "mrr@5": 0.2,
+        "ndcg@5": 0.38685280723454163,
+        "top": [
+          {
+            "id": "models.py#25",
+            "file": "models.py",
+            "symbol": "prepare_headers",
+            "start_line": 565
+          },
+          {
+            "id": "auth.py#19",
+            "file": "auth.py",
+            "symbol": "build_digest_header",
+            "start_line": 157
+          },
+          {
+            "id": "auth.py#14",
+            "file": "auth.py",
+            "symbol": "HTTPDigestAuth",
+            "start_line": 124
+          },
+          {
+            "id": "auth.py#5",
+            "file": "auth.py",
+            "symbol": "HTTPBasicAuth",
+            "start_line": 85
+          },
+          {
+            "id": "auth.py#2",
+            "file": "auth.py",
+            "symbol": "_basic_auth_str",
+            "start_line": 34
+          }
+        ]
+      },
+      "B3Qs": {
+        "recall@5": 1.0,
+        "mrr@5": 0.25,
+        "ndcg@5": 0.43067655807339306,
+        "top": [
+          {
+            "id": "auth.py#14",
+            "file": "auth.py",
+            "symbol": "HTTPDigestAuth",
+            "start_line": 124
+          },
+          {
+            "id": "auth.py#19",
+            "file": "auth.py",
+            "symbol": "build_digest_header",
+            "start_line": 157
+          },
+          {
+            "id": "auth.py#5",
+            "file": "auth.py",
+            "symbol": "HTTPBasicAuth",
+            "start_line": 85
+          },
+          {
+            "id": "auth.py#2",
+            "file": "auth.py",
+            "symbol": "_basic_auth_str",
+            "start_line": 34
+          },
+          {
+            "id": "utils.py#41",
+            "file": "utils.py",
+            "symbol": "get_auth_from_url",
+            "start_line": 1070
+          }
+        ]
+      },
+      "B4Qs": {
+        "recall@5": 1.0,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.6309297535714575,
+        "top": [
+          {
+            "id": "auth.py#19",
+            "file": "auth.py",
+            "symbol": "build_digest_header",
+            "start_line": 157
+          },
+          {
+            "id": "auth.py#2",
+            "file": "auth.py",
+            "symbol": "_basic_auth_str",
+            "start_line": 34
+          },
+          {
+            "id": "models.py#29",
+            "file": "models.py",
+            "symbol": "prepare_cookies",
+            "start_line": 699
+          },
+          {
+            "id": "auth.py#14",
+            "file": "auth.py",
+            "symbol": "HTTPDigestAuth",
+            "start_line": 124
+          },
+          {
+            "id": "auth.py#5",
+            "file": "auth.py",
+            "symbol": "HTTPBasicAuth",
+            "start_line": 85
+          }
+        ]
+      }
+    },
+    {
+      "id": "q02",
+      "taxonomy": "L1",
+      "source": "manual",
+      "B2": {
+        "recall@5": 1.0,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.6309297535714575,
+        "top": [
+          {
+            "id": "exceptions.py#23",
+            "file": "exceptions.py",
+            "symbol": "ContentDecodingError",
+            "start_line": 134
+          },
+          {
+            "id": "utils.py#19",
+            "file": "utils.py",
+            "symbol": "get_encoding_from_headers",
+            "start_line": 569
+          },
+          {
+            "id": "utils.py#37",
+            "file": "utils.py",
+            "symbol": "default_headers",
+            "start_line": 951
+          },
+          {
+            "id": "utils.py#18",
+            "file": "utils.py",
+            "symbol": "_parse_content_type_header",
+            "start_line": 547
+          },
+          {
+            "id": "models.py#53",
+            "file": "models.py",
+            "symbol": "text",
+            "start_line": 1054
+          }
+        ]
+      },
+      "B3": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0,
+        "top": [
+          {
+            "id": "utils.py#19",
+            "file": "utils.py",
+            "symbol": "get_encoding_from_headers",
+            "start_line": 569
+          },
+          {
+            "id": "models.py#53",
+            "file": "models.py",
+            "symbol": "text",
+            "start_line": 1054
+          },
+          {
+            "id": "utils.py#24",
+            "file": "utils.py",
+            "symbol": "get_unicode_from_response",
+            "start_line": 633
+          },
+          {
+            "id": "utils.py#18",
+            "file": "utils.py",
+            "symbol": "_parse_content_type_header",
+            "start_line": 547
+          },
+          {
+            "id": "models.py#17",
+            "file": "models.py",
+            "symbol": "PreparedRequest",
+            "start_line": 378
+          }
+        ]
+      },
+      "B4": {
+        "recall@5": 1.0,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.6309297535714575,
+        "top": [
+          {
+            "id": "models.py#53",
+            "file": "models.py",
+            "symbol": "text",
+            "start_line": 1054
+          },
+          {
+            "id": "utils.py#19",
+            "file": "utils.py",
+            "symbol": "get_encoding_from_headers",
+            "start_line": 569
+          },
+          {
+            "id": "utils.py#18",
+            "file": "utils.py",
+            "symbol": "_parse_content_type_header",
+            "start_line": 547
+          },
+          {
+            "id": "models.py#17",
+            "file": "models.py",
+            "symbol": "PreparedRequest",
+            "start_line": 378
+          },
+          {
+            "id": "models.py#25",
+            "file": "models.py",
+            "symbol": "prepare_headers",
+            "start_line": 565
+          }
+        ]
+      },
+      "B3Q": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0,
+        "top": [
+          {
+            "id": "utils.py#19",
+            "file": "utils.py",
+            "symbol": "get_encoding_from_headers",
+            "start_line": 569
+          },
+          {
+            "id": "utils.py#17",
+            "file": "utils.py",
+            "symbol": "get_encodings_from_content",
+            "start_line": 522
+          },
+          {
+            "id": "utils.py#24",
+            "file": "utils.py",
+            "symbol": "get_unicode_from_response",
+            "start_line": 633
+          },
+          {
+            "id": "utils.py#18",
+            "file": "utils.py",
+            "symbol": "_parse_content_type_header",
+            "start_line": 547
+          },
+          {
+            "id": "models.py#53",
+            "file": "models.py",
+            "symbol": "text",
+            "start_line": 1054
+          }
+        ]
+      },
+      "B3Qs": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 1.0,
+        "top": [
+          {
+            "id": "utils.py#19",
+            "file": "utils.py",
+            "symbol": "get_encoding_from_headers",
+            "start_line": 569
+          },
+          {
+            "id": "models.py#53",
+            "file": "models.py",
+            "symbol": "text",
+            "start_line": 1054
+          },
+          {
+            "id": "utils.py#17",
+            "file": "utils.py",
+            "symbol": "get_encodings_from_content",
+            "start_line": 522
+          },
+          {
+            "id": "utils.py#18",
+            "file": "utils.py",
+            "symbol": "_parse_content_type_header",
+            "start_line": 547
+          },
+          {
+            "id": "utils.py#24",
+            "file": "utils.py",
+            "symbol": "get_unicode_from_response",
+            "start_line": 633
+          }
+        ]
+      },
+      "B4Qs": {
+        "recall@5": 1.0,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.6309297535714575,
+        "top": [
+          {
+            "id": "models.py#53",
+            "file": "models.py",
+            "symbol": "text",
+            "start_line": 1054
+          },
+          {
+            "id": "utils.py#19",
+            "file": "utils.py",
+            "symbol": "get_encoding_from_headers",
+            "start_line": 569
+          },
+          {
+            "id": "utils.py#18",
+            "file": "utils.py",
+            "symbol": "_parse_content_type_header",
+            "start_line": 547
+          },
+          {
+            "id": "utils.py#17",
+            "file": "utils.py",
+            "symbol": "get_encodings_from_content",
+            "start_line": 522
+          },
+          {
+            "id": "utils.py#24",
+            "file": "utils.py",
+            "symbol": "get_unicode_from_response",
+            "start_line": 633
+          }
+        ]
+      }
+    },
+    {
+      "id": "q03",
+      "taxonomy": "L2",
+      "source": "manual",
+      "B2": {
+        "recall@5": 0.6666666666666666,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.7039180890341347,
+        "top": [
+          {
+            "id": "auth.py#5",
+            "file": "auth.py",
+            "symbol": "HTTPBasicAuth",
+            "start_line": 85
+          },
+          {
+            "id": "_types.py#7",
+            "file": "_types.py",
+            "symbol": "is_prepared",
+            "start_line": 47
+          },
+          {
+            "id": "models.py#28",
+            "file": "models.py",
+            "symbol": "prepare_auth",
+            "start_line": 670
+          },
+          {
+            "id": "auth.py#11",
+            "file": "auth.py",
+            "symbol": "__call__",
+            "start_line": 111
+          },
+          {
+            "id": "sessions.py#7",
+            "file": "sessions.py",
+            "symbol": "should_strip_auth",
+            "start_line": 154
+          }
+        ]
+      },
+      "B3": {
+        "recall@5": 0.6666666666666666,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.7039180890341347,
+        "top": [
+          {
+            "id": "auth.py#5",
+            "file": "auth.py",
+            "symbol": "HTTPBasicAuth",
+            "start_line": 85
+          },
+          {
+            "id": "auth.py#11",
+            "file": "auth.py",
+            "symbol": "__call__",
+            "start_line": 111
+          },
+          {
+            "id": "models.py#28",
+            "file": "models.py",
+            "symbol": "prepare_auth",
+            "start_line": 670
+          },
+          {
+            "id": "auth.py#12",
+            "file": "auth.py",
+            "symbol": "HTTPProxyAuth",
+            "start_line": 116
+          },
+          {
+            "id": "auth.py#13",
+            "file": "auth.py",
+            "symbol": "__call__",
+            "start_line": 119
+          }
+        ]
+      },
+      "B4": {
+        "recall@5": 0.6666666666666666,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.7653606369886217,
+        "top": [
+          {
+            "id": "auth.py#5",
+            "file": "auth.py",
+            "symbol": "HTTPBasicAuth",
+            "start_line": 85
+          },
+          {
+            "id": "auth.py#2",
+            "file": "auth.py",
+            "symbol": "_basic_auth_str",
+            "start_line": 34
+          },
+          {
+            "id": "sessions.py#17",
+            "file": "sessions.py",
+            "symbol": "request",
+            "start_line": 557
+          },
+          {
+            "id": "utils.py#41",
+            "file": "utils.py",
+            "symbol": "get_auth_from_url",
+            "start_line": 1070
+          },
+          {
+            "id": "auth.py#11",
+            "file": "auth.py",
+            "symbol": "__call__",
+            "start_line": 111
+          }
+        ]
+      },
+      "B3Q": {
+        "recall@5": 0.6666666666666666,
+        "mrr@5": 0.3333333333333333,
+        "ndcg@5": 0.41618115554873086,
+        "top": [
+          {
+            "id": "auth.py#11",
+            "file": "auth.py",
+            "symbol": "__call__",
+            "start_line": 111
+          },
+          {
+            "id": "auth.py#13",
+            "file": "auth.py",
+            "symbol": "__call__",
+            "start_line": 119
+          },
+          {
+            "id": "auth.py#5",
+            "file": "auth.py",
+            "symbol": "HTTPBasicAuth",
+            "start_line": 85
+          },
+          {
+            "id": "auth.py#12",
+            "file": "auth.py",
+            "symbol": "HTTPProxyAuth",
+            "start_line": 116
+          },
+          {
+            "id": "models.py#28",
+            "file": "models.py",
+            "symbol": "prepare_auth",
+            "start_line": 670
+          }
+        ]
+      },
+      "B3Qs": {
+        "recall@5": 0.6666666666666666,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6713860725233041,
+        "top": [
+          {
+            "id": "auth.py#5",
+            "file": "auth.py",
+            "symbol": "HTTPBasicAuth",
+            "start_line": 85
+          },
+          {
+            "id": "auth.py#11",
+            "file": "auth.py",
+            "symbol": "__call__",
+            "start_line": 111
+          },
+          {
+            "id": "auth.py#13",
+            "file": "auth.py",
+            "symbol": "__call__",
+            "start_line": 119
+          },
+          {
+            "id": "models.py#28",
+            "file": "models.py",
+            "symbol": "prepare_auth",
+            "start_line": 670
+          },
+          {
+            "id": "auth.py#12",
+            "file": "auth.py",
+            "symbol": "HTTPProxyAuth",
+            "start_line": 116
+          }
+        ]
+      },
+      "B4Qs": {
+        "recall@5": 0.6666666666666666,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.7653606369886217,
+        "top": [
+          {
+            "id": "auth.py#5",
+            "file": "auth.py",
+            "symbol": "HTTPBasicAuth",
+            "start_line": 85
+          },
+          {
+            "id": "auth.py#2",
+            "file": "auth.py",
+            "symbol": "_basic_auth_str",
+            "start_line": 34
+          },
+          {
+            "id": "sessions.py#17",
+            "file": "sessions.py",
+            "symbol": "request",
+            "start_line": 557
+          },
+          {
+            "id": "utils.py#41",
+            "file": "utils.py",
+            "symbol": "get_auth_from_url",
+            "start_line": 1070
+          },
+          {
+            "id": "auth.py#11",
+            "file": "auth.py",
+            "symbol": "__call__",
+            "start_line": 111
+          }
+        ]
+      }
+    },
+    {
+      "id": "q04",
+      "taxonomy": "L2",
+      "source": "manual",
+      "B2": {
+        "recall@5": 0.0,
+        "mrr@5": 0.0,
+        "ndcg@5": 0.0,
+        "top": [
+          {
+            "id": "sessions.py#7",
+            "file": "sessions.py",
+            "symbol": "should_strip_auth",
+            "start_line": 154
+          },
+          {
+            "id": "auth.py#20",
+            "file": "auth.py",
+            "symbol": "handle_redirect",
+            "start_line": 268
+          },
+          {
+            "id": "sessions.py#4",
+            "file": "sessions.py",
+            "symbol": "SessionRedirectMixin",
+            "start_line": 127
+          },
+          {
+            "id": "auth.py#21",
+            "file": "auth.py",
+            "symbol": "handle_401",
+            "start_line": 273
+          },
+          {
+            "id": "auth.py#12",
+            "file": "auth.py",
+            "symbol": "HTTPProxyAuth",
+            "start_line": 116
+          }
+        ]
+      },
+      "B3": {
+        "recall@5": 0.5,
+        "mrr@5": 0.3333333333333333,
+        "ndcg@5": 0.3065735963827292,
+        "top": [
+          {
+            "id": "sessions.py#7",
+            "file": "sessions.py",
+            "symbol": "should_strip_auth",
+            "start_line": 154
+          },
+          {
+            "id": "sessions.py#4",
+            "file": "sessions.py",
+            "symbol": "SessionRedirectMixin",
+            "start_line": 127
+          },
+          {
+            "id": "sessions.py#9",
+            "file": "sessions.py",
+            "symbol": "rebuild_auth",
+            "start_line": 309
+          },
+          {
+            "id": "utils.py#32",
+            "file": "utils.py",
+            "symbol": "should_bypass_proxies",
+            "start_line": 810
+          },
+          {
+            "id": "models.py#42",
+            "file": "models.py",
+            "symbol": "is_redirect",
+            "start_line": 877
+          }
+        ]
+      },
+      "B4": {
+        "recall@5": 0.5,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.38685280723454163,
+        "top": [
+          {
+            "id": "sessions.py#7",
+            "file": "sessions.py",
+            "symbol": "should_strip_auth",
+            "start_line": 154
+          },
+          {
+            "id": "sessions.py#9",
+            "file": "sessions.py",
+            "symbol": "rebuild_auth",
+            "start_line": 309
+          },
+          {
+            "id": "sessions.py#6",
+            "file": "sessions.py",
+            "symbol": "get_redirect_target",
+            "start_line": 134
+          },
+          {
+            "id": "sessions.py#12",
+            "file": "sessions.py",
+            "symbol": "Session",
+            "start_line": 395
+          },
+          {
+            "id": "utils.py#45",
+            "file": "utils.py",
+            "symbol": "rewind_body",
+            "start_line": 1139
+          }
+        ]
+      },
+      "B3Q": {
+        "recall@5": 1.0,
+        "mrr@5": 0.3333333333333333,
+        "ndcg@5": 0.5437713091520254,
+        "top": [
+          {
+            "id": "sessions.py#7",
+            "file": "sessions.py",
+            "symbol": "should_strip_auth",
+            "start_line": 154
+          },
+          {
+            "id": "sessions.py#4",
+            "file": "sessions.py",
+            "symbol": "SessionRedirectMixin",
+            "start_line": 127
+          },
+          {
+            "id": "sessions.py#9",
+            "file": "sessions.py",
+            "symbol": "rebuild_auth",
+            "start_line": 309
+          },
+          {
+            "id": "models.py#42",
+            "file": "models.py",
+            "symbol": "is_redirect",
+            "start_line": 877
+          },
+          {
+            "id": "sessions.py#8",
+            "file": "sessions.py",
+            "symbol": "resolve_redirects",
+            "start_line": 186
+          }
+        ]
+      },
+      "B3Qs": {
+        "recall@5": 1.0,
+        "mrr@5": 0.25,
+        "ndcg@5": 0.5012658353418871,
+        "top": [
+          {
+            "id": "sessions.py#7",
+            "file": "sessions.py",
+            "symbol": "should_strip_auth",
+            "start_line": 154
+          },
+          {
+            "id": "sessions.py#4",
+            "file": "sessions.py",
+            "symbol": "SessionRedirectMixin",
+            "start_line": 127
+          },
+          {
+            "id": "models.py#42",
+            "file": "models.py",
+            "symbol": "is_redirect",
+            "start_line": 877
+          },
+          {
+            "id": "sessions.py#8",
+            "file": "sessions.py",
+            "symbol": "resolve_redirects",
+            "start_line": 186
+          },
+          {
+            "id": "sessions.py#9",
+            "file": "sessions.py",
+            "symbol": "rebuild_auth",
+            "start_line": 309
+          }
+        ]
+      },
+      "B4Qs": {
+        "recall@5": 0.5,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.38685280723454163,
+        "top": [
+          {
+            "id": "sessions.py#7",
+            "file": "sessions.py",
+            "symbol": "should_strip_auth",
+            "start_line": 154
+          },
+          {
+            "id": "sessions.py#9",
+            "file": "sessions.py",
+            "symbol": "rebuild_auth",
+            "start_line": 309
+          },
+          {
+            "id": "sessions.py#6",
+            "file": "sessions.py",
+            "symbol": "get_redirect_target",
+            "start_line": 134
+          },
+          {
+            "id": "sessions.py#12",
+            "file": "sessions.py",
+            "symbol": "Session",
+            "start_line": 395
+          },
+          {
+            "id": "exceptions.py#16",
+            "file": "exceptions.py",
+            "symbol": "TooManyRedirects",
+            "start_line": 106
+          }
+        ]
+      }
+    },
+    {
+      "id": "q05",
+      "taxonomy": "L2",
+      "source": "graph_reverse",
+      "B2": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6131471927654584,
+        "top": [
+          {
+            "id": "cookies.py#21",
+            "file": "cookies.py",
+            "symbol": "extract_cookies_to_jar",
+            "start_line": 135
+          },
+          {
+            "id": "cookies.py#1",
+            "file": "cookies.py",
+            "symbol": "cookies",
+            "start_line": 1
+          },
+          {
+            "id": "cookies.py#51",
+            "file": "cookies.py",
+            "symbol": "_copy_cookie_jar",
+            "start_line": 479
+          },
+          {
+            "id": "models.py#29",
+            "file": "models.py",
+            "symbol": "prepare_cookies",
+            "start_line": 699
+          },
+          {
+            "id": "cookies.py#57",
+            "file": "cookies.py",
+            "symbol": "merge_cookies",
+            "start_line": 604
+          }
+        ]
+      },
+      "B3": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6131471927654584,
+        "top": [
+          {
+            "id": "cookies.py#21",
+            "file": "cookies.py",
+            "symbol": "extract_cookies_to_jar",
+            "start_line": 135
+          },
+          {
+            "id": "cookies.py#57",
+            "file": "cookies.py",
+            "symbol": "merge_cookies",
+            "start_line": 604
+          },
+          {
+            "id": "cookies.py#25",
+            "file": "cookies.py",
+            "symbol": "RequestsCookieJar",
+            "start_line": 191
+          },
+          {
+            "id": "models.py#29",
+            "file": "models.py",
+            "symbol": "prepare_cookies",
+            "start_line": 699
+          },
+          {
+            "id": "cookies.py#36",
+            "file": "cookies.py",
+            "symbol": "multiple_domains",
+            "start_line": 318
+          }
+        ]
+      },
+      "B4": {
+        "recall@5": 0.5,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.38685280723454163,
+        "top": [
+          {
+            "id": "cookies.py#25",
+            "file": "cookies.py",
+            "symbol": "RequestsCookieJar",
+            "start_line": 191
+          },
+          {
+            "id": "cookies.py#21",
+            "file": "cookies.py",
+            "symbol": "extract_cookies_to_jar",
+            "start_line": 135
+          },
+          {
+            "id": "cookies.py#2",
+            "file": "cookies.py",
+            "symbol": "MockRequest",
+            "start_line": 31
+          },
+          {
+            "id": "cookies.py#30",
+            "file": "cookies.py",
+            "symbol": "itervalues",
+            "start_line": 267
+          },
+          {
+            "id": "cookies.py#57",
+            "file": "cookies.py",
+            "symbol": "merge_cookies",
+            "start_line": 604
+          }
+        ]
+      },
+      "B3Q": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6131471927654584,
+        "top": [
+          {
+            "id": "cookies.py#21",
+            "file": "cookies.py",
+            "symbol": "extract_cookies_to_jar",
+            "start_line": 135
+          },
+          {
+            "id": "cookies.py#25",
+            "file": "cookies.py",
+            "symbol": "RequestsCookieJar",
+            "start_line": 191
+          },
+          {
+            "id": "cookies.py#57",
+            "file": "cookies.py",
+            "symbol": "merge_cookies",
+            "start_line": 604
+          },
+          {
+            "id": "cookies.py#51",
+            "file": "cookies.py",
+            "symbol": "_copy_cookie_jar",
+            "start_line": 479
+          },
+          {
+            "id": "cookies.py#55",
+            "file": "cookies.py",
+            "symbol": "cookiejar_from_dict",
+            "start_line": 572
+          }
+        ]
+      },
+      "B3Qs": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6131471927654584,
+        "top": [
+          {
+            "id": "cookies.py#21",
+            "file": "cookies.py",
+            "symbol": "extract_cookies_to_jar",
+            "start_line": 135
+          },
+          {
+            "id": "cookies.py#57",
+            "file": "cookies.py",
+            "symbol": "merge_cookies",
+            "start_line": 604
+          },
+          {
+            "id": "models.py#29",
+            "file": "models.py",
+            "symbol": "prepare_cookies",
+            "start_line": 699
+          },
+          {
+            "id": "cookies.py#51",
+            "file": "cookies.py",
+            "symbol": "_copy_cookie_jar",
+            "start_line": 479
+          },
+          {
+            "id": "cookies.py#25",
+            "file": "cookies.py",
+            "symbol": "RequestsCookieJar",
+            "start_line": 191
+          }
+        ]
+      },
+      "B4Qs": {
+        "recall@5": 0.0,
+        "mrr@5": 0.0,
+        "ndcg@5": 0.0,
+        "top": [
+          {
+            "id": "cookies.py#25",
+            "file": "cookies.py",
+            "symbol": "RequestsCookieJar",
+            "start_line": 191
+          },
+          {
+            "id": "cookies.py#55",
+            "file": "cookies.py",
+            "symbol": "cookiejar_from_dict",
+            "start_line": 572
+          },
+          {
+            "id": "cookies.py#38",
+            "file": "cookies.py",
+            "symbol": "__iter__",
+            "start_line": 348
+          },
+          {
+            "id": "cookies.py#54",
+            "file": "cookies.py",
+            "symbol": "cookiejar_from_dict",
+            "start_line": 564
+          },
+          {
+            "id": "cookies.py#22",
+            "file": "cookies.py",
+            "symbol": "get_cookie_header",
+            "start_line": 153
+          }
+        ]
+      }
+    },
+    {
+      "id": "q06",
+      "taxonomy": "L2",
+      "source": "graph_reverse",
+      "B2": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6131471927654584,
+        "top": [
+          {
+            "id": "utils.py#32",
+            "file": "utils.py",
+            "symbol": "should_bypass_proxies",
+            "start_line": 810
+          },
+          {
+            "id": "utils.py#34",
+            "file": "utils.py",
+            "symbol": "select_proxy",
+            "start_line": 885
+          },
+          {
+            "id": "exceptions.py#21",
+            "file": "exceptions.py",
+            "symbol": "InvalidProxyURL",
+            "start_line": 126
+          },
+          {
+            "id": "auth.py#12",
+            "file": "auth.py",
+            "symbol": "HTTPProxyAuth",
+            "start_line": 116
+          },
+          {
+            "id": "utils.py#35",
+            "file": "utils.py",
+            "symbol": "resolve_proxies",
+            "start_line": 911
+          }
+        ]
+      },
+      "B3": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6131471927654584,
+        "top": [
+          {
+            "id": "utils.py#32",
+            "file": "utils.py",
+            "symbol": "should_bypass_proxies",
+            "start_line": 810
+          },
+          {
+            "id": "sessions.py#7",
+            "file": "sessions.py",
+            "symbol": "should_strip_auth",
+            "start_line": 154
+          },
+          {
+            "id": "utils.py#35",
+            "file": "utils.py",
+            "symbol": "resolve_proxies",
+            "start_line": 911
+          },
+          {
+            "id": "utils.py#34",
+            "file": "utils.py",
+            "symbol": "select_proxy",
+            "start_line": 885
+          },
+          {
+            "id": "adapters.py#21",
+            "file": "adapters.py",
+            "symbol": "proxy_headers",
+            "start_line": 613
+          }
+        ]
+      },
+      "B4": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6131471927654584,
+        "top": [
+          {
+            "id": "utils.py#32",
+            "file": "utils.py",
+            "symbol": "should_bypass_proxies",
+            "start_line": 810
+          },
+          {
+            "id": "utils.py#34",
+            "file": "utils.py",
+            "symbol": "select_proxy",
+            "start_line": 885
+          },
+          {
+            "id": "utils.py#33",
+            "file": "utils.py",
+            "symbol": "get_environ_proxies",
+            "start_line": 873
+          },
+          {
+            "id": "utils.py#44",
+            "file": "utils.py",
+            "symbol": "urldefragauth",
+            "start_line": 1122
+          },
+          {
+            "id": "utils.py#41",
+            "file": "utils.py",
+            "symbol": "get_auth_from_url",
+            "start_line": 1070
+          }
+        ]
+      },
+      "B3Q": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6131471927654584,
+        "top": [
+          {
+            "id": "utils.py#32",
+            "file": "utils.py",
+            "symbol": "should_bypass_proxies",
+            "start_line": 810
+          },
+          {
+            "id": "utils.py#35",
+            "file": "utils.py",
+            "symbol": "resolve_proxies",
+            "start_line": 911
+          },
+          {
+            "id": "exceptions.py#21",
+            "file": "exceptions.py",
+            "symbol": "InvalidProxyURL",
+            "start_line": 126
+          },
+          {
+            "id": "utils.py#34",
+            "file": "utils.py",
+            "symbol": "select_proxy",
+            "start_line": 885
+          },
+          {
+            "id": "adapters.py#12",
+            "file": "adapters.py",
+            "symbol": "proxy_manager_for",
+            "start_line": 269
+          }
+        ]
+      },
+      "B3Qs": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6131471927654584,
+        "top": [
+          {
+            "id": "utils.py#32",
+            "file": "utils.py",
+            "symbol": "should_bypass_proxies",
+            "start_line": 810
+          },
+          {
+            "id": "utils.py#35",
+            "file": "utils.py",
+            "symbol": "resolve_proxies",
+            "start_line": 911
+          },
+          {
+            "id": "utils.py#34",
+            "file": "utils.py",
+            "symbol": "select_proxy",
+            "start_line": 885
+          },
+          {
+            "id": "exceptions.py#21",
+            "file": "exceptions.py",
+            "symbol": "InvalidProxyURL",
+            "start_line": 126
+          },
+          {
+            "id": "adapters.py#19",
+            "file": "adapters.py",
+            "symbol": "request_url",
+            "start_line": 565
+          }
+        ]
+      },
+      "B4Qs": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6131471927654584,
+        "top": [
+          {
+            "id": "utils.py#32",
+            "file": "utils.py",
+            "symbol": "should_bypass_proxies",
+            "start_line": 810
+          },
+          {
+            "id": "utils.py#34",
+            "file": "utils.py",
+            "symbol": "select_proxy",
+            "start_line": 885
+          },
+          {
+            "id": "utils.py#33",
+            "file": "utils.py",
+            "symbol": "get_environ_proxies",
+            "start_line": 873
+          },
+          {
+            "id": "utils.py#30",
+            "file": "utils.py",
+            "symbol": "is_valid_cidr",
+            "start_line": 763
+          },
+          {
+            "id": "utils.py#35",
+            "file": "utils.py",
+            "symbol": "resolve_proxies",
+            "start_line": 911
+          }
+        ]
+      }
+    },
+    {
+      "id": "q07",
+      "taxonomy": "L2",
+      "source": "graph_reverse",
+      "B2": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8503449055347546,
+        "top": [
+          {
+            "id": "adapters.py#13",
+            "file": "adapters.py",
+            "symbol": "cert_verify",
+            "start_line": 307
+          },
+          {
+            "id": "adapters.py#16",
+            "file": "adapters.py",
+            "symbol": "get_connection_with_tls_context",
+            "start_line": 455
+          },
+          {
+            "id": "auth.py#12",
+            "file": "auth.py",
+            "symbol": "HTTPProxyAuth",
+            "start_line": 116
+          },
+          {
+            "id": "adapters.py#5",
+            "file": "adapters.py",
+            "symbol": "send",
+            "start_line": 128
+          },
+          {
+            "id": "adapters.py#22",
+            "file": "adapters.py",
+            "symbol": "send",
+            "start_line": 634
+          }
+        ]
+      },
+      "B3": {
+        "recall@5": 1.0,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.6509209298071326,
+        "top": [
+          {
+            "id": "adapters.py#16",
+            "file": "adapters.py",
+            "symbol": "get_connection_with_tls_context",
+            "start_line": 455
+          },
+          {
+            "id": "adapters.py#13",
+            "file": "adapters.py",
+            "symbol": "cert_verify",
+            "start_line": 307
+          },
+          {
+            "id": "adapters.py#5",
+            "file": "adapters.py",
+            "symbol": "send",
+            "start_line": 128
+          },
+          {
+            "id": "adapters.py#22",
+            "file": "adapters.py",
+            "symbol": "send",
+            "start_line": 634
+          },
+          {
+            "id": "sessions.py#17",
+            "file": "sessions.py",
+            "symbol": "request",
+            "start_line": 557
+          }
+        ]
+      },
+      "B4": {
+        "recall@5": 1.0,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.6240505200038379,
+        "top": [
+          {
+            "id": "adapters.py#16",
+            "file": "adapters.py",
+            "symbol": "get_connection_with_tls_context",
+            "start_line": 455
+          },
+          {
+            "id": "adapters.py#13",
+            "file": "adapters.py",
+            "symbol": "cert_verify",
+            "start_line": 307
+          },
+          {
+            "id": "sessions.py#17",
+            "file": "sessions.py",
+            "symbol": "request",
+            "start_line": 557
+          },
+          {
+            "id": "adapters.py#5",
+            "file": "adapters.py",
+            "symbol": "send",
+            "start_line": 128
+          },
+          {
+            "id": "adapters.py#22",
+            "file": "adapters.py",
+            "symbol": "send",
+            "start_line": 634
+          }
+        ]
+      },
+      "B3Q": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8772153153380493,
+        "top": [
+          {
+            "id": "adapters.py#13",
+            "file": "adapters.py",
+            "symbol": "cert_verify",
+            "start_line": 307
+          },
+          {
+            "id": "adapters.py#5",
+            "file": "adapters.py",
+            "symbol": "send",
+            "start_line": 128
+          },
+          {
+            "id": "adapters.py#16",
+            "file": "adapters.py",
+            "symbol": "get_connection_with_tls_context",
+            "start_line": 455
+          },
+          {
+            "id": "adapters.py#22",
+            "file": "adapters.py",
+            "symbol": "send",
+            "start_line": 634
+          },
+          {
+            "id": "adapters.py#2",
+            "file": "adapters.py",
+            "symbol": "_urllib3_request_context",
+            "start_line": 85
+          }
+        ]
+      },
+      "B3Qs": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8772153153380493,
+        "top": [
+          {
+            "id": "adapters.py#13",
+            "file": "adapters.py",
+            "symbol": "cert_verify",
+            "start_line": 307
+          },
+          {
+            "id": "adapters.py#16",
+            "file": "adapters.py",
+            "symbol": "get_connection_with_tls_context",
+            "start_line": 455
+          },
+          {
+            "id": "adapters.py#5",
+            "file": "adapters.py",
+            "symbol": "send",
+            "start_line": 128
+          },
+          {
+            "id": "adapters.py#22",
+            "file": "adapters.py",
+            "symbol": "send",
+            "start_line": 634
+          },
+          {
+            "id": "adapters.py#2",
+            "file": "adapters.py",
+            "symbol": "_urllib3_request_context",
+            "start_line": 85
+          }
+        ]
+      },
+      "B4Qs": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.8503449055347546,
+        "top": [
+          {
+            "id": "adapters.py#13",
+            "file": "adapters.py",
+            "symbol": "cert_verify",
+            "start_line": 307
+          },
+          {
+            "id": "adapters.py#16",
+            "file": "adapters.py",
+            "symbol": "get_connection_with_tls_context",
+            "start_line": 455
+          },
+          {
+            "id": "sessions.py#17",
+            "file": "sessions.py",
+            "symbol": "request",
+            "start_line": 557
+          },
+          {
+            "id": "adapters.py#5",
+            "file": "adapters.py",
+            "symbol": "send",
+            "start_line": 128
+          },
+          {
+            "id": "adapters.py#22",
+            "file": "adapters.py",
+            "symbol": "send",
+            "start_line": 634
+          }
+        ]
+      }
+    },
+    {
+      "id": "q08",
+      "taxonomy": "L3",
+      "source": "manual",
+      "B2": {
+        "recall@5": 0.0,
+        "mrr@5": 0.0,
+        "ndcg@5": 0.0,
+        "top": [
+          {
+            "id": "cookies.py#7",
+            "file": "cookies.py",
+            "symbol": "get_full_url",
+            "start_line": 60
+          },
+          {
+            "id": "utils.py#45",
+            "file": "utils.py",
+            "symbol": "rewind_body",
+            "start_line": 1139
+          },
+          {
+            "id": "sessions.py#8",
+            "file": "sessions.py",
+            "symbol": "resolve_redirects",
+            "start_line": 186
+          },
+          {
+            "id": "auth.py#20",
+            "file": "auth.py",
+            "symbol": "handle_redirect",
+            "start_line": 268
+          },
+          {
+            "id": "adapters.py#19",
+            "file": "adapters.py",
+            "symbol": "request_url",
+            "start_line": 565
+          }
+        ]
+      },
+      "B3": {
+        "recall@5": 0.2,
+        "mrr@5": 0.3333333333333333,
+        "ndcg@5": 0.16958010263680806,
+        "top": [
+          {
+            "id": "cookies.py#7",
+            "file": "cookies.py",
+            "symbol": "get_full_url",
+            "start_line": 60
+          },
+          {
+            "id": "adapters.py#19",
+            "file": "adapters.py",
+            "symbol": "request_url",
+            "start_line": 565
+          },
+          {
+            "id": "api.py#3",
+            "file": "api.py",
+            "symbol": "get",
+            "start_line": 74
+          },
+          {
+            "id": "sessions.py#8",
+            "file": "sessions.py",
+            "symbol": "resolve_redirects",
+            "start_line": 186
+          },
+          {
+            "id": "sessions.py#6",
+            "file": "sessions.py",
+            "symbol": "get_redirect_target",
+            "start_line": 134
+          }
+        ]
+      },
+      "B4": {
+        "recall@5": 0.2,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.3391602052736161,
+        "top": [
+          {
+            "id": "api.py#3",
+            "file": "api.py",
+            "symbol": "get",
+            "start_line": 74
+          },
+          {
+            "id": "cookies.py#26",
+            "file": "cookies.py",
+            "symbol": "get",
+            "start_line": 211
+          },
+          {
+            "id": "sessions.py#6",
+            "file": "sessions.py",
+            "symbol": "get_redirect_target",
+            "start_line": 134
+          },
+          {
+            "id": "models.py#31",
+            "file": "models.py",
+            "symbol": "Response",
+            "start_line": 732
+          },
+          {
+            "id": "sessions.py#11",
+            "file": "sessions.py",
+            "symbol": "rebuild_method",
+            "start_line": 370
+          }
+        ]
+      },
+      "B3Q": {
+        "recall@5": 0.2,
+        "mrr@5": 0.25,
+        "ndcg@5": 0.14606834984270645,
+        "top": [
+          {
+            "id": "cookies.py#7",
+            "file": "cookies.py",
+            "symbol": "get_full_url",
+            "start_line": 60
+          },
+          {
+            "id": "utils.py#17",
+            "file": "utils.py",
+            "symbol": "get_encodings_from_content",
+            "start_line": 522
+          },
+          {
+            "id": "utils.py#24",
+            "file": "utils.py",
+            "symbol": "get_unicode_from_response",
+            "start_line": 633
+          },
+          {
+            "id": "api.py#3",
+            "file": "api.py",
+            "symbol": "get",
+            "start_line": 74
+          },
+          {
+            "id": "sessions.py#8",
+            "file": "sessions.py",
+            "symbol": "resolve_redirects",
+            "start_line": 186
+          }
+        ]
+      },
+      "B3Qs": {
+        "recall@5": 0.2,
+        "mrr@5": 0.25,
+        "ndcg@5": 0.14606834984270645,
+        "top": [
+          {
+            "id": "cookies.py#7",
+            "file": "cookies.py",
+            "symbol": "get_full_url",
+            "start_line": 60
+          },
+          {
+            "id": "sessions.py#8",
+            "file": "sessions.py",
+            "symbol": "resolve_redirects",
+            "start_line": 186
+          },
+          {
+            "id": "adapters.py#19",
+            "file": "adapters.py",
+            "symbol": "request_url",
+            "start_line": 565
+          },
+          {
+            "id": "api.py#3",
+            "file": "api.py",
+            "symbol": "get",
+            "start_line": 74
+          },
+          {
+            "id": "cookies.py#26",
+            "file": "cookies.py",
+            "symbol": "get",
+            "start_line": 211
+          }
+        ]
+      },
+      "B4Qs": {
+        "recall@5": 0.2,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.3391602052736161,
+        "top": [
+          {
+            "id": "api.py#3",
+            "file": "api.py",
+            "symbol": "get",
+            "start_line": 74
+          },
+          {
+            "id": "cookies.py#26",
+            "file": "cookies.py",
+            "symbol": "get",
+            "start_line": 211
+          },
+          {
+            "id": "models.py#31",
+            "file": "models.py",
+            "symbol": "Response",
+            "start_line": 732
+          },
+          {
+            "id": "sessions.py#6",
+            "file": "sessions.py",
+            "symbol": "get_redirect_target",
+            "start_line": 134
+          },
+          {
+            "id": "sessions.py#9",
+            "file": "sessions.py",
+            "symbol": "rebuild_auth",
+            "start_line": 309
+          }
+        ]
+      }
+    },
+    {
+      "id": "q09",
+      "taxonomy": "L3",
+      "source": "graph_reverse",
+      "B2": {
+        "recall@5": 0.25,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.24630238874073,
+        "top": [
+          {
+            "id": "auth.py#20",
+            "file": "auth.py",
+            "symbol": "handle_redirect",
+            "start_line": 268
+          },
+          {
+            "id": "sessions.py#8",
+            "file": "sessions.py",
+            "symbol": "resolve_redirects",
+            "start_line": 186
+          },
+          {
+            "id": "exceptions.py#16",
+            "file": "exceptions.py",
+            "symbol": "TooManyRedirects",
+            "start_line": 106
+          },
+          {
+            "id": "auth.py#21",
+            "file": "auth.py",
+            "symbol": "handle_401",
+            "start_line": 273
+          },
+          {
+            "id": "models.py#42",
+            "file": "models.py",
+            "symbol": "is_redirect",
+            "start_line": 877
+          }
+        ]
+      },
+      "B3": {
+        "recall@5": 0.25,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.24630238874073,
+        "top": [
+          {
+            "id": "auth.py#20",
+            "file": "auth.py",
+            "symbol": "handle_redirect",
+            "start_line": 268
+          },
+          {
+            "id": "sessions.py#8",
+            "file": "sessions.py",
+            "symbol": "resolve_redirects",
+            "start_line": 186
+          },
+          {
+            "id": "sessions.py#4",
+            "file": "sessions.py",
+            "symbol": "SessionRedirectMixin",
+            "start_line": 127
+          },
+          {
+            "id": "auth.py#21",
+            "file": "auth.py",
+            "symbol": "handle_401",
+            "start_line": 273
+          },
+          {
+            "id": "adapters.py#19",
+            "file": "adapters.py",
+            "symbol": "request_url",
+            "start_line": 565
+          }
+        ]
+      },
+      "B4": {
+        "recall@5": 0.5,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.4144299250118475,
+        "top": [
+          {
+            "id": "sessions.py#6",
+            "file": "sessions.py",
+            "symbol": "get_redirect_target",
+            "start_line": 134
+          },
+          {
+            "id": "sessions.py#9",
+            "file": "sessions.py",
+            "symbol": "rebuild_auth",
+            "start_line": 309
+          },
+          {
+            "id": "adapters.py#22",
+            "file": "adapters.py",
+            "symbol": "send",
+            "start_line": 634
+          },
+          {
+            "id": "sessions.py#11",
+            "file": "sessions.py",
+            "symbol": "rebuild_method",
+            "start_line": 370
+          },
+          {
+            "id": "sessions.py#7",
+            "file": "sessions.py",
+            "symbol": "should_strip_auth",
+            "start_line": 154
+          }
+        ]
+      },
+      "B3Q": {
+        "recall@5": 0.25,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.24630238874073,
+        "top": [
+          {
+            "id": "auth.py#20",
+            "file": "auth.py",
+            "symbol": "handle_redirect",
+            "start_line": 268
+          },
+          {
+            "id": "sessions.py#8",
+            "file": "sessions.py",
+            "symbol": "resolve_redirects",
+            "start_line": 186
+          },
+          {
+            "id": "sessions.py#4",
+            "file": "sessions.py",
+            "symbol": "SessionRedirectMixin",
+            "start_line": 127
+          },
+          {
+            "id": "models.py#42",
+            "file": "models.py",
+            "symbol": "is_redirect",
+            "start_line": 877
+          },
+          {
+            "id": "sessions.py#6",
+            "file": "sessions.py",
+            "symbol": "get_redirect_target",
+            "start_line": 134
+          }
+        ]
+      },
+      "B3Qs": {
+        "recall@5": 0.25,
+        "mrr@5": 0.5,
+        "ndcg@5": 0.24630238874073,
+        "top": [
+          {
+            "id": "auth.py#20",
+            "file": "auth.py",
+            "symbol": "handle_redirect",
+            "start_line": 268
+          },
+          {
+            "id": "sessions.py#8",
+            "file": "sessions.py",
+            "symbol": "resolve_redirects",
+            "start_line": 186
+          },
+          {
+            "id": "sessions.py#4",
+            "file": "sessions.py",
+            "symbol": "SessionRedirectMixin",
+            "start_line": 127
+          },
+          {
+            "id": "models.py#42",
+            "file": "models.py",
+            "symbol": "is_redirect",
+            "start_line": 877
+          },
+          {
+            "id": "auth.py#21",
+            "file": "auth.py",
+            "symbol": "handle_401",
+            "start_line": 273
+          }
+        ]
+      },
+      "B4Qs": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.5413996682199069,
+        "top": [
+          {
+            "id": "sessions.py#9",
+            "file": "sessions.py",
+            "symbol": "rebuild_auth",
+            "start_line": 309
+          },
+          {
+            "id": "sessions.py#6",
+            "file": "sessions.py",
+            "symbol": "get_redirect_target",
+            "start_line": 134
+          },
+          {
+            "id": "utils.py#35",
+            "file": "utils.py",
+            "symbol": "resolve_proxies",
+            "start_line": 911
+          },
+          {
+            "id": "utils.py#45",
+            "file": "utils.py",
+            "symbol": "rewind_body",
+            "start_line": 1139
+          },
+          {
+            "id": "sessions.py#11",
+            "file": "sessions.py",
+            "symbol": "rebuild_method",
+            "start_line": 370
+          }
+        ]
+      }
+    },
+    {
+      "id": "q10",
+      "taxonomy": "L3",
+      "source": "manual",
+      "B2": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6131471927654584,
+        "top": [
+          {
+            "id": "models.py#26",
+            "file": "models.py",
+            "symbol": "prepare_body",
+            "start_line": 576
+          },
+          {
+            "id": "_types.py#7",
+            "file": "_types.py",
+            "symbol": "is_prepared",
+            "start_line": 47
+          },
+          {
+            "id": "models.py#27",
+            "file": "models.py",
+            "symbol": "prepare_content_length",
+            "start_line": 654
+          },
+          {
+            "id": "models.py#17",
+            "file": "models.py",
+            "symbol": "PreparedRequest",
+            "start_line": 378
+          },
+          {
+            "id": "models.py#25",
+            "file": "models.py",
+            "symbol": "prepare_headers",
+            "start_line": 565
+          }
+        ]
+      },
+      "B3": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6131471927654584,
+        "top": [
+          {
+            "id": "models.py#26",
+            "file": "models.py",
+            "symbol": "prepare_body",
+            "start_line": 576
+          },
+          {
+            "id": "models.py#17",
+            "file": "models.py",
+            "symbol": "PreparedRequest",
+            "start_line": 378
+          },
+          {
+            "id": "models.py#19",
+            "file": "models.py",
+            "symbol": "prepare",
+            "start_line": 424
+          },
+          {
+            "id": "_types.py#7",
+            "file": "_types.py",
+            "symbol": "is_prepared",
+            "start_line": 47
+          },
+          {
+            "id": "models.py#27",
+            "file": "models.py",
+            "symbol": "prepare_content_length",
+            "start_line": 654
+          }
+        ]
+      },
+      "B4": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6131471927654584,
+        "top": [
+          {
+            "id": "models.py#26",
+            "file": "models.py",
+            "symbol": "prepare_body",
+            "start_line": 576
+          },
+          {
+            "id": "models.py#27",
+            "file": "models.py",
+            "symbol": "prepare_content_length",
+            "start_line": 654
+          },
+          {
+            "id": "models.py#17",
+            "file": "models.py",
+            "symbol": "PreparedRequest",
+            "start_line": 378
+          },
+          {
+            "id": "models.py#9",
+            "file": "models.py",
+            "symbol": "_encode_files",
+            "start_line": 183
+          },
+          {
+            "id": "sessions.py#17",
+            "file": "sessions.py",
+            "symbol": "request",
+            "start_line": 557
+          }
+        ]
+      },
+      "B3Q": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6131471927654584,
+        "top": [
+          {
+            "id": "models.py#26",
+            "file": "models.py",
+            "symbol": "prepare_body",
+            "start_line": 576
+          },
+          {
+            "id": "models.py#17",
+            "file": "models.py",
+            "symbol": "PreparedRequest",
+            "start_line": 378
+          },
+          {
+            "id": "models.py#19",
+            "file": "models.py",
+            "symbol": "prepare",
+            "start_line": 424
+          },
+          {
+            "id": "_types.py#7",
+            "file": "_types.py",
+            "symbol": "is_prepared",
+            "start_line": 47
+          },
+          {
+            "id": "models.py#16",
+            "file": "models.py",
+            "symbol": "prepare",
+            "start_line": 360
+          }
+        ]
+      },
+      "B3Qs": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6131471927654584,
+        "top": [
+          {
+            "id": "models.py#26",
+            "file": "models.py",
+            "symbol": "prepare_body",
+            "start_line": 576
+          },
+          {
+            "id": "models.py#17",
+            "file": "models.py",
+            "symbol": "PreparedRequest",
+            "start_line": 378
+          },
+          {
+            "id": "_types.py#7",
+            "file": "_types.py",
+            "symbol": "is_prepared",
+            "start_line": 47
+          },
+          {
+            "id": "models.py#19",
+            "file": "models.py",
+            "symbol": "prepare",
+            "start_line": 424
+          },
+          {
+            "id": "models.py#16",
+            "file": "models.py",
+            "symbol": "prepare",
+            "start_line": 360
+          }
+        ]
+      },
+      "B4Qs": {
+        "recall@5": 0.5,
+        "mrr@5": 1.0,
+        "ndcg@5": 0.6131471927654584,
+        "top": [
+          {
+            "id": "models.py#26",
+            "file": "models.py",
+            "symbol": "prepare_body",
+            "start_line": 576
+          },
+          {
+            "id": "models.py#17",
+            "file": "models.py",
+            "symbol": "PreparedRequest",
+            "start_line": 378
+          },
+          {
+            "id": "models.py#27",
+            "file": "models.py",
+            "symbol": "prepare_content_length",
+            "start_line": 654
+          },
+          {
+            "id": "sessions.py#17",
+            "file": "sessions.py",
+            "symbol": "request",
+            "start_line": 557
+          },
+          {
+            "id": "models.py#9",
+            "file": "models.py",
+            "symbol": "_encode_files",
+            "start_line": 183
+          }
+        ]
+      }
+    }
+  ]
+}

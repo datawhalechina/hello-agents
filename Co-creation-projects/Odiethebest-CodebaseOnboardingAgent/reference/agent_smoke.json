@@ -1,0 +1,32 @@
+{
+  "date": "2026-09-09",
+  "model": "gpt-5.4-mini",
+  "question": "When following a redirect to a different host, how does a Session decide whether to strip the Authorization header?",
+  "status": "completed_with_answer_caveat",
+  "llm_calls": 2,
+  "actions": [
+    "search_code",
+    "Finish"
+  ],
+  "elapsed_seconds_including_local_setup": 6.41,
+  "answer": "When a redirect points to a different hostname, `SessionRedirectMixin.should_strip_auth(old_url, new_url)` returns `True`, which means the `Authorization` header should be removed; it compares `urlparse(old_url).hostname` and `urlparse(new_url).hostname` and strips auth whenever they differ. There is one special case: it does not strip auth for an `http` -> `https` redirect when the old URL uses port 80 or no port and the new URL uses port 443 or no port, to preserve backward compatibility. During redirect processing, `resolve_redirects` is the code path that follows redirects and uses this decision. [sessions.py#7][sessions.py#8]",
+  "citation_id_validity": 1.0,
+  "source_links": [
+    {
+      "id": "sessions.py#7",
+      "label": "sessions.py::SessionRedirectMixin.should_strip_auth",
+      "url": "https://github.com/psf/requests/blob/414f0513c33883adf6f2b46901d4f0b38a455851/src/requests/sessions.py#L154-L184"
+    },
+    {
+      "id": "sessions.py#8",
+      "label": "sessions.py::SessionRedirectMixin.resolve_redirects",
+      "url": "https://github.com/psf/requests/blob/414f0513c33883adf6f2b46901d4f0b38a455851/src/requests/sessions.py#L186-L307"
+    }
+  ],
+  "review": {
+    "verified": "Both citation IDs exist and were observed in this run. The cross-host stripping statement matches the source.",
+    "caveat": "The HTTP-to-HTTPS standard-port exception applies only when hostnames are the same. The generated answer omitted that condition and can imply a cross-host exception. It is not a fully verified answer.",
+    "scope": "One live smoke sample, not an answer-quality benchmark. Part 4 metrics remain separate."
+  },
+  "agent_demo_sha256": "5b04d5ac3df8b991de03c2861fc0b2067018f53e144dc174a68dfda55177cab7"
+}

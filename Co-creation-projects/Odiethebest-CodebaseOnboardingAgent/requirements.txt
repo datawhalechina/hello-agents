@@ -1,13 +1,13 @@
-# 核心框架
-hello-agents[all]>=0.2.7
-
-# 检索
-rank-bm25>=0.2.2                 # 应用层 Okapi BM25（完整项目同款）
-sentence-transformers>=3.0.0     # 向量化；完整项目用 jina-embeddings-v2-base-code
-numpy>=1.24.0
-
-# 评测与展示
-pandas>=2.0.0
-
-# 环境
-python-dotenv>=1.0.0
+# Validated on Python 3.12 / CPU. First run downloads the corpus and model.
+hello-agents==0.2.7
+sentence-transformers==5.1.2
+torch==2.8.0
+transformers==4.57.6
+numpy==2.2.6
+rank-bm25==0.2.2
+pandas==2.2.3
+python-dotenv==1.2.1
+jupyterlab==4.4.9
+nbformat==5.10.4
+nbclient==0.10.2
+ipykernel==6.30.1

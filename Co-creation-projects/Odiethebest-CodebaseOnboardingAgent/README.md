@@ -1,214 +1,173 @@
-# Codebase Onboarding Agent —— 代码库入门问答智能体
+# Codebase Onboarding Agent：带对照评测的代码库问答示例
 
-> 新人接手陌生代码库时直接提问，系统给出答案，**每条引用都能点回具体的文件、符号和行号**。附一套能推翻自己的评测。
+面向“这个功能在哪里实现、调用关系怎么走”的 Python 代码库问题，提供源码索引、混合检索、可选 ReAct 问答演示，以及一套可自动核对的证据检索评测。
 
-## 📝 项目简介
+这是一个课程项目的教学实现。重点是让检索改动能够单独测量，并保留没有通过既定门槛的结果。
 
-新人进组第一周最费时间的事，往往不是写代码，是搞清楚"这个功能到底在哪实现的""这条调用链怎么走"。翻文档过时，问同事打扰人，全局搜索一个 `handle` 出来两百个结果。
+## 实现范围
 
-本项目把这件事做成一个只读的问答服务：仓库先做结构化索引，用户提问后系统用混合检索加多步取证找证据，最后给出的每一条引用都经过服务端核验，能直接点回源码。
-
-它是我一个课程项目在 HelloAgents 框架上的**最小可跑复现**。原项目是 FastAPI + RabbitMQ + PostgreSQL/pgvector 的服务（三人协作，我负责架构与约九成实现），这里压缩成一个 notebook，但四条主线的逻辑一致。
-
-**和其他共创项目最不一样的地方是第 4 部分：它带一套完整评测**，不是挑几个成功案例截图。跑之前先锁死判据，跑完结果是什么报什么——本项目最终判定是 `unsupported`，我把它留在了 README 里。
-
-## 🤔 为什么不直接用通用 Coding Agent
-
-这是这个项目最该被问的问题：仓库就在那儿，Claude Code、Cursor 已经能读代码，为什么还要自己建一套索引和检索？
-
-诚实的回答是：**在"理解代码"这件事本身上通用 Coding Agent 更强，这个项目不跟它们比模型能力。** 它拿这一点去换另外五样东西：
-
-| 维度 | 本项目的做法 | 换来什么 |
+| 部分 | 当前实现 | 验证范围 |
 |---|---|---|
-| 共享索引 | 仓库预先索引并持久化，多人复用 | 团队公共入口，不必每个会话重建仓库上下文 |
-| 可验证引用 | 引用绑定服务端 evidence ID，验不过的在返回前删除 | 用户能点回真实源码复核，降低伪造引用风险 |
-| 可审计执行 | 检索候选、工具调用、错误、最终证据、预算全部可落盘 | 能回放失败问题，回答"为什么得出这个结论" |
-| 权限边界 | 工具只读文件、查符号、追关系，不给 shell 与写权限 | 适合企业把"查内部代码"做成受控的内部服务 |
-| **可做因果评测** | 固定模型与 prompt，只替换检索或工具集合 | 能判断某个模块是否真有贡献——即 Part 4 |
+| 索引 | Python AST 类、函数、方法与模块 docstring；内存符号表和向量矩阵 | 固定语料的源码坐标 |
+| 检索 | BM25 + dense + 加权 RRF；可选一跳调用名扩展、查询改写 | 六臂的 top-5 证据排序 |
+| 问答演示 | HelloAgents ReAct + 搜索、大纲、读符号、查潜在调用方四个只读工具 | 可选 LLM 路径，与 Part 4 分开 |
+| 引用校验 | 检查 ID 存在且在本轮工具结果中出现；输出固定 commit 源码链接 | 引用 ID 有效率，不是断言的语义正确率 |
 
-**最后一行才是这个项目真正的重点。** 前四条很多系统都能声称，只有第五条能被验证，也只有它能回答"你加的这个模块到底值不值得留着"。
+索引不持久化，也没有多用户服务、权限系统或持久化审计日志。原课程项目的 FastAPI、RabbitMQ、PostgreSQL/pgvector 服务未迁入本例。
+没有与通用 Coding Agent 做统一条件的端到端比较；帮助新人 onboarding 仍是应用假设。
 
-边界说在明处：本项目**没有**和 Claude Code、Codex 做统一条件的端到端对比，所以上面五条是设计取向，不是实测优势；"帮助新人 onboarding" 目前也仍然是应用假设。两者其实可以组合——把这里的检索、符号与调用关系能力暴露成 MCP 工具，由通用 Coding Agent 负责规划和修改。
+## 快速开始
 
-## ✨ 核心功能
-
-- **结构化索引**：按 Python AST 的语法边界切块（模块 docstring / 类 / 函数 / 方法），每个 chunk 带 `文件 + 符号 + 起止行` 的稳定坐标，不按固定字符数硬切
-- **混合检索**：BM25 处理符号名、配置键这类精确词面，向量召回处理"只描述行为不写符号名"的问法，加权 RRF 按名次融合（K=60，dense:sparse=2:1）
-- **多步取证**：Agent 挂 4 个只读工具（检索 / 文件大纲 / 读符号 / 查调用方），沿调用关系向外走，14 步硬预算
-- **确定性查询改写**：同义扩展 + 符号表回填，做成独立对照臂而非直接并入检索链，因为它到底有没有用需要测
-- **引用验证**：每条引用回索引核验，验不过的从正文删掉；**计分用删除前的集合，零引用答案记 0 分**——堵死"多猜换高分"和"不回答得满分"两条捷径
-- **baseline 阶梯评测**：B2 / B3 / B4 三个对照臂 + 预注册判据 + 分层归因，另有三个诊断臂隔离查询改写与多步取证各自的贡献；全程无需 LLM，完全确定性可复现
-
-## 🛠️ 技术栈
-
-- **HelloAgents 框架**：`ReActAgent` + `ToolRegistry` + `HelloAgentsLLM`
-- **智能体范式**：ReAct（多步推理与工具调用），规划器在评测路径上用确定性版本
-- **检索**：`rank_bm25`（Okapi BM25）、`sentence-transformers`（向量化）、加权 RRF
-- **程序分析**：Python `ast`（语义切块、符号表、静态调用点）
-- **评测**：Recall@5 / MRR / nDCG@5，自建锚点式题集
-
-## 🚀 快速开始
-
-### 环境要求
-
-- Python 3.10+
-- 首次运行会下载约 350MB（语料 tarball + embedding 模型）
-- 普通笔记本 CPU 上全流程约 3–5 分钟
-
-### 安装依赖
+使用 Python 3.12，在本项目目录执行：
 
 ```bash
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
+python -m unittest -v
+python run_evaluation.py --check-reference
 ```
 
-### 配置 API 密钥（可选）
+也可运行 `jupyter lab` 打开 `main.ipynb`，按顺序执行。`run_evaluation.py` 执行同一份 notebook 代码，始终跳过 LLM 演示。
+首次运行需要联网下载语料与 embedding 模型，耗时取决于网络与 CPU。后续可用本地缓存；不需要 API Key。
 
-**Part 1 / 2 / 4 不需要 API Key。** 只有 Part 3 的 Agent 问答演示需要：
+模型固定为 `flax-sentence-embeddings/st-codesearch-distilroberta-base` 的 revision
+`23d22ea4191fc9d006833d3b62694949f1ffebd1`，计算设备为 CPU。直接依赖固定于 `requirements.txt`，参考环境的完整包版本在 `reference/environment.txt`。
+跨硬件或数值库仍可能产生排序差异。检查命令要求指标误差不超过 `1e-6`、排序与判定一致；失败时应对照环境与 provenance 排查，不能直接覆盖参考答案。
+
+### 可选的 Agent 演示
 
 ```bash
 cp .env.example .env
-# 编辑 .env 填入你的 key
+# 填写 LLM_API_KEY、LLM_MODEL_ID、LLM_BASE_URL，并设置 RUN_AGENT_DEMO=1
+jupyter lab
 ```
 
-### 运行
-
-```bash
-jupyter lab      # 打开 main.ipynb，从上往下依次运行
-```
-
-## 📖 使用示例
-
-Agent 回答一个跨文件问题，并给出经过核验的引用：
+在 notebook 中执行 Part 3。`agent_demo.py` 使用 HelloAgents 0.2.7 的 `custom_prompt`，确保引用规则进入实际 ReAct 提示词。
+框架循环最多 14 步，包括结束动作；这不代表 token 或延迟上限。
 
 ```python
-question = ("When following a redirect to a different host, "
-            "how does a Session decide whether to strip the Authorization header?")
-answer = agent.run(question)
-checked = verify_citations(str(answer))
-
-print(f"引用（删除前）: {len(checked['cited_before_filter'])} 条")
-print(f"验证通过      : {len(checked['verified'])} 条")
+OBSERVED_IDS.clear()
+answer = agent.run("How is basic auth attached to a prepared request?")
+checked = verify_citations(str(answer), OBSERVED_IDS)
+print(checked["answer"])
+print(checked["citation_id_validity"])
 for cid in checked["verified"]:
-    c = BY_ID[cid]
-    print(f"  → {c.label}  L{c.start_line}-{c.end_line}")
+    print(source_url(BY_ID[cid]))
 ```
 
-输出的引用会指向 `sessions.py::SessionRedirectMixin.rebuild_auth  L309-333` 这样的具体位置，可以直接点回源码复核。
+引用 ID 按过滤前不同 ID 的集合计分，重复引用不增加权重，零引用记 0。不存在或本轮未出现的 ID 会被删除。
+**真实 ID 也可能支持不了对应断言；删除引用标记不会修正正文。** 本例没有 LLM Judge 或人工答案正确性评分。
 
-## 🎯 项目亮点
+### 一次真实问答示例
 
-**1. 引用是可验证的，不是模型编的**
+以下摘自 2026-09-09 的 `gpt-5.4-mini` 实跑记录；无需配置 API 即可阅读。[完整记录](./reference/agent_smoke.json)保留原始回答与核查说明。
 
-引用由服务端的 evidence ID 绑定到文件、符号和行号，验不过的在返回前删掉。用户能点回真实源码复核，降低伪造引用的风险。
+**问题**：重定向到不同主机时，Session 如何决定是否移除 `Authorization` 请求头？
 
-**2. 带一套能推翻自己的评测**
+**执行过程**：`search_code → Finish`，共 2 次模型调用，答案引用了以下两个源码位置：
 
-不是"跑几个成功案例给你看"。有 baseline 阶梯、有预注册判据、有分层归因、有 bad case 列表。共创区里做代码 Agent 的项目不少，但据我翻下来，**带对照实验的目前只有这一个**。
+- [sessions.py::SessionRedirectMixin.should_strip_auth](https://github.com/psf/requests/blob/414f0513c33883adf6f2b46901d4f0b38a455851/src/requests/sessions.py#L154-L184)
+- [sessions.py::SessionRedirectMixin.resolve_redirects](https://github.com/psf/requests/blob/414f0513c33883adf6f2b46901d4f0b38a455851/src/requests/sessions.py#L186-L307)
 
-**3. 两个指标反作弊设计**
+**回答原文**：
 
-- 引用**删除前**计分 —— 否则系统可以先大量生成引用，错的反正会被删掉
-- 零引用答案记 **0** 分 —— 否则"什么都不说"成了最优策略（一个不引用的答案技术上确实没有无据断言）
+> When a redirect points to a different hostname, `SessionRedirectMixin.should_strip_auth(old_url, new_url)` returns `True`, which means the `Authorization` header should be removed; it compares `urlparse(old_url).hostname` and `urlparse(new_url).hostname` and strips auth whenever they differ. There is one special case: it does not strip auth for an `http` -> `https` redirect when the old URL uses port 80 or no port and the new URL uses port 443 or no port, to preserve backward compatibility. During redirect processing, `resolve_redirects` is the code path that follows redirects and uses this decision. [sessions.py#7][sessions.py#8]
 
-这两条都是完整项目踩过坑才加上的。
+**核查结果**：两个引用 ID 均存在且在本轮工具结果中出现，引用 ID 有效率为 1.0。回答正确指出不同主机会移除认证头，但随后提到 HTTP→HTTPS 的例外时，漏写了“同一主机”这一前提，容易让人误以为跨主机也存在该例外。因此这次记录证明链路能够运行，不能当作完全正确的答案。
 
-**4. 保留了不利结论**
+## 评测协议与参考结果
 
-预注册的主假设最终判定 `unsupported`。我没有回头去调判据、换对手或者删题。
+语料固定在 `psf/requests@414f0513c33883adf6f2b46901d4f0b38a455851`，仅索引 `src/requests`：19 个文件、320 个 chunk。
+题集 10 道，L1/L2/L3 分别为 2/5/3 道；所有 gold 启动时必须恰好解析到一个 chunk。
 
-## 📊 性能评估
+`strict-anchor-v2` 精确匹配文件、符号、起始行；类块不替方法得分，同名方法不互相替代。重复结果不重复得分，gold 顺序不影响评分。
+MRR 在前五条截断，记为 MRR@5。composite 是 Recall@5、MRR@5、nDCG@5 的等权均值。
 
-### 本 notebook 的复现结果
+| 臂 | 检索路径 |
+|---|---|
+| B2 | dense-only |
+| B3 | BM25 + dense + RRF（K=60，dense:sparse=2:1） |
+| B4 | B3 + 一跳调用名扩展与显式符号跳转，按来源/相关度排序后再次融合 |
+| B3Q | 扩展查询给稀疏、稠密两路 |
+| B3Qs | 只给稀疏路扩展查询 |
+| B4Qs | B3Qs 的种子 + 与 B4 相同的扩展函数，显式跳转仍用原问题 |
 
-语料 `psf/requests@414f0513`（19 个文件 / 320 chunk），自建题集 10 道（L1 2 / L2 5 / L3 3），每题 1–5 个源码锚点。**Part 4 完全确定性，跑几次结果一样。**
+前三臂进入主判据：B4 在 L2、L3 上都要比 B2、B3 高至少 0.05，四项全过才为 supported。
+0.05 是工程门槛，不是统计显著性阈值。后三臂用于诊断，不改变主判定。
 
-进判据的三个臂：
+**Part 4 没有运行 ReAct，也没有生成或核验最终答案。它测的是证据检索与扩展。**
 
-| 臂 | 路径 | Recall@5 | MRR | nDCG@5 | composite |
-|---|---|---:|---:|---:|---:|
-| B2 | dense-only（普通向量 RAG） | 0.642 | 0.617 | 0.488 | 0.582 |
-| B3 | BM25 + dense + 加权 RRF | 0.737 | 0.733 | 0.587 | 0.686 |
-| B4 | B3 + 多步取证 | 0.690 | 0.750 | 0.640 | 0.693 |
+| 臂 | Recall@5 | MRR@5 | nDCG@5 | composite |
+|---|---|---|---|---|
+| B2 | 0.542 | 0.633 | 0.477 | 0.551 |
+| B3 | 0.612 | 0.717 | 0.555 | 0.628 |
+| B4 | 0.637 | 0.750 | 0.577 | 0.655 |
+| B3Q | 0.662 | 0.662 | 0.546 | 0.623 |
+| B3Qs | 0.662 | 0.725 | 0.571 | 0.653 |
+| B4Qs | 0.587 | 0.750 | 0.537 | 0.625 |
 
-预注册判据：B4 在 L2 和 L3 上都要同时比 B2、B3 高至少 0.05，**四项全过**才算成立。
+| 层级 | 题数 | B2 | B3 | B4 | B4−B2 | B4−B3 |
+|---|---|---|---|---|---|---|
+| L2 | 5 | 0.630 | 0.659 | 0.630 | -0.000 | -0.030 |
+| L3 | 3 | 0.345 | 0.424 | 0.563 | 0.217 | 0.139 |
 
-| 层级 | B2 | B3 | B4 | B4−B2 | B4−B3 |
-|---|---:|---:|---:|---:|---:|
-| L2（5 题） | 0.693 | 0.712 | 0.670 | −0.023 ❌ | −0.042 ❌ |
-| L3（3 题） | 0.345 | 0.529 | 0.528 | **+0.183** ✅ | −0.000 ❌ |
+**四项通过 2/4，判定 `unsupported`。** 表格保留三位小数，判定使用未舍入值。
 
-**四项通过一项 → `unsupported`。**
+| 层级 | 两路改写−B3 | 仅稀疏改写−B3 | 扩展−B3 | 两者组合−B3 |
+|---|---|---|---|---|
+| L2 | 0.034 | 0.087 | -0.030 | -0.074 |
+| L3 | -0.012 | -0.012 | 0.139 | 0.209 |
 
-不说明多步取证没用——L3 上它比普通向量 RAG 高 0.183。说明的是**收益的分布**：检索本来就够强的地方（L2），扩池反而挤掉排对了的证据；检索够不着的地方（L3 架构题），价值才显现。真实系统靠 cross-encoder 重排和 LLM 挑证据吸收这个代价，最小复现两样都没有。
+### 如何解释
 
-### 诊断臂：查询改写值多少
+- L3 上 B4−B3 为 +0.139，表示这套扩展策略在三道 L3 题上的增益；B4−B2 的 +0.217 同时包含混合检索收益，不能全部归因给取证扩展。
+- L2 上 B4−B3 为 −0.030。整体均值不能说明所有层级都受益，应查看 `reference/h1_report.json` 的逐题证据。
+- 只改稀疏路的整体分数高于同时改两路，但这是当前词表与模型配置的结果，不能推广为“稠密检索不该改写”。句向量语义偏移仅是可能解释。
+- B4Qs 在 L3 上优于单独组件，L2 上却更差，因此不能笼统地说“两个增强不叠加”。
 
-判据只认 B2/B3/B4。下面三个是**后加的诊断臂**，可以改变对系统的理解，但不能改变已锁定的判定。
+同题集上的查询新增词数上限（`max_expand`）扫描：4 / 8 / 12 / 20 对应 composite 0.6721 / 0.6961 / 0.6526 / 0.6562。
+默认仍为 12，扫描只是敏感性分析，没有把最高分当作未见数据收益。这里调整的是查询新增词数；B4 的一跳检索操作预算固定为 14，两者分别控制查询改写和证据扩展。
 
-| 诊断臂 | 做法 | 整体 composite |
-|---|---|---:|
-| B3Q | 改写后的查询给稀疏和稠密两路 | 0.667 |
-| B3Qs | 只给稀疏臂改写，稠密臂用原问题 | **0.700** |
-| B4Qs | B3Qs + 多步取证 | 0.657 |
+### 修订与数据边界
 
-孤立贡献（相对 B3）：
+v2 修复方法 chunk 的缩进解析、同名符号误匹配和依赖 gold 顺序的 nDCG；统一 B4/B4Qs 扩展逻辑、稳定同分排序，并用未舍入数值判定。
+旧版的 0.582 / 0.686 / 0.693 及 1/4 判定已废弃。新旧分数属于不同协议，不能用差值宣称能力提升。
 
-| 层级 | 改写(两路) | 改写(仅稀疏) | 多步取证 | 两者叠加 |
-|---|---:|---:|---:|---:|
-| L2 | +0.006 | **+0.066** | −0.042 | +0.006 |
-| L3 | −0.012 | −0.012 | −0.000 | −0.105 |
+本题集已经用于开发、配置选择和本次修复，不是独立 holdout，也不能把本轮修复称为新的独立预注册实验。
+本例演示固定规则后运行与报告的流程；真正的确认性评测需提前冻结实现和判据，并另取未用于调试的题目。
 
-三条结论都不太符合直觉：
+## 文件与验证
 
-1. **朴素查询改写是负收益**（0.686 → 0.667）。最说明问题的是 q03「basic auth 怎么挂到 prepared request 上」：改写扩展出的词里**正好包含 gold 符号 `_basic_auth_str`**，这题却从 0.790 掉到 0.472。加对了关键词反而更差。
-2. **只改稀疏臂就变正**（0.700，L2 上 +0.066 过门槛），q03 停在 0.790 不动。机制是查询扩展本质是**词面**技术：BM25 拿到更多关键词受益，稠密臂拿到一串堆砌关键词的句子，句向量偏离了原意图。「把改写后的查询喂给整条检索链」是个默认选项，但它是错的。
-3. **两个增强不叠加**，L3 上叠加是 −0.105。它们抢的是同一批 top-5 名额。
+- `main.ipynb`：四部分教学流程。
+- `evaluation.py`：缩进解析、精确锚点指标、引用 ID 校验和全精度判定。
+- `agent_demo.py`：可选 HelloAgents 适配。
+- `test_evaluation.py`：评分边界与脚本化 LLM 的四工具集成测试，不调用真实模型。
+- `reference/h1_report.json`：逐题排名、聚合、判定、模型 revision、题集与代码哈希；本地重跑写入 `results/`。
 
-notebook 里还扫了扩展词数：`max_expand=8` 最好（0.731），高于默认的 12（0.700）。**默认值没有改成 8**——这个扫描是在同一批 10 道题上做的，用测试集选超参等于把测试集变成开发集，选出来的数不能当作可信效果。
+已通过 10 项测试和六臂本地执行。测试包含脚本化 LLM 的四工具往返，以及 GPT-5/普通模型的实际 HTTP JSON 参数序列化；测试不调用真实 API。
 
-### 完整项目的正式评测（不在本 notebook 内）
+2026-09-09 使用 `gpt-5.4-mini` 实跑一条跨主机重定向问题：2 次模型调用（search_code → Finish）、2 个有效引用，记录见 `reference/agent_smoke.json`。
+链路完成，但答案漏写了 HTTP→HTTPS 保留认证仅适用于同主机的限定，不能当作完全正确的回答或质量基准。
+这也说明引用 ID 有效率为 1.0 不等于语义 groundedness 为 1.0。
 
-作为对照，完整项目的规模与结论：
+实跑修复了 `.env` 显式路径、GPT-5 的 `max_completion_tokens` 参数，以及把完整答案写入单行 Finish 的提示词。适配层对 GPT-5/o 系列省略旧 `max_tokens` 和默认 temperature，其他模型使用 `max_tokens=4096`。
 
-- **阶梯**：B0 外部搜索 → B1 BM25 → B2 dense RAG → B3 hybrid+rerank → B4 完整系统，外加一个 B3.5 诊断臂
-- **规模**：33 道题（L1 5 / L2 16 / L3 12），三轮重复，每轮 5 臂 × 33 题，共 **495 次** arm-question 执行
-- **结论**：四项通过三项，`unsupported`。L2 对最强 baseline 的 margin 是 +0.0439，差 0.0061
-- **方差**：那条决定结论的 margin 三轮分别是 +0.0376 / +0.0057 / +0.0884，**极差 0.083 比 0.05 的门槛本身还大**，单轮结论会翻转
-- **消融**：B3.5 隔离出——L3 上多步取证贡献 +0.1466，静态调用图只有 +0.0226，**约 6.5 倍**。我在调用图上花的时间最多，孤立贡献却最小
+## 已知边界
 
-方法论完整版见 [Extra14《垂直场景 Agent 的自建评测》](../../Extra-Chapter/Extra14-垂直场景Agent的自建评测.md)。
+- 仅 Python、单一仓库、10 道题；不能外推到其他语言、大型仓库或真实用户效果。
+- 4 道 `graph_reverse` 题由已有调用关系反推，可能漏掉解析器看不到的链路，来源与难度混淆。
+- 调用解析只匹配名字，不推断接收者类型；同名定义均为候选，可能误报。
+- 精确 gold 不能覆盖所有合理证据；类块即使包含目标方法也不得分，这是刻意选择的严格口径。
+- 步数上限不限制单步候选数量或读取 token；没有完整服务安全与权限设计。
 
-### 已知边界
+## 与 Extra14 的关系
 
-写在明处，因为一份不写缺口的评测报告不值得信：
+配套投稿 `Extra-Chapter/Extra14-垂直场景Agent的自建评测.md` 解释方法。
+两份 PR 独立提交，不要求另一份先合并；本目录已包含运行所需文件。
+章节中的 33 题、495 次执行、三轮重复与 B3.5 消融属于原课程项目的作者报告数据，不是本 notebook 的复现结果。
 
-- 只支持 Python。限制不在向量模型，在结构化索引层——切块、符号、调用解析全按 Python 语义实现，换个文件后缀读到的只是文本
-- 单一仓库、10 道题（完整项目 33 道），单题权重很大，不能外推到大型仓库或其他语言
-- 没有和 Claude Code、Codex 这类通用 Coding Agent 做统一条件的端到端对比
-- 只测"有没有找到并引用正确代码"，**不测"解释是否准确、清晰、可执行"**
-- 题集里 4 道标了 `graph_reverse`——从系统自己的调用关系反推出来的，天然不会包含它漏建的链路，来源和难度标签也存在混淆
-- "帮助新人 onboarding"目前仍是应用假设，没有真实新人 A/B
+## 作者与许可证
 
-## 🔮 未来计划
-
-- [ ] 引入 cross-encoder 重排，吸收多步取证扩池带来的排序代价
-- [ ] 语言适配层：把 parse / chunk / symbol / edge 收敛到 adapter，先扩 Java（tree-sitter 或 JavaParser，需处理方法重载与接口实现）
-- [ ] 接真 LLM-as-Judge 与人工双人标注，让评测能回答"解释写得对不对"
-- [ ] 增加第二个仓库和更多 L2 题，把小于 0.05 的效应测稳
-- [ ] 多维预算：当前只限 14 步，限不住大文件读取带来的 token 和延迟
-
-## 🤝 贡献指南
-
-欢迎提出 Issue 和 Pull Request。如果你要把这套评测方法搬到自己的项目上，`main.ipynb` 的 Part 4 可以直接改锚点定义复用。
-
-## 📄 许可证
-
-CC BY-NC-SA 4.0
-
-## 👤 作者
-
-- GitHub: [@Odiethebest](https://github.com/Odiethebest)
-
-## 🙏 致谢
-
-感谢 Datawhale 社区和 Hello-Agents 项目。第十二章讲清楚了怎么用 BFCL、GAIA 评估智能体，这个项目试着补上另一半：**没有现成基准可用时，怎么给自己的 Agent 造一套评测。**
+作者：[@Odiethebest](https://github.com/Odiethebest)。感谢 Datawhale 与 Hello-Agents 社区。
+许可证：CC BY-NC-SA 4.0。

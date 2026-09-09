@@ -3,3 +3,6 @@ results/
 .env
 .ipynb_checkpoints/
 __pycache__/
+.venv/
+# Root rules ignore test_*.py; ship this project's regression tests.
+!test_evaluation.py
