@@ -11,3 +11,5 @@ jupyterlab==4.4.9
 nbformat==5.10.4
 nbclient==0.10.2
 ipykernel==6.30.1
+# Transitive via hello-agents; pinned here because test_evaluation.py imports it directly.
+httpx==0.28.1
