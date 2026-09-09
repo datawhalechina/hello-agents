@@ -94,6 +94,7 @@
 | [11-WebAgent科普与实战](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra11-WebAgent科普与实战.md) | Web Agent 原理、反爬实战与 HelloAgents 集成 |
 | [12-旅行助手后训练实战](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra12-旅行助手后训练实战.md) | 把旅行助手 Demo 打磨成能用的 Planner |
 | [13-Hello-Agents视频课录制共创](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra13-Hello-Agents视频课录制共创.md) | 视频课程共创录制资源 |
+| [14-垂直场景Agent的自建评测](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra14-垂直场景Agent的自建评测.md) | 代码库问答 Agent 的可解释检索评测 |
 
 ### PDF 版本下载
 
@@ -165,6 +166,7 @@
 - [殷鑫-个人开发者](https://github.com/vinci-grape) (浙江大学, Extra10 内容贡献)
 - [Pranav Janakiraman-个人开发者](https://github.com/pranavjana) (TinyFish, Extra11 内容贡献)
 - [王雨飞-个人开发者](https://github.com/nameless0120) (北京邮电大学，Extra12 内容贡献)
+- [杨子奇-个人开发者](https://github.com/Odiethebest) (Extra14 内容贡献)
 
 ### 特别感谢
 - 感谢 [@Sm1les](https://github.com/Sm1les) 对本项目的帮助与支持
