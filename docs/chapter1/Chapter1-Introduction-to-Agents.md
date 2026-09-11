@@ -401,7 +401,6 @@ import re
 API_KEY = "YOUR_API_KEY"
 BASE_URL = "YOUR_BASE_URL"
 MODEL_ID = "YOUR_MODEL_ID"
-TAVILY_API_KEY="YOUR_Tavily_KEY"
 os.environ['TAVILY_API_KEY'] = "YOUR_TAVILY_API_KEY"
 
 llm = OpenAICompatibleClient(
