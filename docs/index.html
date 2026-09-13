@@ -169,6 +169,40 @@
             border-top: 1px solid var(--dark-border);
         }
 
+        /* 搜索框与结果适配 */
+        body.dark-mode .search {
+            border-bottom-color: var(--dark-border);
+        }
+        body.dark-mode .search input {
+            background-color: var(--dark-code-bg);
+            color: var(--dark-text);
+            border-color: var(--dark-border);
+        }
+        body.dark-mode .search input::placeholder {
+            color: #888;
+        }
+        body.dark-mode .search input:focus {
+            background-color: var(--dark-code-bg);
+            color: var(--dark-text);
+            border-color: var(--theme-color);
+        }
+        body.dark-mode .search .matching-post {
+            border-bottom-color: var(--dark-border);
+        }
+        body.dark-mode .search .matching-post a,
+        body.dark-mode .search .matching-post h2 {
+            color: #e0e0e0;
+        }
+        body.dark-mode .search .matching-post p {
+            color: var(--dark-text);
+        }
+        body.dark-mode .search p.empty {
+            color: #999;
+        }
+        body.dark-mode .search .search-keyword {
+            color: var(--theme-color);
+        }
+
         /* --- 3. 新增：侧边栏开关按钮样式 --- */
         .sidebar-toggle-btn {
             cursor: pointer;
@@ -241,6 +275,21 @@
                 fontsize: '0.9em',
                 color: 'rgb(90,90,90)',
                 language: 'chinese'
+            },
+            // 侧边栏关键词搜索：按当前语言 sidebar 自动建索引
+            search: {
+                paths: 'auto',
+                depth: 3,
+                namespace: 'hello-agents',
+                pathNamespaces: ['/en'],
+                placeholder: {
+                    '/en/': 'Type to search',
+                    '/': '搜索'
+                },
+                noData: {
+                    '/en/': 'No Results!',
+                    '/': '没有匹配结果'
+                }
             },
             // 多语言配置
             fallbackLanguages: ['en'],
@@ -432,6 +481,7 @@
     </script>
     <!-- Put them above docsify.min.js -->
     <script src="//cdn.jsdelivr.net/npm/docsify@latest/lib/docsify.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/docsify@latest/lib/plugins/search.min.js"></script>
     <!-- code render-->
     <script src="//cdn.jsdelivr.net/npm/prismjs@latest/components/prism-bash.js"></script>
     <script src="//cdn.jsdelivr.net/npm/prismjs@latest/components/prism-python.js"></script>
