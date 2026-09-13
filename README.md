@@ -94,6 +94,7 @@
 | [11-WebAgent科普与实战](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra11-WebAgent科普与实战.md) | Web Agent 原理、反爬实战与 HelloAgents 集成 |
 | [12-旅行助手后训练实战](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra12-旅行助手后训练实战.md) | 把旅行助手 Demo 打磨成能用的 Planner |
 | [13-Hello-Agents视频课录制共创](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra13-Hello-Agents视频课录制共创.md) | 视频课程共创录制资源 |
+| [14-把Agent的运行录下来：离线复现与排错](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra14-把Agent的运行录下来.md) | 在模型请求边界录制与离线重放 |
 
 ### PDF 版本下载
 
