@@ -11,6 +11,7 @@ import threading
 import time
 from typing import Any, Dict, List, Tuple
 
+from ..compat import tool_text
 from ..tools import market_data
 
 
@@ -36,9 +37,10 @@ class ToolCallCounter:
                 with self._lock:
                     self.counts[_name] = self.counts.get(_name, 0) + 1
                 result = _run(parameters)
-                if isinstance(result, str):
+                text = tool_text(result)
+                if text:
                     with self._lock:
-                        self.outputs.append(result)
+                        self.outputs.append(text)
                 return result
 
             tool.run = wrapper
@@ -67,7 +69,7 @@ def timed_run(agent, query: str) -> Tuple[str, Dict[str, Any]]:
     """
     before = market_data.get_stats()
     start = time.perf_counter()
-    result = agent.run(query)
+    result = tool_text(agent.run(query))
     elapsed = time.perf_counter() - start
     after = market_data.get_stats()
 

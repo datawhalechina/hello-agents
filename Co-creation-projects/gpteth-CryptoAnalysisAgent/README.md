@@ -87,10 +87,22 @@ CryptoAnalysisAgent 是一个面向加密货币交易场景的多智能体分析
 - 条件化交易建议生成
 - 风险等级评估
 
+### 5. 智能对话与 Web 工作台
+- **智能对话**：基于 ReAct（Thought → Action → Observation → Finish）的多轮对话
+- **记忆系统**：长期记忆 `MEMORY.md` + 按日期自动归档的每日记忆
+- **工具调用**：文件操作、代码执行、网页搜索、网页抓取、加密货币综合分析
+- **会话管理**：多会话支持，历史持久化到 `workspace/sessions/`
+- **身份定制**：通过 `IDENTITY.md` / `SOUL.md` / `USER.md` / `AGENTS.md` 自定义助手人设
+- **流式输出**：SSE 推送思考过程、工具状态和最终回复
+- **Web 界面**：Vue 3 前端（对话 / 会话 / 记忆 / 身份 / 研报）
+
+![对话工作台](talk.png)
+
 ## 🛠️ 技术栈
 
 - **Agent 框架**: HelloAgents (SimpleAgent + ToolRegistry + Multi-Agent)
-- **Agent 范式**: ReAct (技术/链上/情绪 Agent) + Plan-and-Solve (Coordinator)
+- **Agent 范式**: ReAct 对话 Agent + ReAct 专业分析师 + Plan-and-Solve Coordinator
+- **Web**: FastAPI + SSE + Vue 3
 - **数据源**: Binance API (K线)、CoinGlass (链上)、Alternative.me (情绪)
 - **技术指标**: 自研计算模块（基于 pandas/numpy）
 - **LLM**: 兼容 OpenAI API 格式（推荐 Qwen2.5-72B / DeepSeek）
@@ -117,7 +129,17 @@ cp .env.example .env
 
 ### 运行项目
 
-**方式一: 命令行 (推荐，适合生产/定时运行)**
+**方式一: Web 对话工作台 (推荐)**
+
+```bash
+python web.py                         # 后端: 对话 SSE + 研报 API，http://127.0.0.1:8765
+
+cd frontend && npm install && npm run dev   # Vue 3 前端，http://localhost:5173
+```
+
+对话页支持流式回复和工具调用；身份/记忆/会话可在侧栏管理。研报页保留一键多维分析。构建前端后（`npm run build`），`python web.py` 会直接托管 `frontend/dist`。
+
+**方式二: 命令行 (适合生产/定时运行)**
 
 ```bash
 python analyze.py BTC              # 完整分析: 报告 + 质量门禁 + 归档信号
@@ -133,7 +155,7 @@ python analyze.py BTC --judge      # 额外执行 LLM Judge 语义评审
 0 10 * * * cd /path/to/project && python analyze.py --settle
 ```
 
-**方式二: Jupyter (适合学习/交互探索)**
+**方式三: Jupyter (适合学习/交互探索)**
 
 ```bash
 jupyter lab
@@ -265,7 +287,7 @@ print(format_signal_summary(summarize_signals()))  # 24h/7d 胜率、分币种�
 ## 👤 作者
 
 - GitHub: [@gpteth](https://github.com/gpteth)
-- 项目: [NOFXi Trading](https://nofx.pro)
+- 项目: CryptoAnalysisAgent
 
 ## 🙏 致谢
 

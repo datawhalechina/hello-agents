@@ -5,7 +5,8 @@
 工具集: K线数据获取、技术指标计算、支撑阻力位识别
 """
 
-from hello_agents import SimpleAgent, HelloAgentsLLM, ToolRegistry
+from hello_agents import HelloAgentsLLM, ToolRegistry
+from ..compat import make_simple_agent, wrap_tools
 from ..tools.technical import KlineFetchTool, TechnicalIndicatorTool, SupportResistanceTool
 
 
@@ -43,7 +44,7 @@ TECHNICAL_AGENT_PROMPT = """你是一位专业的加密货币技术分析师。�
 """
 
 
-def create_technical_agent(llm: HelloAgentsLLM = None, tool_counter=None) -> SimpleAgent:
+def create_technical_agent(llm: HelloAgentsLLM = None, tool_counter=None):
     """创建技术分析 Agent
 
     Args:
@@ -55,6 +56,7 @@ def create_technical_agent(llm: HelloAgentsLLM = None, tool_counter=None) -> Sim
 
     # 创建工具注册表
     tools = [KlineFetchTool(), TechnicalIndicatorTool(), SupportResistanceTool()]
+    wrap_tools(*tools)
     if tool_counter is not None:
         tool_counter.instrument(*tools)
     tool_registry = ToolRegistry()
@@ -62,11 +64,12 @@ def create_technical_agent(llm: HelloAgentsLLM = None, tool_counter=None) -> Sim
         tool_registry.register_tool(tool)
 
     # 创建 Agent
-    agent = SimpleAgent(
+    agent = make_simple_agent(
         name="技术分析师",
         llm=llm,
         system_prompt=TECHNICAL_AGENT_PROMPT,
         tool_registry=tool_registry,
+        max_tool_iterations=6,
     )
 
     return agent

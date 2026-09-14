@@ -12,6 +12,10 @@ aiohttp>=3.9.0
 # Environment variables
 python-dotenv>=1.0.0
 
+# Local web console (HelloClaw-style FastAPI + SSE)
+fastapi>=0.115.0
+uvicorn>=0.30.0
+
 # Visualization (optional, for notebook display)
 matplotlib>=3.7.0
 

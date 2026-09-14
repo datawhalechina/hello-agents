@@ -5,7 +5,8 @@
 工具集: 恐惧贪婪指数、资金费率、社交媒体情绪
 """
 
-from hello_agents import SimpleAgent, HelloAgentsLLM, ToolRegistry
+from hello_agents import HelloAgentsLLM, ToolRegistry
+from ..compat import make_simple_agent, wrap_tools
 from ..tools.sentiment import FearGreedTool, FundingRateTool, SocialSentimentTool
 
 
@@ -51,7 +52,7 @@ SENTIMENT_AGENT_PROMPT = """你是一位专业的加密货币市场情绪分析�
 """
 
 
-def create_sentiment_agent(llm: HelloAgentsLLM = None, tool_counter=None) -> SimpleAgent:
+def create_sentiment_agent(llm: HelloAgentsLLM = None, tool_counter=None):
     """创建情绪分析 Agent
 
     Args:
@@ -63,6 +64,7 @@ def create_sentiment_agent(llm: HelloAgentsLLM = None, tool_counter=None) -> Sim
 
     # 创建工具注册表
     tools = [FearGreedTool(), FundingRateTool(), SocialSentimentTool()]
+    wrap_tools(*tools)
     if tool_counter is not None:
         tool_counter.instrument(*tools)
     tool_registry = ToolRegistry()
@@ -70,11 +72,12 @@ def create_sentiment_agent(llm: HelloAgentsLLM = None, tool_counter=None) -> Sim
         tool_registry.register_tool(tool)
 
     # 创建 Agent
-    agent = SimpleAgent(
+    agent = make_simple_agent(
         name="情绪分析师",
         llm=llm,
         system_prompt=SENTIMENT_AGENT_PROMPT,
         tool_registry=tool_registry,
+        max_tool_iterations=6,
     )
 
     return agent

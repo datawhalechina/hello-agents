@@ -8,9 +8,11 @@
 import os
 from concurrent.futures import ThreadPoolExecutor
 
-from hello_agents import SimpleAgent, HelloAgentsLLM, ToolRegistry
+from hello_agents import HelloAgentsLLM, SimpleAgent, ToolRegistry
 from hello_agents.tools import Tool, ToolParameter
 from typing import Dict, Any, List
+
+from ..compat import first_text, make_simple_agent, wrap_tools
 
 
 COORDINATOR_PROMPT = """你是一位资深的加密货币投资顾问，负责协调技术分析师、链上分析师和情绪分析师的工作，并汇总他们的分析结果，生成综合分析报告。
@@ -96,7 +98,7 @@ class SubAgentTool(Tool):
         )
 
     def run(self, parameters: Dict[str, Any]) -> str:
-        query = parameters.get("query", "")
+        query = first_text(parameters, "query")
         if not query:
             return f"错误: 请提供分析请求内容"
 
@@ -141,7 +143,7 @@ class FullAnalysisTool(Tool):
         )
 
     def run(self, parameters: Dict[str, Any]) -> str:
-        query = parameters.get("query", "")
+        query = first_text(parameters, "query")
         if not query:
             return "错误: 请提供分析请求内容"
 
@@ -229,20 +231,24 @@ def create_coordinator(
     # 创建工具注册表，将子 Agent 包装为工具
     # run_full_analysis 并行调用三位分析师 (综合分析场景)
     # ask_*_analyst 单独调用某一位 (定向分析场景)
+    coordinator_tools = [
+        FullAnalysisTool(technical_agent, onchain_agent, sentiment_agent),
+        SubAgentTool(technical_agent, "technical"),
+        SubAgentTool(onchain_agent, "onchain"),
+        SubAgentTool(sentiment_agent, "sentiment"),
+    ]
+    wrap_tools(*coordinator_tools)
     tool_registry = ToolRegistry()
-    tool_registry.register_tool(
-        FullAnalysisTool(technical_agent, onchain_agent, sentiment_agent)
-    )
-    tool_registry.register_tool(SubAgentTool(technical_agent, "technical"))
-    tool_registry.register_tool(SubAgentTool(onchain_agent, "onchain"))
-    tool_registry.register_tool(SubAgentTool(sentiment_agent, "sentiment"))
+    for tool in coordinator_tools:
+        tool_registry.register_tool(tool)
 
     # 创建协调 Agent
-    coordinator = SimpleAgent(
+    coordinator = make_simple_agent(
         name="综合分析协调员",
         llm=llm,
         system_prompt=COORDINATOR_PROMPT,
         tool_registry=tool_registry,
+        max_tool_iterations=6,
     )
 
     return coordinator

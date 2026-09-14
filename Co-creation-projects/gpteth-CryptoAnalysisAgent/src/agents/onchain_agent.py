@@ -5,7 +5,8 @@
 工具集: 交易所资金流向、巨鲸活动、活跃地址
 """
 
-from hello_agents import SimpleAgent, HelloAgentsLLM, ToolRegistry
+from hello_agents import HelloAgentsLLM, ToolRegistry
+from ..compat import make_simple_agent, wrap_tools
 from ..tools.onchain import ExchangeFlowTool, WhaleActivityTool, ActiveAddressTool
 
 
@@ -51,7 +52,7 @@ ONCHAIN_AGENT_PROMPT = """你是一位专业的加密货币链上数据分析师
 """
 
 
-def create_onchain_agent(llm: HelloAgentsLLM = None, tool_counter=None) -> SimpleAgent:
+def create_onchain_agent(llm: HelloAgentsLLM = None, tool_counter=None):
     """创建链上数据分析 Agent
 
     Args:
@@ -63,6 +64,7 @@ def create_onchain_agent(llm: HelloAgentsLLM = None, tool_counter=None) -> Simpl
 
     # 创建工具注册表
     tools = [ExchangeFlowTool(), WhaleActivityTool(), ActiveAddressTool()]
+    wrap_tools(*tools)
     if tool_counter is not None:
         tool_counter.instrument(*tools)
     tool_registry = ToolRegistry()
@@ -70,11 +72,12 @@ def create_onchain_agent(llm: HelloAgentsLLM = None, tool_counter=None) -> Simpl
         tool_registry.register_tool(tool)
 
     # 创建 Agent
-    agent = SimpleAgent(
+    agent = make_simple_agent(
         name="链上分析师",
         llm=llm,
         system_prompt=ONCHAIN_AGENT_PROMPT,
         tool_registry=tool_registry,
+        max_tool_iterations=6,
     )
 
     return agent
