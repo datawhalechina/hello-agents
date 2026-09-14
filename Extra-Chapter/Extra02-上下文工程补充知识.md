@@ -2,14 +2,14 @@
 
 ## 引入
 
-为什么上下文工程最近又再次火热起来？源自 Chroma 创始人兼 CEOJeff 在 Len Space [播客](https://youware.app/project/7529x70z4p)的对话，
+为什么上下文工程最近又再次火热起来？源自 Chroma 创始人兼 CEO Jeff 在 Len Space [播客](https://youware.app/project/7529x70z4p)的对话，
 Chroma 向量数据库领域的开源霸主。连大名鼎鼎的 Voyager 论文里用的都是它。
-CEOJeff 对话的标题就是关于“RAG is dead”的观念，在视频中很明显的说明了原本的RAG的局限性和现在context engnieer的重要性，
+CEO Jeff 对话的标题就是关于“RAG is dead”的观念，在视频中很明显的说明了原本的RAG的局限性和现在context engineering的重要性，
 
 ![alt text](./images/Extra02-figures/image-1.png)
 
 
-本章我们先全面讲解一下“上下文工程”的（context engnieer）概念， 
+本章我们先全面讲解一下“上下文工程”的（context engineering）概念， 
 并在文章最后谈一下对 Rag is dead 的看法
 
 
@@ -38,7 +38,7 @@ _"上下文工程是...在上下文窗口中为下一步填充恰到好处信息
 
 
 
-## [上下文工程的概念](https://blog.langchain.com/context-engineering-for-agents/`)
+## [上下文工程的概念](https://blog.langchain.com/context-engineering-for-agents/)
 
 ![alt text](./images/Extra02-figures/image-2.png)
 
@@ -240,7 +240,7 @@ Agent 让 AI 从一个“问答机器人”进化成一个<strong>能思考、�
 
 ### Context Poisoning: When a Hallucination Makes It into the Context
 
-上下文毒化（Context Poisoning）指的是幻觉（hallucination，即模型生成的错误或虚构信息）或其它错误进入上下文窗口，并被反复引用，从而嵌入错误信息，导致代理（agent）性能脱轨。这种情况会“毒化”关键部分，如目标或摘要，使得模型固执于不可能或无关的目标，导致重复的、无意义的的行为。
+上下文毒化（Context Poisoning）指的是幻觉（hallucination，即模型生成的错误或虚构信息）或其它错误进入上下文窗口，并被反复引用，从而嵌入错误信息，导致代理（agent）性能脱轨。这种情况会“毒化”关键部分，如目标或摘要，使得模型固执于不可能或无关的目标，导致重复的、无意义的行为。
 
 ### Context Distraction: When the Context Overwhelms the Training
 
