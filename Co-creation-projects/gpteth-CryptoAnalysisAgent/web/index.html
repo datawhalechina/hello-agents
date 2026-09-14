@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CryptoAnalysisAgent</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <a class="skip" href="#report">跳到报告</a>
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark" aria-hidden="true"></span>
+      <div>
+        <p class="eyebrow">Hello-Agents</p>
+        <h1>CryptoAnalysisAgent</h1>
+      </div>
+    </div>
+    <p class="status" id="health" role="status">正在检查环境…</p>
+  </header>
+
+  <div class="shell">
+    <aside class="rail">
+      <form id="analyze-form" class="panel">
+        <label for="symbol">分析标的</label>
+        <div class="symbol-row">
+          <input id="symbol" name="symbol" type="text" value="BTC" autocomplete="off" spellcheck="false" maxlength="12" aria-describedby="symbol-hint">
+          <button type="submit" id="run" class="primary">开始分析</button>
+        </div>
+        <p id="symbol-hint" class="hint">输入交易对基础货币，例如 BTC、ETH、SOL</p>
+        <div class="chips" role="group" aria-label="常用币种">
+          <button type="button" class="chip" data-symbol="BTC">BTC</button>
+          <button type="button" class="chip" data-symbol="ETH">ETH</button>
+          <button type="button" class="chip" data-symbol="SOL">SOL</button>
+          <button type="button" class="chip" data-symbol="BNB">BNB</button>
+          <button type="button" class="chip" data-symbol="XRP">XRP</button>
+        </div>
+        <label class="check">
+          <input type="checkbox" id="record" name="record">
+          通过质量门禁后归档为信号
+        </label>
+      </form>
+
+      <section class="panel agents" aria-label="分析师状态">
+        <h2>协作分析师</h2>
+        <ul id="agent-list">
+          <li data-agent="technical"><span class="dot"></span>技术面</li>
+          <li data-agent="onchain"><span class="dot"></span>链上面</li>
+          <li data-agent="sentiment"><span class="dot"></span>情绪面</li>
+          <li data-agent="coordinator"><span class="dot"></span>综合研判</li>
+        </ul>
+      </section>
+
+      <section class="panel history">
+        <h2>最近报告</h2>
+        <ul id="history" aria-live="polite"></ul>
+      </section>
+    </aside>
+
+    <main>
+      <section class="metrics" id="metrics" hidden></section>
+      <article id="report" class="report panel" aria-live="polite">
+        <div class="empty">
+          <h2>本地多维分析台</h2>
+          <p>选择币种后，技术、链上、情绪三位分析师会并行工作，由协调员汇总成条件化建议。分析大约需要半分钟。</p>
+          <p class="fine">结果仅供研究参考，不构成投资建议。</p>
+        </div>
+      </article>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>

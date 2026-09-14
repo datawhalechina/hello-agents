@@ -1,0 +1,37 @@
+# Environment
+.env
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Output (keep sample only)
+outputs/*.md
+outputs/reports/
+!outputs/sample_report.md
+
+# Agent workspace (generated at runtime)
+workspace/memory/
+workspace/sessions/
+workspace/*.md
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
