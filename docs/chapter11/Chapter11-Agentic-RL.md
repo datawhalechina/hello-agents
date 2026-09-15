@@ -927,7 +927,7 @@ As shown in Figure 11.6, SFT is the bridge from pretrained models to reinforceme
 
 ### 11.3.2 LoRA: Parameter-Efficient Fine-Tuning
 
-Directly fine-tuning the entire model requires substantial computational resources and memory. For Qwen3-0.6B (0.6B parameters), full fine-tuning requires about 12GB memory (FP16) or 24GB memory (FP32). For larger models (such as 7B, 13B), full fine-tuning is almost impossible on consumer-grade GPUs.
+Directly fine-tuning the entire model requires substantial computational resources and memory. For Qwen3-0.6B (about 0.6B parameters), the model weights themselves are only about 1.2 GB (FP16) or 2.4 GB (FP32), but full fine-tuning also requires storing gradients, optimizer states, and activations, so the total VRAM usage will continue to increase. For larger models (such as 7B, 13B), full fine-tuning is almost impossible on consumer-grade GPUs.
 
 LoRA (Low-Rank Adaptation)<sup>[3]</sup> is a parameter-efficient fine-tuning method that only trains a small number of additional parameters while keeping the original model parameters frozen. The core idea of LoRA is: parameter changes during model fine-tuning can be represented by low-rank matrices.
 
