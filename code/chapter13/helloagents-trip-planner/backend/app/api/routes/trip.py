@@ -70,13 +70,26 @@ async def health_check():
     """健康检查"""
     try:
         # 检查Agent是否可用
-        agent = get_trip_planner_agent()
+        trip_planner = get_trip_planner_agent()
+
+        component_agents = (
+            trip_planner.attraction_agent,
+            trip_planner.weather_agent,
+            trip_planner.hotel_agent,
+            trip_planner.planner_agent,
+        )
+        # 多个组件可能共享同名工具，按系统实际能力去重统计。
+        unique_tool_names = {
+            tool_name
+            for component_agent in component_agents
+            for tool_name in component_agent.list_tools()
+        }
         
         return {
             "status": "healthy",
             "service": "trip-planner",
-            "agent_name": agent.agent.name,
-            "tools_count": len(agent.agent.list_tools())
+            "agent_name": type(trip_planner).__name__,
+            "tools_count": len(unique_tool_names)
         }
     except Exception as e:
         raise HTTPException(
