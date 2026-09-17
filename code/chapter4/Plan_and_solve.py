@@ -113,6 +113,7 @@ class PlanAndSolveAgent:
             return
         final_answer = self.executor.execute(question, plan)
         print(f"\n--- 任务完成 ---\n最终答案: {final_answer}")
+        return final_answer
 
 # --- 5. 主函数入口 ---
 if __name__ == '__main__':
