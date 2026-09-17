@@ -449,7 +449,9 @@ async def background_dialogue_update():
         try:
             # Use batch generator to generate background dialogues for all NPCs
             batch_generator = get_batch_generator()
-            dialogues = batch_generator.generate_batch_dialogues()
+            dialogues = await asyncio.to_thread(
+                batch_generator.generate_batch_dialogues
+            )
 
             # Update to state manager
             for npc_name, dialogue in dialogues.items():
