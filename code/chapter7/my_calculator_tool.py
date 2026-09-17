@@ -15,6 +15,8 @@ def my_calculate(expression: str) -> str:
         ast.Sub: operator.sub,      # -
         ast.Mult: operator.mul,     # *
         ast.Div: operator.truediv,  # /
+        ast.USub: operator.neg,     # unary -
+        ast.UAdd: operator.pos,     # unary +
     }
 
     # 支持的基本函数
@@ -34,6 +36,12 @@ def _eval_node(node, operators, functions):
     """简化的表达式求值"""
     if isinstance(node, ast.Constant):
         return node.value
+    elif isinstance(node, ast.UnaryOp):
+        operand = _eval_node(node.operand, operators, functions)
+        op = operators.get(type(node.op))
+        if op is None:
+            raise ValueError("不支持的一元运算")
+        return op(operand)
     elif isinstance(node, ast.BinOp):
         left = _eval_node(node.left, operators, functions)
         right = _eval_node(node.right, operators, functions)
