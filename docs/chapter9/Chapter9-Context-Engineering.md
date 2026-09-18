@@ -1388,6 +1388,11 @@ class ProjectAssistant(SimpleAgent):
                 "note_type": "blocker",
                 "limit": 2
             })
+            actions = self.note_tool.run({
+                "action": "list",
+                "note_type": "action",
+                "limit": 2
+            })
 
             # General search
             search_results = self.note_tool.run({
@@ -1397,7 +1402,7 @@ class ProjectAssistant(SimpleAgent):
             })
 
             # Merge and deduplicate
-            all_notes = {note['note_id']: note for note in blockers + search_results}
+            all_notes = {note['note_id']: note for note in blockers + actions + search_results}
             return list(all_notes.values())[:limit]
 
         except Exception as e:
