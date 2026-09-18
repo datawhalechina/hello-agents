@@ -190,7 +190,7 @@ class ContextConfig:
         reserve_ratio: Ratio reserved for system instructions (0.0-1.0)
         min_relevance: Minimum relevance threshold
         enable_compression: Whether to enable compression
-        recency_weight: Recency weight (0.0-1.0)
+        recency_weight: Temporal recency weight (0.0-1.0)
         relevance_weight: Relevance weight (0.0-1.0)
     """
     max_tokens: int = 3000
@@ -346,10 +346,10 @@ def _select(
             relevance = self._calculate_relevance(packet.content, user_query)
             packet.relevance_score = relevance
 
-        # Calculate recency score
+        # Calculate temporal recency score
         recency = self._calculate_recency(packet.timestamp)
 
-        # Combined score = relevance weight × relevance + recency weight × recency
+        # Combined score = relevance weight × relevance + temporal recency weight × temporal recency
         combined_score = (
             self.config.relevance_weight * packet.relevance_score +
             self.config.recency_weight * recency
