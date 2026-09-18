@@ -208,7 +208,7 @@ grpo_result_str = rl_tool.run({
     "output_dir": "./models/quick_test_grpo",
     "max_samples": 5,       # 只用5个样本快速测试
     "num_epochs": 1,
-    "batch_size": 2,        # 必须能被num_generations(8)整除,使用2
+    "batch_size": 2,        # num_generations(8)必须能被batch_size整除,使用2
     "use_lora": True
 })
 
