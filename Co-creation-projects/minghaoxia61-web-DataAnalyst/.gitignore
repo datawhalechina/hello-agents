@@ -1,0 +1,15 @@
+# 环境与密钥（切勿提交真实 API Key）
+.env
+.venv/
+venv/
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# 大文件与临时输出
+*.mp4
+*.zip
+*.tar.gz
+outputs/*.tmp

@@ -1,0 +1,12 @@
+# 核心框架
+hello-agents[all]>=0.2.7
+
+# 数据分析与可视化
+pandas>=2.0.0
+matplotlib>=3.7.0
+
+# 环境变量加载
+python-dotenv>=1.0.0
+
+# Notebook 运行环境（可选，也可以用 pip install jupyterlab）
+jupyterlab>=4.0.0
