@@ -1,0 +1,4 @@
+[flake8]
+ignore = E501, W293, E302, E305, E261, W291, F401, E722
+exclude = .venv,alembic
+max-line-length = 120
