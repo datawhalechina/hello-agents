@@ -1,0 +1,80 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "contact": {
+      "email": "me@kennethreitz.org",
+      "responsibleDeveloper": "Kenneth Reitz",
+      "responsibleOrganization": "Kenneth Reitz",
+      "url": "https://kennethreitz.org"
+    },
+    "description": "A simple HTTP Request & Response Service.<br/> <br/> <b>Run locally: </b> <code>$ docker run -p 80:80 kennethreitz/httpbin</code>",
+    "title": "httpbin.org",
+    "version": "0.9.2"
+  },
+  "paths": {
+    "/get": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "The request's query parameters."
+          }
+        },
+        "summary": "The request's query parameters.",
+        "tags": [
+          "HTTP Methods"
+        ]
+      }
+    },
+    "/post": {
+      "post": {
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "The request's POST parameters."
+          }
+        },
+        "summary": "The request's POST parameters.",
+        "tags": [
+          "HTTP Methods"
+        ]
+      }
+    },
+    "/json": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "An JSON document."
+          }
+        },
+        "summary": "Returns a simple JSON document.",
+        "tags": [
+          "Response formats"
+        ]
+      }
+    },
+    "/uuid": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A UUID4."
+          }
+        },
+        "summary": "Return a UUID4.",
+        "tags": [
+          "Dynamic data"
+        ]
+      }
+    }
+  }
+}

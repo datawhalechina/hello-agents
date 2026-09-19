@@ -1,0 +1,31 @@
+# ============================================================
+# .dockerignore - "别把这些搬进集装箱现场"的黑名单
+#
+# docker build 时,会把当前目录整个打包发给 Docker 引擎
+# (这个包叫"构建上下文")。你项目里 .venv 有近 2 万个文件、
+# node_modules 也是几百 MB —— 不排除的话,每次构建光传文件就要几分钟。
+#
+# 注意:node_modules 在容器里会重新 npm install,宿主这份完全不用带;
+# .env 里有密钥,绝对不能进镜像(以后用 docker run --env-file 在运行时喂)。
+# ============================================================
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Node(阶段一会在容器里自己装,宿主这份不带)
+frontend/node_modules/
+
+# 测试与日志(镜像里不需要)
+tests/
+reports/
+server.log
+httpbin.json
+
+# 密钥!打死也不进镜像
+.env
+
+# Git 元数据
+.git/

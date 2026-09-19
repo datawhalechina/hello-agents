@@ -1,0 +1,18 @@
+openapi: 3.0.0
+info:
+  title: JSONPlaceholder 测试API
+  description: 用于测试智能API测试助手的示例文档
+  version: 1.0.0
+paths:
+  /users:
+    get:
+      summary: 获取用户列表
+      responses:
+        '200':
+          description: 成功返回用户列表
+  /posts:
+    get:
+      summary: 获取帖子列表
+      responses:
+        '200':
+          description: 成功返回帖子列表

@@ -1,0 +1,27 @@
+/* ===== 全局样式：先做「基础重置 + 页面氛围」，组件内部样式各自写在 .vue 里 ===== */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  /* 浅灰底，让白色的 el-card 卡片浮起来，更有层次 */
+  background-color: #f0f2f5;
+  /* 匹配企业后台常用的字体族 */
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
+  color: #303133;
+}
+
+#app {
+  /* 应用内容的最大宽度与水平居中，宽屏下不会拉得满屏 */
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 20px;
+}
