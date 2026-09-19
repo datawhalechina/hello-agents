@@ -1,0 +1,23 @@
+# 环境与密钥
+.env
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+*.egg-info/
+
+# 大文件不入库（仅保留 sample 与 demo_result）
+data/*.xlsx
+data/*.parquet
+data/*.zip
+data/*.gz
+outputs/*.csv
+outputs/cleaned_*
+outputs/*_[0-9]*.png
+!outputs/demo_result.png
+
+# 系统文件
+.DS_Store
+Thumbs.db
