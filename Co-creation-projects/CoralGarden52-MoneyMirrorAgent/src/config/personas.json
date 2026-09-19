@@ -1,0 +1,122 @@
+{
+  "version": 2,
+  "archetypes": [
+    {
+      "id": "late_night_focus",
+      "name": "夜行消费探索者",
+      "minimum_score": 52,
+      "required_features": {"night": 38},
+      "weights": {"night": 0.75, "impulse": 0.25},
+      "evidence_metrics": ["late_night_share", "late_night_count", "impulse"]
+    },
+    {
+      "id": "weekend_experience",
+      "name": "周末体验玩家",
+      "minimum_score": 52,
+      "required_features": {"weekend": 38},
+      "weights": {"weekend": 0.65, "flexible_spend": 0.35},
+      "evidence_metrics": ["weekend_share", "weekend_count", "flexible_spend_share"]
+    },
+    {
+      "id": "frequent_small_spend",
+      "name": "高频小额行动派",
+      "minimum_score": 55,
+      "required_features": {"frequent_small": 45},
+      "weights": {"frequent_small": 0.65, "impulse": 0.2, "food": 0.15},
+      "evidence_metrics": ["frequent_small_count", "frequent_small_share", "food_share"]
+    },
+    {
+      "id": "subscription_collector",
+      "name": "数字订阅整理师",
+      "minimum_score": 50,
+      "required_features": {"subscription": 35},
+      "weights": {"subscription": 0.8, "planning_inverse": 0.2},
+      "evidence_metrics": ["subscription_share", "subscription_count"]
+    },
+    {
+      "id": "learning_investor",
+      "name": "学习投入玩家",
+      "minimum_score": 55,
+      "required_features": {"learning": 45, "learning_consistency": 50},
+      "weights": {"learning": 0.75, "learning_consistency": 0.25},
+      "evidence_metrics": ["learning_share", "learning_active_months"]
+    },
+    {
+      "id": "steady_planner",
+      "name": "稳健规划玩家",
+      "minimum_score": 60,
+      "required_features": {"planning": 55, "savings": 45},
+      "weights": {"planning": 0.6, "savings": 0.4},
+      "evidence_metrics": ["savings_rate", "payday_share", "late_night_share"]
+    },
+    {
+      "id": "payday_rhythm",
+      "name": "发薪节奏管理者",
+      "minimum_score": 58,
+      "required_features": {"payday": 55, "impulse": 35},
+      "weights": {"payday": 0.55, "impulse": 0.3, "planning": 0.15},
+      "evidence_metrics": ["payday_share", "savings_rate", "impulse"]
+    },
+    {
+      "id": "weekend_social",
+      "name": "周末社交发动机",
+      "minimum_score": 58,
+      "required_features": {"weekend": 42, "flexible_spend": 30},
+      "weights": {"weekend": 0.55, "flexible_spend": 0.3, "food": 0.15},
+      "evidence_metrics": ["weekend_share", "weekend_count", "food_share", "flexible_spend_share"]
+    },
+    {
+      "id": "food_routine",
+      "name": "日常餐饮探索家",
+      "minimum_score": 62,
+      "required_features": {"food": 55, "frequent_small": 42},
+      "weights": {"food": 0.55, "frequent_small": 0.3, "weekend": 0.15},
+      "evidence_metrics": ["food_share", "frequent_small_count", "frequent_small_share"]
+    },
+    {
+      "id": "savings_sprinter",
+      "name": "储蓄冲刺玩家",
+      "minimum_score": 66,
+      "required_features": {"savings": 65, "planning": 52},
+      "weights": {"savings": 0.65, "planning": 0.35},
+      "evidence_metrics": ["savings_rate", "payday_share", "flexible_spend_share"]
+    },
+    {
+      "id": "digital_lifestyle",
+      "name": "数字生活玩家",
+      "minimum_score": 58,
+      "required_features": {"subscription": 45, "planning_inverse": 30},
+      "weights": {"subscription": 0.68, "planning_inverse": 0.32},
+      "evidence_metrics": ["subscription_share", "subscription_count", "savings_rate"]
+    },
+    {
+      "id": "learning_consistent",
+      "name": "学习成长玩家",
+      "minimum_score": 60,
+      "required_features": {"learning": 48, "learning_consistency": 65},
+      "weights": {"learning_consistency": 0.6, "learning": 0.4},
+      "evidence_metrics": ["learning_share", "learning_active_months", "savings_rate"]
+    },
+    {
+      "id": "flexible_adventurer",
+      "name": "弹性体验玩家",
+      "minimum_score": 60,
+      "required_features": {"flexible_spend": 52},
+      "weights": {"flexible_spend": 0.62, "weekend": 0.23, "impulse_inverse": 0.15},
+      "evidence_metrics": ["flexible_spend_share", "weekend_share", "weekend_count", "impulse"]
+    },
+    {
+      "id": "mindful_minimalist",
+      "name": "清醒消费实践者",
+      "minimum_score": 64,
+      "required_features": {"planning": 62, "impulse_inverse": 58},
+      "weights": {"planning": 0.45, "savings": 0.3, "impulse_inverse": 0.25},
+      "evidence_metrics": ["savings_rate", "impulse", "late_night_share", "frequent_small_share"]
+    }
+  ],
+  "fallback": {
+    "id": "balanced_explorer",
+    "name": "均衡节奏探索者",
+    "evidence_metrics": ["savings_rate", "late_night_share", "weekend_share"]
+  }
+}
