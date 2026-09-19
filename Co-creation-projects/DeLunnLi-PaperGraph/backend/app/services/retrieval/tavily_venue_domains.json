@@ -1,0 +1,81 @@
+{
+  "official_proceedings_hosts": [
+    "papers.nips.cc",
+    "proceedings.neurips.cc",
+    "proceedings.iclr.cc",
+    "proceedings.mlr.press",
+    "openaccess.thecvf.com",
+    "aclanthology.org",
+    "aaai.org",
+    "ijcai.org"
+  ],
+  "include_domains_by_canonical": {
+    "neurips": ["papers.nips.cc", "proceedings.neurips.cc"],
+    "iclr": ["proceedings.iclr.cc"],
+    "icml": ["proceedings.mlr.press"],
+    "cvpr": ["openaccess.thecvf.com"],
+    "iccv": ["openaccess.thecvf.com"],
+    "eccv": ["openaccess.thecvf.com"],
+    "aaai": ["aaai.org"],
+    "acl": ["aclanthology.org"],
+    "emnlp": ["aclanthology.org"],
+    "coling": ["aclanthology.org"],
+    "ijcai": ["ijcai.org"],
+    "sigir": ["aclanthology.org"]
+  },
+  "substring_rules": [
+    {
+      "domains": ["papers.nips.cc", "proceedings.neurips.cc"],
+      "any": [
+        {"regex": "(?<!\\w)nips(?!\\w)"},
+        {"substring": "neurips"},
+        {"substring": "neural information processing"}
+      ]
+    },
+    {
+      "domains": ["proceedings.iclr.cc"],
+      "any": [
+        {"substring": "iclr"},
+        {"substring": "international conference on learning representations"}
+      ]
+    },
+    {
+      "domains": ["proceedings.mlr.press"],
+      "any": [
+        {"substring": "icml"},
+        {"substring": "international conference on machine learning"},
+        {"regex": "\\bpmlr\\b"}
+      ]
+    },
+    {
+      "domains": ["openaccess.thecvf.com"],
+      "any": [
+        {"substring": "cvpr"},
+        {"substring": "iccv"},
+        {"substring": "eccv"},
+        {"substring": "wacv"},
+        {"substring": "ieee/cvf"},
+        {"substring": "computer vision and pattern recognition"},
+        {"substring": "european conference on computer vision"},
+        {"substring": "international conference on computer vision"}
+      ]
+    },
+    {"domains": ["aaai.org"], "any": [{"substring": "aaai"}]},
+    {"domains": ["ijcai.org"], "any": [{"substring": "ijcai"}]},
+    {
+      "domains": ["aclanthology.org"],
+      "any": [
+        {"substring": "emnlp"},
+        {"substring": "naacl"},
+        {"substring": "eacl"},
+        {"substring": "coling"},
+        {"substring": "aclanthology"},
+        {"substring": "findings of acl"},
+        {"substring": "findings of emnlp"},
+        {"substring": "findings of naacl"},
+        {"regex": "\\bacl\\b"}
+      ]
+    },
+    {"domains": ["aclanthology.org"], "any": [{"substring": "sigir"}]}
+  ]
+}
