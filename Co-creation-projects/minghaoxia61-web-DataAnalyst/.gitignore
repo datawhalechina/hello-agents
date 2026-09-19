@@ -8,6 +8,9 @@ __pycache__/
 *.py[cod]
 .ipynb_checkpoints/
 
+# HelloAgents 框架运行时生成的会话与轨迹文件
+memory/
+
 # 大文件与临时输出
 *.mp4
 *.zip
