@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+.venv/
+env/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node.js
+node_modules/
+dist/
+dist-ssr/
+
+# Build outputs
+*.local
+
+# Logs
+logs/
+*.log
+
+# Backend data (user-specific)
+backend/data/
+backend/memory/
+
+# Agent trace files
+*.jsonl
+
+# Sisyphus orchestration
+.sisyphus/
+
+# Frontend assets (Vite scaffold)
+frontend/src/assets/vite.svg
+frontend/src/assets/typescript.svg
+
+# Test coverage
+coverage/
+.nyc_output/
