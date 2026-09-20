@@ -1,0 +1,13 @@
+# Python 3.11-3.12 is required. The exact resolved set is in requirements.lock.
+hello-agents==1.0.0
+fastapi>=0.115.0,<1.0.0
+starlette>=0.46.0,<2.0.0
+uvicorn>=0.30.0,<1.0.0
+python-dotenv>=1.0.1
+fitparse>=1.2.0
+fitfile>=1.2.0
+python-multipart>=0.0.18
+requests>=2.31.0,<3.0.0
+fastmcp>=3.4.0
+google-api-python-client>=2.0.0
+tzdata>=2024.1; platform_system == "Windows"
