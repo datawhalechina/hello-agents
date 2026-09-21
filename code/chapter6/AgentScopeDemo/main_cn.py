@@ -137,10 +137,11 @@ class ThreeKingdomsWerewolfGame:
             )
         )
 
-        # 由 sequential_reply 逐条广播发言。
+        # 讨论阶段：狼人通过消息交换策略
         for _ in range(MAX_DISCUSSION_ROUND):
             await sequential_reply(self.werewolves, structured_schema=DiscussionModelCN)
 
+        # 投票阶段：收集并统计狼人的击杀决策
         kill_votes = await fanout_reply(
             self.werewolves,
             msg=await self.moderator.announce("请选择击杀目标"),
@@ -283,6 +284,7 @@ class ThreeKingdomsWerewolfGame:
         )
         await sequential_reply( self.alive_players, msg=discussion_announcement)
 
+        # 并行收集所有玩家的投票决策
         vote_msgs = await fanout_reply(
             self.alive_players,
             await self.moderator.announce("请投票选择要淘汰的玩家"),

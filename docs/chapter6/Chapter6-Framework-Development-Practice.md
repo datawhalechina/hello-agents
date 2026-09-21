@@ -449,9 +449,9 @@ Using messages as the basic unit of interaction brings several key advantages:
 In AgentScope, each agent has a clear lifecycle (initialization, running, pausing, destruction, etc.) and is implemented based on a unified base class `AgentBase`. Developers usually only need to focus on its core `reply` method.
 
 ```python
-from agentscope.agents import AgentBase
+from agentscope.agents import Agent
 
-class CustomAgent(AgentBase):
+class CustomAgent(Agent):
     def __init__(self, name: str, **kwargs):
         super().__init__(name=name, **kwargs)
         # Agent initialization logic
@@ -504,27 +504,25 @@ async def werewolf_phase(self, round_num: int):
     if not self.werewolves:
         return None
 
-    # Establish werewolf-exclusive communication channel through message center
-    async with MsgHub(
+    # Discussion
+    await broadcast_msg(
         self.werewolves,
-        enable_auto_broadcast=True,
-        announcement=await self.moderator.announce(
-            f"Werewolves, please discuss tonight's kill target. Surviving players: {format_player_list(self.alive_players)}"
-        ),
-    ) as werewolves_hub:
-        # Discussion phase: werewolves exchange strategies through messages
-        for _ in range(MAX_DISCUSSION_ROUND):
-            for wolf in self.werewolves:
-                await wolf(structured_model=DiscussionModelCN)
-
-        # Voting phase: collect and count werewolves' kill decisions
-        werewolves_hub.set_auto_broadcast(False)
-        kill_votes = await fanout_pipeline(
-            self.werewolves,
-            msg=await self.moderator.announce("Please choose kill target"),
-            structured_model=WerewolfKillModelCN,
-            enable_gather=False,
+        msg=await self.moderator.announce(
+            f"狼人们，请讨论今晚的击杀目标。存活玩家：{format_player_list(self.alive_players)}"
         )
+    )
+
+    # Discussion phase: werewolves exchange strategies through messages
+    for _ in range(MAX_DISCUSSION_ROUND):
+        await sequential_reply(self.werewolves, structured_schema=DiscussionModelCN)
+
+    # Voting phase: collect and count werewolves' kill decisions
+    kill_votes = await fanout_reply(
+        self.werewolves,
+        msg=await self.moderator.announce("请选择击杀目标"),
+        structured_schema=WerewolfKillModelCN,
+        enable_gather=False,
+    )        
 ```
 
 The advantage of this design is that game logic is clearly expressed as "in a specific context, what mode of message exchange to conduct," rather than a series of rigid state transitions. Day discussion (full broadcast), seer verification (point-to-point request), and other phases all follow the same design paradigm.
@@ -593,7 +591,7 @@ AgentScope's asynchronous architecture plays an important role in this multi-age
 
 ```python
 # Collect voting decisions from all players in parallel
-vote_msgs = await fanout_pipeline(
+vote_msgs = await fanout_reply(
     self.alive_players,
     await self.moderator.announce("Please vote to choose the player to eliminate"),
     structured_model=get_vote_model_cn(self.alive_players),
@@ -601,25 +599,7 @@ vote_msgs = await fanout_pipeline(
 )
 ```
 
-`fanout_pipeline` allows us to send the same message to all agents in parallel and asynchronously collect their responses. This not only improves the execution efficiency of the game but, more importantly, simulates the "simultaneous voting" scenario in real Werewolf games. At the same time, we add fault tolerance handling at key points:
-
-```python
-try:
-    response = await wolf(
-        "Please analyze the current situation and express your viewpoint.",
-        structured_model=DiscussionModelCN
-    )
-except Exception as e:
-    print(f"⚠️ {wolf.name} error during discussion: {e}")
-    # Create default response to ensure game continues
-    default_response = DiscussionModelCN(
-        reach_agreement=False,
-        confidence_level=5,
-        key_evidence="Unable to analyze temporarily"
-    )
-```
-
-This design ensures that even if an agent encounters an exception, the entire game process can continue.
+`fanout_reply` allows us to send the same message to all agents in parallel and asynchronously collect their responses. This not only improves the execution efficiency of the game but, more importantly, simulates the "simultaneous voting" scenario in real Werewolf games.
 
 (6) Case Output and Summary
 
