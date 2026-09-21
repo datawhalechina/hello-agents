@@ -363,10 +363,8 @@ class ThreeKingdomsWerewolfGame:
             traceback.print_exc()
 
 
-from dotenv import load_dotenv
 async def main():
     """主函数"""
-    load_dotenv()
     # 检查环境变量
     if "DASHSCOPE_API_KEY" not in os.environ:
         print("❌ 请设置环境变量 DASHSCOPE_API_KEY")
