@@ -21,7 +21,7 @@ class ProjectAssistant(SimpleAgent):
 
     def __init__(self, name: str, project_name: str, **kwargs):
         # 配置 LLM
-        from hello_agents.core.llm import HelloAgentsLLM
+        # from hello_agents.core.llm import HelloAgentsLLM
         llm = HelloAgentsLLM()
 
         super().__init__(name=name, llm=llm, **kwargs)

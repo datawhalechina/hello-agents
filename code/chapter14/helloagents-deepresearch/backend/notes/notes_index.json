@@ -1,0 +1,338 @@
+{
+  "notes": [
+    {
+      "id": "note_20260528_103244_0",
+      "title": "任务1: 组织基本信息",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_1"
+      ],
+      "created_at": "2026-05-28T10:32:44.051945"
+    },
+    {
+      "id": "note_20260528_103244_1",
+      "title": "任务2: 核心业务与项目",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_2"
+      ],
+      "created_at": "2026-05-28T10:32:44.051945"
+    },
+    {
+      "id": "note_20260528_103244_2",
+      "title": "任务3: 团队架构与运营",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_3"
+      ],
+      "created_at": "2026-05-28T10:32:44.062031"
+    },
+    {
+      "id": "note_20260528_103244_3",
+      "title": "任务4: 社区影响力评估",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_4"
+      ],
+      "created_at": "2026-05-28T10:32:44.062031"
+    },
+    {
+      "id": "note_20260528_103244_4",
+      "title": "任务5: 资源与合作伙伴",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_5"
+      ],
+      "created_at": "2026-05-28T10:32:44.062031"
+    },
+    {
+      "id": "note_20260528_103350_5",
+      "title": "研究报告：Datawhale是一个什么样的组织？",
+      "type": "conclusion",
+      "tags": [
+        "deep_research",
+        "report"
+      ],
+      "created_at": "2026-05-28T10:33:50.699920"
+    },
+    {
+      "id": "note_20260528_103517_6",
+      "title": "任务1: 组织背景与定位",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_1"
+      ],
+      "created_at": "2026-05-28T10:35:17.152749"
+    },
+    {
+      "id": "note_20260528_103517_7",
+      "title": "任务2: 核心业务与项目",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_2"
+      ],
+      "created_at": "2026-05-28T10:35:17.152749"
+    },
+    {
+      "id": "note_20260528_103517_8",
+      "title": "任务3: 社区规模与影响力",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_3"
+      ],
+      "created_at": "2026-05-28T10:35:17.152749"
+    },
+    {
+      "id": "note_20260528_103517_9",
+      "title": "任务4: 运营机制与模式",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_4"
+      ],
+      "created_at": "2026-05-28T10:35:17.152749"
+    },
+    {
+      "id": "note_20260528_103555_10",
+      "title": "研究报告：Datawhale是一个什么样的组织？",
+      "type": "conclusion",
+      "tags": [
+        "deep_research",
+        "report"
+      ],
+      "created_at": "2026-05-28T10:35:55.959719"
+    },
+    {
+      "id": "note_20260528_104010_11",
+      "title": "任务1: 公司背景与基本信息",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_1"
+      ],
+      "created_at": "2026-05-28T10:40:10.559705"
+    },
+    {
+      "id": "note_20260528_104010_12",
+      "title": "任务2: 经营范围与资质证书",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_2"
+      ],
+      "created_at": "2026-05-28T10:40:10.562218"
+    },
+    {
+      "id": "note_20260528_104010_13",
+      "title": "任务3: 法律诉讼与经营风险",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_3"
+      ],
+      "created_at": "2026-05-28T10:40:10.566080"
+    },
+    {
+      "id": "note_20260528_104010_14",
+      "title": "任务4: 市场声誉与合作网络",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_4"
+      ],
+      "created_at": "2026-05-28T10:40:10.566080"
+    },
+    {
+      "id": "note_20260528_104036_15",
+      "title": "研究报告：民生科技有限责任公司深圳分公司",
+      "type": "conclusion",
+      "tags": [
+        "deep_research",
+        "report"
+      ],
+      "created_at": "2026-05-28T10:40:36.397874"
+    },
+    {
+      "id": "note_20260528_104215_16",
+      "title": "任务1: 公司基本面梳理",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_1"
+      ],
+      "created_at": "2026-05-28T10:42:15.725371"
+    },
+    {
+      "id": "note_20260528_104215_17",
+      "title": "任务2: 股价走势分析",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_2"
+      ],
+      "created_at": "2026-05-28T10:42:15.733305"
+    },
+    {
+      "id": "note_20260528_104215_18",
+      "title": "任务3: 行业竞争格局",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_3"
+      ],
+      "created_at": "2026-05-28T10:42:15.736200"
+    },
+    {
+      "id": "note_20260528_104215_19",
+      "title": "任务4: 机构观点与风险",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_4"
+      ],
+      "created_at": "2026-05-28T10:42:15.736200"
+    },
+    {
+      "id": "note_20260528_104255_20",
+      "title": "研究报告：际华股票",
+      "type": "conclusion",
+      "tags": [
+        "deep_research",
+        "report"
+      ],
+      "created_at": "2026-05-28T10:42:55.928824"
+    },
+    {
+      "id": "note_20260528_104501_21",
+      "title": "任务1: 公司基本面与主营业务",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_1"
+      ],
+      "created_at": "2026-05-28T10:45:01.104885"
+    },
+    {
+      "id": "note_20260528_104501_22",
+      "title": "任务2: 新能源热管理业务分析",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_2"
+      ],
+      "created_at": "2026-05-28T10:45:01.121778"
+    },
+    {
+      "id": "note_20260528_104501_23",
+      "title": "任务3: 机器人业务布局与进展",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_3"
+      ],
+      "created_at": "2026-05-28T10:45:01.131981"
+    },
+    {
+      "id": "note_20260528_104501_24",
+      "title": "任务4: 财务表现与估值分析",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_4"
+      ],
+      "created_at": "2026-05-28T10:45:01.131981"
+    },
+    {
+      "id": "note_20260528_104501_25",
+      "title": "任务5: 行业竞争格局与风险因素",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_5"
+      ],
+      "created_at": "2026-05-28T10:45:01.131981"
+    },
+    {
+      "id": "note_20260528_104539_26",
+      "title": "研究报告：三花智控",
+      "type": "conclusion",
+      "tags": [
+        "deep_research",
+        "report"
+      ],
+      "created_at": "2026-05-28T10:45:39.651749"
+    },
+    {
+      "id": "note_20260528_104752_27",
+      "title": "任务1: 公司业务结构与核心产品",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_1"
+      ],
+      "created_at": "2026-05-28T10:47:52.439343"
+    },
+    {
+      "id": "note_20260528_104752_28",
+      "title": "任务2: 行业竞争格局与市场地位",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_2"
+      ],
+      "created_at": "2026-05-28T10:47:52.449364"
+    },
+    {
+      "id": "note_20260528_104752_29",
+      "title": "任务3: 财务表现与盈利能力分析",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_3"
+      ],
+      "created_at": "2026-05-28T10:47:52.460990"
+    },
+    {
+      "id": "note_20260528_104752_30",
+      "title": "任务4: 新能源汽车业务增长潜力",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_4"
+      ],
+      "created_at": "2026-05-28T10:47:52.465168"
+    },
+    {
+      "id": "note_20260528_104752_31",
+      "title": "任务5: 主要风险因素与估值评估",
+      "type": "task_state",
+      "tags": [
+        "deep_research",
+        "task_5"
+      ],
+      "created_at": "2026-05-28T10:47:52.465754"
+    },
+    {
+      "id": "note_20260528_104823_32",
+      "title": "研究报告：三花智控深度研究报告",
+      "type": "conclusion",
+      "tags": [
+        "deep_research",
+        "report"
+      ],
+      "created_at": "2026-05-28T10:48:23.622380"
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-05-28T10:32:24.117173",
+    "total_notes": 33
+  }
+}

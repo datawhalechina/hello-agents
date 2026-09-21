@@ -8,11 +8,15 @@
 
 config_version=5
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
 config/name="Helloagents-AI-Town"
-run/main_scene="uid://b21hnf84ctx7e"
-config/features=PackedStringArray("4.5", "Mobile")
+run/main_scene="uid://dxcvuxgvdsx7"
+config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://icon.svg"
 
 [autoload]

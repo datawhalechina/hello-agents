@@ -142,10 +142,14 @@ import re
 
 # --- 1. 配置LLM客户端 ---
 # 请根据您使用的服务，将这里替换成对应的凭证和地址
-API_KEY = "YOUR_API_KEY"
-BASE_URL = "YOUR_BASE_URL"
-MODEL_ID = "YOUR_MODEL_ID"
-os.environ['TAVILY_API_KEY'] = "YOUR_TAVILY_API_KEY"
+API_KEY = "ms-030e3302-d88b-4d1a-8f75-3dbc038b72d1"
+BASE_URL = "https://api-inference.modelscope.cn/v1"
+MODEL_ID = "deepseek-ai/DeepSeek-V4.1-Flash"
+os.environ['TAVILY_API_KEY'] = "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"
+
+# LLM_API_KEY = "ms-c219dc30-cca0-48e9-8322-c6d516f03bae"
+# LLM_BASE_URL = "https://api-inference.modelscope.cn/v1"
+# LLM_MODEL_ID = 'Qwen/Qwen3.6-35B-A3B' # ModelScope Model-Id, required
 
 llm = OpenAICompatibleClient(
     model=MODEL_ID,
@@ -154,7 +158,7 @@ llm = OpenAICompatibleClient(
 )
 
 # --- 2. 初始化 ---
-user_prompt = "你好，请帮我查询一下今天北京的天气，然后根据天气推荐一个合适的旅游景点。"
+user_prompt = "你好，请帮我查询一下今天深圳的天气，然后根据天气推荐一个合适的旅游景点。"
 prompt_history = [f"用户请求: {user_prompt}"]
 
 print(f"用户输入: {user_prompt}\n" + "="*40)

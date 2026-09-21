@@ -272,25 +272,66 @@ def create_gradio_ui():
         else:
             return f"❌ {result['message']}"
 
+    # def chat(message: str, history: List) -> Tuple[str, List]:
+    #     """聊天功能"""
+    #     if assistant_state["assistant"] is None:
+    #         return "", history + [[message, "❌ 请先初始化助手并加载文档"]]
+    #
+    #     if not message.strip():
+    #         return "", history
+    #
+    #     # 判断是技术问题还是回顾问题
+    #     if any(keyword in message for keyword in ["之前", "学过", "回顾", "历史", "记得"]):
+    #         # 回顾学习历程
+    #         response = assistant_state["assistant"].recall(message)
+    #         response = f"🧠 **学习回顾**\n\n{response}"
+    #     else:
+    #         # 技术问答
+    #         response = assistant_state["assistant"].ask(message)
+    #         response = f"💡 **回答**\n\n{response}"
+    #
+    #     history.append([message, response])
+    #     return "", history
+
     def chat(message: str, history: List) -> Tuple[str, List]:
         """聊天功能"""
+
         if assistant_state["assistant"] is None:
-            return "", history + [[message, "❌ 请先初始化助手并加载文档"]]
+            history.append({
+                "role": "user",
+                "content": message
+            })
+
+            history.append({
+                "role": "assistant",
+                "content": "❌ 请先初始化助手并加载文档"
+            })
+
+            return "", history
 
         if not message.strip():
             return "", history
 
+        # 用户消息
+        history.append({
+            "role": "user",
+            "content": message
+        })
+
         # 判断是技术问题还是回顾问题
         if any(keyword in message for keyword in ["之前", "学过", "回顾", "历史", "记得"]):
-            # 回顾学习历程
             response = assistant_state["assistant"].recall(message)
             response = f"🧠 **学习回顾**\n\n{response}"
         else:
-            # 技术问答
             response = assistant_state["assistant"].ask(message)
             response = f"💡 **回答**\n\n{response}"
 
-        history.append([message, response])
+        # AI 回复
+        history.append({
+            "role": "assistant",
+            "content": response
+        })
+
         return "", history
 
     def add_note_ui(note_content: str, concept: str) -> str:
@@ -374,7 +415,7 @@ def create_gradio_ui():
             chatbot = gr.Chatbot(
                 label="对话历史",
                 height=400,
-                bubble_full_width=False
+                # bubble_full_width=False
             )
             with gr.Row():
                 msg_input = gr.Textbox(

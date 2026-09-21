@@ -1,4 +1,4 @@
-[gd_scene load_steps=65 format=3 uid="uid://vd6f817st20r"]
+[gd_scene format=3 uid="uid://vd6f817st20r"]
 
 [ext_resource type="Script" uid="uid://dyfhfmncwhby0" path="res://scripts/main.gd" id="1_tbgi4"]
 [ext_resource type="PackedScene" uid="uid://dob8a2h4f6gt8" path="res://scenes/player.tscn" id="2_sugp2"]
@@ -381,36 +381,36 @@ size = Vector2(302, 67)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jbj1t"]
 size = Vector2(107, 65)
 
-[node name="Main" type="Node2D"]
+[node name="Main" type="Node2D" unique_id=448491368]
 script = ExtResource("1_tbgi4")
 
-[node name="Background" type="Sprite2D" parent="."]
+[node name="Background" type="Sprite2D" parent="." unique_id=1425958681]
 position = Vector2(644.49994, 371.25)
 scale = Vector2(1.4747808, 1.1394081)
 texture = ExtResource("5_tbgi4")
 metadata/_edit_lock_ = true
 
-[node name="小鲸鱼" type="Sprite2D" parent="Background"]
+[node name="小鲸鱼" type="Sprite2D" parent="Background" unique_id=1339079769]
 position = Vector2(96.62457, -220.50922)
 scale = Vector2(0.09239753, 0.12666555)
 texture = ExtResource("8_tipki")
 
-[node name="Player" parent="." instance=ExtResource("2_sugp2")]
-position = Vector2(453, 492)
+[node name="Player" parent="." unique_id=971661885 instance=ExtResource("2_sugp2")]
+position = Vector2(1051, 173)
 
-[node name="NPCs" type="Node2D" parent="."]
+[node name="NPCs" type="Node2D" parent="." unique_id=615109970]
 
-[node name="NPC_Zhang" parent="NPCs" instance=ExtResource("3_jyhfs")]
+[node name="NPC_Zhang" parent="NPCs" unique_id=487246326 instance=ExtResource("3_jyhfs")]
 position = Vector2(367, 172)
 
-[node name="NPC_Li" parent="NPCs" instance=ExtResource("3_jyhfs")]
+[node name="NPC_Li" parent="NPCs" unique_id=1174372273 instance=ExtResource("3_jyhfs")]
 position = Vector2(1071, 164)
 npc_name = "李四"
 npc_title = "产品经理"
 sprite_frames = SubResource("SpriteFrames_tbgi4")
 move_speed = 20.0
 
-[node name="NPC_Wang" parent="NPCs" instance=ExtResource("3_jyhfs")]
+[node name="NPC_Wang" parent="NPCs" unique_id=851567067 instance=ExtResource("3_jyhfs")]
 z_index = 1
 position = Vector2(206, 423)
 npc_name = "王五"
@@ -418,61 +418,61 @@ npc_title = "UI设计师"
 sprite_frames = SubResource("SpriteFrames_dp3eg")
 wander_range = 0.0
 
-[node name="DialogueUI" parent="." instance=ExtResource("5_tefeu")]
+[node name="DialogueUI" parent="." unique_id=331461541 instance=ExtResource("5_tefeu")]
 
-[node name="Walls" type="Node2D" parent="."]
+[node name="Walls" type="Node2D" parent="." unique_id=2046805840]
 
-[node name="TopWall" type="StaticBody2D" parent="Walls"]
+[node name="TopWall" type="StaticBody2D" parent="Walls" unique_id=1218864713]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/TopWall"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/TopWall" unique_id=1813966321]
 position = Vector2(396, 86)
 shape = SubResource("RectangleShape2D_tipki")
 
-[node name="CollisionShape2D2" type="CollisionShape2D" parent="Walls/TopWall"]
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Walls/TopWall" unique_id=1786649345]
 position = Vector2(1034, 86)
 shape = SubResource("RectangleShape2D_85g3d")
 
-[node name="CollisionShape2D3" type="CollisionShape2D" parent="Walls/TopWall"]
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="Walls/TopWall" unique_id=922802075]
 position = Vector2(787, 113)
 shape = SubResource("RectangleShape2D_choun")
 
-[node name="CollisionShape2D4" type="CollisionShape2D" parent="Walls/TopWall"]
+[node name="CollisionShape2D4" type="CollisionShape2D" parent="Walls/TopWall" unique_id=836886324]
 position = Vector2(747, 112.75)
 shape = SubResource("RectangleShape2D_ya4ey")
 
-[node name="CollisionShape2D5" type="CollisionShape2D" parent="Walls/TopWall"]
+[node name="CollisionShape2D5" type="CollisionShape2D" parent="Walls/TopWall" unique_id=518895079]
 position = Vector2(827, 113)
 shape = SubResource("RectangleShape2D_ya4ey")
 
-[node name="BottomWall" type="StaticBody2D" parent="Walls"]
+[node name="BottomWall" type="StaticBody2D" parent="Walls" unique_id=1722351484]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/BottomWall"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/BottomWall" unique_id=1987347475]
 position = Vector2(641, 567)
 shape = SubResource("RectangleShape2D_eb6dy")
 
-[node name="CollisionShape2D2" type="CollisionShape2D" parent="Walls/BottomWall"]
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Walls/BottomWall" unique_id=882295439]
 position = Vector2(26.75, 328)
 shape = SubResource("RectangleShape2D_trceg")
 
-[node name="CollisionShape2D3" type="CollisionShape2D" parent="Walls/BottomWall"]
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="Walls/BottomWall" unique_id=1725523826]
 position = Vector2(1260, 332)
 shape = SubResource("RectangleShape2D_trceg")
 
-[node name="MiddleWall" type="StaticBody2D" parent="Walls"]
+[node name="MiddleWall" type="StaticBody2D" parent="Walls" unique_id=995086073]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/MiddleWall"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/MiddleWall" unique_id=1587333128]
 position = Vector2(428.5, 268.5)
 shape = SubResource("RectangleShape2D_a8y0u")
 
-[node name="CollisionShape2D2" type="CollisionShape2D" parent="Walls/MiddleWall"]
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Walls/MiddleWall" unique_id=1567811515]
 position = Vector2(907, 368.5)
 shape = SubResource("RectangleShape2D_jkv2x")
 
-[node name="CollisionShape2D3" type="CollisionShape2D" parent="Walls/MiddleWall"]
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="Walls/MiddleWall" unique_id=727477661]
 position = Vector2(1197.5, 369.5)
 shape = SubResource("RectangleShape2D_jbj1t")
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=446208977]
 stream = ExtResource("9_85g3d")
 volume_db = -6.679
 autoplay = true
