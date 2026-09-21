@@ -139,12 +139,12 @@ class ThreeKingdomsWerewolfGame:
 
         # 由 sequential_reply 逐条广播发言。
         for _ in range(MAX_DISCUSSION_ROUND):
-            await sequential_reply(self.werewolves, structured_model=DiscussionModelCN)
+            await sequential_reply(self.werewolves, structured_schema=DiscussionModelCN)
 
         kill_votes = await fanout_reply(
             self.werewolves,
             msg=await self.moderator.announce("请选择击杀目标"),
-            structured_model=WerewolfKillModelCN,
+            structured_schema=WerewolfKillModelCN,
             enable_gather=False,
         )
         
@@ -286,7 +286,7 @@ class ThreeKingdomsWerewolfGame:
         vote_msgs = await fanout_reply(
             self.alive_players,
             await self.moderator.announce("请投票选择要淘汰的玩家"),
-            structured_model=get_vote_model_cn(self.alive_players),
+            structured_schema=get_vote_model_cn(self.alive_players),
             enable_gather=False,
         )
 

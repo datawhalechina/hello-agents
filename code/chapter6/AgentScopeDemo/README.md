@@ -110,7 +110,7 @@ class VoteModelCN(BaseModel):
 vote_msgs = await fanout_reply(
     self.alive_players,
     msg=vote_announcement,
-    structured_model=get_vote_model_cn(self.alive_players),
+    structured_schema=get_vote_model_cn(self.alive_players),
     enable_gather=False,
 )
 ```

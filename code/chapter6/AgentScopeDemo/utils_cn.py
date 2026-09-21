@@ -71,7 +71,7 @@ async def broadcast_msg( participants: List[Agent], msg: Msg, exclude_names: Opt
             await participant.observe(msg)
 
 
-async def sequential_reply( participants: List[Agent], msg: Optional[Msg] = None, structured_model: Optional[Type[BaseModel]] = None, broadcast: bool = True, ) -> List[Optional[Msg]]:
+async def sequential_reply( participants: List[Agent], msg: Optional[Msg] = None, structured_schema: Optional[Type[BaseModel]] = None, broadcast: bool = True, ) -> List[Optional[Msg]]:
     """让参与者依次发言，并可选地将每条发言广播给其他参与者。"""
     if msg is not None:
         await broadcast_msg(participants, msg)
@@ -79,7 +79,7 @@ async def sequential_reply( participants: List[Agent], msg: Optional[Msg] = None
     replies: List[Optional[Msg]] = []
     for participant in participants:
         try:
-            reply = await participant.reply(structured_schema=structured_model)
+            reply = await participant.reply(structured_schema=structured_schema)
         except Exception as error:  # pylint: disable=broad-exception-caught
             print(f"⚠️ {participant.name} 发言失败：{error}")
             reply = None
@@ -95,14 +95,14 @@ async def sequential_reply( participants: List[Agent], msg: Optional[Msg] = None
     return replies
 
 
-async def fanout_reply( participants: List[Agent], msg: Optional[Msg], structured_model: Optional[Type[BaseModel]] = None, enable_gather: bool = True, ) -> List[Optional[Msg]]:
+async def fanout_reply( participants: List[Agent], msg: Optional[Msg], structured_schema: Optional[Type[BaseModel]] = None, enable_gather: bool = True, ) -> List[Optional[Msg]]:
     """并行或顺序请求所有参与者回复"""
 
     async def _reply(participant: Agent) -> Optional[Msg]:
         try:
             return await participant.reply(
                 inputs=msg,
-                structured_schema=structured_model,
+                structured_schema=structured_schema,
             )
         except Exception as error:  # pylint: disable=broad-exception-caught
             print(f"⚠️ {participant.name} 行动失败：{error}")
