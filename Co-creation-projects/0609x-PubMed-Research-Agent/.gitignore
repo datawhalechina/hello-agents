@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# Node / Vue frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+
+# Database & runtime data
+*.db
+*.sqlite3
+data/*.db
+data/cache/
+
+# ChromaDB
+chroma_data/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+*.log
+logs/
+backups/*.dump
+
+# Test cache
+.pytest_cache/
+.tmp/
