@@ -1,1 +1,1 @@
-agentscope==1.0.2
+agentscope==2.0.8

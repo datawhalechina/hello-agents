@@ -24,9 +24,7 @@
 ### 1. 安装依赖
 
 ```bash
-pip install agentscope
-pip install dashscope
-pip install pydantic
+python -m pip install -r requirements.txt
 ```
 
 ### 2. 配置环境变量
@@ -44,7 +42,7 @@ $env:DASHSCOPE_API_KEY="your-api-key-here"
 set DASHSCOPE_API_KEY=your-api-key-here
 ```
 
-获取 API Key：https://dashscope.console.aliyun.com/apiKey
+获取 API Key：https://bailian.console.aliyun.com/cn-beijing/model/settings/api-key
 
 ### 3. 运行游戏
 
@@ -78,10 +76,10 @@ python main_cn.py
     ├── 流程控制
     └── 胜负判定
 
-智能体交互层 (MsgHub)
-    ├── 消息路由
-    ├── 并发处理
-    └── 状态同步
+智能体交互层
+    ├── 同步上下文：broadcast_message
+    ├── 顺序讨论：sequential_reply
+    └── 并行行动：fanout_reply
 
 角色建模层 (DialogAgent)
     ├── 角色提示词
@@ -91,16 +89,13 @@ python main_cn.py
 
 ### 核心组件
 
-**1. 消息中心 (MsgHub)**
+**1. 消息中心**
 ```python
-async with MsgHub(
-    participants=self.werewolves,
-    enable_auto_broadcast=True
-) as hub:
-    # 狼人夜晚讨论
-    for wolf in self.werewolves:
-        await wolf(structured_model=DiscussionModelCN)
-```
+await broadcast_msg(self.werewolves, announcement)
+# 狼人夜晚讨论
+for _ in range(MAX_DISCUSSION_ROUND):
+    await sequential_reply(self.werewolves)
+``` 
 
 **2. 结构化输出**
 ```python
@@ -112,7 +107,7 @@ class VoteModelCN(BaseModel):
 
 **3. 并发管道**
 ```python
-vote_msgs = await fanout_pipeline(
+vote_msgs = await fanout_reply(
     self.alive_players,
     msg=vote_announcement,
     structured_model=get_vote_model_cn(self.alive_players),
@@ -123,7 +118,7 @@ vote_msgs = await fanout_pipeline(
 ## 🎯 游戏流程
 
 ### 夜晚阶段
-1. **狼人讨论**：狼人通过 MsgHub 协商击杀目标
+1. **狼人讨论**：狼人通过 sequential_reply 顺序发言并共享上下文
 2. **预言家查验**：预言家选择查验对象
 3. **女巫行动**：女巫决定是否使用解药/毒药
 
@@ -175,8 +170,8 @@ A: 可能原因：
 
 ### Q: 游戏流程卡住？
 A: 建议：
-- 检查 MsgHub 的消息传递
-- 验证并发管道的执行状态
+- 检查 broadcast_message 是否把公告写入各 Agent 上下文
+- 检查 sequential_reply / fanout_reply 中的 Agent 异常日志
 - 查看控制台错误日志
 
 ## 📚 技术亮点
