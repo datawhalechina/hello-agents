@@ -49,7 +49,7 @@ def majority_vote_cn(votes: Dict[str, str]) -> tuple[str, int]:
     return most_voted[0], most_voted[1]
 
 
-def check_winning_cn(alive_players: List[AgentBase], roles: Dict[str, str]) -> Optional[str]:
+def check_winning_cn(alive_players: List[Agent], roles: Dict[str, str]) -> Optional[str]:
     """检查中文版游戏胜利条件"""
     alive_roles = [roles.get(p.name, "村民") for p in alive_players]
     werewolf_count = alive_roles.count("狼人")
