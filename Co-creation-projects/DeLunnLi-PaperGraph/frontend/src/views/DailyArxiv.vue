@@ -356,7 +356,7 @@ const skipOne = async (paper: Paper, index: number) => {
       action: 'skip',
       source_list: randomIds.value.has(paper.arxiv_id || '') ? 'general' : 'personalized',
       keywords: paper.keywords,
-      category: paper.category,
+      category: paper.category ?? undefined,
       journal: (paper as any).journal,
       source: (paper as any).source,
     })

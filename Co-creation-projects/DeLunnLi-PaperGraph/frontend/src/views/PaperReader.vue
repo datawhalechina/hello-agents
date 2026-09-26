@@ -196,6 +196,7 @@ const onPdfError = (msg: string) => {
 const pdfReady = ref(false)
 const openingStarted = ref(false)
 const onPdfLoaded = () => {
+  loadError.value = ''
   pdfReady.value = true
   void maybeStartOpening()
 }

@@ -221,7 +221,6 @@ const {
   messages,
   hasSearched,
   userInput,
-  showSidebar,
   titleFromMessages: generateTitle,
 })
 function deleteConversation(id: string) {

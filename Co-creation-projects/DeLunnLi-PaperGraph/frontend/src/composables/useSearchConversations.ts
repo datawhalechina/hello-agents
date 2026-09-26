@@ -22,7 +22,8 @@ export function useSearchConversations<TMessage>({
   stateStorageKey = 'searchAgentState',
   conversationsStorageKey = 'searchAgentConversations',
 }: UseSearchConversationsOptions<TMessage>) {
-  const conversations = ref<SearchConversation<TMessage>[]>([])
+  // Messages are plain serializable data; retain the generic type across Vue unwrapping.
+  const conversations = ref([]) as Ref<SearchConversation<TMessage>[]>
   const currentConversationId = ref<string | null>(null)
   const PERSIST_DEBOUNCE_MS = 900
   let conversationsPersistTimer: ReturnType<typeof setTimeout> | null = null
