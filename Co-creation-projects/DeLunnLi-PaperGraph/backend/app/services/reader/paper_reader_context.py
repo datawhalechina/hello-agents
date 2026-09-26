@@ -472,10 +472,10 @@ def format_paper_reader_block(
         )
     return "\n".join(lines)
 
-def build_reader_context_for_paper(db: Any, paper_id: int) -> tuple[Any | None, str, str]:
+def build_reader_context_for_paper(db: Any, paper_id: int) -> tuple[Any | None, str, str, bool]:
     p = db.get_paper_by_id(int(paper_id))
     if not p:
-        return None, "", ""
+        return None, "", "", False
     pdf_path = _ensure_reader_pdf_available(db, p)
     excerpt, is_cached = extract_pdf_text_full_cached(getattr(db, "db_path", ""), int(paper_id), pdf_path)
     if pdf_path and not excerpt:

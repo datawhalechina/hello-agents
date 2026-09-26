@@ -125,7 +125,7 @@ PaperGraph（知脉）是一个面向科研学习、论文调研和研究方向�
 ### 1. 环境要求
 
 - Python 3.10+
-- Node.js 18+
+- Node.js 20+
 - 可用的 OpenAI 兼容 LLM 服务
 
 ### 2. 后端安装与配置
@@ -155,7 +155,7 @@ python run.py
 
 ```bash
 cd frontend
-npm install
+npm ci
 npm run dev
 ```
 
@@ -168,6 +168,29 @@ npm run dev
 ```bash
 ./start.sh
 ```
+
+### 5. 回归检查
+
+后端测试使用临时数据库、合成 PDF 和模拟模型，不需要 API 密钥：
+
+```bash
+cd backend
+pip install -r requirements-dev.txt
+python -m pytest -q tests
+```
+
+前端检查：
+
+```bash
+cd frontend
+npm ci
+npm run typecheck
+npm test
+npm run build
+```
+
+这些检查覆盖阅读接口、记忆隔离与持久化、图谱 PDF 上下文和 PDF 阅读器。
+真实论文搜索、模型回答质量和每日推荐仍需配置模型后单独验证。
 
 ## 使用流程
 
@@ -258,3 +281,5 @@ GitHub: [@DeLunnLi](https://github.com/DeLunnLi)
 ## 致谢
 
 感谢 Datawhale 社区和 Hello-Agents 项目。本项目基于 HelloAgents 的智能体、工具注册、上下文构建和熔断能力完成实践探索。
+
+记忆模块恢复与 PDF 阅读器修复参考作者的 [PaperGraph 原项目](https://github.com/DeLunnLi/PaperGraph/tree/2b6c81bc34865df1b55dd1a1ef30da2c7f45ee5b)，并针对本共创目录的依赖和运行方式做了适配。项目级 `.gitignore` 保留记忆源码和回归测试，避免被上游通用忽略规则漏掉。

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from typing import Any
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 
 from fastapi import BackgroundTasks, HTTPException
 from starlette.concurrency import run_in_threadpool
@@ -45,8 +45,12 @@ class PaperReaderService:
         lines: list[str] = []
         tail = list(turns or [])[-24:]
         for t in tail:
-            role = (getattr(t, "role", None) or "").strip().lower()
-            content = (getattr(t, "content", None) or "").strip()
+            if isinstance(t, Mapping):
+                role = (t.get("role") or "").strip().lower()
+                content = (t.get("content") or "").strip()
+            else:
+                role = (getattr(t, "role", None) or "").strip().lower()
+                content = (getattr(t, "content", None) or "").strip()
             if not content:
                 continue
             if role not in ("user", "assistant"):
@@ -55,7 +59,7 @@ class PaperReaderService:
             lines.append(f"{label}：{content}")
         return "\n\n".join(lines)
 
-    async def _build_reader_context(self, paper_id: int, user_message: str = "") -> tuple[Any, str, str]:
+    async def _build_reader_context(self, paper_id: int, user_message: str = "") -> tuple[Any, str, str, str, bool]:
         from ..memory.memory_store import MemoryStore
         from .paper_reader_context import build_reader_context_for_paper
 

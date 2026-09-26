@@ -44,6 +44,9 @@ from .prompts.paper_analysis import ANALYSIS_SYSTEM, READER_CHAT_SYSTEM
 
 logger = logging.getLogger(__name__)
 
+_READER_PROMPT_MAX_CHARS = 7200
+_READER_MEMORY_MAX_CHARS = 1200
+
 def _reader_resolve_user_hint(user_message: str, snap: Dict[str, Any], *, want_reco: bool) -> str:
     um = (user_message or "").strip()
     if not want_reco:
@@ -507,23 +510,33 @@ class PaperAnalysisAgent(BaseAgent):
             want_reco, reco_max = parse_reader_recommendation_intent(um)
             self._reader_last_user_message = um
 
+            # Reserve current evidence, recent history and the question before
+            # filling the remaining space with optional cross-paper memories.
+            context_and_history = f"【当前文献材料】\n{ctx}\n\n【对话历史】\n{hist}\n\n"
+            question = f"【用户最新问题】\n{um}"
+            memory_header = "【共享/独立记忆】\n"
+            memory_budget = min(_READER_MEMORY_MAX_CHARS, max(
+                0, _READER_PROMPT_MAX_CHARS - len(context_and_history) - len(question)
+                - len(memory_header) - len("\n\n"),
+            ))
             try:
                 from ..services.memory.agent_memory import get_agent_memory
 
-                mem_block = get_agent_memory().build_context_block(agent_name="paper_analysis", query=um)
+                mem_block = get_agent_memory().build_context_block(
+                    agent_name="paper_analysis", query=um, max_chars=memory_budget,
+                ) if memory_budget else ""
             except Exception:
                 mem_block = ""
             user = (
-                (f"【共享/独立记忆】\n{mem_block}\n\n" if mem_block else "")
-                + f"【当前文献材料】\n{ctx}\n\n"
-                + f"【对话历史】\n{hist}\n\n"
-                + f"【用户最新问题】\n{um}"
+                context_and_history
+                + (f"{memory_header}{mem_block}\n\n" if mem_block else "")
+                + question
             )
             spec = TaskSpec(
                 name="paper_reader_reply",
                 agent=self._reader,
                 parser=None,
-                max_chars=7200,
+                max_chars=_READER_PROMPT_MAX_CHARS,
             )
             out = self._run_task(spec, user)
             # Clean up mixed tool/user-facing output.
