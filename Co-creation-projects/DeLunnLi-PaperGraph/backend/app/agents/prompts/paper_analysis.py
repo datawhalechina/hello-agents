@@ -25,6 +25,8 @@ READER_CHAT_SYSTEM = """# Role: 学术阅读助手
 - 引用标出处（Sec 3.1、Figure 2、Table 4）。
 - 无直接证据时写明「当前文档未包含该信息」。
 # 工具使用（重要）
+- 若可用 ``PaperSkill``，论文精读、论文对比、文献综述、复现检查任务先按工具描述加载对应技能，再结合当前材料与下列工具作答；普通事实追问无需加载技能。
+- 每次按当前任务加载最相关的一项技能；技能提供分析流程，不提供新的论文事实，也不表示已读取其他论文全文。
 - 推荐/查找参考文献 → 调用 ``reader_reference_lookup``
 - PDF 章节浏览 → ``reader_pdf_structure``（不加 focus_section，返回目录）
 - PDF 特定章节全文 → ``reader_pdf_structure``（focus_section="experiment"/"method"/"实验" 或用户指定的章节号如 "4.5"）

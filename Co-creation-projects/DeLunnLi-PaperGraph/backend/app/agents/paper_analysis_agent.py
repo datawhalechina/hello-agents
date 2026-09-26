@@ -29,6 +29,7 @@ from .support.paper_analysis_helpers import (
 )
 from .support.reader_pdf_parse_tool import ReaderPdfParseTool
 from .support.reader_table_tool import ReaderTableTool
+from .support.paper_skill_tool import PaperSkillTool
 from .support.reader_paper_lookup_tool import ReaderPaperLookupTool, ground_score_paper_vs_reference_blob
 from .support.reader_reference_lookup_tool import (
     READER_RECOMMEND_MAX_RESULTS, ReaderReferenceLookupTool,
@@ -87,6 +88,9 @@ class PaperAnalysisAgent(BaseAgent):
 
         self._reader_reco_ref_offset: Dict[int, int] = {}
         _reader_reg = ToolRegistry()
+        reader_config = papergraph_agent_config()
+        if reader_config.skills_enabled and reader_config.skills_auto_register:
+            _reader_reg.register_tool(PaperSkillTool())
         _reader_reg.register_tool(
             ReaderPaperLookupTool(
                 on_papers_found=self._reader_tool_on_found,
@@ -115,7 +119,7 @@ class PaperAnalysisAgent(BaseAgent):
             name="papergraph_paper_reader",
             llm=self.llm,
             system_prompt=READER_CHAT_SYSTEM,
-            config=papergraph_agent_config(),
+            config=reader_config,
             tool_registry=_reader_reg,
             enable_tool_calling=True,
             max_tool_iterations=5,
