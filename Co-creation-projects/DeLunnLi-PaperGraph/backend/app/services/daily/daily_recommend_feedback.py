@@ -10,6 +10,27 @@ from collections import Counter
 
 from ...models.schemas import FeedbackActionEnum as FeedbackAction
 from ...utils.common import exec_sql
+from ...utils import normalize_arxiv_id
+
+
+def canonical_feedback_identity(key: str, identity_type: str = "title_hash") -> str:
+    """Accept both canonical identities and the unprefixed keys stored by older releases."""
+    key = str(key or "").strip()
+    prefix, sep, value = key.partition(":")
+    if sep and prefix in {"arxiv", "doi", "ty", "title_hash"}:
+        identity_type = prefix
+        key = value
+    if identity_type == "arxiv":
+        return f"arxiv:{normalize_arxiv_id(key) or key}"
+    if identity_type == "doi":
+        return f"doi:{key.lower()}"
+    if identity_type == "ty":
+        return f"ty:{key.lower()}"
+    # Older web clients sent title_hash:<literal title>_<year>, not a hash.
+    title, split, year = key.rpartition("_")
+    if split and (year.isdigit() or year.lower() in {"none", "null", "undefined", ""}):
+        return f"ty:{title.strip().lower()}|{int(year) if year.isdigit() else 0}"
+    return f"title_hash:{key}"
 
 @contextlib.contextmanager
 def _conn(db_path: str):
@@ -81,6 +102,8 @@ def record_feedback(
     category: str | None = None,
 ) -> bool:
     try:
+        paper_identity_key = canonical_feedback_identity(paper_identity_key, identity_type)
+        identity_type = paper_identity_key.split(":", 1)[0]
         now = int(time.time())
         with _conn(db_path) as conn:
             cur = conn.cursor()
@@ -223,11 +246,11 @@ def get_skipped_papers(
     with _conn(db_path) as conn:
         cur = conn.cursor()
         cur.execute(
-            f"SELECT DISTINCT paper_identity_key FROM daily_recommend_feedback "
+            f"SELECT DISTINCT paper_identity_key, identity_type FROM daily_recommend_feedback "
             f"WHERE date_key>=? AND action IN ({placeholders})",
             (cutoff, *actions),
         )
-        skipped = {str(row[0]) for row in cur.fetchall()}
+        skipped = {canonical_feedback_identity(row[0], row[1]) for row in cur.fetchall()}
     return skipped
 
 
@@ -252,8 +275,12 @@ def record_daily_shown_papers(
     with _conn(db_path) as conn:
         conn.cursor().executemany(
             """INSERT OR IGNORE INTO daily_recommend_feedback(date_key,paper_identity_key,identity_type,title,action,source_list,score_at_recommend,created_at)
-            VALUES(?,?,'title_hash',?,'shown','daily',0.0,?)""",
-            [(date_key, p.get("identity_key", ""), p.get("title", ""), now) for p in papers],
+            VALUES(?,?,?,?,'shown','daily',0.0,?)""",
+            [
+                (date_key, key, key.split(":", 1)[0], p.get("title", ""), now)
+                for p in papers
+                if (key := canonical_feedback_identity(p.get("identity_key", "")))
+            ],
         )
 
 def get_high_value_keywords_from_feedback(

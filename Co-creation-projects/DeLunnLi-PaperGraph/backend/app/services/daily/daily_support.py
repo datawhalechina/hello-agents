@@ -7,8 +7,11 @@ import logging
 import re
 import time
 from collections import Counter
+from functools import partial
+from pathlib import Path
 from typing import Any
 
+import anyio
 from fastapi.concurrency import run_in_threadpool
 
 from ...agents import get_search_agent
@@ -29,7 +32,8 @@ _ARXIV_QUERY_NOISE = frozenset({
 })
 _OPENALEX_FALLBACK_QUERY = "machine learning neural network transformer deep learning"
 
-_user_profile_cache: tuple[Any, ...] | None = None
+_user_profile_cache: set[str] | None = None
+_user_profile_cache_key: tuple[Any, ...] | None = None
 _user_profile_cache_ts: float = 0.0
 _USER_PROFILE_CACHE_TTL = 7200
 
@@ -193,7 +197,7 @@ async def extract_memory_keywords_via_llm(raw_texts: list[str], log: Any) -> set
     if not raw_texts:
         return set()
     try:
-        agent = get_search_agent()
+        agent = await anyio.to_thread.run_sync(get_search_agent, abandon_on_cancel=True)
         llm = getattr(agent, "llm", None)
         if not llm:
             return set()
@@ -216,12 +220,12 @@ async def extract_memory_keywords_via_llm(raw_texts: list[str], log: Any) -> set
             f"{memory_block}\n\n"
             'Format: ["keyword1", ...]'
         )
-        raw = await run_in_threadpool(
+        raw = await anyio.to_thread.run_sync(partial(
             llm.invoke,
             [{"role": "user", "content": prompt}],
             temperature=0.0,
             max_tokens=400,
-        )
+        ), abandon_on_cancel=True)
         txt = coerce_hello_agents_llm_output_to_str(raw).strip()
         try:
             parsed = json.loads(txt)
@@ -316,9 +320,21 @@ async def load_user_context(
 
 
 def invalidate_user_profile_cache() -> None:
-    global _user_profile_cache, _user_profile_cache_ts
+    global _user_profile_cache, _user_profile_cache_ts, _user_profile_cache_key
     _user_profile_cache = None
     _user_profile_cache_ts = 0.0
+    _user_profile_cache_key = None
+
+
+def _memory_revision(path: Path) -> tuple[Any, ...]:
+    revision = []
+    for file in (path, Path(str(path) + "-wal")):
+        try:
+            stat = file.stat()
+            revision.append((stat.st_mtime_ns, stat.st_size))
+        except OSError:
+            revision.append(None)
+    return tuple(revision)
 
 
 async def get_or_load_user_context(
@@ -329,23 +345,35 @@ async def get_or_load_user_context(
     force_reload: bool = False,
     include_shown_exclusions: bool = True,
 ) -> tuple[set[str], int, list[str], set[str]]:
-    global _user_profile_cache, _user_profile_cache_ts
-    now = time.time()
+    global _user_profile_cache, _user_profile_cache_ts, _user_profile_cache_key
+    now = time.monotonic()
+    database = Path(db_path).resolve()
+    cache_key = (
+        str(database), tuple(sorted(set(lib_ids))),
+        _memory_revision(database.parent / "reader_memory.db"),
+        _memory_revision(Path(get_settings().data_dir).resolve() / "agent_memory.db"),
+    )
     if (
         not force_reload
         and _user_profile_cache is not None
+        and _user_profile_cache_key == cache_key
         and (now - _user_profile_cache_ts) < _USER_PROFILE_CACHE_TTL
     ):
-        return _user_profile_cache
-    result = await load_user_context(
-        db_path=db_path,
-        lib_ids=lib_ids,
-        log=log,
-        include_shown_exclusions=include_shown_exclusions,
+        mem_kw = set(_user_profile_cache)
+    else:
+        mem_kw = await load_memory_keywords(db_path=db_path, lib_ids=lib_ids, log=log)
+        _user_profile_cache = set(mem_kw)
+        _user_profile_cache_key = cache_key
+        _user_profile_cache_ts = now
+    # Behavior and exclusion state changes with every interaction. Cache only
+    # memory extraction; never reuse an exclusion set or accumulated feedback.
+    await load_feedback_keywords(db_path=db_path, mem_kw=mem_kw)
+    await load_profile_keywords(db_path=db_path, mem_kw=mem_kw, log=log)
+    skipped = await _safe_load_keywords(
+        run_in_threadpool(get_skipped_papers, db_path, days=14, include_shown=include_shown_exclusions)
     )
-    _user_profile_cache = result
-    _user_profile_cache_ts = now
-    return result
+    mem_kw_list, mem_kw_n = prepare_memory_keywords(mem_kw)
+    return mem_kw, mem_kw_n, mem_kw_list, skipped
 
 
 def daily_arxiv_category_list(daily_arxiv_cs_categories: list[str] | None) -> list[str]:
@@ -375,9 +403,13 @@ def append_arxiv_batch_filtered(
     seen_titles: set[str],
     exclude_sigs: set[str],
 ) -> None:
+    from ..papers.papers_helpers import daily_paper_identity_sig
+
+    seen_ids = {daily_paper_identity_sig(p) for p in arxiv_results}
     for p in batch:
         t = str(getattr(p, "title", "") or "").strip().lower()
-        if not t or t in seen_titles:
+        sig = daily_paper_identity_sig(p)
+        if not t or t in seen_titles or sig in seen_ids or sig in exclude_sigs:
             continue
         pid = _arxiv_canonical_from_paper(p)
         doi = (getattr(p, "doi", "") or "").strip().lower()
@@ -386,6 +418,7 @@ def append_arxiv_batch_filtered(
         if f"ty:{t}|{getattr(p, 'year', '')}" in exclude_sigs:
             continue
         seen_titles.add(t)
+        seen_ids.add(sig)
         arxiv_results.append(p)
 
 
@@ -446,7 +479,9 @@ async def fetch_openalex_daily_fallback(
     import datetime as _dt
 
     try:
-        q = build_daily_arxiv_query(mem_kw, lib_kw, log=log)
+        q = await anyio.to_thread.run_sync(
+            partial(build_daily_arxiv_query, mem_kw, lib_kw, log=log), abandon_on_cancel=True
+        )
         if len(q) < 4:
             bits = [
                 t for t in prepare_memory_keywords(mem_kw, limit=12, short_first=True)[0]
@@ -482,7 +517,9 @@ async def fetch_external_candidates(
     log: Any,
     exclude_sigs: set[str] | None = None,
 ) -> tuple[list[Any], dict[str, int], str]:
-    arxiv_query = build_daily_arxiv_query(mem_kw, lib_kw, log=log)
+    arxiv_query = await anyio.to_thread.run_sync(
+        partial(build_daily_arxiv_query, mem_kw, lib_kw, log=log), abandon_on_cancel=True
+    )
     arxiv_results, arx_n = await fetch_arxiv_candidates(
         searcher=searcher,
         arxiv_query=arxiv_query,
@@ -493,7 +530,7 @@ async def fetch_external_candidates(
     )
     if len(arxiv_results) < 16 and exclude_sigs:
         log.info(
-            "每日论文：剔除已展示/跳过后过少(%s)，本轮忽略排除集再抓一批以便形成推荐池",
+            "每日论文：剔除已展示/跳过后过少(%s)，扩大查询以补充推荐池",
             len(arxiv_results),
         )
         rescue, _ = await fetch_arxiv_candidates(
@@ -502,13 +539,29 @@ async def fetch_external_candidates(
             days_back=max(7, days_back),
             daily_arxiv_cs_categories=daily_arxiv_cs_categories,
             log=log,
-            exclude_sigs=set(),
+            exclude_sigs=exclude_sigs,
         )
-        append_unique_by_title(arxiv_results, rescue)
+        append_arxiv_batch_filtered(
+            rescue, arxiv_results=arxiv_results,
+            seen_titles={str(p.title).strip().lower() for p in arxiv_results},
+            exclude_sigs=exclude_sigs,
+        )
+
+    arx_n = len(arxiv_results)
+    if arx_n < 16:
+        fallback = await fetch_openalex_daily_fallback(
+            searcher=searcher, mem_kw=mem_kw, lib_kw=lib_kw, log=log
+        )
+        append_arxiv_batch_filtered(
+            fallback, arxiv_results=arxiv_results,
+            seen_titles={str(p.title).strip().lower() for p in arxiv_results},
+            exclude_sigs=exclude_sigs or set(),
+        )
+    openalex_n = len(arxiv_results) - arx_n
 
     arxiv_results.sort(
         key=lambda p: (int(getattr(p, "year", 0) or 0), int(getattr(p, "citations", 0) or 0)),
         reverse=True,
     )
     arxiv_results = arxiv_results[:96]
-    return arxiv_results, {"arxiv": len(arxiv_results)}, arxiv_query
+    return arxiv_results, {"arxiv": arx_n, "openalex": openalex_n}, arxiv_query

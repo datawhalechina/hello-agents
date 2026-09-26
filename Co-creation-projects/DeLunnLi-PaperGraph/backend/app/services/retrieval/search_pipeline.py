@@ -145,12 +145,11 @@ async def rank_candidates(
         return [RankedPaper(paper=p) for p in candidates[: runtime.max_results]], "recall_only", {}
 
     venue = primary_venue(plan)
-    ranker = LlmPaperRanker(recall_max=runtime.recall_max, fine_top_k=runtime.max_results)
     prefer_rec = (plan.sort or "").strip().lower() == "date" or bool(plan.year_from) or bool(venue)
     try:
         with anyio.fail_after(runtime.rank_wall):
             ranked, ranking_metadata = await anyio.to_thread.run_sync(
-                lambda: ranker.rank(
+                lambda: LlmPaperRanker(recall_max=runtime.recall_max, fine_top_k=runtime.max_results).rank(
                     candidates,
                     ctx.rank_query,
                     runtime.max_results,
@@ -166,7 +165,8 @@ async def rank_candidates(
                     main_conference_proceedings_only=bool(plan.main_conference_proceedings_only),
                     intent_source_message=ctx.intent_source_message,
                     method_acronym=ctx.search_kwargs.get("method_acronym"),
-                )
+                ),
+                abandon_on_cancel=True,
             )
         return ranked, ranking_metadata.get("ranking_method", "llm_rank"), ranking_metadata
     except TimeoutError:
@@ -211,7 +211,7 @@ async def run_search_pipeline_async(
         try:
             with anyio.fail_after(3.0):
                 candidates = await anyio.to_thread.run_sync(
-                    _merge_pinned_papers, candidates, pinned_ids, searcher
+                    _merge_pinned_papers, candidates, pinned_ids, searcher, abandon_on_cancel=True
                 )
         except TimeoutError:
             pass

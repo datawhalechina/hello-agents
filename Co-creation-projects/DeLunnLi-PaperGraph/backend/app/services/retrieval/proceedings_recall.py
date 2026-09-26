@@ -88,7 +88,8 @@ async def _llm_extract_papers_from_page(
                 system_prompt="你是严格的信息抽取器，只输出合法 JSON，不得编造页面文本中没有的论文。",
                 user_prompt=prompt, timeout_sec=15, retries=0,
                 default={"papers": []},
-            )
+            ),
+            abandon_on_cancel=True,
         )
     except Exception:
         return []

@@ -267,7 +267,7 @@ async def search_dblp(searcher, query, max_results=10, **kwargs):
             if qi + 1 >= len(query_chain):
                 logger.warning("[DBLP] async giving up q=%r", qtext)
                 searcher._bump_stat("dblp_requests")
-                return []
+                raise
             continue
     if not raw_hits:
         searcher._bump_stat("dblp_requests")

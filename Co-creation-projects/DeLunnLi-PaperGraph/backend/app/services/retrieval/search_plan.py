@@ -102,6 +102,9 @@ def _resolve_sources(intent) -> list[str]:
 
 
 def _resolve_use_tavily(intent) -> bool:
+    explicit = getattr(intent, "use_tavily", None)
+    if explicit is not None:
+        return bool(explicit)
     llm_src = [str(s).strip().lower() for s in (getattr(intent, "sources", []) or [])]
     return "tavily" in llm_src or bool(getattr(intent, "use_tavily_presearch", False))
 

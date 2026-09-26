@@ -122,11 +122,27 @@ def _error_response(msg: str) -> SearchAgentResponse:
 async def _prepare_agent_and_query(request: SearchAgentMessage) -> tuple[SearchAgent, str]:
     try:
         with anyio.fail_after(_SEARCH_AGENT_INIT_SEC):
-            agent = await anyio.to_thread.run_sync(get_search_agent)
+            agent = await anyio.to_thread.run_sync(get_search_agent, abandon_on_cancel=True)
     except TimeoutError as exc:
         logger.warning("search-agent init timeout after %.0fs", _SEARCH_AGENT_INIT_SEC, exc_info=exc)
         raise HTTPException(status_code=504, detail="search_agent_init_timeout") from exc
-    return agent, (request.message or "").strip()
+    message = request.message.strip()
+    # Only the explicitly supplied, recent conversation belongs to this request.
+    # Reserve space for the complete current message within the intent budget.
+    recent: list[str] = []
+    remaining = 1000
+    for turn in reversed(request.history[-6:]):
+        role = turn.get("role", "")
+        if role not in {"user", "assistant"} or remaining <= 0:
+            continue
+        content = (turn.get("content") or "").strip()
+        if content:
+            line = f"{role}: {content[-min(500, remaining):]}"
+            recent.append(line)
+            remaining -= len(line)
+    if recent:
+        message = "对话背景（仅用于理解当前需求）：\n" + "\n".join(reversed(recent)) + "\n当前需求：\n" + message
+    return agent, message
 
 
 async def _run_search_agent_core(
@@ -138,16 +154,24 @@ async def _run_search_agent_core(
 ) -> SearchAgentResponse:
     tool_calls: List[ToolCallInfo] = []
 
-    intent = agent.understand_intent(merged_query, request.mode)
     with track_tool_call(tool_calls, "understand_intent", {"query": merged_query}) as tc:
+        intent = await anyio.to_thread.run_sync(
+            agent.understand_intent, merged_query, request.mode, abandon_on_cancel=True
+        )
         tc.result_summary = f"sort={intent.sort}, venues={intent.venues}, yf={intent.year_from}, kw={intent.keywords}"
 
     plan = ResolvedSearchPlan.from_search_intent(intent)
+    if "use_tavily" in request.model_fields_set:
+        plan.use_tavily = request.use_tavily
     with track_tool_call(tool_calls, "search_pipeline", {"query": intent.query or merged_query}) as tc:
         tc.result_summary = "intent→SearchPlan→pipeline"
         mr = int(getattr(plan, "max_results", None) or intent.max_results or 10)
         pip = await run_search_pipeline_async(searcher=searcher, plan=plan, max_results=mr)
         tc.result_summary = f"ranked={len(pip.ranked or [])}"
+        pipeline_error = (pip.metadata.get("search_debug") or {}).get("search_error")
+        if pipeline_error and not pip.ranked:
+            tc.status = "error"
+            tc.result_summary = str(pipeline_error)
 
     papers = litpapers_to_api_papers(rp.paper for rp in (pip.ranked or []))
     prefix = f"为您找到 {len(papers)} 篇论文。" if papers else "未找到相关论文。"
@@ -162,7 +186,7 @@ async def _run_search_agent_core(
         return SearchAgentResponse(
             success=False,
             response=body,
-            search_params=_search_params_from_intent(intent, mode=request.mode),
+            search_params=_search_params_from_intent(intent, mode=request.mode, use_tavily=plan.use_tavily),
             tool_calls=normalize_tool_calls(tool_calls),
             papers=[],
             total=0,
@@ -173,7 +197,7 @@ async def _run_search_agent_core(
     return SearchAgentResponse(
         success=True,
         response=body,
-        search_params=_search_params_from_intent(intent, mode=request.mode),
+        search_params=_search_params_from_intent(intent, mode=request.mode, use_tavily=plan.use_tavily),
         tool_calls=normalize_tool_calls(tool_calls),
         papers=papers,
         total=len(papers),

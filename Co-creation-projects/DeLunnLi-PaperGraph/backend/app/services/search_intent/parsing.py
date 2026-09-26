@@ -14,6 +14,7 @@ from app.core.search.paper_searcher import _sanitize_author_list_for_query
 
 
 from .arxiv_normalization import sanitize_arxiv_categories, sanitize_arxiv_id_list
+from ..llm.context_budget import MODEL_ITEM_BYTES, clip_utf8
 from ...utils.common import dedupe_strings_preserve_order
 from .venue_phrases import sanitize_venue_tokens
 
@@ -251,22 +252,50 @@ def format_intent_llm_prompt(
 ) -> str:
     now = datetime.now()
     edition_year = infer_target_edition_year_for_recent(is_latest=True)
-    base = template.format(
-        user_text=(user_text or "").strip()[:3500],
-        profile=profile,
+    fields = dict(
+        profile=profile if profile in {"accuracy", "novelty"} else "accuracy",
         current_date_iso=now.strftime("%Y-%m-%d"),
         current_year=now.year,
         suggested_edition_year=edition_year,
     )
-    hint = (correction_hint or "").strip()
-    if not hint:
-        return base
-    return (
-        f"{base}\n\n"
-        "## 修正要求（上次输出无效，请重新生成完整 JSON）\n"
-        f"{hint}\n\n"
-        "只输出一个 JSON 对象，不要 markdown 代码块或解释文字。"
-    )
+    # Reserve the complete instructions and output schema before adding user
+    # data; clipping the assembled prompt would cut off its trailing schema.
+    fixed_bytes = len(template.format(user_text="", **fields).encode("utf-8"))
+    hint = clip_utf8((correction_hint or "").strip(), 900)
+    correction = (
+        "\n\n## 修正要求（上次输出无效，请重新生成完整 JSON）\n"
+        + hint + "\n\n只输出一个 JSON 对象，不要 markdown 代码块或解释文字。"
+    ) if hint else ""
+    available = MODEL_ITEM_BYTES - fixed_bytes - len(correction.encode("utf-8"))
+    if available <= 0:
+        raise ValueError("intent_prompt_template_exceeds_byte_budget")
+
+    current = (user_text or "").strip()
+    history = ""
+    history_heading = "对话背景（仅用于理解当前需求）：\n"
+    current_heading = "\n当前需求：\n"
+    if current.startswith(history_heading) and current_heading in current:
+        history, _, current = current[len(history_heading):].partition(current_heading)
+
+    if len(current.encode("utf-8")) > available:
+        # Long requests commonly finish with year/author/exclusion constraints.
+        # Preserve both ends instead of silently dropping those constraints.
+        marker = "\n…\n"
+        if available <= len(marker.encode("utf-8")):
+            current = clip_utf8(current, available)
+        else:
+            text_bytes = available - len(marker.encode("utf-8"))
+            head_bytes = text_bytes // 2
+            current = clip_utf8(current, head_bytes) + marker + clip_utf8(current, text_bytes - head_bytes, tail=True)
+        history = ""
+    remaining = available - len(current.encode("utf-8"))
+    history_budget = remaining - len((history_heading + current_heading).encode("utf-8"))
+    if history and history_budget > 0:
+        current = history_heading + clip_utf8(history, min(1200, history_budget), tail=True) + current_heading + current
+    prompt = template.format(user_text=current, **fields) + correction
+    if len(prompt.encode("utf-8")) > MODEL_ITEM_BYTES:
+        raise ValueError("intent_prompt_template_exceeds_byte_budget")
+    return prompt
 
 
 def build_intent_retry_correction_hint(
@@ -277,8 +306,9 @@ def build_intent_retry_correction_hint(
 ) -> str:
     em = str(exc or "").strip()
     em_l = em.lower()
-    msg = (user_message or "").strip()[:400]
-    parts: list[str] = [f"用户查询：「{msg}」。"]
+    # The current request is already included in the prompt. Repeating it here
+    # could consume the correction budget before the actual validation error.
+    parts: list[str] = []
     if "empty_query" in em_l or "intent_parse_empty" in em_l:
         parts.append(
             "上次 JSON 缺少有效检索锚点：query、venues、authors、target_titles、arxiv_id_list 至少应有一项非空；"
