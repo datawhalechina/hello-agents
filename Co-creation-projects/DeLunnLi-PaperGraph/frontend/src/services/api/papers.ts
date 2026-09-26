@@ -37,11 +37,23 @@ export async function savePapers(papers: Paper[], options?: {
 export async function deletePaper(id: number): Promise<void> {
   await apiClient.delete(`/api/papers/${id}`)
 }
-export async function postReadingLog(body: {
-  paper_id: number; duration_sec: number; client_ts?: number
-}): Promise<{ success: boolean }> {
+export interface ReadingLogPayload {
+  paper_id: number; duration_sec: number; client_ts?: number; session_id?: string
+}
+export async function postReadingLog(body: ReadingLogPayload): Promise<{ success: boolean }> {
   const response = await apiClient.post('/api/papers/reading/log', body)
   return response.data
+}
+export function sendReadingLogOnExit(body: ReadingLogPayload): void {
+  const base = (apiClient.defaults.baseURL || '').replace(/\/$/, '')
+  const url = `${base}/api/papers/reading/log`
+  const data = JSON.stringify(body)
+  try {
+    if (navigator.sendBeacon?.(url, new Blob([data], { type: 'application/json' }))) return
+  } catch { /* Fall back if the browser's beacon queue is full or unavailable. */ }
+  void fetch(url, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: data, keepalive: true,
+  }).catch(() => {})
 }
 export async function getReadingCalendar(days = 180): Promise<{
   success: boolean; days: number; items: { date: string; seconds: number; sessions: number }[]
