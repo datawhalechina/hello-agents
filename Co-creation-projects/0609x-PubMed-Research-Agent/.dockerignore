@@ -1,0 +1,34 @@
+# Build context exclusions (root context shared by both Dockerfiles).
+
+# Secrets & local config
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+
+# Node / frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Runtime data (cache + sqlite are generated; journal table ships in data/)
+data/cache/
+*.db
+*.sqlite3
+
+# VCS / IDE / OS
+.git/
+.gitignore
+.idea/
+.vscode/
+*.log
+logs/
+.DS_Store
+Thumbs.db
