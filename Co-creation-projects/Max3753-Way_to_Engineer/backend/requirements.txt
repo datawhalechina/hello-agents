@@ -1,0 +1,20 @@
+# FastAPI
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+
+# AI Framework
+hello-agents
+
+# Environment
+python-dotenv
+
+# HTTP Client
+httpx
+
+# Logging
+loguru
+
+# CORS
+python-multipart
