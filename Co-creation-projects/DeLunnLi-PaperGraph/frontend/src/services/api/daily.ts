@@ -37,23 +37,11 @@ export async function getDailyPapers(body?: {
     if (dailyPayloadCount(cached) > 0) return cached as DailyPapersApiResponse
   }
 
-  // Show cache while a forced refresh runs in the background.
-  if (body?.force_refresh && dailyPayloadCount(cached) > 0) {
-    apiClient.post<DailyPapersApiResponse>('/api/papers/daily', body, {
-      timeout: DAILY_PAPERS_REQUEST_MS,
-    }).then(postRes => {
-      if (dailyPayloadCount(postRes.data) > 0) {
-        return postRes.data
-      }
-      return null
-    }).catch(() => null)
-    return { ...(cached as DailyPapersApiResponse), message: '正在后台刷新…当前显示最近缓存。' }
-  }
-
   try {
     const postRes = await apiClient.post<DailyPapersApiResponse>('/api/papers/daily', body || {}, {
       timeout: DAILY_PAPERS_REQUEST_MS,
     })
+    if (!postRes.data?.success) throw new Error(postRes.data?.message || '刷新失败')
     if (body?.force_refresh && dailyPayloadCount(postRes.data) === 0) {
       if (dailyPayloadCount(cached) > 0) {
         return { ...(cached as DailyPapersApiResponse), stale_cache: true, message: postRes.data?.message || '刷新未取到新结果，已显示缓存列表。' }

@@ -212,6 +212,7 @@ const {
   currentConversationId,
   ensureCurrentConversationId,
   persistConversationAndState,
+  saveConversationSnapshot,
   loadConversation,
   createNewConversation,
   removeConversation,
@@ -289,7 +290,7 @@ const { sendMessage } = useSearchAgentChat({
   hasSearched,
   ensureCurrentConversationId,
   scrollToBottom,
-  onConversationDirty: () => persistConversationAndState(),
+  onConversationDirty: saveConversationSnapshot,
 })
 const saveOne = async (paper: Paper) => {
   try {
