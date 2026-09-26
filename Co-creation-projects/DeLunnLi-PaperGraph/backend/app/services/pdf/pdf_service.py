@@ -92,11 +92,18 @@ def build_library_pdf_response(*, paper_id: int, request: Request, db_path: str,
                 headers={**common_headers, "Content-Length": str(file_size)},
             )
 
-    m = re.match(r"bytes=(\d+)-(\d*)", range_header.strip())
-    if not m:
+    m = re.fullmatch(r"bytes=(\d*)-(\d*)", range_header.strip())
+    if not m or not any(m.groups()):
         return Response(status_code=416, headers={**common_headers, "Content-Range": f"bytes */{file_size}"})
-    start = int(m.group(1))
-    end = int(m.group(2)) if m.group(2) else file_size - 1
+    if m.group(1):
+        start = int(m.group(1))
+        end = int(m.group(2)) if m.group(2) else file_size - 1
+    else:
+        suffix_length = int(m.group(2))
+        if suffix_length <= 0:
+            return Response(status_code=416, headers={**common_headers, "Content-Range": f"bytes */{file_size}"})
+        start = max(0, file_size - suffix_length)
+        end = file_size - 1
     if start >= file_size:
         return Response(status_code=416, headers={**common_headers, "Content-Range": f"bytes */{file_size}"})
     end = min(end, file_size - 1)

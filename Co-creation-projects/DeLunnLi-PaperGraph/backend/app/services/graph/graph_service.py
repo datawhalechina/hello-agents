@@ -36,10 +36,8 @@ def build_library_graph(
                 return LibraryGraphResponse(success=True, nodes=[], edges=[])
             paper_ids_in_view: set[int] = {int(focus_id)}
         else:
-            papers = db.get_all_papers(limit=int(limit), order_by="created_at DESC")
             cat = (category or "").strip() or None
-            if cat:
-                papers = [p for p in papers if (getattr(p, "category", None) or "").strip() == cat]
+            papers = db.search_library(category=cat, limit=int(limit))
             paper_ids_in_view = set()
             for p in papers:
                 pid = int(getattr(p, "id") or 0)
@@ -157,7 +155,7 @@ def build_library_graph(
                 if pid <= 0:
                     continue
                 if include_authors:
-                    paper_au[pid] = {graph_author_label(a, i, "") for i, a in enumerate(getattr(p, "authors", []) or []) if (getattr(a, "name", None) or "").strip()}
+                    paper_au[pid] = {graph_author_node_id(pid, i, a) for i, a in enumerate(getattr(p, "authors", []) or []) if (getattr(a, "name", None) or "").strip()}
                 if include_keywords:
                     paper_kw[pid] = {str(k).strip().lower() for k in (getattr(p, "keywords", None) or [])[:16] if str(k).strip()}
 

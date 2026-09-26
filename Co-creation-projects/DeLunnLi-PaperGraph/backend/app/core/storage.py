@@ -9,6 +9,7 @@ import re
 import sqlite3
 from collections import defaultdict
 from contextlib import contextmanager, suppress
+from datetime import datetime
 from typing import Any
 
 from .author import Author
@@ -201,13 +202,20 @@ class PaperDatabase:
         return s if s else None
 
     def _sync_saved_meta(self, cursor: sqlite3.Cursor, paper_id: int, paper: Paper) -> None:
-        cat = getattr(paper, "category", None)
+        cursor.execute("SELECT category, tags FROM papers WHERE id = ?", (paper_id,))
+        existing = cursor.fetchone()
+        # Saving search results enriches records. Explicit clearing belongs to update_paper.
+        cat = (getattr(paper, "category", None) or "").strip() or None
+        if existing["category"] and cat in (None, "未分类"):
+            cat = existing["category"]
+        tags = list(dict.fromkeys(json.loads(existing["tags"] or "[]") + (paper.tags or [])))
         doi = self._norm_id_field(paper.doi)
         arxiv_id = self._norm_id_field(paper.arxiv_id)
         abs_new = (paper.abstract or "").strip() or None
         title_new = (paper.title or "").strip() or None
         cursor.execute(
-            """UPDATE papers SET category = ?, tags = ?, pdf_url = ?, source_url = ?,
+            """UPDATE papers SET category = ?, tags = ?,
+               pdf_url = COALESCE(?, pdf_url), source_url = COALESCE(?, source_url),
                doi = COALESCE(?, doi),
                arxiv_id = COALESCE(?, arxiv_id),
                abstract = COALESCE(?, abstract),
@@ -216,14 +224,14 @@ class PaperDatabase:
                updated_at = CURRENT_TIMESTAMP WHERE id = ?""",
             (
                 cat,
-                json.dumps(paper.tags or [], ensure_ascii=False),
-                paper.pdf_url,
-                paper.source_url,
+                json.dumps(tags, ensure_ascii=False),
+                self._norm_id_field(paper.pdf_url),
+                self._norm_id_field(paper.source_url),
                 doi,
                 arxiv_id,
                 abs_new,
                 title_new,
-                getattr(paper, "venue_type", None),
+                self._norm_id_field(getattr(paper, "venue_type", None)),
                 paper_id,
             ),
         )
@@ -290,6 +298,8 @@ class PaperDatabase:
 
     def add_paper(self, paper: Paper) -> tuple[int, bool]:
         with self._get_connection() as conn:
+            # Lock before identity lookup so concurrent saves enrich the same row.
+            conn.execute("BEGIN IMMEDIATE")
             return self._add_paper_internal(conn, paper)
 
     def add_papers(self, papers: list[Paper]) -> tuple[list[int], int, int]:
@@ -297,6 +307,7 @@ class PaperDatabase:
         added = 0
         updated = 0
         with self._get_connection() as conn:
+            conn.execute("BEGIN IMMEDIATE")
             for paper in papers:
                 try:
                     paper_id, is_new = self._add_paper_internal(conn, paper)
@@ -313,18 +324,25 @@ class PaperDatabase:
     def _add_authors(self, conn: sqlite3.Connection, paper_id: int, authors: list[Author]) -> None:
         cursor = conn.cursor()
         for order, author in enumerate(authors):
-            if author.orcid:
-                cursor.execute("SELECT id FROM authors WHERE orcid = ?", (author.orcid,))
+            orcid = self._norm_id_field(author.orcid)
+            if orcid:
+                cursor.execute("SELECT id FROM authors WHERE orcid = ?", (orcid,))
+                result = cursor.fetchone()
+            elif author.email and author.email.strip():
+                cursor.execute(
+                    "SELECT id FROM authors WHERE name = ? AND LOWER(TRIM(email)) = LOWER(?)",
+                    (author.name, author.email.strip()),
+                )
+                result = cursor.fetchone()
             else:
-                cursor.execute("SELECT id FROM authors WHERE name = ?", (author.name,))
-
-            result = cursor.fetchone()
+                # A name, even with an affiliation, does not establish a person's identity.
+                result = None
             if result:
                 author_id = result[0]
             else:
                 cursor.execute(
                     "INSERT INTO authors (name, affiliation, email, orcid) VALUES (?, ?, ?, ?)",
-                    (author.name, author.affiliation, author.email, author.orcid),
+                    (author.name, author.affiliation, author.email, orcid),
                 )
                 author_id = cursor.lastrowid
 
@@ -395,6 +413,8 @@ class PaperDatabase:
             rating=row["rating"],
             read_status=row["read_status"] or "unread",
             importance=row["importance"] or "normal",
+            created_at=datetime.fromisoformat(row["created_at"]) if row["created_at"] else None,
+            updated_at=datetime.fromisoformat(row["updated_at"]) if row["updated_at"] else None,
         )
 
     def count_papers(self) -> int:
@@ -427,6 +447,88 @@ class PaperDatabase:
             authors_map = self._fetch_authors_for_papers(conn, [paper_id])
         return self._row_to_paper_fast(row, authors_map.get(paper_id, []))
 
+    def _library_filter(
+        self, *, query=None, tags=None, year_from=None, year_to=None,
+        read_status=None, category=None,
+    ) -> tuple[str, list[Any]]:
+        clauses: list[str] = ["1=1"]
+        params: list[Any] = []
+        use_fts = False
+        match_expr = ""
+        clean_query = ""
+
+        if query and str(query).strip():
+            clean_query = re.sub(r'["\'*^]', " ", str(query)).strip()
+            if clean_query and self._library_fts_ready:
+                parts = [w for w in clean_query.split() if w.strip()]
+                if parts:
+                    match_expr = " AND ".join(f'"{w}"' for w in parts)
+                    use_fts = True
+
+        if use_fts:
+            clauses.append(
+                "(p.id IN (SELECT rowid FROM papers_fts WHERE papers_fts MATCH ?)"
+                " OR p.id IN (SELECT pa.paper_id FROM paper_authors pa JOIN authors a ON pa.author_id = a.id WHERE a.name LIKE ?))"
+            )
+            params.append(match_expr)
+            like_author = f"%{clean_query}%"
+            params.append(like_author)
+        elif query and str(query).strip():
+            clauses.append("(p.title LIKE ? OR p.abstract LIKE ? OR p.id IN (SELECT pa.paper_id FROM paper_authors pa JOIN authors a ON pa.author_id = a.id WHERE a.name LIKE ?))")
+            like = f"%{str(query).strip()}%"
+            params.extend([like, like, like])
+
+        if category:
+            cat = category.strip()
+            if cat.endswith("/*"):
+                prefix = cat[:-2].strip()
+                if prefix == "未分类":
+                    clauses.append(
+                        "(p.category IS NULL OR TRIM(COALESCE(p.category, '')) IN ('', '未分类') "
+                        "OR TRIM(COALESCE(p.category, '')) LIKE '未分类/%')"
+                    )
+                elif prefix:
+                    clauses.append(
+                        "(TRIM(COALESCE(p.category, '')) = ? OR TRIM(COALESCE(p.category, '')) LIKE ?)"
+                    )
+                    params.extend([prefix, prefix + "/%"])
+            elif cat == "未分类":
+                clauses.append(
+                    "(p.category IS NULL OR TRIM(COALESCE(p.category, '')) IN ('', '未分类'))"
+                )
+            else:
+                clauses.append("TRIM(COALESCE(p.category, '')) = ?")
+                params.append(cat)
+
+        if year_from is not None:
+            clauses.append("(p.year IS NOT NULL AND p.year >= ?)")
+            params.append(year_from)
+        if year_to is not None:
+            clauses.append("(p.year IS NOT NULL AND p.year <= ?)")
+            params.append(year_to)
+        if read_status:
+            clauses.append("p.read_status = ?")
+            params.append(read_status)
+
+        if tags:
+            placeholders = ",".join("?" for _ in tags)
+            clauses.append(
+                "EXISTS (SELECT 1 FROM json_each(COALESCE(p.tags, '[]')) tag "
+                f"WHERE tag.value IN ({placeholders}))"
+            )
+            params.extend(tags)
+        return " AND ".join(clauses), params
+
+    def count_library(
+        self, *, query=None, tags=None, year_from=None, year_to=None,
+        read_status=None, category=None,
+    ) -> int:
+        where, params = self._library_filter(
+            query=query, tags=tags, year_from=year_from, year_to=year_to,
+            read_status=read_status, category=category,
+        )
+        return int(self._query(f"SELECT COUNT(*) FROM papers p WHERE {where}", params, fetch="one")[0])
+
     def search_library(
         self,
         query: str | None = None,
@@ -438,89 +540,19 @@ class PaperDatabase:
         limit: int = 100,
         offset: int = 0,
     ) -> list[Paper]:
+        where, params = self._library_filter(
+            query=query, tags=tags, year_from=year_from, year_to=year_to,
+            read_status=read_status, category=category,
+        )
         with self._get_connection() as conn:
-            cursor = conn.cursor()
-            clauses: list[str] = ["1=1"]
-            params: list[Any] = []
-            use_fts = False
-            match_expr = ""
-            clean_query = ""
-
-            if query and str(query).strip():
-                clean_query = re.sub(r'["\'*^]', " ", str(query)).strip()
-                if clean_query and self._library_fts_ready:
-                    parts = [w for w in clean_query.split() if w.strip()]
-                    if parts:
-                        match_expr = " AND ".join(f'"{w}"' for w in parts)
-                        use_fts = True
-
-            if use_fts:
-                base_from = "papers p"
-                clauses.append(
-                    "(p.id IN (SELECT rowid FROM papers_fts WHERE papers_fts MATCH ?)"
-                    " OR p.id IN (SELECT pa.paper_id FROM paper_authors pa JOIN authors a ON pa.author_id = a.id WHERE a.name LIKE ?))"
-                )
-                params.append(match_expr)
-                like_author = f"%{clean_query}%"
-                params.append(like_author)
-            elif query and str(query).strip():
-                clauses.append("(p.title LIKE ? OR p.abstract LIKE ? OR p.id IN (SELECT pa.paper_id FROM paper_authors pa JOIN authors a ON pa.author_id = a.id WHERE a.name LIKE ?))")
-                like = f"%{str(query).strip()}%"
-                params.extend([like, like, like])
-                base_from = "papers p"
-            else:
-                base_from = "papers p"
-
-            if category:
-                cat = category.strip()
-                if cat.endswith("/*"):
-                    prefix = cat[:-2].strip()
-                    if prefix == "未分类":
-                        clauses.append(
-                            "(p.category IS NULL OR TRIM(COALESCE(p.category, '')) IN ('', '未分类') "
-                            "OR TRIM(COALESCE(p.category, '')) LIKE '未分类/%')"
-                        )
-                    elif prefix:
-                        clauses.append(
-                            "(TRIM(COALESCE(p.category, '')) = ? OR TRIM(COALESCE(p.category, '')) LIKE ?)"
-                        )
-                        params.extend([prefix, prefix + "/%"])
-                elif cat == "未分类":
-                    clauses.append(
-                        "(p.category IS NULL OR TRIM(COALESCE(p.category, '')) IN ('', '未分类'))"
-                    )
-                else:
-                    clauses.append("TRIM(COALESCE(p.category, '')) = ?")
-                    params.append(cat)
-
-            if year_from is not None:
-                clauses.append("(p.year IS NOT NULL AND p.year >= ?)")
-                params.append(year_from)
-            if year_to is not None:
-                clauses.append("(p.year IS NOT NULL AND p.year <= ?)")
-                params.append(year_to)
-            if read_status:
-                clauses.append("p.read_status = ?")
-                params.append(read_status)
-
-            order_clause = "ORDER BY p.created_at DESC"
-
-            sql = f"SELECT p.* FROM {base_from} WHERE {' AND '.join(clauses)} {order_clause} LIMIT ?"
-            params.append(int(limit))
-            if offset:
-                sql += " OFFSET ?"
-                params.append(int(offset))
-            cursor.execute(sql, params)
-            rows = cursor.fetchall()
-            if not rows:
-                return []
+            rows = conn.execute(
+                f"SELECT p.* FROM papers p WHERE {where} "
+                "ORDER BY p.created_at DESC, p.id DESC LIMIT ? OFFSET ?",
+                [*params, int(limit), int(offset)],
+            ).fetchall()
             paper_ids = [int(r["id"]) for r in rows]
             authors_map = self._fetch_authors_for_papers(conn, paper_ids)
-            papers = [self._row_to_paper_fast(row, authors_map.get(int(row["id"]), [])) for row in rows]
-            if tags:
-                tag_set = set(tags)
-                papers = [p for p in papers if tag_set.intersection(set(p.tags))]
-            return papers
+            return [self._row_to_paper_fast(row, authors_map.get(int(row["id"]), [])) for row in rows]
 
     def update_paper(self, paper_id: int, **fields) -> bool:
         allowed = {"notes", "tags", "rating", "read_status", "importance", "category", "abstract"}
@@ -559,6 +591,11 @@ class PaperDatabase:
                     with suppress(OSError):
                         os.remove(abspath)
             cursor.execute("DELETE FROM paper_authors WHERE paper_id = ?", (paper_id,))
+            if cursor.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='paper_relations'").fetchone():
+                cursor.execute(
+                    "DELETE FROM paper_relations WHERE source_paper_id = ? OR target_paper_id = ?",
+                    (paper_id, paper_id),
+                )
             cursor.execute("DELETE FROM papers WHERE id = ?", (paper_id,))
             return cursor.rowcount > 0
 

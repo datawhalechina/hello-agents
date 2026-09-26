@@ -207,6 +207,7 @@ class ReadingLogRequest(BaseModel):
     paper_id: int = Field(..., ge=1)
     duration_sec: int = Field(..., ge=1, le=60 * 60 * 24, description="本次阅读停留时长（秒）")
     client_ts: int | None = Field(default=None, description="客户端时间戳（秒）；缺省则服务端按当前时间落在当天")
+    session_id: str | None = Field(default=None, min_length=1, max_length=128, description="同一阅读会话的稳定 ID；提供后时长按累计值幂等更新")
 
 class ReadingCalendarItem(BaseModel):
     date: str = Field(..., description="YYYY-MM-DD")
