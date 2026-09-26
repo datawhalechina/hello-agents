@@ -251,14 +251,16 @@ async function expandPaper(paperId: number) {
     loading.value = false
   }
 }
-watch(selected, (node) => {
+watch(selected, (node, _previous, onCleanup) => {
+  let active = true
+  onCleanup(() => { active = false })
   paperDetail.value = null
   if (node?.type === 'paper' && node?.paper_id) {
     paperDetailLoading.value = true
     getPaper(Number(node.paper_id))
-      .then((d) => { paperDetail.value = d })
-      .catch(() => { paperDetail.value = null })
-      .finally(() => { paperDetailLoading.value = false })
+      .then((d) => { if (active) paperDetail.value = d })
+      .catch(() => { if (active) paperDetail.value = null })
+      .finally(() => { if (active) paperDetailLoading.value = false })
   } else {
     paperDetailLoading.value = false
   }

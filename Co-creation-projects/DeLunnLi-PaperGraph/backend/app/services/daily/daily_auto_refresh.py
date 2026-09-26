@@ -73,11 +73,11 @@ async def daily_auto_refresh_loop(app: FastAPI) -> None:
             return False
 
     lock = get_daily_compute_lock()
-    date_key = _dt.datetime.now().strftime("%Y-%m-%d")
 
     while True:
         try:
             await asyncio.sleep(poll)
+            date_key = _dt.datetime.now().strftime("%Y-%m-%d")
             ts = getattr(app.state, "last_meaningful_activity_monotonic", None)
             if ts is not None and time.monotonic() - ts < idle:
                 continue

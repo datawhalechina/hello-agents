@@ -2,18 +2,26 @@
 
 from __future__ import annotations
 import datetime as _dt, sqlite3, time
-from ...utils.common import exec_sql
 
 def ensure_tables(db_path: str) -> None:
-    exec_sql(db_path,
-        """CREATE TABLE IF NOT EXISTS paper_reading_sessions (
+    with sqlite3.connect(db_path) as conn:
+        # Serialize schema inspection/upgrade when concurrent beacons arrive on an old DB.
+        conn.execute("BEGIN IMMEDIATE")
+        conn.execute("""CREATE TABLE IF NOT EXISTS paper_reading_sessions (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           paper_id INTEGER NOT NULL, duration_sec INTEGER NOT NULL,
-          day_key TEXT NOT NULL, created_at INTEGER NOT NULL)""",
-        "CREATE INDEX IF NOT EXISTS idx_prs_day ON paper_reading_sessions(day_key, created_at)",
-        "CREATE INDEX IF NOT EXISTS idx_prs_paper ON paper_reading_sessions(paper_id, created_at)")
+          day_key TEXT NOT NULL, created_at INTEGER NOT NULL, session_id TEXT)""")
+        cols = {row[1] for row in conn.execute("PRAGMA table_info(paper_reading_sessions)")}
+        if "session_id" not in cols:
+            conn.execute("ALTER TABLE paper_reading_sessions ADD COLUMN session_id TEXT")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_prs_day ON paper_reading_sessions(day_key, created_at)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_prs_paper ON paper_reading_sessions(paper_id, created_at)")
+        conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_prs_session ON paper_reading_sessions(paper_id, session_id)")
 
-def append_session(db_path: str, *, paper_id: int, duration_sec: int, client_ts: int | None = None) -> None:
+def append_session(
+    db_path: str, *, paper_id: int, duration_sec: int,
+    client_ts: int | None = None, session_id: str | None = None,
+) -> None:
     if not db_path or int(duration_sec or 0) <= 0:
         return
     ensure_tables(db_path)
@@ -22,8 +30,13 @@ def append_session(db_path: str, *, paper_id: int, duration_sec: int, client_ts:
     day = _dt.datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
     conn = sqlite3.connect(db_path)
     try:
-        conn.execute("INSERT INTO paper_reading_sessions(paper_id,duration_sec,day_key,created_at) VALUES(?,?,?,?)",
-                     (int(paper_id), dur, day, int(time.time())))
+        conn.execute(
+            """INSERT INTO paper_reading_sessions(paper_id,duration_sec,day_key,created_at,session_id)
+               VALUES(?,?,?,?,?)
+               ON CONFLICT(paper_id,session_id) DO UPDATE SET
+                 duration_sec=MAX(paper_reading_sessions.duration_sec,excluded.duration_sec)""",
+            (int(paper_id), dur, day, int(time.time()), (session_id or "").strip() or None),
+        )
         conn.commit()
     finally:
         conn.close()

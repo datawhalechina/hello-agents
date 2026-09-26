@@ -6,6 +6,7 @@ import os
 import re
 import sqlite3
 import time
+import threading
 from typing import Any
 
 def extract_pdf_text_full(abspath: str | None) -> str:
@@ -139,10 +140,13 @@ def preprocess_pdf_text_for_reference_blob(blob: str) -> str:
 
 def soft_unwrap_reference_section_newlines(blob: str) -> str:
     s = preprocess_pdf_text_for_reference_blob(blob or "")
+    # Preserve explicit entry starts when repairing PDF line wraps. Otherwise
+    # a citation ending in a period can swallow the following numbered entry.
+    s = re.sub(r"(?m)^(?=[ \t]*(?:\[\d{1,4}\]|\d{1,4}\.[ \t]+))", "\n", s)
 
-    s = re.sub(r",\s*\n(?!\n)", ", ", s)
+    s = re.sub(r",[ \t]*\n(?!\n)", ", ", s)
 
-    s = re.sub(r"(?<=[,.])\s*\n(?!\s*\n)\s*(?=[A-Za-z0-9(\u4e00-\u9fff])", " ", s)
+    s = re.sub(r"(?<=[,.])[ \t]*\n(?![ \t]*\n)[ \t]*(?=[A-Za-z0-9(\u4e00-\u9fff])", " ", s)
     s = re.sub(r"\n{4,}", "\n\n\n", s)
     s = re.sub(r"[ \t]{2,}", " ", s)
     return s.strip()
@@ -157,24 +161,24 @@ def normalize_saved_reference_entry(text: str) -> str:
     return s
 
 _REF_SECTION = re.compile(
-    r"(?:^|\n)\s*(?:"
-    r"References|REFERENCES|Bibliography|BIBLIOGRAPHY|"
-    r"参考文献|引用文献|參考文獻"
-    r")\s*\n",
-    re.MULTILINE,
+    r"^[ \t]*(?:#{1,6}[ \t]*)?(?:\d+(?:\.\d+)*[.)]?[ \t]+)?"
+    r"(?:\*\*)?(?:references|reference\s+list|bibliography|cited\s+references|参考文献|引用文献|參考文獻)"
+    r"(?:\*\*)?[ \t]*[:：]?[ \t#]*(?:\n|$)", re.MULTILINE | re.IGNORECASE,
 )
+
 
 def extract_references_section_raw_from_pdf_text(pdf_text: str) -> str:
     t = (pdf_text or "").strip()
-    if len(t) < 120:
+    match = _REF_SECTION.search(t)
+    if not match:
         return ""
-    m = _REF_SECTION.search(t)
-    body = t[m.end():].strip() if m else t[-min(len(t), 48000):]
-    body = soft_unwrap_reference_section_newlines(body)
-    return (body or "").strip()
+    body = t[match.end():].strip()
+    # Appendices following the bibliography are not reference entries.
+    body = re.split(r"(?im)^[ \t]*(?:#{1,6}\s*)?(?:appendix|appendices|supplementary|附录)\b", body, maxsplit=1)[0]
+    return soft_unwrap_reference_section_newlines(body).strip()
 
 _REF_FALLBACK_ENTRY_HEAD = re.compile(
-    r"^(?:\[\d{1,3}\]\s*)?(?:[A-Z][a-zA-Z'\u2019\-]{1,42},\s+[A-Z.\-]|\d{1,3}\.\s+[A-Za-z0-9])"
+    r"^(?:\[\d{1,4}\]\s*|\d{1,4}\.\s+|[A-Z][a-zA-Z'\u2019\-]{1,42},\s+[A-Z.\-])"
 )
 _REF_FALLBACK_DOI_LINE = re.compile(r"^doi:\s*10\.\d", re.I)
 
@@ -238,10 +242,10 @@ def _ensure_cache_table(conn: sqlite3.Connection) -> None:
         cur.execute("ALTER TABLE paper_pdf_excerpt_cache ADD COLUMN last_miss_at INTEGER")
     conn.commit()
 
-def _pdf_stat(abspath: str) -> tuple[int, int | None]:
+def _pdf_stat(abspath: str) -> tuple[int, int] | None:
     try:
         st = os.stat(abspath)
-        return int(st.st_mtime), int(st.st_size)
+        return int(st.st_mtime_ns), int(st.st_size)
     except Exception:
         return None
 
@@ -259,7 +263,7 @@ def _cache_get(db_path: str, paper_id: int, pdf_abspath: str, max_age_days: int 
         cur = conn.cursor()
         _ensure_cache_table(conn)
         cur.execute(
-            "SELECT pdf_mtime,pdf_size,excerpt,updated_at FROM paper_pdf_excerpt_cache WHERE paper_id=?",
+            "SELECT pdf_mtime,pdf_size,excerpt,updated_at,pdf_abspath FROM paper_pdf_excerpt_cache WHERE paper_id=?",
             (int(paper_id),),
         )
         row = cur.fetchone()
@@ -270,7 +274,8 @@ def _cache_get(db_path: str, paper_id: int, pdf_abspath: str, max_age_days: int 
             )
             conn.commit()
             return None
-        ok = int(row[0] or 0) == mtime and int(row[1] or 0) == size
+        ok = (int(row[0] or 0) == mtime and int(row[1] or 0) == size
+              and os.path.abspath(str(row[4] or "")) == os.path.abspath(pdf_abspath))
         ex = (row[2] or "").strip()
         updated_at = int(row[3] or 0)
         expired = bool(updated_at and max_age_days > 0 and (now - updated_at) > max_age_days * 86400)
@@ -346,13 +351,21 @@ def _cache_delete(db_path: str, paper_id: int) -> None:
     except Exception:
         pass
 
-def compute_and_cache_excerpt(db_path: str, paper_id: int, pdf_abspath: str) -> None:
-    ex = extract_pdf_text_full(pdf_abspath)
-    if ex.strip():
-        _cache_set(db_path, int(paper_id), pdf_abspath, ex)
-    else:
+_EXCERPT_LOCKS = [threading.Lock() for _ in range(32)]
 
-        _cache_delete(db_path, int(paper_id))
+
+def compute_and_cache_excerpt(db_path: str, paper_id: int, pdf_abspath: str) -> None:
+    # Fixed lock stripes bound bookkeeping and coalesce concurrent cache misses.
+    lock = _EXCERPT_LOCKS[hash((os.path.abspath(db_path), int(paper_id))) % len(_EXCERPT_LOCKS)]
+    with lock:
+        if _cache_get(db_path, int(paper_id), pdf_abspath, max_age_days=45) is not None:
+            return
+        before = _pdf_stat(pdf_abspath)
+        ex = extract_pdf_text_full(pdf_abspath)
+        if ex.strip() and before == _pdf_stat(pdf_abspath):
+            _cache_set(db_path, int(paper_id), pdf_abspath, ex)
+        else:
+            _cache_delete(db_path, int(paper_id))
 
 def _ensure_reader_pdf_available(db: Any, paper: Any) -> str | None:
     """阅读页兜底：库内无 PDF 但有 arXiv/pdf_url 时，现取现存一份供上下文解析。"""
@@ -412,6 +425,10 @@ def build_reader_snap(paper: Any, *, pdf_text_for_references: str = "") -> dict[
         "doi": (getattr(paper, "doi", None) or "").strip(),
         "arxiv_id": (getattr(paper, "arxiv_id", None) or "").strip(),
         "abstract": (getattr(paper, "abstract", None) or "").strip(),
+        "authors": [str(getattr(author, "name", author)) for author in (getattr(paper, "authors", None) or [])],
+        "year": getattr(paper, "year", None),
+        "journal": getattr(paper, "journal", None),
+        "category": getattr(paper, "category", None),
         "keywords": [str(x) for x in (getattr(paper, "keywords", None) or [])[:32] if str(x).strip()],
         "references": refs,
         "references_source": refs_source,
@@ -472,16 +489,15 @@ def format_paper_reader_block(
         )
     return "\n".join(lines)
 
-def build_reader_context_for_paper(db: Any, paper_id: int) -> tuple[Any | None, str, str]:
+def build_reader_context_for_paper(db: Any, paper_id: int) -> tuple[Any | None, str, str, bool]:
     p = db.get_paper_by_id(int(paper_id))
     if not p:
-        return None, "", ""
+        return None, "", "", False
     pdf_path = _ensure_reader_pdf_available(db, p)
     excerpt, is_cached = extract_pdf_text_full_cached(getattr(db, "db_path", ""), int(paper_id), pdf_path)
     if pdf_path and not excerpt:
-        excerpt = extract_pdf_text_full(pdf_path)
-        if excerpt.strip():
-            _cache_set(getattr(db, "db_path", ""), int(paper_id), pdf_path, excerpt)
+        compute_and_cache_excerpt(getattr(db, "db_path", ""), int(paper_id), pdf_path)
+        excerpt = _cache_get(getattr(db, "db_path", ""), int(paper_id), pdf_path) or ""
     merged_for_refs = excerpt.strip()
     refs_raw = ""
     if not (getattr(p, "references", None) or []):

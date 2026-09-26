@@ -53,7 +53,7 @@ function abstractPreview(abs: string, length = 280): string {
         <div class="paper-source">
           <strong>期刊/会议：</strong>
           <LatexInline
-            :text="`${paper.journal || paper.venue || (paper.source ? resultSourceMeta(paper.source).label + ' 预印本' : '—')} · ${paper.year ?? '—'}`"
+            :text="`${paper.journal || (paper.source ? resultSourceMeta(paper.source).label + ' 预印本' : '—')} · ${paper.year ?? '—'}`"
           />
         </div>
         <div v-if="paper.abstract" class="paper-abstract">

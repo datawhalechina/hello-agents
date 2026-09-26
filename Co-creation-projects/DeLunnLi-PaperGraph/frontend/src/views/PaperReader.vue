@@ -134,12 +134,12 @@ import {
   postPaperReaderOpening,
   postPaperReaderChat,
   getPaperReaderHistory,
-  postReadingLog,
   savePapers,
 } from '@/services/api'
 import type { Paper } from '@/types'
 import PdfJsViewer from '@/components/PdfJsViewer.vue'
 import { renderMarkdown } from '@/utils/markdown'
+import { useReadingSession } from '@/composables/useReadingSession'
 const route = useRoute()
 const router = useRouter()
 const paper = ref<Paper | null>(null)
@@ -165,7 +165,10 @@ const dragging = ref(false)
 const dragPointerId = ref<number | null>(null)
 const rafPending = ref(false)
 const lastClientX = ref<number | null>(null)
-const readingSession = ref<{ paperId: number; startedAtMs: number } | null>(null)
+const readingSession = useReadingSession()
+let paperVersion = 0
+let conversationRevision = 0
+const isCurrentPaper = (version: number, id: number) => version === paperVersion && id === paperId.value
 const normalizeAssistantText = (s: string): string => {
   const raw = String(s || '')
   if (raw.includes('```')) return raw.replace(/\r\n/g, '\n')
@@ -194,8 +197,10 @@ const onPdfError = (msg: string) => {
   void maybeStartOpening()
 }
 const pdfReady = ref(false)
+const historyReady = ref(false)
 const openingStarted = ref(false)
 const onPdfLoaded = () => {
+  loadError.value = ''
   pdfReady.value = true
   void maybeStartOpening()
 }
@@ -208,6 +213,7 @@ const backToLibrary = () => {
   router.push('/library')
 }
 const closeTab = () => {
+  readingSession.flush(true)
   try {
     window.close()
   } catch {
@@ -287,21 +293,9 @@ const onDividerPointerDown = (ev: PointerEvent) => {
   window.addEventListener('pointercancel', onDividerPointerUp)
 }
 onBeforeUnmount(() => {
+  paperVersion += 1
   endDrag()
-  void flushReadingSession()
 })
-const flushReadingSession = async () => {
-  const s = readingSession.value
-  if (!s) return
-  readingSession.value = null
-  const durMs = Date.now() - s.startedAtMs
-  const sec = Math.floor(durMs / 1000)
-  if (!Number.isFinite(sec) || sec < 8) return
-  try {
-    await postReadingLog({ paper_id: s.paperId, duration_sec: Math.min(sec, 60 * 60 * 6), client_ts: Math.floor(Date.now() / 1000) })
-  } catch {
-  }
-}
 const scrollBottom = async () => {
   await nextTick()
   const el = scrollRef.value
@@ -318,14 +312,21 @@ const mapHistoryTurns = (
       return { role, content }
     })
 const ensureOpeningAndHistory = async (reloadHistory = false, showError = true) => {
-  if (paperId.value == null) return
+  const id = paperId.value
+  if (id == null) return
+  const version = paperVersion
+  const originalMessages = messages.value
+  const originalLength = originalMessages.length
   try {
-    const res = await postPaperReaderOpening(paperId.value)
+    const res = await postPaperReaderOpening(id)
+    if (!isCurrentPaper(version, id)) return
     if (!res.success || !res.opening) return
-    if (res.pdf_parsing) pdfParsing.value = true
+    pdfParsing.value = !!res.pdf_parsing
     if (reloadHistory) {
-      const h = await getPaperReaderHistory(paperId.value, 200)
-      if (h?.success && Array.isArray(h.turns) && h.turns.length > 0) {
+      const h = await getPaperReaderHistory(id, 200)
+      if (!isCurrentPaper(version, id)) return
+      if (conversationRevision === 0 && messages.value === originalMessages && messages.value.length === originalLength &&
+          h?.success && Array.isArray(h.turns) && h.turns.length > 0) {
         const restored = mapHistoryTurns(h.turns)
         if (restored.length > 0) {
           messages.value = restored
@@ -335,18 +336,19 @@ const ensureOpeningAndHistory = async (reloadHistory = false, showError = true) 
       }
     }
     const hasAssistantMessage = messages.value.some((m) => m.role === 'assistant')
-    if (!hasAssistantMessage) {
+    if (!hasAssistantMessage && conversationRevision === 0) {
       messages.value.push({ role: 'assistant', content: normalizeAssistantText(res.opening) })
       await scrollBottom()
     }
   } catch (e: unknown) {
-    if (showError) {
+    if (isCurrentPaper(version, id) && showError) {
       message.error((e as Error).message || '导读加载失败')
     }
   }
 }
-const maybeStartOpening = async (reloadHistory = false, showError = true) => {
+const maybeStartOpening = async (reloadHistory = true, showError = true) => {
   if (openingStarted.value) return
+  if (!historyReady.value) return
   if (paperId.value == null) return
   if (hasLocalPdfForViewer.value && !pdfReady.value) return
   openingStarted.value = true
@@ -354,20 +356,27 @@ const maybeStartOpening = async (reloadHistory = false, showError = true) => {
 }
 const send = async () => {
   const text = draft.value.trim()
-  if (!text || paperId.value == null || sending.value) return
+  const id = paperId.value
+  if (!text || id == null || sending.value) return
   if (composing.value) return
+  const version = paperVersion
+  const history = messages.value.map(({ role, content }) => ({ role, content }))
+  conversationRevision += 1
   sending.value = true
   messages.value.push({ role: 'user', content: text })
   draft.value = ''
   inputKey.value += 1
   await nextTick()
   await scrollBottom()
+  if (!isCurrentPaper(version, id)) return
   try {
     const res = await postPaperReaderChat({
-      paper_id: paperId.value,
-      messages: messages.value.slice(0, -1),
+      paper_id: id,
+      messages: history,
       user_message: text,
     })
+    if (!isCurrentPaper(version, id)) return
+    pdfParsing.value = !!res.pdf_parsing
     if (res.success && res.reply) {
       const rp = Array.isArray((res as any).related_papers) ? ((res as any).related_papers as Paper[]) : []
       messages.value.push({
@@ -379,11 +388,14 @@ const send = async () => {
       messages.value.push({ role: 'assistant', content: '（无回复）' })
     }
   } catch (e: unknown) {
+    if (!isCurrentPaper(version, id)) return
     message.error((e as Error).message || '发送失败')
     messages.value.push({ role: 'assistant', content: '请求失败，请检查网络或 LLM 配置。' })
   } finally {
-    sending.value = false
-    await scrollBottom()
+    if (isCurrentPaper(version, id)) {
+      sending.value = false
+      await scrollBottom()
+    }
   }
 }
 const paperExternalUrl = (p: Paper): string | null => {
@@ -425,26 +437,41 @@ const saveRelatedPaperToLibrary = async (p: Paper) => {
   }
 }
 const loadPaper = async () => {
-  await flushReadingSession()
+  const version = ++paperVersion
+  conversationRevision = 0
+  const id = paperId.value
+  readingSession.finish()
   loadingPaper.value = true
   loadError.value = ''
   paper.value = null
   pdfReady.value = false
+  historyReady.value = false
+  pdfParsing.value = false
   openingStarted.value = false
   messages.value = []
+  draft.value = ''
+  sending.value = false
+  inputKey.value += 1
   await nextTick()
+  if (version !== paperVersion) return
   initDefaultSplitIfNeeded()
-  if (paperId.value == null) {
+  if (id == null) {
     loadError.value = '无效的文献 ID'
     loadingPaper.value = false
     return
   }
-  readingSession.value = { paperId: paperId.value, startedAtMs: Date.now() }
   try {
-    paper.value = await getPaper(paperId.value)
+    const loaded = await getPaper(id)
+    if (!isCurrentPaper(version, id)) return
+    paper.value = loaded
+    readingSession.start(id)
+    const originalMessages = messages.value
+    const originalLength = originalMessages.length
     try {
-      const h = await getPaperReaderHistory(paperId.value, 200)
-      if (h?.success && Array.isArray(h.turns) && h.turns.length > 0) {
+      const h = await getPaperReaderHistory(id, 200)
+      if (!isCurrentPaper(version, id)) return
+      if (originalLength === 0 && messages.value === originalMessages && messages.value.length === originalLength &&
+          h?.success && Array.isArray(h.turns) && h.turns.length > 0) {
         const restored = mapHistoryTurns(h.turns)
         if (restored.length > 0) {
           messages.value = restored
@@ -453,15 +480,14 @@ const loadPaper = async () => {
       }
     } catch {
     }
-    if (messages.value.length === 0) {
-      void maybeStartOpening()
-    } else if (messages.value[0]?.role === 'user') {
-      void maybeStartOpening(true, false)
-    }
+    if (!isCurrentPaper(version, id)) return
+    historyReady.value = true
+    // Existing history may contain an opening for an older metadata/PDF version.
+    void maybeStartOpening(true, messages.value.length === 0)
   } catch (e: unknown) {
-    loadError.value = (e as Error).message || '加载失败'
+    if (isCurrentPaper(version, id)) loadError.value = (e as Error).message || '加载失败'
   } finally {
-    loadingPaper.value = false
+    if (isCurrentPaper(version, id)) loadingPaper.value = false
   }
 }
 watch(

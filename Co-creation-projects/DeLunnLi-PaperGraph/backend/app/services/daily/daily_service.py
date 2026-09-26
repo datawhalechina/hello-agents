@@ -6,8 +6,10 @@ import asyncio
 import json
 import logging
 import re
+from functools import partial
 from typing import Any
 
+import anyio
 from fastapi import HTTPException
 from fastapi.responses import Response
 from starlette.concurrency import run_in_threadpool
@@ -47,10 +49,13 @@ def _select_personalized_and_general(
 ) -> tuple[list[Any], list[Any]]:
     _identity = daily_paper_identity_sig_fn
     skip_sigs = set(skipped_papers or set())
-    pool = [p for p in (candidates or []) if _identity(p) not in skip_sigs]
+    pool = [p for p in dedupe_papers(candidates or [], identity_fn=_identity) if _identity(p) not in skip_sigs]
     if len(pool) < personalized_k + general_k:
+        seen = {_identity(p) for p in pool}
         for p in external_unique or []:
-            if _identity(p) not in skip_sigs:
+            sig = _identity(p)
+            if sig not in skip_sigs and sig not in seen:
+                seen.add(sig)
                 pool.append(p)
     if not pool:
         return [], []
@@ -88,12 +93,12 @@ def _select_personalized_and_general(
                 get_llm().invoke([{"role": "user", "content": prompt}], temperature=pick_temp, max_tokens=400)
             )
             data = json.loads(raw.strip().lstrip("```json").rstrip("```").strip())
-            llm_p = [int(i) for i in (data.get("personalized") or [])[:personalized_k] if 0 <= int(i) < len(pool)]
-            llm_g = [
+            llm_p = list(dict.fromkeys(int(i) for i in (data.get("personalized") or []) if 0 <= int(i) < len(pool)))[:personalized_k]
+            llm_g = list(dict.fromkeys(
                 int(i)
-                for i in (data.get("general") or [])[:general_k]
+                for i in (data.get("general") or [])
                 if 0 <= int(i) < len(pool) and int(i) not in llm_p
-            ]
+            ))[:general_k]
             if llm_p or llm_g:
                 p_idxs, g_idxs = llm_p, llm_g
     except Exception:
@@ -265,7 +270,8 @@ async def _build_daily_response(
 ) -> DailyPapersResponse:
     _to_api = papergraph_to_api_fn
     _identity = daily_paper_identity_sig_fn
-    strategy_explanation = _build_strategy_explanation(
+    strategy_explanation = await _run_model_work(
+        _build_strategy_explanation,
         agent=agent,
         n_personalized=len(personalized_final),
         n_general=len(general_selected),
@@ -278,7 +284,7 @@ async def _build_daily_response(
     g_theme: list[str] = []
     if use_llm_theme_keywords:
         try:
-            p_theme, g_theme = await run_in_threadpool(
+            p_theme, g_theme = await _run_model_work(
                 summarize_daily_theme_keywords_sync,
                 personalized_titles=titles_for_daily_theme_prompt(personalized_final),
                 general_titles=titles_for_daily_theme_prompt(general_selected),
@@ -375,7 +381,7 @@ async def compute_daily_papers(
             personalized_k = 20
         general_k = max(0, min(25, total_target - personalized_k))
 
-        agent = get_search_agent()
+        agent = await _run_model_work(get_search_agent)
         try:
             lib_lim = max(50, min(3000, int(body.library_limit if body.library_limit is not None else 800)))
         except (TypeError, ValueError):
@@ -409,7 +415,7 @@ async def compute_daily_papers(
             ),
             run_in_threadpool(extract_library_characteristics, library_papers),
         )
-        llm_categories = llm_arxiv_categories(agent, mem_kw_list, daily_arxiv_cs_categories)
+        llm_categories = await _run_model_work(llm_arxiv_categories, agent, mem_kw_list, daily_arxiv_cs_categories)
 
         all_external, source_counts, _arxiv_query = await fetch_external_candidates(
             searcher=searcher,
@@ -470,7 +476,7 @@ async def compute_daily_papers(
                 general_pick_hints=[],
             )
 
-        personalized_final, general_selected = await run_in_threadpool(
+        personalized_final, general_selected = await _run_model_work(
             _select_personalized_and_general,
             candidates=candidates,
             external_unique=external_unique,
@@ -512,18 +518,13 @@ async def compute_daily_papers(
 
 async def record_user_daily_feedback(*, body, db_path) -> Any:
     import datetime
-    from .daily_recommend_feedback import FeedbackAction
+    from .daily_recommend_feedback import FeedbackAction, canonical_feedback_identity
     from ...models.schemas import DailyRecommendFeedbackResponse
 
     date_key = datetime.datetime.now().strftime("%Y-%m-%d")
-    identity_key = body.identity_key
-    identity_type = "title_hash"
-    if identity_key.startswith("arxiv:"):
-        identity_type, identity_key = "arxiv", identity_key[6:]
-    elif identity_key.startswith("doi:"):
-        identity_type, identity_key = "doi", identity_key[4:]
-    elif identity_key.startswith("title_hash:"):
-        identity_type, identity_key = "title_hash", identity_key[11:]
+    identity_key = canonical_feedback_identity(body.identity_key)
+    identity_type = identity_key.split(":", 1)[0]
+    action = FeedbackAction(body.action)
 
     ok = await run_in_threadpool(
         record_feedback,
@@ -532,19 +533,19 @@ async def record_user_daily_feedback(*, body, db_path) -> Any:
         paper_identity_key=identity_key,
         identity_type=identity_type,
         title=body.title,
-        action=FeedbackAction(body.action),
+        action=action,
         source_list=body.source_list,
         score_at_recommend=body.score_at_recommend,
         keywords=body.keywords,
         category=body.category,
     )
 
-    if str(body.action) == "skip":
+    if ok and action == FeedbackAction.SKIP:
         try:
             await run_in_threadpool(
                 record_skip_negative_pref,
                 db_path,
-                identity_key=body.identity_key,
+                identity_key=identity_key,
                 title=str(body.title or ""),
                 abstract=None,
                 journal=body.journal,
@@ -565,3 +566,9 @@ async def record_user_daily_feedback(*, body, db_path) -> Any:
             pass
 
     return DailyRecommendFeedbackResponse(success=ok, message="反馈已记录" if ok else "记录失败")
+
+
+async def _run_model_work(func, *args, **kwargs):
+    # Cancelling a request releases its wait; the synchronous client retains its
+    # own network timeout. Keep database writes on the normal threadpool path.
+    return await anyio.to_thread.run_sync(partial(func, *args, **kwargs), abandon_on_cancel=True)

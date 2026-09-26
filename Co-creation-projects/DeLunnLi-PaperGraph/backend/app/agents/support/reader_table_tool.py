@@ -9,6 +9,8 @@ from typing import Any, Callable
 from hello_agents.tools.base import Tool, ToolParameter
 from hello_agents.tools.response import ToolResponse
 
+from ...services.llm.context_budget import clip_utf8, TOOL_ITEM_BYTES
+
 logger = logging.getLogger(__name__)
 
 
@@ -36,14 +38,14 @@ class ReaderTableTool(Tool):
         ]
 
     def run(self, parameters: dict[str, Any]) -> ToolResponse:
-        ref = str(parameters.get("table_ref") or "").strip()
+        ref = clip_utf8(str(parameters.get("table_ref") or "").strip(), 160)
         if not ref:
             return ToolResponse.error("NO_REF", "请指定表格编号或关键词，如 table_ref='3'")
 
         try:
             snap = self._get_snap() or {}
         except Exception as exc:
-            return ToolResponse.error("SNAP_FAILED", f"读取快照失败：{exc}")
+            return ToolResponse.error("SNAP_FAILED", f"读取快照失败：{clip_utf8(str(exc), 200)}")
 
         pdf_path = str(snap.get("_pdf_abspath") or "").strip()
         if not pdf_path:
@@ -73,47 +75,44 @@ class ReaderTableTool(Tool):
 
         matched = self._find_table(tables, ref)
         if not matched:
-            available = [t.get("label", f"表{i+1}") for i, t in enumerate(tables[:8])]
+            available = [clip_utf8(t.get("label", f"表{i+1}"), 600) for i, t in enumerate(tables[:8])]
             return ToolResponse.success(
-                text=f"未找到匹配 '{ref}' 的表格。可用表格：{', '.join(available)}"
+                text=clip_utf8(f"未找到匹配 '{ref}' 的表格。可用表格：{', '.join(available)}", TOOL_ITEM_BYTES)
             )
 
-        result = f"## {matched['label']}\n\n{matched['content']}"
-        return ToolResponse.success(text=result)
+        result = f"## {clip_utf8(matched['label'], 600)}\n\n{matched['content']}"
+        return ToolResponse.success(text=clip_utf8(result, TOOL_ITEM_BYTES))
 
     @staticmethod
     def _parse_table_blocks(md: str) -> list[dict[str, Any]]:
         tables: list[dict[str, Any]] = []
-        blocks = re.split(r"\n(?=##|\|)", md)
-        for i, block in enumerate(blocks):
-            block = block.strip()
-            if not block or "|" not in block:
-                continue
-            label = f"表{i + 1}"
-            m = re.match(r"^##\s*(.*)", block)
-            if m:
-                label = m.group(1).strip()
-                block = block[m.end():].strip()
-            if block.startswith("|"):
-                tables.append({"label": label, "content": block[:3000]})
+        rows: list[str] = []
+        caption = ""
+
+        def flush():
+            nonlocal rows, caption
+            if len(rows) >= 2:
+                tables.append({"label": caption or f"表{len(tables) + 1}", "content": "\n".join(rows)})
+            rows = []
+            caption = ""
+
+        for line in (md or "").splitlines():
+            stripped = line.strip()
+            if stripped.startswith("|") and stripped.count("|") >= 2:
+                rows.append(stripped)
+            else:
+                if rows:
+                    flush()
+                if re.match(r"^(?:#{1,6}\s*|Table\s*\d|Tab\.\s*\d|表\s*\d)", stripped, re.I):
+                    caption = stripped.lstrip("# ")
+                elif stripped:
+                    caption = ""
+        flush()
         return tables
 
     @staticmethod
     def _extract_tables_from_text(text: str) -> list[dict[str, Any]]:
-        """Extract Markdown-style table blocks from merged text."""
-        tables: list[dict[str, Any]] = []
-        # Find table-like patterns: lines starting with | that have multiple columns
-        for m in re.finditer(
-            r"(?:^|\n)((?:Table\s*\d+[^\n]*|Tab\.\s*\d+[^\n]*))?\s*\n?"
-            r"((?:\|[^\n]+\|\n){2,})",
-            text, re.MULTILINE,
-        ):
-            caption = (m.group(1) or "").strip()
-            body = m.group(2).strip()
-            if body.count("|") >= 3:
-                label = caption if caption else f"表{len(tables) + 1}"
-                tables.append({"label": label, "content": body[:3000]})
-        return tables
+        return ReaderTableTool._parse_table_blocks(text)
 
     @staticmethod
     def _find_table(tables: list[dict[str, Any]], ref: str) -> dict[str, Any] | None:

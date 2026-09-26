@@ -211,7 +211,8 @@ async def _run_search_job(searcher: Any, job: RecallJob, runtime: SearchRuntimeC
                 papers = await searcher.search_async(job.query, sources=job.sources, max_results=job.max_results, **sk)
             else:
                 papers = await anyio.to_thread.run_sync(
-                    lambda: searcher.search(job.query, sources=job.sources, max_results=job.max_results, **sk)
+                    lambda: searcher.search(job.query, sources=job.sources, max_results=job.max_results, **sk),
+                    abandon_on_cancel=True,
                 )
             return list(papers or []), None
     except TimeoutError:

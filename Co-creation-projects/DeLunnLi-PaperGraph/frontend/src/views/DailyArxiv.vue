@@ -78,8 +78,8 @@
         }"
       >
         <template #renderItem="{ item, index }">
-          <PaperCard :paper="item" :index="index + 1" :tag-color="randomIds.has(item.arxiv_id || '') ? 'gold' : 'blue'"
-            :tag-label="randomIds.has(item.arxiv_id || '') ? '随机' : '个性化'" @click="onPaperClick">
+          <PaperCard :paper="item" :index="index + 1" :tag-color="randomIds.has(paperIdentity(item)) ? 'gold' : 'blue'"
+            :tag-label="randomIds.has(paperIdentity(item)) ? '随机' : '个性化'" @click="onPaperClick">
             <template #actions>
               <a-button type="link" @click="saveOne(item)">保存</a-button>
               <a-button v-if="hintFor(item)" type="link" @click="showWhyAndMaybeRead(item)">为什么</a-button>
@@ -104,6 +104,7 @@ import PaperCard from '@/components/shared/PaperCard.vue'
 import { savePapers, getDailyPapers, postDailyRecommendFeedback, type DailyPapersApiResponse } from '@/services/api'
 import type { Paper } from '@/types'
 import { titleCoKeywordsFromPapers } from '@/composables/useTitleKeywords'
+import { paperIdentity } from '@/utils/paperIdentity'
 const searchResults = ref<Paper[]>([])
 const randomIds = ref<Set<string>>(new Set())
 const loading = ref(true)
@@ -141,7 +142,7 @@ const preferenceTitleCoKeywords = computed(() => {
     return personalizedThemeKeywordsLlm.value.slice(0, 8)
   }
   const rid = randomIds.value
-  const personalized = searchResults.value.filter((p) => !rid.has(p.arxiv_id || ''))
+  const personalized = searchResults.value.filter((p) => !rid.has(paperIdentity(p)))
   return titleCoKeywordsFromPapers(personalized, 5)
 })
 const randomTitleCoKeywords = computed(() => {
@@ -149,7 +150,7 @@ const randomTitleCoKeywords = computed(() => {
     return generalThemeKeywordsLlm.value.slice(0, 8)
   }
   const rid = randomIds.value
-  const general = searchResults.value.filter((p) => rid.has(p.arxiv_id || ''))
+  const general = searchResults.value.filter((p) => rid.has(paperIdentity(p)))
   return titleCoKeywordsFromPapers(general, 5)
 })
 const listTopCategories = computed(() => topCategoriesFromPapers(searchResults.value, 4))
@@ -185,13 +186,8 @@ const dailyStrategyDetailBody = computed(() => {
   return raw
 })
 const refreshButtonText = computed(() => refreshing.value ? '刷新中…' : '刷新论文')
-function dailyPaperIdentity(paper: Paper): string {
-  if (paper.arxiv_id) return `arxiv:${paper.arxiv_id}`
-  if (paper.doi) return `doi:${paper.doi}`
-  return `title:${paper.title || ''}:${paper.year || ''}`
-}
 function dailyListSignature(papers: Paper[]): string {
-  return papers.map(dailyPaperIdentity).join('|')
+  return papers.map(paperIdentity).join('|')
 }
 function applyDailyPayload(r: DailyPapersApiResponse) {
   metaDateKey.value = (r.date_key && String(r.date_key).trim()) || ''
@@ -202,7 +198,7 @@ function applyDailyPayload(r: DailyPapersApiResponse) {
   generalThemeKeywordsLlm.value = normThemeKeywordList(r.general_theme_keywords)
   const rr = [...(r.arxiv_selected || [])]
   const pr = [...(r.personalized || [])]
-  randomIds.value = new Set(rr.map((p) => p.arxiv_id || '').filter(Boolean))
+  randomIds.value = new Set(rr.map(paperIdentity))
   const hints = new Map<string, { kind: string; explanation: string }>()
   r.personalized_pick_hints?.forEach((h) => {
     hints.set(h.identity_key, { kind: h.pick_kind, explanation: h.explanation })
@@ -218,8 +214,7 @@ function applyDailyPayload(r: DailyPapersApiResponse) {
     if (i < pr.length) interleaved.push(pr[i])
   }
   const filtered = interleaved.filter((p) => {
-    const identity = p.arxiv_id ? `arxiv:${p.arxiv_id}` : p.doi ? `doi:${p.doi}` : `title_hash:${p.title}_${p.year}`
-    return !skippedIds.value.has(identity)
+    return !skippedIds.value.has(paperIdentity(p))
   })
   searchResults.value = filtered
   if (!filtered.length) {
@@ -232,6 +227,7 @@ function dailyPayloadHasPapers(r: DailyPapersApiResponse): boolean {
   return (r.arxiv_selected?.length ?? 0) + (r.personalized?.length ?? 0) > 0
 }
 async function reloadDaily(forceRefresh: boolean) {
+  if (refreshing.value) return
   if (forceRefresh) refreshing.value = true
   else if (searchResults.value.length === 0) loading.value = true
   emptyHint.value = null
@@ -241,6 +237,7 @@ async function reloadDaily(forceRefresh: boolean) {
   try {
     const r = await getDailyPapers(forceRefresh ? { force_refresh: true } : {})
     if (!r?.success) throw new Error(r?.message || '加载失败')
+    if (r.stale_cache || r.refresh_failed) skippedIds.value = previousSkipped
     if (forceRefresh && !dailyPayloadHasPapers(r) && searchResults.value.length > 0) {
       skippedIds.value = previousSkipped
       emptyHint.value = r.message || '刷新未取到新结果，已保留当前列表。'
@@ -285,16 +282,12 @@ const saveOne = async (paper: Paper) => {
     if ((res.pdf_downloaded ?? 0) > 0) parts.push(`本地 PDF ${res.pdf_downloaded} 个`)
     message.success(parts.join('，'))
     if (res.message) message.warning(res.message)
-    const identityKey = paper.arxiv_id
-      ? `arxiv:${paper.arxiv_id}`
-      : paper.doi
-        ? `doi:${paper.doi}`
-        : `title_hash:${paper.title}_${paper.year}`
+    const identityKey = paperIdentity(paper)
     void postDailyRecommendFeedback({
       identity_key: identityKey,
       title: paper.title,
       action: 'save',
-      source_list: randomIds.value.has(paper.arxiv_id || '') ? 'general' : 'personalized',
+      source_list: randomIds.value.has(identityKey) ? 'general' : 'personalized',
       journal: (paper as any).journal,
       source: (paper as any).source,
     })
@@ -303,9 +296,7 @@ const saveOne = async (paper: Paper) => {
   }
 }
 function getPaperIdentityKey(paper: Paper): string {
-  if (paper.arxiv_id) return `arxiv:${paper.arxiv_id}`
-  if (paper.doi) return `doi:${paper.doi}`
-  return `title_hash:${paper.title}_${paper.year}`
+  return paperIdentity(paper)
 }
 function hintFor(paper: Paper): { kind: string; explanation: string } | null {
   const k = getPaperIdentityKey(paper)
@@ -320,7 +311,7 @@ async function ensureSavedAndOpenReader(paper: Paper) {
     identity_key: identityKey,
     title: paper.title,
     action: 'read',
-    source_list: randomIds.value.has(paper.arxiv_id || '') ? 'general' : 'personalized',
+    source_list: randomIds.value.has(identityKey) ? 'general' : 'personalized',
     journal: (paper as any).journal,
     source: (paper as any).source,
   })
@@ -354,9 +345,9 @@ const skipOne = async (paper: Paper, index: number) => {
       identity_key: identityKey,
       title: paper.title,
       action: 'skip',
-      source_list: randomIds.value.has(paper.arxiv_id || '') ? 'general' : 'personalized',
+      source_list: randomIds.value.has(identityKey) ? 'general' : 'personalized',
       keywords: paper.keywords,
-      category: paper.category,
+      category: paper.category ?? undefined,
       journal: (paper as any).journal,
       source: (paper as any).source,
     })
@@ -372,7 +363,7 @@ const onPaperClick = async (paper: Paper) => {
       identity_key: identityKey,
       title: paper.title,
       action: 'click',
-      source_list: randomIds.value.has(paper.arxiv_id || '') ? 'general' : 'personalized',
+      source_list: randomIds.value.has(identityKey) ? 'general' : 'personalized',
       journal: (paper as any).journal,
       source: (paper as any).source,
     })

@@ -22,7 +22,8 @@ export function useSearchConversations<TMessage>({
   stateStorageKey = 'searchAgentState',
   conversationsStorageKey = 'searchAgentConversations',
 }: UseSearchConversationsOptions<TMessage>) {
-  const conversations = ref<SearchConversation<TMessage>[]>([])
+  // Messages are plain serializable data; retain the generic type across Vue unwrapping.
+  const conversations = ref([]) as Ref<SearchConversation<TMessage>[]>
   const currentConversationId = ref<string | null>(null)
   const PERSIST_DEBOUNCE_MS = 900
   let conversationsPersistTimer: ReturnType<typeof setTimeout> | null = null
@@ -111,16 +112,25 @@ export function useSearchConversations<TMessage>({
     if (!hasSearched.value || messages.value.length === 0) return
     const convId = currentConversationId.value || generateId()
     if (!currentConversationId.value) currentConversationId.value = convId
+    saveConversationSnapshot(convId, messages.value)
+  }
+  function saveConversationSnapshot(id: string, snapshot: TMessage[]) {
+    const existingIndex = conversations.value.findIndex((c) => c.id === id)
+    // A request that finishes after deletion must not recreate the conversation.
+    if (existingIndex < 0 && currentConversationId.value !== id) return
     const next: SearchConversation<TMessage> = {
-      id: convId,
-      title: titleFromMessages(messages.value),
-      messages: JSON.parse(JSON.stringify(messages.value)),
+      id,
+      title: titleFromMessages(snapshot),
+      messages: JSON.parse(JSON.stringify(snapshot)),
       timestamp: Date.now(),
-      messageCount: messages.value.length,
+      messageCount: snapshot.length,
     }
-    const existingIndex = conversations.value.findIndex((c) => c.id === convId)
     if (existingIndex >= 0) conversations.value.splice(existingIndex, 1, next)
     else conversations.value.unshift(next)
+    if (currentConversationId.value === id) {
+      messages.value = snapshot
+      saveState()
+    }
     saveConversations()
   }
   function ensureCurrentConversationId(): string {
@@ -176,6 +186,7 @@ export function useSearchConversations<TMessage>({
     conversations,
     currentConversationId,
     saveCurrentConversation,
+    saveConversationSnapshot,
     ensureCurrentConversationId,
     saveState,
     persistConversationAndState,

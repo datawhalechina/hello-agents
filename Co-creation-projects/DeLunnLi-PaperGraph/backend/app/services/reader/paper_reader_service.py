@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import logging
 from typing import Any
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 
 from fastapi import BackgroundTasks, HTTPException
 from starlette.concurrency import run_in_threadpool
 
 from ...agents import get_paper_analysis_agent
-from ...agents.support.reader_reference_lookup_tool import READER_RELATED_FROM_BIBLIOGRAPHY, READER_RELATED_FROM_PRE_SEARCH
+from ...agents.support.reader_reference_lookup_tool import READER_RELATED_FROM_BIBLIOGRAPHY, READER_RELATED_FROM_PRE_SEARCH, READER_RELATED_FROM_REF_BLOCK
 from ...utils.common import suppress_exceptions_async
 
 logger = logging.getLogger(__name__)
@@ -45,8 +45,12 @@ class PaperReaderService:
         lines: list[str] = []
         tail = list(turns or [])[-24:]
         for t in tail:
-            role = (getattr(t, "role", None) or "").strip().lower()
-            content = (getattr(t, "content", None) or "").strip()
+            if isinstance(t, Mapping):
+                role = (t.get("role") or "").strip().lower()
+                content = (t.get("content") or "").strip()
+            else:
+                role = (getattr(t, "role", None) or "").strip().lower()
+                content = (getattr(t, "content", None) or "").strip()
             if not content:
                 continue
             if role not in ("user", "assistant"):
@@ -55,7 +59,7 @@ class PaperReaderService:
             lines.append(f"{label}：{content}")
         return "\n\n".join(lines)
 
-    async def _build_reader_context(self, paper_id: int, user_message: str = "") -> tuple[Any, str, str]:
+    async def _build_reader_context(self, paper_id: int, user_message: str = "") -> tuple[Any, str, str, str, bool]:
         from ..memory.memory_store import MemoryStore
         from .paper_reader_context import build_reader_context_for_paper
 
@@ -72,11 +76,11 @@ class PaperReaderService:
         return paper, ctx, title_hint, pdf_ref_text, pdf_parsing
 
     def _schedule_pdf_excerpt(self, paper_id: int, ctx: str, background_tasks: BackgroundTasks) -> None:
-        from .paper_reader_context import compute_and_cache_excerpt
+        from .paper_reader_context import compute_and_cache_excerpt, _cache_get
 
         try:
             pdf_path = self._db.get_library_pdf_abspath(paper_id)
-            if pdf_path and "【PDF 正文摘录" not in ctx:
+            if pdf_path and _cache_get(self._db.db_path, int(paper_id), pdf_path, max_age_days=45) is None:
                 background_tasks.add_task(compute_and_cache_excerpt, self._db.db_path, paper_id, pdf_path)
         except Exception as exc:
             logger.debug("paper_reader.schedule_pdf_excerpt_failed", extra={"paper_id": paper_id}, exc_info=exc)
@@ -120,7 +124,7 @@ class PaperReaderService:
         )
 
     async def get_opening(self, *, paper_id: int, background_tasks: BackgroundTasks) -> dict:
-        from .reader_opening_cache import get_cached_opening, set_cached_opening
+        from .reader_opening_cache import get_cached_opening, set_cached_opening, opening_evidence_key
 
         from .paper_reader_context import build_reader_snap
 
@@ -136,7 +140,8 @@ class PaperReaderService:
         if pdf_parsing:
             self._schedule_pdf_excerpt(paper_id, ctx, background_tasks)
 
-        cached, fresh = await run_in_threadpool(get_cached_opening, self._db.db_path, paper_id, 72)
+        evidence_key = opening_evidence_key(reader_snap)
+        cached, fresh = await run_in_threadpool(get_cached_opening, self._db.db_path, paper_id, 72, evidence_key)
         if cached and fresh:
             op = cached.strip()
             await self._ensure_opening_turn_safe(paper_id=paper_id, opening_text=op)
@@ -145,10 +150,13 @@ class PaperReaderService:
         if cached and not fresh:
             def _refresh() -> None:
                 try:
-                    opening2, _, _ = self._agent.paper_reader_reply(
+                    result = self._agent.paper_reader_reply(
                         ctx, _NO_HISTORY_PLACEHOLDER, _OPENING_PROMPT, reader_snap
                     )
-                    set_cached_opening(self._db.db_path, paper_id, opening2.strip())
+                    if getattr(result, "generated", bool(result[0].strip())):
+                        from .paper_reader_history import ensure_opening_turn
+                        ensure_opening_turn(self._db.db_path, paper_id=paper_id, opening_text=result[0].strip())
+                        set_cached_opening(self._db.db_path, paper_id, result[0].strip(), evidence_key)
                 except Exception as exc:
                     logger.warning("paper_reader.opening_refresh_failed", extra={"paper_id": paper_id}, exc_info=exc)
 
@@ -157,12 +165,13 @@ class PaperReaderService:
             await self._ensure_opening_turn_safe(paper_id=paper_id, opening_text=op)
             return {"opening": op, "pdf_parsing": pdf_parsing}
 
-        opening, _, _ = await run_in_threadpool(
+        result = await run_in_threadpool(
             lambda: self._agent.paper_reader_reply(ctx, _NO_HISTORY_PLACEHOLDER, _OPENING_PROMPT, reader_snap)
         )
-        op = opening.strip()
-        await run_in_threadpool(set_cached_opening, self._db.db_path, paper_id, op)
-        await self._ensure_opening_turn_safe(paper_id=paper_id, opening_text=op)
+        op = result[0].strip()
+        if getattr(result, "generated", bool(op)):
+            await self._ensure_opening_turn_safe(paper_id=paper_id, opening_text=op)
+            await run_in_threadpool(set_cached_opening, self._db.db_path, paper_id, op, evidence_key)
         return {"opening": op, "pdf_parsing": pdf_parsing}
 
     async def process_chat(
@@ -207,11 +216,11 @@ class PaperReaderService:
                 "ref_idx": i,
                 "title": getattr(p, "title", None),
                 "reason": (
-                    "来自当前文献参考文献题录（OpenAlex 解析）"
-                    if i - 1 < len(rs) and rs[i - 1] == READER_RELATED_FROM_BIBLIOGRAPHY
+                    "来自当前文献参考文献（题名或文献标识已核对）"
+                    if i - 1 < len(rs) and rs[i - 1] in (READER_RELATED_FROM_BIBLIOGRAPHY, READER_RELATED_FROM_REF_BLOCK)
                     else "基于论文主题相似度匹配"
                     if i - 1 < len(rs) and rs[i - 1] == READER_RELATED_FROM_PRE_SEARCH
-                    else "来自用户给定英文短语或外部题名检索（OpenAlex）"
+                    else "来自用户给定英文短语或外部题名检索"
                 ),
             }
             for i, p in enumerate(related_papers or [], start=1)

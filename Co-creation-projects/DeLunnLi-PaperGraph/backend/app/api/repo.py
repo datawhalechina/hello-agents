@@ -19,10 +19,12 @@ class RelationRepository:
             cur = conn.cursor()
             if focus_id is not None:
                 cur.execute(
-                    """SELECT source_paper_id, target_paper_id, relation, score, evidence
-                    FROM paper_relations
-                    WHERE source_paper_id = ? OR target_paper_id = ?
-                    ORDER BY score DESC, updated_at DESC LIMIT ?""",
+                    """SELECT pr.source_paper_id, pr.target_paper_id, pr.relation, pr.score, pr.evidence
+                    FROM paper_relations pr
+                    INNER JOIN papers source ON source.id = pr.source_paper_id
+                    INNER JOIN papers target ON target.id = pr.target_paper_id
+                    WHERE pr.source_paper_id = ? OR pr.target_paper_id = ?
+                    ORDER BY pr.score DESC, pr.updated_at DESC LIMIT ?""",
                     (int(focus_id), int(focus_id), int(limit)),
                 )
             else:

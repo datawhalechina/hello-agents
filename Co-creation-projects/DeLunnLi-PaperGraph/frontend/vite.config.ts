@@ -37,12 +37,9 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks(id) {
-            if (id.includes('node_modules/ant-design-vue')) {
-              if (id.includes('/vc-table/') || id.includes('/table/')) return 'antd-table'
-              if (id.includes('/vc-select/') || id.includes('/select/')) return 'antd-select'
-              if (id.includes('/vc-picker/') || id.includes('/date-picker/')) return 'antd-picker'
-              return 'antd'
-            }
+            // Ant Design components share internal modules. Keep them together
+            // to avoid cyclic chunks accessing exports before initialization.
+            if (id.includes('node_modules/ant-design-vue')) return 'antd'
             if (id.includes('node_modules/katex')) return 'katex'
           },
         },

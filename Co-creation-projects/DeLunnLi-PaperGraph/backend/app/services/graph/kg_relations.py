@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import logging
+import os
 import re
 import sqlite3
 import threading
@@ -310,16 +312,17 @@ def build_relations_for_new_paper(db_path: str, new_paper_id: int) -> int:
     now = time.time()
     _prune_recent_fingerprints(now)
 
-    _ax = _norm_arxiv_id(new_meta.get("arxiv_id"))
-    if _ax:
-        fp = f"arxiv:{_ax}"
-    else:
-        _doi = (new_meta.get("doi") or "").strip().lower()
-        if _doi:
-            fp = f"doi:{_doi}"
-        else:
-            _t = (new_meta.get("title") or "").strip().lower()[:160]
-            fp = f"title:{_t}"
+    # Scope completed work to this database and evidence, including a newly acquired PDF.
+    pdf_path = _pdf_abspath_from_row(db_path, new_meta.get("local_pdf_path"))
+    pdf_version = None
+    if pdf_path:
+        try:
+            st = os.stat(pdf_path)
+            pdf_version = (st.st_mtime_ns, st.st_size)
+        except OSError:
+            pass
+    inputs = json.dumps([new_meta, cands, pdf_version], sort_keys=True, ensure_ascii=False)
+    fp = f"{os.path.realpath(db_path)}:{new_paper_id}:{hashlib.sha256(inputs.encode()).hexdigest()}"
 
     with _kg_fingerprints_lock:
         last = _kg_recent_fingerprints.get(fp)
@@ -337,10 +340,10 @@ def build_relations_for_new_paper(db_path: str, new_paper_id: int) -> int:
         pdf_abspath = _pdf_abspath_from_row(db_path, new_meta.get("local_pdf_path"))
         if pdf_abspath:
             excerpt, _hit = extract_pdf_text_full_cached(
-                db_path, int(new_paper_id), pdf_abspath, max_chars=9000
+                db_path, int(new_paper_id), pdf_abspath
             )
             if not excerpt.strip():
-                excerpt = extract_pdf_text_full(pdf_abspath, max_chars=9000)
+                excerpt = extract_pdf_text_full(pdf_abspath)
                 if excerpt.strip():
                     _cache_set(db_path, int(new_paper_id), pdf_abspath, excerpt)
             if excerpt.strip():
@@ -353,12 +356,17 @@ def build_relations_for_new_paper(db_path: str, new_paper_id: int) -> int:
             exc_info=exc,
         )
 
-    edges: list[dict[str, Any]] = []
-    with _kg_infer_lock:
-        agent = get_knowledge_graph_agent()
-        edges, _ = agent.infer_edges(new_paper=new_meta, candidates=cands)
-
-    n = upsert_relations(db_path, int(new_paper_id), edges)
+    try:
+        with _kg_infer_lock:
+            agent = get_knowledge_graph_agent()
+            edges, _ = agent.infer_edges(new_paper=new_meta, candidates=cands)
+        n = upsert_relations(db_path, int(new_paper_id), edges)
+    except Exception:
+        with _kg_fingerprints_lock:
+            # Do not evict a newer attempt if the failed call outlived the dedup window.
+            if _kg_recent_fingerprints.get(fp) == now:
+                _kg_recent_fingerprints.pop(fp, None)
+        raise
     if n:
         with _kg_metrics_lock:
             _kg_metrics["relations_upserted"] = _kg_metrics.get("relations_upserted", 0) + n

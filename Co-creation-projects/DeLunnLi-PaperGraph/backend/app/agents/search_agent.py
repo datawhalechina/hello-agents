@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any, Optional
+from copy import deepcopy
+from threading import Lock
+from typing import Optional
 
 from ..core.search.paper_searcher import _sanitize_author_list_for_query
 from ..models.schemas import Paper
@@ -27,6 +29,7 @@ logger = logging.getLogger(__name__)
 
 _INTENT_CACHE: dict[tuple[str, str], tuple[float, SearchIntent]] = {}
 _INTENT_CACHE_TTL = 300.0
+_INTENT_CACHE_LOCK = Lock()
 
 
 class SearchAgent(BaseAgent):
@@ -34,7 +37,6 @@ class SearchAgent(BaseAgent):
 
     def __init__(self) -> None:
         super().__init__()
-        self._intent_parser_agent: Optional[Any] = None
         self.intent_parser = IntentParser(self)
         self.explainer = _SearchExplainer()
 
@@ -60,15 +62,14 @@ class SearchAgent(BaseAgent):
         )
         from hello_agents import SimpleAgent
 
-        parser_agent = self._intent_parser_agent
-        if parser_agent is None:
-            parser_agent = SimpleAgent(
-                name="intent_parser",
-                llm=self.llm,
-                system_prompt="你是学术检索意图解析器。只输出 JSON，不要解释。",
-                config=papergraph_agent_config(),
-            )
-            self._intent_parser_agent = parser_agent
+        # SimpleAgent retains its conversation. Each parse must have its own
+        # history, including concurrent requests and abandoned worker threads.
+        parser_agent = SimpleAgent(
+            name="intent_parser",
+            llm=self.llm,
+            system_prompt="你是学术检索意图解析器。只输出 JSON，不要解释。",
+            config=papergraph_agent_config(),
+        )
 
         resp = parser_agent.run(prompt)
         text = coerce_hello_agents_llm_output_to_str(resp).strip()
@@ -105,19 +106,20 @@ class IntentParser:
             return SearchIntent()
 
         # 5 分钟内相同查询命中缓存，避免重复调用 LLM
-        cache_key = (msg.lower()[:200], (profile or "accuracy").strip().lower())
-        now = time.time()
-        if cache_key in _INTENT_CACHE:
-            ts, cached = _INTENT_CACHE[cache_key]
-            if now - ts < _INTENT_CACHE_TTL:
-                return cached
+        cache_key = (msg, SearchAgent._normalize_profile(profile))
+        now = time.monotonic()
+        with _INTENT_CACHE_LOCK:
+            if cache_key in _INTENT_CACHE:
+                ts, cached = _INTENT_CACHE[cache_key]
+                if now - ts < _INTENT_CACHE_TTL:
+                    return deepcopy(cached)
 
         intent = self._parse_with_retry(msg, profile)
-        _INTENT_CACHE[cache_key] = (now, intent)
-        # LRU 淘汰：缓存超过 200 条时删除最旧条目
-        if len(_INTENT_CACHE) > 200:
-            oldest = min(_INTENT_CACHE, key=lambda k: _INTENT_CACHE[k][0])
-            del _INTENT_CACHE[oldest]
+        with _INTENT_CACHE_LOCK:
+            _INTENT_CACHE[cache_key] = (time.monotonic(), deepcopy(intent))
+            if len(_INTENT_CACHE) > 200:
+                oldest = min(_INTENT_CACHE, key=lambda k: _INTENT_CACHE[k][0])
+                del _INTENT_CACHE[oldest]
         return intent
 
     def _parse_with_retry(self, msg: str, profile: str) -> SearchIntent:

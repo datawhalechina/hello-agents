@@ -6,6 +6,7 @@ import contextlib
 import logging
 import os
 import re
+import tempfile
 from urllib.parse import urlparse
 
 import requests
@@ -131,6 +132,8 @@ def resolve_paper_pdf_url(paper: Paper, email: str = "") -> str | None:
 
     if u and _is_direct_pdf_url(u):
         return u
+    if su and _is_direct_pdf_url(su):
+        return su
 
     from app.core.search import _arxiv_canonical_from_paper, _arxiv_pdf_url_from_id
 
@@ -192,36 +195,42 @@ def download_paper_pdf_to_path(paper: Paper, dest_abspath: str, email: str = "")
         if not urls:
             return False
 
-        with contextlib.suppress(OSError):
-            os.makedirs(os.path.dirname(dest_abspath) or ".", exist_ok=True)
+        dest_dir = os.path.dirname(os.path.abspath(dest_abspath))
+        os.makedirs(dest_dir, exist_ok=True)
 
         for url in urls:
-            tmp = dest_abspath + ".part"
+            tmp = None
             try:
                 headers = _headers_for_pdf_get(url, paper, email)
                 with requests.get(url, timeout=90, stream=True, headers=headers, allow_redirects=True) as r:
                     if r.status_code != 200:
                         continue
 
-                    with open(tmp, "wb") as f:
+                    # Concurrent saves may share a destination, but must never
+                    # share an open staging inode or remove another attempt's file.
+                    with tempfile.NamedTemporaryFile(
+                        mode="wb", dir=dest_dir,
+                        prefix=f".{os.path.basename(dest_abspath)}.", suffix=".part", delete=False,
+                    ) as f:
+                        tmp = f.name
                         for chunk in r.iter_content(chunk_size=65536):
                             if chunk:
                                 f.write(chunk)
 
                 if os.path.getsize(tmp) < 256 or not _file_looks_like_pdf(tmp):
-                    _cleanup_temp_file(tmp)
                     continue
 
                 os.replace(tmp, dest_abspath)
                 return True
 
             except (OSError, requests.RequestException):
-                _cleanup_temp_file(tmp)
                 continue
+            finally:
+                if tmp is not None:
+                    _cleanup_temp_file(tmp)
 
         return False
 
     except Exception as ex:
         _log.warning("download_paper_pdf_to_path 异常: %s", ex, exc_info=True)
-        _cleanup_temp_file(dest_abspath + ".part")
         return False

@@ -318,12 +318,16 @@ class PaperSearcher:
             else:
                 return []
 
+        source_errors: dict[str, str] = {}
+
         async def _run_one(src: str) -> List[Paper]:
             wall = max(5.0, min(60.0, float(_src_timeouts.get(src, 25.0))))
             try: return await asyncio.wait_for(_fetch_src(src), timeout=wall)
             except asyncio.TimeoutError:
+                source_errors[src] = f"timeout after {wall:.0f}s"
                 logger.warning("搜索 %s 超时（%.0fs）", src, wall); return []
             except Exception as e:
+                source_errors[src] = str(e)[:100]
                 logger.warning("搜索 %s 时出错: %s", src, str(e)); return []
 
         results_by_src = await asyncio.gather(*[_run_one(s) for s in sources])
@@ -333,6 +337,11 @@ class PaperSearcher:
             logger.info("从 %s 获取 %s 篇文献", src, len(res))
 
         final_results = self._post_process_results(all_results, query, max_results=max_results, **kwargs)
+        if not final_results and source_errors:
+            # Keep usable partial results, but never turn an unrecovered outage
+            # into a successful "no matching papers" response.
+            detail = "; ".join(f"{src}: {error}" for src, error in source_errors.items())
+            raise RuntimeError(f"search provider failure: {detail}")
         self._bump_stat("total_results", len(final_results))
         return final_results
 

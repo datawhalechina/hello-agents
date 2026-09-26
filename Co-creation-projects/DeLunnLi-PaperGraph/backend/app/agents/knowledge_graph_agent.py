@@ -10,6 +10,7 @@ from hello_agents import SimpleAgent
 
 from ..utils import parse_llm_json
 from ..services.llm.agent_config import papergraph_agent_config
+from ..services.llm.context_budget import MODEL_ITEM_BYTES, clip_utf8
 from .base import BaseAgent
 from .prompts.knowledge_graph import REL_PROMPT
 
@@ -29,37 +30,75 @@ class KnowledgeGraphAgent(BaseAgent):
         super().__init__()
         self.min_score = min_score
         self.max_edges = max_edges
-        self.chunk_size = chunk_size
-        self._agent = agent or SimpleAgent(
-            name="papergraph_kg_rel",
-            llm=self.llm,
-            system_prompt=REL_PROMPT,
-            config=papergraph_agent_config(),
-        )
+        self.chunk_size = max(1, int(chunk_size))
+        self._agent = agent
 
     def _candidate_id(self, paper: dict[str, Any]) -> int | None:
         for key in ("paper_id", "id", "target_paper_id"):
             try:
                 value = int(paper.get(key))
-                if value > 0:
+                if 0 < value <= 2**63 - 1:
                     return value
             except (TypeError, ValueError):
                 continue
         return None
 
     def _compact_paper(self, paper: dict[str, Any]) -> dict[str, Any]:
+        keywords = paper.get("keywords")
+        try:
+            year = int(paper.get("year"))
+        except (TypeError, ValueError, OverflowError):
+            year = 0
         out = {
             "paper_id": self._candidate_id(paper),
-            "title": self._clip(paper.get("title"), 300),
-            "abstract": self._clip(paper.get("abstract"), 2000),
-            "keywords": list((paper.get("keywords") or [])[:12]),
-            "source": paper.get("source"),
-            "year": paper.get("year"),
-            "category": paper.get("category"),
-            "pdf_excerpt": self._clip(paper.get("pdf_excerpt"), 1200),
-            "related_work_excerpt": self._clip(paper.get("related_work_excerpt"), 1200),
+            "title": clip_utf8(paper.get("title"), 360),
+            "abstract": clip_utf8(paper.get("abstract"), 1200),
+            "keywords": [clip_utf8(k, 64) for k in keywords[:12]] if isinstance(keywords, (list, tuple)) else [],
+            "source": clip_utf8(paper.get("source"), 96),
+            "year": year if 1000 <= year <= 3000 else None,
+            "category": clip_utf8(paper.get("category"), 96),
+            "pdf_excerpt": clip_utf8(paper.get("pdf_excerpt"), 900),
+            "related_work_excerpt": clip_utf8(paper.get("related_work_excerpt"), 600),
         }
+        # Reserve room for both a new paper and at least one candidate. JSON escaping
+        # can expand even byte-clipped text, so fit the serialized object as well.
+        overhead = len(self._payload_json({}, []).encode("utf-8"))
+        paper_budget = (MODEL_ITEM_BYTES - overhead) // 2
+        while len(json.dumps(out, ensure_ascii=False, separators=(",", ":")).encode("utf-8")) > paper_budget:
+            texts = [(key, None, value) for key, value in out.items() if isinstance(value, str) and value]
+            texts.extend(("keywords", i, value) for i, value in enumerate(out["keywords"]) if value)
+            key, index, value = max(texts, key=lambda item: len(json.dumps(item[2], ensure_ascii=False).encode("utf-8")))
+            shortened = clip_utf8(value, len(value.encode("utf-8")) // 2)
+            if index is None:
+                out[key] = shortened
+            else:
+                out[key][index] = shortened
+        out["keywords"] = [k for k in out["keywords"] if k]
         return {k: v for k, v in out.items() if v not in (None, "", [], {})}
+
+    @staticmethod
+    def _payload_json(new_paper: dict[str, Any], candidates: list[dict[str, Any]]) -> str:
+        return json.dumps({
+            "evidence_scope": "Partial metadata and excerpts only; omitted text is not evidence of absence.",
+            "new_paper": new_paper,
+            "candidates": candidates,
+        }, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
+
+    def _run_chunk(self, payload: str) -> str:
+        # Framework agents append to conversation history after every run. Each
+        # chunk is an independent extraction task, including across saved papers.
+        agent = self._agent or SimpleAgent(
+            name="papergraph_kg_rel", llm=self.llm,
+            system_prompt=clip_utf8(REL_PROMPT), config=papergraph_agent_config(),
+        )
+        reset = getattr(agent, "clear_history", None) if self._agent is not None else None
+        if callable(reset):
+            reset()
+        try:
+            return agent.run(payload)
+        finally:
+            if callable(reset):
+                reset()
 
     def _validate_edges(self, edges: Any, allowed_ids: set[int]) -> list[dict[str, Any]]:
         if not isinstance(edges, list):
@@ -85,8 +124,21 @@ class KnowledgeGraphAgent(BaseAgent):
                 best[tid] = edge
         return sorted(best.values(), key=lambda x: x["score"], reverse=True)
 
-    def _chunks(self, items: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
-        return [items[i : i + self.chunk_size] for i in range(0, len(items), self.chunk_size)]
+    def _chunks(
+        self, items: list[dict[str, Any]], *, new_paper: dict[str, Any],
+    ) -> list[list[dict[str, Any]]]:
+        chunks: list[list[dict[str, Any]]] = []
+        chunk: list[dict[str, Any]] = []
+        for item in items:
+            proposed = [*chunk, item]
+            if chunk and (len(proposed) > self.chunk_size or
+                          len(self._payload_json(new_paper, proposed).encode("utf-8")) > MODEL_ITEM_BYTES):
+                chunks.append(chunk)
+                chunk = []
+            chunk.append(item)
+        if chunk:
+            chunks.append(chunk)
+        return chunks
 
     def infer_edges(
         self, *, new_paper: dict[str, Any], candidates: list[dict[str, Any]]
@@ -107,10 +159,10 @@ class KnowledgeGraphAgent(BaseAgent):
 
         merged: dict[int, dict[str, Any]] = {}
 
-        for chunk in self._chunks(compact_candidates):
-            payload = {"new_paper": compact_new, "candidates": chunk}
+        for chunk in self._chunks(compact_candidates, new_paper=compact_new):
+            payload = self._payload_json(compact_new, chunk)
             try:
-                raw = self._agent.run(json.dumps(payload, ensure_ascii=False))
+                raw = self._run_chunk(payload)
             except Exception as exc:
                 logger.exception("kg_llm_run_failed")
                 raise RuntimeError("kg_llm_run_failed") from exc

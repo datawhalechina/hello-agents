@@ -28,7 +28,11 @@ class UserInterestProfile:
 class UserBehaviorAnalytics:
 
     def __init__(self, db_path: str) -> None:
+        from ..reading_log.log import ensure_tables
+
         self.db_path = db_path
+        # Saved-paper interests also work before the first reading session.
+        ensure_tables(db_path)
 
     def _get_connection(self) -> sqlite3.Connection:
         conn = sqlite3.connect(self.db_path)
@@ -83,7 +87,7 @@ class UserBehaviorAnalytics:
     ) -> list[tuple[int, str]]:
         with self._cursor() as cur:
             cur.execute(
-                "SELECT id,category FROM papers WHERE created_at>=strftime('%s','now',?) ORDER BY created_at DESC LIMIT ?",
+                "SELECT id,category FROM papers WHERE datetime(created_at)>=datetime('now',?) ORDER BY created_at DESC LIMIT ?",
                 (f"-{days} days", top_n),
             )
             return [(int(r["id"]), str(r["category"] or "")) for r in cur.fetchall()]
@@ -119,7 +123,7 @@ class UserBehaviorAnalytics:
         """Count topics from paper metadata. LLM daily pipeline handles semantic classification."""
         subdomains: Counter[str] = Counter()
         for row in rows:
-            cat = (row.get("category") or "").strip()
+            cat = (row["category"] or "").strip()
             if cat:
                 subdomains[cat.lower()] += 1
         return subdomains

@@ -5,6 +5,7 @@ import os
 import time
 
 from fastapi import BackgroundTasks, HTTPException, Request
+from starlette.concurrency import run_in_threadpool
 
 from ...settings import get_settings
 from ...models.schemas import (
@@ -92,9 +93,12 @@ def get_library(
                 if p.id is not None and int(p.id) in repaired:
                     p.local_pdf_path = repaired[int(p.id)]
 
-        total = db.count_papers() if not (q or year_from or year_to or read_status or tag_list or cat) else len(papers_data) + (1 if len(papers_data) >= limit else 0)
+        total = db.count_library(
+            query=q, tags=tag_list, year_from=year_from, year_to=year_to,
+            read_status=read_status.value if read_status else None, category=cat,
+        )
         papers = [litpaper_to_api_paper_fn(p) for p in papers_data]
-        return PapersResponse(success=True, total=total or len(papers), papers=papers)
+        return PapersResponse(success=True, total=total, papers=papers)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -106,6 +110,13 @@ async def save_papers(
     api_to_lit_fn,
     litpaper_to_api_paper_fn,
 ) -> SavePapersResponse:
+    # Classification, provider requests, PDF parsing and SQLite access are synchronous.
+    return await run_in_threadpool(
+        _save_papers_sync, db=db, request=request,
+        api_to_lit_fn=api_to_lit_fn,
+    )
+
+def _save_papers_sync(*, db, request: SavePapersRequest, api_to_lit_fn) -> SavePapersResponse:
     try:
         t0 = time.perf_counter()
         from ..graph.kg_relations import build_relations_for_new_paper
@@ -114,7 +125,7 @@ async def save_papers(
             library_pdf_relative_path,
             normalize_library_category_display,
         )
-        from app.core.pdf_download import download_paper_pdf_to_path, resolve_paper_pdf_url
+        from app.core.pdf_download import download_paper_pdf_to_path
 
         lit_list = [api_to_lit_fn(p) for p in request.papers]
         for api_p, lit_p in zip(request.papers, lit_list):
@@ -216,14 +227,6 @@ async def save_papers(
 
         t_after_memory = time.perf_counter()
 
-        for pid in ids or []:
-            try:
-                if pid is None or int(pid) <= 0:
-                    continue
-                build_relations_for_new_paper(db.db_path, int(pid))
-            except Exception:
-                continue
-
         pdf_downloaded = 0
         if request.download_pdfs and lit_list and ids:
             s = get_settings()
@@ -233,30 +236,23 @@ async def save_papers(
             for lit_p, pid in zip(lit_list, ids):
                 if pid is None or pid < 0:
                     continue
+                lit_p = db.get_paper_by_id(int(pid)) or lit_p
+                if db.get_library_pdf_abspath(int(pid)):
+                    pdf_downloaded += 1
+                    continue
                 relpath = library_pdf_relative_path(
                     getattr(lit_p, "category", None), int(pid), getattr(lit_p, "title", None)
                 )
                 dest = os.path.join(data_root, relpath)
                 os.makedirs(os.path.dirname(dest), exist_ok=True)
-                try:
-                    resolved = resolve_paper_pdf_url(lit_p, email=mail)
-                except Exception as ex:
-                    logger.warning("解析 PDF 链接异常（已跳过该条 PDF）: %s", ex, exc_info=True)
-                    resolved = None
-                if not resolved:
-                    logger.warning(
-                        "保存跳过 PDF：无可用链接 title=%r doi=%r",
-                        lit_p.title,
-                        lit_p.doi,
-                    )
                 if os.path.isfile(dest) and os.path.getsize(dest) >= 256:
                     db.set_local_pdf_path(int(pid), relpath)
                     pdf_downloaded += 1
                     continue
-                if resolved and download_paper_pdf_to_path(lit_p, dest, email=mail):
+                if download_paper_pdf_to_path(lit_p, dest, email=mail):
                     db.set_local_pdf_path(int(pid), relpath)
                     pdf_downloaded += 1
-                elif resolved:
+                else:
                     logger.warning("保存 PDF 下载失败 title=%r", lit_p.title)
         t_after_pdf = time.perf_counter()
 
@@ -269,6 +265,13 @@ async def save_papers(
                     need_repair.append(pid)
             if need_repair:
                 db.repair_library_local_pdf_paths_batch(need_repair)
+
+        # Inference must see the persisted PDF path and its full-text evidence.
+        for pid in ids_ok:
+            try:
+                build_relations_for_new_paper(db.db_path, pid)
+            except Exception:
+                logger.warning("保存后的图谱关系构建失败 paper_id=%s", pid, exc_info=True)
 
         msg = None
         if (

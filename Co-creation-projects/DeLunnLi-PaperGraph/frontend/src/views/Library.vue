@@ -166,10 +166,9 @@ const loadFolders = async () => {
   } catch {
   }
 }
-let _loading = false
+let loadVersion = 0
 const load = async () => {
-  if (_loading) return
-  _loading = true
+  const version = ++loadVersion
   loading.value = true
   try {
     const sk = selectedKey.value
@@ -183,15 +182,14 @@ const load = async () => {
       ...(cat ? { category: cat } : {}),
       ...(q ? { q } : {}),
     })
-    if (res.success) {
+    if (version === loadVersion && res.success) {
       papers.value = res.papers ?? []
       pagination.value = { ...pagination.value, total: typeof res.total === 'number' ? res.total : papers.value.length }
     }
   } catch (e: unknown) {
-    message.error((e as Error).message || '加载失败')
+    if (version === loadVersion) message.error((e as Error).message || '加载失败')
   } finally {
-    loading.value = false
-    _loading = false
+    if (version === loadVersion) loading.value = false
   }
 }
 const onTableChange = (pag: { current?: number; pageSize?: number }) => {
@@ -251,6 +249,7 @@ onMounted(async () => {
   await load()
 })
 onBeforeUnmount(() => {
+  loadVersion += 1
   if (searchDebounceTimer != null) {
     clearTimeout(searchDebounceTimer)
     searchDebounceTimer = null

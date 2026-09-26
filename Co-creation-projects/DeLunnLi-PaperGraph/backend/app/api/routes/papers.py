@@ -175,7 +175,8 @@ async def daily_papers(
 def log_reading_session(body: ReadingLogRequest, db_path=Depends(get_db_path)):
     from ...services.reading_log.log import append_session
     append_session(db_path, paper_id=int(body.paper_id), duration_sec=int(body.duration_sec),
-                   client_ts=int(body.client_ts) if body.client_ts is not None else None)
+                   client_ts=int(body.client_ts) if body.client_ts is not None else None,
+                   session_id=body.session_id)
     return {"success": True}
 
 @router.get("/reading/calendar", response_model=ReadingCalendarResponse)

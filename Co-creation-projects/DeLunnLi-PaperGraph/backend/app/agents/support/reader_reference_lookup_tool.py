@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import re
 from typing import Any
@@ -11,7 +10,7 @@ from collections.abc import Callable
 from hello_agents.tools.base import Tool, ToolParameter
 from hello_agents.tools.response import ToolResponse
 
-from ...agents.search_agent import SearchIntent
+from ...services.llm.context_budget import clip_utf8, TOOL_ITEM_BYTES
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +67,7 @@ def user_message_may_need_reference_lookup(um: str) -> bool:
 
 def reader_user_allows_external_paper_lookup(um: str) -> bool:
     s = (um or "").strip().lower()
-    if any(k in s for k in ("仅参考文献", "只要引用", "only reference", "just bibliography")):
+    if any(k in s for k in ("仅参考文献", "仅限参考文献", "只要参考文献", "只推荐参考文献", "只从参考文献", "只要引用", "不要库外", "不需要外部", "only reference", "just bibliography")):
         return False
     return True
 
@@ -140,7 +139,7 @@ class ReaderReferenceLookupTool(Tool):
             name="reader_reference_lookup",
             description=(
                 "从当前文献的参考文献中提取搜索查询，检索相关论文。"
-                "接受一条参考文献文本（或用户提示），调用 search_papers() 检索并返回可点击的论文结果。"
+                "用户提示仅用于选择已有引用；结果须与引用的题名、DOI 或 arXiv 标识一致。"
             ),
         )
         self._get_snap = get_snap
@@ -160,7 +159,7 @@ class ReaderReferenceLookupTool(Tool):
                 name="reference_focus",
                 type="string",
                 description=(
-                    "可选。用户感兴趣的引用方向或文本片段，直接用作文本检索查询。"
+                    "可选。用于对当前参考文献排序的引用方向或文本片段。"
                 ),
                 required=False,
                 default="",
@@ -168,102 +167,24 @@ class ReaderReferenceLookupTool(Tool):
         ]
 
     def run(self, parameters: dict[str, Any]) -> ToolResponse:
-        snap = {}
         try:
             snap = self._get_snap() or {}
-        except Exception as exc:
-            logger.debug("reader_reference_lookup_get_snap_failed", exc_info=exc)
-            return ToolResponse.error("SNAP_FAILED", f"reader_reference_lookup: cannot read snap. {exc}")
-
-        refs = [str(x).strip() for x in (snap.get("references") or []) if str(x).strip()]
-        raw = (snap.get("references_section_raw") or "").strip()
-        if not refs:
-            if raw:
-                return ToolResponse.success(
-                    text=(
-                        "reader_reference_lookup: current paper has no parsed references list; "
-                        "the PDF references section text is available. "
-                        "Extract English titles, DOIs, or arXiv IDs from it and call reader_paper_lookup."
-                    ),
-                )
-            return ToolResponse.success(
-                text=(
-                    "reader_reference_lookup: no references available (empty list, no PDF section text)."
-                ),
-            )
-
-        try:
-            mr = int(parameters.get("max_results") or 5)
-        except (TypeError, ValueError):
-            mr = 5
-        mr = max(1, min(READER_RECOMMEND_MAX_RESULTS, mr))
-
-        focus = str(parameters.get("reference_focus") or "").strip()
-        um = ""
-        try:
-            um = (self._get_user_message() or "").strip()
-        except Exception as exc:
-            logger.debug("reader_reference_lookup_get_user_message_failed", exc_info=exc)
-
-        query = (focus or um or (refs[0] if refs else "")).strip()[:300]
-        if not query or len(query) < 4:
-            return ToolResponse.success(
-                text="reader_reference_lookup: no usable query text. Provide a title, DOI, or arXiv ID.",
-            )
-
-        try:
-            from ...api.dependencies import get_searcher
-            from ...services.papers.papers_converters import litpaper_to_api_paper
-            from ...services.retrieval.search_pipeline import run_search_pipeline_async
-            from ...services.retrieval.search_plan import ResolvedSearchPlan
-        except Exception as exc:
-            logger.warning("reader_reference_lookup_import_failed", exc_info=exc)
-            return ToolResponse.error("IMPORT_FAILED", f"import failed: {exc}")
-
-        searcher = get_searcher()
-        intent = SearchIntent(
-            query=query,
-            sources=["arxiv", "openalex"],
-            max_results=mr,
-            sort="relevance",
-        )
-        plan = ResolvedSearchPlan.from_search_intent(intent)
-
-        try:
-            pip = asyncio.run(
-                run_search_pipeline_async(
-                    searcher=searcher,
-                    plan=plan,
-                    max_results=mr,
-                )
-            )
-        except Exception as exc:
-            logger.debug("reader_reference_lookup_search_failed", exc_info=exc)
-            return ToolResponse.error("SEARCH_FAILED", f"search failed: {exc}")
-
-        collected = [litpaper_to_api_paper(rp.paper) for rp in (pip.ranked or [])[:mr]]
+            hint = clip_utf8(parameters.get("reference_focus") or self._get_user_message(), 600)
+            try:
+                mr = max(1, min(READER_RECOMMEND_MAX_RESULTS, int(parameters.get("max_results") or 5)))
+            except (TypeError, ValueError):
+                mr = 5
+            collected = resolve_references_via_openalex(snap, max_results=mr, user_hint=hint)
+        except Exception:
+            logger.debug("reader_reference_lookup_failed", exc_info=True)
+            return ToolResponse.error("SEARCH_FAILED", "参考文献检索暂不可用，请稍后重试。")
         if not collected:
-            return ToolResponse.success(
-                text=(
-                    f"reader_reference_lookup: no results for query [{query[:80]}]. "
-                    "Try a more specific English title, DOI, or arXiv ID."
-                ),
-            )
-
-        try:
-            self._on_papers_found(collected, READER_RELATED_FROM_BIBLIOGRAPHY)
-        except Exception as exc:
-            logger.debug("reader_reference_lookup_callback_failed", exc_info=exc)
-
-        lines = [
-            f"reader_reference_lookup: {len(collected)} papers found from references:"
-        ]
-        for i, ap in enumerate(collected, start=1):
-            t = str(getattr(ap, "title", "") or "").strip() or "(no title)"
-            y = getattr(ap, "year", None) or "-"
-            lines.append(f"{i}. {t} | year={y}")
-        lines.append("Refer to items by number or short title above.")
-        return ToolResponse.success(text="\n".join(lines))
+            return ToolResponse.success(text="未找到与当前参考文献的题名、DOI 或 arXiv 标识一致的结果。可指定一条完整引用后重试。")
+        self._on_papers_found(collected, READER_RELATED_FROM_BIBLIOGRAPHY)
+        lines = [f"已核对 {len(collected)} 条参考文献；下方卡片可查看完整条目："]
+        for i, paper in enumerate(collected, 1):
+            lines.append(f"{i}. {clip_utf8(getattr(paper, 'title', ''), 240)} | year={getattr(paper, 'year', None) or '-'}")
+        return ToolResponse.success(text=clip_utf8("\n".join(lines), TOOL_ITEM_BYTES))
 
 def score_reference_line_against_hint(ln: str, hint: str) -> float:
     import re as _re
@@ -277,36 +198,71 @@ def score_reference_line_against_hint(ln: str, hint: str) -> float:
         return 0.0
     return len(h_tokens & l_tokens) / max(len(h_tokens), len(l_tokens))
 
+def reader_reference_lines(snap: dict[str, Any]) -> list[str]:
+    refs = snap.get("references") or snap.get("references_from_structure") or []
+    if not refs:
+        from ...services.reader.paper_reader_context import reference_strings_for_resolve_fallback
+        refs = reference_strings_for_resolve_fallback(str(snap.get("references_section_raw") or ""))
+    return [str(ref).strip()[:4000] for ref in refs[:220] if str(ref).strip()]
+
+
+def paper_matches_reference(paper: Any, reference: str) -> bool:
+    """Bibliography provenance requires an identifier or complete title anchor.
+
+    Topic overlap and search-engine ranking are not evidence of citation. In
+    particular, a conflicting identifier defeats an otherwise similar title.
+    """
+    doi_refs = {_norm_doi(x) for x in re.findall(r"10\.\d{4,9}/[^\s<>\"|]+", reference, re.I)}
+    doi = _norm_doi(getattr(paper, "doi", None))
+    if doi and doi_refs:
+        return doi in doi_refs
+    ax_refs = {_norm_arxiv(x) for x in re.findall(r"(?<!\d)\d{4}\.\d{4,5}(?:v\d+)?", reference, re.I)}
+    ax = _norm_arxiv(getattr(paper, "arxiv_id", None))
+    if ax and ax_refs:
+        return ax in ax_refs
+    # Remove punctuation/line wraps, preserving whole-word order. Do not accept
+    # a subset of generic words, or a search hit merely matching the topic.
+    normalize = lambda value: " ".join(re.findall(r"[^\W_]+", str(value or "").casefold()))
+    title = normalize(getattr(paper, "title", None))
+    ref = normalize(reference)
+    substantial = len(title) >= 16 and (len(title.split()) >= 3 or len(re.findall(r"[\u4e00-\u9fff]", title)) >= 8)
+    return bool(substantial and f" {title} " in f" {ref} ")
+
+
 def resolve_references_via_openalex(
-    snap: dict[str, Any], *, max_results: int = 5
+    snap: dict[str, Any], *, max_results: int = 5, user_hint: str = ""
 ) -> list[Any]:
-    refs = snap.get("references") or []
+    refs = reader_reference_lines(snap)
     if not refs:
         return []
+    max_results = max(1, min(READER_RECOMMEND_MAX_RESULTS, int(max_results)))
+    if user_hint:
+        refs.sort(key=lambda ref: score_reference_line_against_hint(ref, user_hint[:900]), reverse=True)
     from app.api.dependencies import get_searcher
     from app.services.papers.papers_converters import litpaper_to_api_paper
     from app.utils.async_sync import run_coroutine_sync
     searcher = get_searcher()
     results: list[Any] = []
+    queries: set[str] = set()
     seen: set[str] = set()
-    for ref in refs[:max_results * 3]:
-        q = str(ref or "").strip()[:200]
-        if not q or q.lower() in seen:
+    for ref in refs[:min(max_results * 3, 24)]:
+        q = ref[:520]
+        if not q or q.casefold() in queries:
             continue
-        seen.add(q.lower())
+        queries.add(q.casefold())
         try:
             papers = run_coroutine_sync(
                 searcher.search_async(q, sources=["openalex", "arxiv"], max_results=2, http_timeout_sec=5),
                 op_name="resolve_refs",
             )
-            for p in (papers or []):
-                api_p = litpaper_to_api_paper(p)
-                t = str(getattr(api_p, "title", "") or "").strip().lower()
-                if t and t not in seen:
-                    seen.add(t)
-                    results.append(api_p)
+            for paper in papers or []:
+                candidate = litpaper_to_api_paper(paper)
+                title = str(getattr(candidate, "title", "") or "").strip().casefold()
+                if title and title not in seen and paper_matches_reference(candidate, ref):
+                    seen.add(title)
+                    results.append(candidate)
         except Exception:
-            continue
+            logger.debug("reader_reference_resolve_failed", exc_info=True)
         if len(results) >= max_results:
             break
     return results[:max_results]

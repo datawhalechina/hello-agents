@@ -1,0 +1,24 @@
+# Keep application memory code and regression tests despite repository-wide rules.
+!backend/app/services/memory/
+!backend/app/services/memory/**
+!backend/tests/test_*.py
+
+# Local configuration and generated runtime/build artifacts.
+.env
+.env.*
+!.env.example
+backend/data/
+backend/downloads/
+backend/memory/
+backend/traces/
+*.db
+*.db-*
+:memory:.ses
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+node_modules/
+frontend/dist/
+frontend/public/pdfjs/
+.DS_Store
