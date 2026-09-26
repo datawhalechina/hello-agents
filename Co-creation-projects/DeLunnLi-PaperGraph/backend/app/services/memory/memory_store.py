@@ -3,18 +3,23 @@ from __future__ import annotations
 
 import os
 import time
+import threading
 from typing import Any
 
-from ..llm.agent_runtime import run_json_task
+from ..llm.agent_runtime import run_json_task, _run_with_optional_timeout
+from ..llm.context_budget import clip_utf8, MODEL_ITEM_BYTES
 from ..llm.llm_service import coerce_hello_agents_llm_output_to_str
 from .sqlite_document_store_compat import SQLiteDocumentStore
 
 _EXTRACT_PROMPT_MAX_CHARS = 3600
+_COMPRESSION_LOCKS = [threading.Lock() for _ in range(32)]
 
 
 def _stateless_llm_chat(llm: Any, user_prompt: str, **invoke_kwargs: Any) -> str:
     """Keep optional memory LLM calls independent of previous agent turns."""
-    output = llm.invoke([{"role": "user", "content": user_prompt}], **invoke_kwargs)
+    output = _run_with_optional_timeout(
+        lambda: llm.invoke([{"role": "user", "content": clip_utf8(user_prompt)}], **invoke_kwargs), 12.0,
+    )
     return coerce_hello_agents_llm_output_to_str(output)
 
 
@@ -175,10 +180,7 @@ class MemoryStore:
                 working_docs.sort(key=lambda d: self._ts_of(d), reverse=True)
                 to_compress = working_docs[20:]
                 if to_compress:
-                    compressed = self._summarize_via_llm(to_compress)
-                    if compressed:
-                        self._delete_docs(to_compress)
-                        self.add(scope=scope, paper_id=paper_id, kind="long", content=compressed, importance=0.6)
+                    self._compress_docs(to_compress, scope=scope, paper_id=paper_id)
 
         return result
 
@@ -371,8 +373,10 @@ class MemoryStore:
             "你是一个学术文献阅读助手的记忆管理模块。请将以下用户阅读过程中的关注点和问答摘要"
             "综合为一段不超过 300 字的紧凑摘要，保留关键术语、用户兴趣方向和研究问题。"
             "只输出摘要文本，不要加前缀或解释。\n\n"
-            + "\n".join(f"- {c[:200]}" for c in contents[-20:])
+            + "\n".join(f"- {c}" for c in contents)
         )
+        if len(prompt.encode("utf-8")) > MODEL_ITEM_BYTES:
+            return ""
         try:
             from ..llm.llm_service import get_llm
             llm = get_llm()
@@ -389,12 +393,45 @@ class MemoryStore:
         to_compress = entries[5:]
         if not to_compress:
             return "nothing to compress"
-        compressed = self._summarize_via_llm(to_compress)
-        if not compressed:
-            return "compression failed"
-        self._delete_docs(to_compress)
-        self.add(scope=scope, paper_id=paper_id, kind="long", content=compressed, importance=0.6)
-        return "compressed"
+        return "compressed" if self._compress_docs(to_compress, scope=scope, paper_id=paper_id) else "compression failed"
+
+    def _compress_docs(self, docs: list[dict], *, scope: str, paper_id: int | None) -> bool:
+        lock = _COMPRESSION_LOCKS[hash((self.db_path, scope, paper_id)) % len(_COMPRESSION_LOCKS)]
+        if not lock.acquire(blocking=False):
+            return False
+        try:
+            batch: list[dict] = []
+            size = 0
+            # Choose whole notes within the prompt bound, oldest first. Unsent
+            # notes (including oversize notes) remain available for a future run.
+            for doc in reversed(docs):
+                content = self._content_of(doc)
+                cost = len(content.encode("utf-8")) + 4
+                if not content or size + cost > 7600:
+                    continue
+                batch.append(doc)
+                size += cost
+                if len(batch) == 20:
+                    break
+            if not batch:
+                return False
+            summary = self._summarize_via_llm(batch)
+            if not summary:
+                return False
+            # Persist the replacement before removing its exact source notes.
+            saved = self.store.add_memory(
+                user_id=self._user_id_for(scope, paper_id), content=summary,
+                memory_type="long", importance=0.6,
+                metadata=self._properties(scope, paper_id, "long", {
+                    "summarized_memory_ids": [self._memory_id_of(doc) for doc in batch],
+                }),
+            )
+            if not saved:
+                return False
+            self._delete_docs(batch)
+            return True
+        finally:
+            lock.release()
 
     def consolidate(self, *, scope: str, paper_id: int | None, from_kind: str, to_kind: str, threshold: float = 0.6) -> int:
         docs = self._list_recent_docs(scope=scope, paper_id=paper_id, kinds=[from_kind], limit_per_kind=400)
@@ -522,17 +559,25 @@ class MemoryStore:
 
         packets.sort(key=lambda x: x[2], reverse=True)
         selected: list[str] = []
-        budget = 0
+        # max_tokens is a legacy API name. Enforce a conservative UTF-8 byte
+        # ceiling for the complete block, including labels and separators.
+        max_bytes = max(0, min(int(max_tokens), MODEL_ITEM_BYTES))
+        used_bytes = 0
         for kind, content, _score in packets:
             if not content:
                 continue
-            cost = len(content) // 3
-            if budget + cost > max_tokens:
+            prefix = f"[{kind}] "
+            overhead = len(prefix.encode("utf-8")) + (1 if selected else 0)
+            room = max_bytes - used_bytes - overhead
+            if room <= 0:
                 continue
-            selected.append(f"[{kind}] {content}")
-            budget += cost
+            fragment = clip_utf8(content, room)
+            if not fragment:
+                continue
+            selected.append(prefix + fragment)
+            used_bytes += overhead + len(fragment.encode("utf-8"))
 
-        return "\n".join(selected) if selected else ""
+        return "\n".join(selected)
 
     def get_context_for_query(self, *, paper_id: int, query: str, limit: int = 6) -> str:
         q = (query or "").strip().lower()

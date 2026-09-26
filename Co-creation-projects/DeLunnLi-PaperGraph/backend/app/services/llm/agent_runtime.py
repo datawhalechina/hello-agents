@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import concurrent.futures
 import logging
+import threading
+import contextvars
 from typing import Any, TypeVar
 from collections.abc import Callable
 
@@ -11,6 +13,7 @@ from hello_agents import SimpleAgent
 
 from ...settings import get_settings
 from .agent_config import papergraph_agent_config
+from .context_budget import clip_utf8
 
 logger = logging.getLogger(__name__)
 
@@ -43,16 +46,43 @@ def _task_failed_due_to_timeout(exc: BaseException) -> bool:
         or "timed out" in str(e).lower()
     ))
 
+# Timed-out Python calls cannot be killed safely. Keep a finite number of daemon
+# workers alive until providers return; saturation fails immediately instead of
+# creating unbounded orphan threads or blocking executor shutdown.
+_TIMEOUT_SLOTS = threading.BoundedSemaphore(8)
+
+
 def _run_with_optional_timeout(fn: Callable[[], _T], timeout_sec: float | None) -> _T:
     if timeout_sec is None or float(timeout_sec) <= 0:
         return fn()
-    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as ex:
-        fut = ex.submit(fn)
+    slots = _TIMEOUT_SLOTS
+    if not slots.acquire(blocking=False):
+        raise TimeoutError("agent timeout worker capacity exhausted")
+    fut = concurrent.futures.Future()
+    context = contextvars.copy_context()
+
+    def worker():
         try:
-            return fut.result(timeout=float(timeout_sec))
-        except concurrent.futures.TimeoutError as exc:
-            fut.cancel()
-            raise TimeoutError(f"agent task timeout after {timeout_sec}s") from exc
+            if fut.set_running_or_notify_cancel():
+                try:
+                    result = context.run(fn)
+                except BaseException as exc:
+                    fut.set_exception(exc)
+                else:
+                    fut.set_result(result)
+        finally:
+            slots.release()
+
+    try:
+        threading.Thread(target=worker, name="papergraph-agent-task", daemon=True).start()
+    except BaseException:
+        slots.release()
+        raise
+    try:
+        return fut.result(timeout=float(timeout_sec))
+    except concurrent.futures.TimeoutError as exc:
+        fut.cancel()
+        raise TimeoutError(f"agent task timeout after {timeout_sec}s") from exc
 
 def run_agent_task(
     *,
@@ -81,10 +111,10 @@ def run_agent_task(
             agent = SimpleAgent(
                 name=agent_name,
                 llm=llm,
-                system_prompt=system_prompt,
+                system_prompt=clip_utf8(system_prompt),
                 config=papergraph_agent_config(),
             )
-            raw = _run_with_optional_timeout(lambda: agent.run(user_prompt), resolved_timeout)
+            raw = _run_with_optional_timeout(lambda agent=agent: agent.run(clip_utf8(user_prompt)), resolved_timeout)
             return (raw or "").strip()
         except Exception as exc:
             last_error = exc

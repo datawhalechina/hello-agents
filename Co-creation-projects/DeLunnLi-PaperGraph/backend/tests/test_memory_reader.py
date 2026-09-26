@@ -184,7 +184,8 @@ def test_reader_agent_keeps_current_question_with_full_context_and_memory(monkey
     assert "RECENT_HISTORY_MARKER" in prompt
     assert "【共享/独立记忆】" in prompt
     history_section = prompt.split("【对话历史】\n", 1)[1].split("\n\n【共享/独立记忆】", 1)[0]
-    assert len(history_section) >= 2000
+    assert len(history_section.encode("utf-8")) >= 2000
+    assert len(prompt.encode("utf-8")) <= 9000
     assert prompt.endswith(f"【用户最新问题】\n{question}")
     assert "OUTSIDE_QUESTION_BUDGET" not in prompt
 
