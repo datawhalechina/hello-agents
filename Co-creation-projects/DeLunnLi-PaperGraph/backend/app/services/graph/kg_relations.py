@@ -337,10 +337,10 @@ def build_relations_for_new_paper(db_path: str, new_paper_id: int) -> int:
         pdf_abspath = _pdf_abspath_from_row(db_path, new_meta.get("local_pdf_path"))
         if pdf_abspath:
             excerpt, _hit = extract_pdf_text_full_cached(
-                db_path, int(new_paper_id), pdf_abspath, max_chars=9000
+                db_path, int(new_paper_id), pdf_abspath
             )
             if not excerpt.strip():
-                excerpt = extract_pdf_text_full(pdf_abspath, max_chars=9000)
+                excerpt = extract_pdf_text_full(pdf_abspath)
                 if excerpt.strip():
                     _cache_set(db_path, int(new_paper_id), pdf_abspath, excerpt)
             if excerpt.strip():
