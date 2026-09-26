@@ -41,25 +41,33 @@ def get_vote_model_cn(agents: list[AgentBase]) -> type[BaseModel]:
     return VoteModelCN
 
 
-class WitchActionModelCN(BaseModel):
-    """中文版女巫行动模型"""
-    
-    use_antidote: bool = Field(
-        description="是否使用解药救人",
-        default=False
-    )
-    use_poison: bool = Field(
-        description="是否使用毒药杀人", 
-        default=False
-    )
-    target_name: Optional[str] = Field(
-        description="目标玩家姓名（救人或毒杀的对象）",
-        default=None
-    )
-    action_reason: Optional[str] = Field(
-        description="行动理由",
-        default=None
-    )
+def get_witch_model_cn(agents: list[AgentBase]) -> type[BaseModel]:
+    """获取中文版女巫行动模型
+
+    毒杀目标限定在存活玩家中，避免女巫对已经出局的玩家用毒。
+    """
+
+    class WitchActionModelCN(BaseModel):
+        """中文版女巫行动模型"""
+
+        use_antidote: bool = Field(
+            description="是否使用解药救人",
+            default=False
+        )
+        use_poison: bool = Field(
+            description="是否使用毒药杀人",
+            default=False
+        )
+        target_name: Optional[Literal[tuple(_.name for _ in agents)]] = Field(
+            description="毒杀的目标玩家姓名，只能从存活玩家中选择；不使用毒药时留空",
+            default=None
+        )
+        action_reason: Optional[str] = Field(
+            description="行动理由",
+            default=None
+        )
+
+    return WitchActionModelCN
 
 
 def get_seer_model_cn(agents: list[AgentBase]) -> type[BaseModel]:
@@ -103,19 +111,27 @@ def get_hunter_model_cn(agents: list[AgentBase]) -> type[BaseModel]:
     return HunterModelCN
 
 
-class WerewolfKillModelCN(BaseModel):
-    """中文版狼人击杀模型"""
-    
-    target: str = Field(
-        description="要击杀的玩家姓名",
-    )
-    kill_strategy: str = Field(
-        description="击杀策略说明",
-    )
-    team_coordination: Optional[str] = Field(
-        description="与狼队友的配合计划",
-        default=None
-    )
+def get_werewolf_kill_model_cn(agents: list[AgentBase]) -> type[BaseModel]:
+    """获取中文版狼人击杀模型
+
+    击杀目标限定在存活玩家中，避免狼人对已经出局的玩家下刀。
+    """
+
+    class WerewolfKillModelCN(BaseModel):
+        """中文版狼人击杀模型"""
+
+        target: Literal[tuple(_.name for _ in agents)] = Field(
+            description="要击杀的玩家姓名，只能从存活玩家中选择",
+        )
+        kill_strategy: str = Field(
+            description="击杀策略说明",
+        )
+        team_coordination: Optional[str] = Field(
+            description="与狼队友的配合计划",
+            default=None
+        )
+
+    return WerewolfKillModelCN
 
 
 class GameAnalysisModelCN(BaseModel):
