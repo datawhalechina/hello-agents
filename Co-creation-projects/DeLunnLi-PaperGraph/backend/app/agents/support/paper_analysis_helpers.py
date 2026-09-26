@@ -161,4 +161,4 @@ def clip_reader_history(hist: str, max_chars: int) -> str:
             break
         out.append(line)
         size += len(line) + 1
-    return "\n".join(reversed(out)) if out else truncate_text(h, max_chars, suffix="…")
+    return "\n".join(reversed(out)) if out else h[-max_chars:]

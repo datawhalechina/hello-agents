@@ -7,12 +7,11 @@ from typing import Any
 
 from .paper_reader_context import (
     extract_references_section_raw_from_pdf_text,
+    _REF_SECTION,
     reference_strings_for_resolve_fallback,
 )
 
-_REF_HEADER = re.compile(
-    r"(?is)(?:^|\n)[\s#]*(?:references|reference\s+list|bibliography|cited\s+references|引用文献|参考文献)\s*[:：]?\s*(?:\n+|$)",
-)
+_REF_HEADER = _REF_SECTION
 
 _CHAPTER_LINE = re.compile(
     r"(?m)^(?:\s|#)*(?:(?P<num>\d+(?:\.\d+){0,2})\.?\s+)?(?P<h>"
@@ -82,6 +81,7 @@ def _split_chapters(
             {
                 "id": f"{slug}_{i}",
                 "heading": heading,
+                "number": (m.group("num") or ""),
                 "text": body[:max_chapter_chars],
                 "truncated": len(body) > max_chapter_chars,
             }

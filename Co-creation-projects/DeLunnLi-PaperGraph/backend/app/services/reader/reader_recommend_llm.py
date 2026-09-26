@@ -11,6 +11,7 @@ from ...agents.support.reader_reference_lookup_tool import (
     prioritize_reader_related_pairs_refs_first,
 )
 from ...utils import parse_llm_json, truncate_text
+from ..llm.context_budget import clip_utf8
 from ..llm.llm_service import coerce_hello_agents_llm_output_to_str, get_llm, is_llm_configured
 from .paper_reader_context import preprocess_pdf_text_for_reference_blob
 
@@ -26,12 +27,13 @@ def extract_title_queries_from_ref_blob_llm(
 ) -> list[str]:
     if not is_llm_configured() or not (section_raw or "").strip():
         return []
-    blob = truncate_text((section_raw or "").strip(), 11000, suffix="...")
-    title = str(snap.get("title") or "").strip()
-    ab = truncate_text(str(snap.get("abstract") or "").strip(), 1200, suffix="...")
+    blob = clip_utf8((section_raw or "").strip(), 5000)
+    title = clip_utf8(str(snap.get("title") or "").strip(), 300)
+    ab = clip_utf8(str(snap.get("abstract") or "").strip(), 900)
     kw = snap.get("keywords") or []
     kw_s = ", ".join(str(x) for x in kw[:20] if str(x).strip()) if isinstance(kw, (list, tuple)) else ""
 
+    kw_s = clip_utf8(kw_s, 400)
     system = (
         "Extract English paper titles/phrases from the reference blob below for OpenAlex search. "
         "Output JSON: {\"queries\":[...]}, max "
@@ -136,21 +138,27 @@ def rerank_reader_recommend_pairs_by_llm(
         return bib + head
 
     n = len(bib)
-    title = str(snap.get("title") or "").strip()
-    ab = truncate_text(str(snap.get("abstract") or "").strip(), 2000, suffix="...")
+    title = clip_utf8(str(snap.get("title") or "").strip(), 300)
+    ab = clip_utf8(str(snap.get("abstract") or "").strip(), 900)
     kw = snap.get("keywords") or []
     kw_s = ", ".join(str(x) for x in kw[:24] if str(x).strip()) if isinstance(kw, (list, tuple)) else ""
-    um = truncate_text((user_message or "").strip(), 600, suffix="...")
-    hist = truncate_text((history_lines or "").strip(), 1400, suffix="...")
+    um = clip_utf8((user_message or "").strip(), 900)
+    hist = clip_utf8((history_lines or "").strip(), 900, tail=True)
+    kw_s = clip_utf8(kw_s, 400)
 
     lines: list[str] = []
-    for i, (ap, _) in enumerate(bib):
-        t = str(getattr(ap, "title", "") or "").strip() or "(no title)"
+    for i, (ap, _) in enumerate(bib[:20]):
+        t = clip_utf8(str(getattr(ap, "title", "") or "").strip(), 220) or "(no title)"
         y = getattr(ap, "year", None) or "-"
-        j = str(getattr(ap, "journal", None) or getattr(ap, "venue", None) or "").strip() or "-"
-        ax = str(getattr(ap, "arxiv_id", None) or "").strip() or "-"
-        doi = str(getattr(ap, "doi", None) or "").strip() or "-"
-        lines.append(f"{i}. {t} | year={y} | venue={j[:80]} | arxiv={ax} | doi={doi}")
+        j = clip_utf8(str(getattr(ap, "journal", None) or getattr(ap, "venue", None) or "").strip(), 70) or "-"
+        ax = clip_utf8(str(getattr(ap, "arxiv_id", None) or "").strip(), 40) or "-"
+        doi = clip_utf8(str(getattr(ap, "doi", None) or "").strip(), 100) or "-"
+        line = f"{i}. {t} | year={y} | venue={j} | arxiv={ax} | doi={doi}"
+        if len(("\n".join(lines) + "\n" + line).encode("utf-8")) > 5000:
+            break
+        lines.append(line)
+    bib = bib[:len(lines)]
+    n = len(bib)
 
     system = (
         "You are a relevance judge. Given the main paper, chat context, and user question, "
@@ -207,10 +215,10 @@ def rerank_reader_recommend_pairs_by_llm(
 
     if not order or len(order) < max(2, (n + 1) // 2):
         try:
-            from ...agents.support.reader_reference_lookup_tool import rerank_reader_pairs_by_anchor
+            from ...agents.support.reader_reference_lookup_tool import rerank_reader_pairs_by_anchor_refs_first
 
             kn = max(1, min(hint, n, READER_RECOMMEND_MAX_RESULTS))
-            return rerank_reader_pairs_by_anchor(snap, bib, k=kn) + head
+            return rerank_reader_pairs_by_anchor_refs_first(snap, bib, k=kn) + head
         except Exception:
             return bib[: max(1, min(hint, n, READER_RECOMMEND_MAX_RESULTS))] + head
 

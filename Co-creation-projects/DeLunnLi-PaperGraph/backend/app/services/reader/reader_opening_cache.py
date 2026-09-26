@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import sqlite3
 import time
+import hashlib
+import json
+import os
 from contextlib import contextmanager
 
 @contextmanager
@@ -19,20 +22,44 @@ def _ensure_table(conn: sqlite3.Connection) -> None:
     conn.execute(
         "CREATE TABLE IF NOT EXISTS paper_opening_cache(paper_id INTEGER PRIMARY KEY,opening TEXT,updated_at INTEGER,hit_count INTEGER DEFAULT 0,miss_count INTEGER DEFAULT 0,last_hit_at INTEGER,last_miss_at INTEGER)"
     )
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(paper_opening_cache)")}
+    if "evidence_key" not in columns:
+        try:
+            conn.execute("ALTER TABLE paper_opening_cache ADD COLUMN evidence_key TEXT DEFAULT ''")
+        except sqlite3.OperationalError:
+            # A concurrent first request may have performed the same migration.
+            if "evidence_key" not in {r[1] for r in conn.execute("PRAGMA table_info(paper_opening_cache)")}:
+                raise
 
-def get_cached_opening(db_path: str, paper_id: int, max_age_hours: int = 72) -> tuple[str | None, bool]:
+
+def opening_evidence_key(snap: dict) -> str:
+    evidence = dict(snap)
+    path = evidence.get("_pdf_abspath")
+    if path:
+        try:
+            stat = os.stat(path)
+            evidence["_pdf_version"] = [os.path.realpath(path), stat.st_mtime_ns, stat.st_size]
+        except OSError:
+            evidence["_pdf_version"] = "missing"
+    payload = json.dumps(evidence, ensure_ascii=False, sort_keys=True, default=str)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def get_cached_opening(db_path: str, paper_id: int, max_age_hours: int = 72, evidence_key: str | None = None) -> tuple[str | None, bool]:
     if not db_path:
         return None, False
     now = int(time.time())
     try:
         with _conn(db_path) as conn:
             _ensure_table(conn)
-            row = conn.execute("SELECT opening,updated_at FROM paper_opening_cache WHERE paper_id=?", (int(paper_id),)).fetchone()
+            row = conn.execute("SELECT opening,updated_at,evidence_key FROM paper_opening_cache WHERE paper_id=?", (int(paper_id),)).fetchone()
             if not row:
                 conn.execute(
                     "INSERT OR IGNORE INTO paper_opening_cache(paper_id,opening,updated_at,miss_count,last_miss_at) VALUES(?,?,?,?,?)",
                     (int(paper_id), "", 0, 1, now),
                 )
+                return None, False
+            if evidence_key is not None and (row[2] or "") != evidence_key:
                 return None, False
             opening = (row[0] or "").strip()
             updated_at = int(row[1] or 0)
@@ -51,7 +78,7 @@ def get_cached_opening(db_path: str, paper_id: int, max_age_hours: int = 72) -> 
     except Exception:
         return None, False
 
-def set_cached_opening(db_path: str, paper_id: int, opening: str) -> None:
+def set_cached_opening(db_path: str, paper_id: int, opening: str, evidence_key: str = "") -> None:
     if not db_path:
         return
     now = int(time.time())
@@ -59,8 +86,8 @@ def set_cached_opening(db_path: str, paper_id: int, opening: str) -> None:
         with _conn(db_path) as conn:
             _ensure_table(conn)
             conn.execute(
-                "INSERT INTO paper_opening_cache(paper_id,opening,updated_at) VALUES(?,?,?) ON CONFLICT(paper_id) DO UPDATE SET opening=excluded.opening,updated_at=excluded.updated_at",
-                (int(paper_id), str(opening or "").strip(), now),
+                "INSERT INTO paper_opening_cache(paper_id,opening,updated_at,evidence_key) VALUES(?,?,?,?) ON CONFLICT(paper_id) DO UPDATE SET opening=excluded.opening,updated_at=excluded.updated_at,evidence_key=excluded.evidence_key",
+                (int(paper_id), str(opening or "").strip(), now, evidence_key),
             )
     except Exception:
         return

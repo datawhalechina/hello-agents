@@ -16,6 +16,8 @@ from .reader_reference_lookup_tool import (
     resolve_references_via_openalex, score_reference_line_against_hint,
 )
 
+from ...services.llm.context_budget import clip_utf8, TOOL_ITEM_BYTES
+
 logger = logging.getLogger(__name__)
 
 def _normalize_ref_blob_for_match(blob: str) -> str:
@@ -124,7 +126,7 @@ class ReaderPaperLookupTool(Tool):
             snap = dict(self._get_snap() or {})
         except Exception as exc:
             logger.debug("reader_paper_lookup_snap_failed", exc_info=exc)
-            return ToolResponse.error("SNAP_FAILED", f"reader_paper_lookup：读取快照失败：{exc}")
+            return ToolResponse.error("SNAP_FAILED", f"reader_paper_lookup：读取快照失败：{clip_utf8(str(exc), 200)}")
 
         ref_blob = str(snap.get("references_section_raw") or "").strip()
         rs_pre = snap.get("references_from_structure")
@@ -141,7 +143,7 @@ class ReaderPaperLookupTool(Tool):
             from ...services.reader.paper_reader_context import reference_strings_for_resolve_fallback
         except Exception as exc:
             logger.warning("reader_paper_lookup_ref_fallback_import_failed", exc_info=exc)
-            return ToolResponse.error("IMPORT_FAILED", f"reader_paper_lookup：摘录分条模块不可用。{exc}")
+            return ToolResponse.error("IMPORT_FAILED", f"reader_paper_lookup：摘录分条模块不可用。{clip_utf8(str(exc), 200)}")
 
         lines: list[str] = []
         rs = snap.get("references_from_structure")
@@ -172,7 +174,7 @@ class ReaderPaperLookupTool(Tool):
             )
         except Exception as exc:
             logger.debug("reader_paper_lookup_resolve_failed", exc_info=exc)
-            return ToolResponse.error("RESOLVE_FAILED", f"reader_paper_lookup：按摘录解析失败：{exc}")
+            return ToolResponse.error("RESOLVE_FAILED", f"reader_paper_lookup：按摘录解析失败：{clip_utf8(str(exc), 200)}")
 
         if not api_papers:
             return ToolResponse.success(
@@ -196,7 +198,7 @@ class ReaderPaperLookupTool(Tool):
             ax = getattr(ap, "arxiv_id", None) or "—"
             doi = getattr(ap, "doi", None) or "—"
             out_lines.append(f"{i}. {t} | year={y} | arxiv={ax} | doi={doi}")
-        return ToolResponse.success(text="\n".join(out_lines))
+        return ToolResponse.success(text=clip_utf8("\n".join(out_lines), TOOL_ITEM_BYTES))
 
     def run(self, parameters: dict[str, Any]) -> ToolResponse:
         q = str(parameters.get("query") or parameters.get("input") or "").strip()
@@ -226,7 +228,7 @@ class ReaderPaperLookupTool(Tool):
             from ...services.papers.papers_converters import litpaper_to_api_paper
         except Exception as exc:
             logger.warning("reader_paper_lookup_import_failed", exc_info=exc)
-            return ToolResponse.error("IMPORT_FAILED", f"reader_paper_lookup：检索模块不可用。{exc}")
+            return ToolResponse.error("IMPORT_FAILED", f"reader_paper_lookup：检索模块不可用。{clip_utf8(str(exc), 200)}")
 
         _REF_ARXIV = re.compile(r"(?:arxiv\.org/(?:abs|pdf)/|\barXiv:\s*)([\w.]+)", re.I)
         _REF_ARXIV_ID_LOOSE = re.compile(r"(?:^|[^\w])arxiv\s*:?\s*(\d{4}\.\d{4,5}(?:v\d+)?)\b", re.I)
@@ -334,4 +336,4 @@ class ReaderPaperLookupTool(Tool):
             doi = getattr(ap, "doi", None) or "—"
             lines.append(f"{i}. {t} | year={y} | arxiv={ax} | doi={doi}")
         lines.append("以上条目为库外检索结果；用户若只要参考文献区内的论文，应使用 from_pdf_references_section=true。")
-        return ToolResponse.success(text="\n".join(lines))
+        return ToolResponse.success(text=clip_utf8("\n".join(lines), TOOL_ITEM_BYTES))
