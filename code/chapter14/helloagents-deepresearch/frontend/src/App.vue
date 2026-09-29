@@ -403,7 +403,8 @@ const searchOptions = [
   "duckduckgo",
   "tavily",
   "perplexity",
-  "searxng"
+  "searxng",
+  "keenable"
 ];
 
 const TASK_STATUS_LABEL: Record<string, string> = {
