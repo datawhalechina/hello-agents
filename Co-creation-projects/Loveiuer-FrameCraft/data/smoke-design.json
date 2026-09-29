@@ -1,0 +1,16 @@
+{
+  "id": "20:1", "type": "FRAME", "name": "开始学习卡片",
+  "layoutMode": "VERTICAL", "itemSpacing": 20,
+  "paddingTop": 32, "paddingRight": 32, "paddingBottom": 32, "paddingLeft": 32,
+  "absoluteBoundingBox": {"x": 0, "y": 0, "width": 480, "height": 320},
+  "fills": [{"type": "SOLID", "color": {"r": 1, "g": 1, "b": 1}}],
+  "cornerRadius": 16,
+  "children": [
+    {"id": "20:2", "type": "TEXT", "name": "Page title", "characters": "把设计变成代码", "style": {"fontFamily": "Arial", "fontSize": 28, "fontWeight": 700}, "fills": [{"type": "SOLID", "color": {"r": 0.15, "g": 0.19, "b": 0.28}}]},
+    {"id": "20:3", "type": "TEXT", "name": "Description", "characters": "从一个 Frame 开始，保留布局，检查每一个生成节点。", "layoutSizingHorizontal": "FILL", "style": {"fontFamily": "Arial", "fontSize": 16}, "fills": [{"type": "SOLID", "color": {"r": 0.4, "g": 0.45, "b": 0.55}}]},
+    {"id": "20:4", "type": "FRAME", "name": "Primary Button", "layoutMode": "HORIZONTAL", "paddingTop": 12, "paddingBottom": 12, "paddingLeft": 20, "paddingRight": 20, "cornerRadius": 8, "fills": [{"type": "SOLID", "color": {"r": 0.32, "g": 0.38, "b": 0.91}}], "children": [
+      {"id": "20:5", "type": "TEXT", "name": "Button label", "characters": "开始学习", "style": {"fontFamily": "Arial", "fontSize": 16, "fontWeight": 600}, "fills": [{"type": "SOLID", "color": {"r": 1, "g": 1, "b": 1}}]}
+    ]},
+    {"id": "20:6", "type": "TEXT", "name": "Footer note", "characters": "演示页面，业务交互待接入", "style": {"fontFamily": "Arial", "fontSize": 12}, "fills": [{"type": "SOLID", "color": {"r": 0.5, "g": 0.55, "b": 0.62}}]}
+  ]
+}

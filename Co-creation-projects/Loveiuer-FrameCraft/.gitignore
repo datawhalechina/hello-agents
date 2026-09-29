@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+outputs/
+node_modules/
+dist/
+*.zip
+.DS_Store
+.ipynb_checkpoints/
+# The parent tutorial ignores test_*.py; retain this project's regression suite.
+!tests/test_*.py

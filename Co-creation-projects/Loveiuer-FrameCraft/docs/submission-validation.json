@@ -1,0 +1,38 @@
+{
+  "recorded_at": "2026-09-29T18:59:59.063445+00:00",
+  "author": "Loveiuer",
+  "upstream_base": "4b014ad47e2658af24b59f21e7bdb3f89a66205e",
+  "unit_tests": {
+    "status": "passed",
+    "count": 44,
+    "command": "python -m unittest discover -s tests -q",
+    "environment": "existing application venv"
+  },
+  "cli_demo": {
+    "status": "passed",
+    "command": "python main.py demo --output outputs/submission-demo",
+    "nodes": 104,
+    "llm_calls": 0
+  },
+  "notebook": {
+    "status": "passed",
+    "code_cells": 4,
+    "execution_counts": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "duration_seconds": 1.504,
+    "mode": "demo",
+    "llm_calls": 0,
+    "environment": "isolated notebook runner with nbclient, nbformat and ipykernel",
+    "source_sha256": "7f4ead43f6776ca5a69b142a9b871ba35b98b12defb87693096625e3e1c3ea1e",
+    "packages": {
+      "nbclient": "0.11.0",
+      "nbformat": "5.11.1",
+      "ipykernel": "7.4.0"
+    }
+  },
+  "scope": "Revalidated the submission copy; no new LLM or Figma calls were made. Previous runtime/build evidence remains in validation.json."
+}

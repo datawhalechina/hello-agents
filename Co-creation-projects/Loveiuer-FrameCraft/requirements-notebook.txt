@@ -1,0 +1,4 @@
+-r requirements.txt
+# Optional notebook UI and reproducible notebook execution.
+notebook>=7,<8
+nbclient>=0.10,<1

@@ -1,0 +1,57 @@
+[
+  {
+    "stage": "import",
+    "status": "running",
+    "message": "导入并规范化选中设计节点"
+  },
+  {
+    "stage": "import",
+    "status": "completed",
+    "message": "导入并规范化选中设计节点 · 完成",
+    "duration_ms": 0.15
+  },
+  {
+    "stage": "analyze",
+    "status": "running",
+    "message": "DesignAnalyst 分析设计"
+  },
+  {
+    "stage": "analyze",
+    "status": "completed",
+    "message": "DesignAnalyst 分析设计 · 完成",
+    "duration_ms": 43062.43
+  },
+  {
+    "stage": "plan",
+    "status": "running",
+    "message": "规划已有节点的语义组件"
+  },
+  {
+    "stage": "plan",
+    "status": "completed",
+    "message": "规划已有节点的语义组件 · 完成",
+    "duration_ms": 30008.23
+  },
+  {
+    "stage": "generate",
+    "status": "running",
+    "message": "生成受约束的 React 与 CSS 项目"
+  },
+  {
+    "stage": "generate",
+    "status": "completed",
+    "message": "生成受约束的 React 与 CSS 项目 · 完成",
+    "duration_ms": 22184.05
+  },
+  {
+    "stage": "review",
+    "status": "running",
+    "message": "校验节点覆盖与基础可访问性"
+  },
+  {
+    "stage": "review",
+    "status": "completed",
+    "message": "校验节点覆盖与基础可访问性 · 完成",
+    "duration_ms": 23282.48
+  }
+]
