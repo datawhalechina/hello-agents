@@ -1,0 +1,20 @@
+# 环境变量（含 API Key），禁止提交
+.env
+
+# Python 缓存与虚拟环境
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 运行产物
+# runs 是逐条明细，体积较大且可随时重跑生成
+outputs/runs/
+# 以下两个目录都是小规模试跑或演示的结果，避免与仓库中的全量报告混淆
+outputs/notebook-demo/
+outputs/limit-demo/
+
+# Notebook 检查点、测试缓存与系统文件
+.ipynb_checkpoints/
+.pytest_cache/
+.DS_Store
