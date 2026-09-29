@@ -1,0 +1,230 @@
+{
+  "recorded_at": "2026-09-29T18:41:43.048925+00:00",
+  "python": "3.11.16",
+  "mode": "demo",
+  "cases": [
+    {
+      "case": "auto_layout_sample",
+      "elapsed_ms": 3.552,
+      "stats": {
+        "node_count": 104,
+        "text_count": 55,
+        "placeholder_count": 0,
+        "hidden_count": 0,
+        "max_depth": 5
+      },
+      "review": {
+        "status": "passed",
+        "passed": true,
+        "checks": [
+          {
+            "name": "required_files",
+            "passed": true,
+            "detail": "必备文件齐全"
+          },
+          {
+            "name": "node_coverage",
+            "passed": true,
+            "detail": "设计节点 104；预览匹配 104；缺失 0；额外 0；重复 0"
+          },
+          {
+            "name": "manifest_json",
+            "passed": true,
+            "detail": "manifest 是有效 JSON 对象"
+          },
+          {
+            "name": "basic_accessibility",
+            "passed": true,
+            "detail": "通过基础语义检查；不代表完整 WCAG 合规"
+          }
+        ],
+        "issues": [],
+        "node_coverage_percent": 100.0,
+        "node_count": 104,
+        "rendered_node_count": 104,
+        "scope": "仅静态结构与基础语义校验；未执行生成代码，未进行截图比较，不是像素还原率。",
+        "repair_applied": false,
+        "repair_count": 0,
+        "model_review": null
+      },
+      "metrics": {
+        "duration_ms": 3.55,
+        "llm_calls": 0,
+        "llm_latency_ms": 0,
+        "input_chars": 0,
+        "output_chars": 0,
+        "input_chars_note": "输入字符数统计摘要 JSON，不含角色系统提示词。",
+        "context_omitted_nodes": 0,
+        "truncated_context_calls": 0,
+        "token_usage": {
+          "input": 0,
+          "output": 0
+        },
+        "estimated_cost_usd": 0,
+        "cost_note": "离线运行，无 LLM 请求与 LLM 费用。",
+        "files_count": 10,
+        "node_count": 104,
+        "node_coverage_percent": 100.0,
+        "coverage_note": "节点覆盖率仅表示导入节点出现在预览 DOM 中，不是视觉还原率。",
+        "calls": [],
+        "runner": "deterministic_demo"
+      },
+      "warnings": []
+    },
+    {
+      "case": "absolute_layout",
+      "elapsed_ms": 0.193,
+      "stats": {
+        "node_count": 2,
+        "text_count": 1,
+        "placeholder_count": 0,
+        "hidden_count": 0,
+        "max_depth": 1
+      },
+      "review": {
+        "status": "passed",
+        "passed": true,
+        "checks": [
+          {
+            "name": "required_files",
+            "passed": true,
+            "detail": "必备文件齐全"
+          },
+          {
+            "name": "node_coverage",
+            "passed": true,
+            "detail": "设计节点 2；预览匹配 2；缺失 0；额外 0；重复 0"
+          },
+          {
+            "name": "manifest_json",
+            "passed": true,
+            "detail": "manifest 是有效 JSON 对象"
+          },
+          {
+            "name": "basic_accessibility",
+            "passed": true,
+            "detail": "通过基础语义检查；不代表完整 WCAG 合规"
+          }
+        ],
+        "issues": [],
+        "node_coverage_percent": 100.0,
+        "node_count": 2,
+        "rendered_node_count": 2,
+        "scope": "仅静态结构与基础语义校验；未执行生成代码，未进行截图比较，不是像素还原率。",
+        "repair_applied": false,
+        "repair_count": 0,
+        "model_review": null
+      },
+      "metrics": {
+        "duration_ms": 0.19,
+        "llm_calls": 0,
+        "llm_latency_ms": 0,
+        "input_chars": 0,
+        "output_chars": 0,
+        "input_chars_note": "输入字符数统计摘要 JSON，不含角色系统提示词。",
+        "context_omitted_nodes": 0,
+        "truncated_context_calls": 0,
+        "token_usage": {
+          "input": 0,
+          "output": 0
+        },
+        "estimated_cost_usd": 0,
+        "cost_note": "离线运行，无 LLM 请求与 LLM 费用。",
+        "files_count": 10,
+        "node_count": 2,
+        "node_coverage_percent": 100.0,
+        "coverage_note": "节点覆盖率仅表示导入节点出现在预览 DOM 中，不是视觉还原率。",
+        "calls": [],
+        "runner": "deterministic_demo"
+      },
+      "warnings": []
+    },
+    {
+      "case": "unsupported_artwork",
+      "elapsed_ms": 0.191,
+      "stats": {
+        "node_count": 3,
+        "text_count": 0,
+        "placeholder_count": 2,
+        "hidden_count": 0,
+        "max_depth": 1
+      },
+      "review": {
+        "status": "passed",
+        "passed": true,
+        "checks": [
+          {
+            "name": "required_files",
+            "passed": true,
+            "detail": "必备文件齐全"
+          },
+          {
+            "name": "node_coverage",
+            "passed": true,
+            "detail": "设计节点 3；预览匹配 3；缺失 0；额外 0；重复 0"
+          },
+          {
+            "name": "manifest_json",
+            "passed": true,
+            "detail": "manifest 是有效 JSON 对象"
+          },
+          {
+            "name": "basic_accessibility",
+            "passed": true,
+            "detail": "通过基础语义检查；不代表完整 WCAG 合规"
+          }
+        ],
+        "issues": [],
+        "node_coverage_percent": 100.0,
+        "node_count": 3,
+        "rendered_node_count": 3,
+        "scope": "仅静态结构与基础语义校验；未执行生成代码，未进行截图比较，不是像素还原率。",
+        "repair_applied": false,
+        "repair_count": 0,
+        "model_review": null
+      },
+      "metrics": {
+        "duration_ms": 0.19,
+        "llm_calls": 0,
+        "llm_latency_ms": 0,
+        "input_chars": 0,
+        "output_chars": 0,
+        "input_chars_note": "输入字符数统计摘要 JSON，不含角色系统提示词。",
+        "context_omitted_nodes": 0,
+        "truncated_context_calls": 0,
+        "token_usage": {
+          "input": 0,
+          "output": 0
+        },
+        "estimated_cost_usd": 0,
+        "cost_note": "离线运行，无 LLM 请求与 LLM 费用。",
+        "files_count": 10,
+        "node_count": 3,
+        "node_coverage_percent": 100.0,
+        "coverage_note": "节点覆盖率仅表示导入节点出现在预览 DOM 中，不是视觉还原率。",
+        "calls": [],
+        "runner": "deterministic_demo"
+      },
+      "warnings": [
+        "8:2（复杂矢量）：VECTOR 图形待替换。",
+        "8:3（RECTANGLE）：图片资源待接入。"
+      ]
+    }
+  ],
+  "visual_fidelity": {
+    "status": "not_measured",
+    "reason": "未取得 Figma 基准渲染图，结构覆盖不能替代像素或人工视觉测量。"
+  },
+  "live_figma": {
+    "status": "not_tested",
+    "reason": "离线评估不使用 Figma Token。"
+  },
+  "live_llm": {
+    "status": "not_tested",
+    "reason": "离线评估不调用模型。"
+  },
+  "react_build": {
+    "status": "not_run",
+    "command": "cd outputs/<run> && npm install && npm run build"
+  }
+}

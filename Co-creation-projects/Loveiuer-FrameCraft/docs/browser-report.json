@@ -1,0 +1,41 @@
+{
+  "recorded_at": "2026-09-29T18:42:00.751Z",
+  "browser": "152.0.7977.140",
+  "checks": [
+    {
+      "name": "demo_and_preview",
+      "passed": true,
+      "nodes": 104
+    },
+    {
+      "name": "source_and_clipboard",
+      "passed": true
+    },
+    {
+      "name": "report_scope",
+      "passed": true
+    },
+    {
+      "name": "download_zip",
+      "passed": true
+    },
+    {
+      "name": "mobile_workbench_no_horizontal_overflow",
+      "passed": true,
+      "width": 390
+    },
+    {
+      "name": "invalid_json_and_invalid_design_errors",
+      "passed": true
+    },
+    {
+      "name": "retry_after_failure",
+      "passed": true
+    },
+    {
+      "name": "no_browser_runtime_errors",
+      "passed": true
+    }
+  ],
+  "visual_fidelity": "not_measured"
+}

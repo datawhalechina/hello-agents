@@ -1,0 +1,138 @@
+{
+  "recorded_at": "2026-09-29T18:53:50.501897+00:00",
+  "environment": {
+    "python": "3.11.16",
+    "hello-agents": "0.2.2",
+    "fastapi": "0.141.1",
+    "node": "v22.17.0",
+    "npm": "10.9.2",
+    "browser": "152.0.7977.140"
+  },
+  "unit_tests": {
+    "status": "passed",
+    "count": 44,
+    "command": "python -m unittest discover -s tests -q"
+  },
+  "offline_evaluation": {
+    "status": "passed",
+    "cases": 3,
+    "report": "evaluation.json"
+  },
+  "react_build": {
+    "status": "passed",
+    "command": "npm run build",
+    "typescript": "5.7.3",
+    "vite": "6.4.3",
+    "artifact": "outputs/demo-verified"
+  },
+  "react_browser": {
+    "status": "passed",
+    "desktop": {
+      "viewport": 1440,
+      "document_width": 1440,
+      "nodes": 104
+    },
+    "mobile": {
+      "viewport": 390,
+      "document_width": 390,
+      "nodes": 104
+    },
+    "runtime_errors": []
+  },
+  "workbench_browser": {
+    "status": "passed",
+    "checks": [
+      {
+        "name": "demo_and_preview",
+        "passed": true,
+        "nodes": 104
+      },
+      {
+        "name": "source_and_clipboard",
+        "passed": true
+      },
+      {
+        "name": "report_scope",
+        "passed": true
+      },
+      {
+        "name": "download_zip",
+        "passed": true
+      },
+      {
+        "name": "mobile_workbench_no_horizontal_overflow",
+        "passed": true,
+        "width": 390
+      },
+      {
+        "name": "invalid_json_and_invalid_design_errors",
+        "passed": true
+      },
+      {
+        "name": "retry_after_failure",
+        "passed": true
+      },
+      {
+        "name": "no_browser_runtime_errors",
+        "passed": true
+      }
+    ],
+    "report": "browser-report.json"
+  },
+  "real_figma": {
+    "status": "not_tested",
+    "reason": "未提供真实Frame链接和可读取Token；接口异常使用HTTPX MockTransport测试。"
+  },
+  "real_llm": {
+    "status": "passed_small_frame",
+    "full_sample_attempts": {
+      "status": "failed",
+      "input_nodes": 104,
+      "observed_failures": [
+        "provider error at DesignAnalyst",
+        "analysis schema mismatch",
+        "planner invalid JSON"
+      ],
+      "changes_after_failure": [
+        "role-specific prompts",
+        "LLM_JSON_MODE default enabled",
+        "explicit configurable output budget"
+      ],
+      "after_json_mode": "not_retested"
+    },
+    "small_frame": {
+      "status": "passed",
+      "input_nodes": 6,
+      "timeout_seconds": 120,
+      "max_tokens": 8192,
+      "json_mode": true,
+      "llm_calls": 4,
+      "duration_ms": 118537.83,
+      "node_coverage_percent": 100.0,
+      "evidence": "live-smoke/review-report.json",
+      "trace": "live-smoke/agent-trace.json",
+      "runner": "hello_agents.SimpleAgent",
+      "react_build": "passed",
+      "react_browser": {
+        "status": "passed",
+        "nodes": 6,
+        "disabled_button": true,
+        "runtime_errors": []
+      }
+    },
+    "note": "真实模型验证仅覆盖6节点样例；完整104节点样例此前在线失败，JSON模式修正后未重新执行完整样例，不声称任意设计在线生成稳定。"
+  },
+  "visual_fidelity": {
+    "status": "not_measured",
+    "reason": "没有Figma基准截图，DOM节点覆盖不能证明像素还原率。"
+  },
+  "fresh_environment_install": {
+    "status": "not_tested",
+    "reason": "使用现有venv安装依赖验证，未声称全新机器验证。"
+  },
+  "secret_scan": {
+    "status": "passed",
+    "matches": 0,
+    "scope": "项目源文件，不含本地outputs和缓存"
+  }
+}

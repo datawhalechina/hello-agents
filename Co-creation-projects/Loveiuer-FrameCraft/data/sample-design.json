@@ -1,0 +1,2869 @@
+{
+  "name": "知行 · Lab 学习工作台 · 示例设计",
+  "lastModified": "2026-09-30T00:00:00Z",
+  "version": "sample-1",
+  "document": {
+    "id": "0:0",
+    "name": "Document",
+    "type": "DOCUMENT",
+    "children": [
+      {
+        "id": "0:1",
+        "name": "毕业设计示例",
+        "type": "CANVAS",
+        "children": [
+          {
+            "id": "1:104",
+            "name": "知行 · Lab 学习工作台",
+            "type": "FRAME",
+            "layoutMode": "VERTICAL",
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "HUG",
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "itemSpacing": 32,
+            "paddingTop": 40,
+            "paddingRight": 40,
+            "paddingBottom": 40,
+            "paddingLeft": 40,
+            "cornerRadius": 0,
+            "children": [
+              {
+                "id": "1:15",
+                "name": "Header",
+                "type": "FRAME",
+                "layoutMode": "HORIZONTAL",
+                "layoutSizingHorizontal": "FILL",
+                "layoutSizingVertical": "HUG",
+                "primaryAxisAlignItems": "SPACE_BETWEEN",
+                "counterAxisAlignItems": "CENTER",
+                "itemSpacing": 20,
+                "paddingTop": 0,
+                "paddingRight": 0,
+                "paddingBottom": 0,
+                "paddingLeft": 0,
+                "cornerRadius": 0,
+                "children": [
+                  {
+                    "id": "1:6",
+                    "name": "Brand",
+                    "type": "FRAME",
+                    "layoutMode": "HORIZONTAL",
+                    "layoutSizingHorizontal": "FIXED",
+                    "layoutSizingVertical": "HUG",
+                    "primaryAxisAlignItems": "MIN",
+                    "counterAxisAlignItems": "CENTER",
+                    "itemSpacing": 12,
+                    "paddingTop": 0,
+                    "paddingRight": 0,
+                    "paddingBottom": 0,
+                    "paddingLeft": 0,
+                    "cornerRadius": 0,
+                    "children": [
+                      {
+                        "id": "1:2",
+                        "name": "BrandMark",
+                        "type": "FRAME",
+                        "layoutMode": "HORIZONTAL",
+                        "layoutSizingHorizontal": "FIXED",
+                        "layoutSizingVertical": "FIXED",
+                        "primaryAxisAlignItems": "CENTER",
+                        "counterAxisAlignItems": "CENTER",
+                        "itemSpacing": 0,
+                        "paddingTop": 0,
+                        "paddingRight": 0,
+                        "paddingBottom": 0,
+                        "paddingLeft": 0,
+                        "cornerRadius": 12,
+                        "children": [
+                          {
+                            "id": "1:1",
+                            "name": "BrandLetter",
+                            "type": "TEXT",
+                            "characters": "L",
+                            "style": {
+                              "fontFamily": "Inter",
+                              "fontSize": 23,
+                              "fontWeight": 700,
+                              "lineHeightPx": 34
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 1.0,
+                                  "g": 1.0,
+                                  "b": 1.0
+                                }
+                              }
+                            ],
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "HUG",
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 18,
+                              "height": 34
+                            }
+                          }
+                        ],
+                        "absoluteBoundingBox": {
+                          "x": 0,
+                          "y": 0,
+                          "width": 42,
+                          "height": 42
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.13333333333333333,
+                              "g": 0.4235294117647059,
+                              "b": 0.36470588235294116
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "id": "1:5",
+                        "name": "BrandText",
+                        "type": "FRAME",
+                        "layoutMode": "VERTICAL",
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG",
+                        "primaryAxisAlignItems": "MIN",
+                        "counterAxisAlignItems": "MIN",
+                        "itemSpacing": 0,
+                        "paddingTop": 0,
+                        "paddingRight": 0,
+                        "paddingBottom": 0,
+                        "paddingLeft": 0,
+                        "cornerRadius": 0,
+                        "children": [
+                          {
+                            "id": "1:3",
+                            "name": "BrandName",
+                            "type": "TEXT",
+                            "characters": "知行 · Lab",
+                            "style": {
+                              "fontFamily": "Inter",
+                              "fontSize": 20,
+                              "fontWeight": 700,
+                              "lineHeightPx": 30
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.12941176470588237,
+                                  "g": 0.23137254901960785,
+                                  "b": 0.2235294117647059
+                                }
+                              }
+                            ],
+                            "layoutSizingHorizontal": "FILL",
+                            "layoutSizingVertical": "HUG"
+                          },
+                          {
+                            "id": "1:4",
+                            "name": "BrandSubtitle",
+                            "type": "TEXT",
+                            "characters": "LEARNING, EVERY DAY",
+                            "style": {
+                              "fontFamily": "Inter",
+                              "fontSize": 9,
+                              "fontWeight": 600,
+                              "lineHeightPx": 14
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.4823529411764706,
+                                  "g": 0.5607843137254902,
+                                  "b": 0.5372549019607843
+                                }
+                              }
+                            ],
+                            "layoutSizingHorizontal": "FILL",
+                            "layoutSizingVertical": "HUG"
+                          }
+                        ]
+                      }
+                    ],
+                    "absoluteBoundingBox": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 240,
+                      "height": 0
+                    }
+                  },
+                  {
+                    "id": "1:10",
+                    "name": "Navigation",
+                    "type": "FRAME",
+                    "layoutMode": "HORIZONTAL",
+                    "layoutSizingHorizontal": "FIXED",
+                    "layoutSizingVertical": "HUG",
+                    "primaryAxisAlignItems": "MIN",
+                    "counterAxisAlignItems": "CENTER",
+                    "itemSpacing": 28,
+                    "paddingTop": 0,
+                    "paddingRight": 0,
+                    "paddingBottom": 0,
+                    "paddingLeft": 0,
+                    "cornerRadius": 0,
+                    "children": [
+                      {
+                        "id": "1:7",
+                        "name": "NavOverview",
+                        "type": "TEXT",
+                        "characters": "学习总览",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": 700,
+                          "lineHeightPx": 21
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.13333333333333333,
+                              "g": 0.4235294117647059,
+                              "b": 0.36470588235294116
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FIXED",
+                        "layoutSizingVertical": "HUG",
+                        "absoluteBoundingBox": {
+                          "x": 0,
+                          "y": 0,
+                          "width": 66,
+                          "height": 21
+                        }
+                      },
+                      {
+                        "id": "1:8",
+                        "name": "NavCourses",
+                        "type": "TEXT",
+                        "characters": "我的课程",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": 500,
+                          "lineHeightPx": 21
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.48627450980392156,
+                              "g": 0.5333333333333333,
+                              "b": 0.5176470588235295
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FIXED",
+                        "layoutSizingVertical": "HUG",
+                        "absoluteBoundingBox": {
+                          "x": 0,
+                          "y": 0,
+                          "width": 66,
+                          "height": 21
+                        }
+                      },
+                      {
+                        "id": "1:9",
+                        "name": "NavNotes",
+                        "type": "TEXT",
+                        "characters": "知识笔记",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": 500,
+                          "lineHeightPx": 21
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.48627450980392156,
+                              "g": 0.5333333333333333,
+                              "b": 0.5176470588235295
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FIXED",
+                        "layoutSizingVertical": "HUG",
+                        "absoluteBoundingBox": {
+                          "x": 0,
+                          "y": 0,
+                          "width": 66,
+                          "height": 21
+                        }
+                      }
+                    ],
+                    "absoluteBoundingBox": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 300,
+                      "height": 0
+                    }
+                  },
+                  {
+                    "id": "1:14",
+                    "name": "Profile",
+                    "type": "FRAME",
+                    "layoutMode": "HORIZONTAL",
+                    "layoutSizingHorizontal": "FIXED",
+                    "layoutSizingVertical": "HUG",
+                    "primaryAxisAlignItems": "MIN",
+                    "counterAxisAlignItems": "CENTER",
+                    "itemSpacing": 12,
+                    "paddingTop": 0,
+                    "paddingRight": 0,
+                    "paddingBottom": 0,
+                    "paddingLeft": 0,
+                    "cornerRadius": 0,
+                    "children": [
+                      {
+                        "id": "1:11",
+                        "name": "ProfileName",
+                        "type": "TEXT",
+                        "characters": "你好，学习者",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": 500,
+                          "lineHeightPx": 20
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.3764705882352941,
+                              "g": 0.4627450980392157,
+                              "b": 0.42745098039215684
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FIXED",
+                        "layoutSizingVertical": "HUG",
+                        "absoluteBoundingBox": {
+                          "x": 0,
+                          "y": 0,
+                          "width": 88,
+                          "height": 20
+                        }
+                      },
+                      {
+                        "id": "1:13",
+                        "name": "Avatar",
+                        "type": "FRAME",
+                        "layoutMode": "HORIZONTAL",
+                        "layoutSizingHorizontal": "FIXED",
+                        "layoutSizingVertical": "FIXED",
+                        "primaryAxisAlignItems": "CENTER",
+                        "counterAxisAlignItems": "CENTER",
+                        "itemSpacing": 0,
+                        "paddingTop": 0,
+                        "paddingRight": 0,
+                        "paddingBottom": 0,
+                        "paddingLeft": 0,
+                        "cornerRadius": 17,
+                        "children": [
+                          {
+                            "id": "1:12",
+                            "name": "AvatarLetter",
+                            "type": "TEXT",
+                            "characters": "学",
+                            "style": {
+                              "fontFamily": "Inter",
+                              "fontSize": 13,
+                              "fontWeight": 700,
+                              "lineHeightPx": 20
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.13333333333333333,
+                                  "g": 0.4235294117647059,
+                                  "b": 0.36470588235294116
+                                }
+                              }
+                            ],
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "HUG",
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 16,
+                              "height": 20
+                            }
+                          }
+                        ],
+                        "absoluteBoundingBox": {
+                          "x": 0,
+                          "y": 0,
+                          "width": 34,
+                          "height": 34
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.8705882352941177,
+                              "g": 0.9215686274509803,
+                              "b": 0.8901960784313725
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "absoluteBoundingBox": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 140,
+                      "height": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "1:45",
+                "name": "Hero",
+                "type": "FRAME",
+                "layoutMode": "HORIZONTAL",
+                "layoutSizingHorizontal": "FILL",
+                "layoutSizingVertical": "HUG",
+                "primaryAxisAlignItems": "MIN",
+                "counterAxisAlignItems": "CENTER",
+                "itemSpacing": 55,
+                "paddingTop": 0,
+                "paddingRight": 0,
+                "paddingBottom": 0,
+                "paddingLeft": 0,
+                "cornerRadius": 0,
+                "children": [
+                  {
+                    "id": "1:22",
+                    "name": "HeroCopy",
+                    "type": "FRAME",
+                    "layoutMode": "VERTICAL",
+                    "layoutSizingHorizontal": "FILL",
+                    "layoutSizingVertical": "HUG",
+                    "primaryAxisAlignItems": "MIN",
+                    "counterAxisAlignItems": "MIN",
+                    "itemSpacing": 19,
+                    "paddingTop": 0,
+                    "paddingRight": 0,
+                    "paddingBottom": 0,
+                    "paddingLeft": 0,
+                    "cornerRadius": 0,
+                    "children": [
+                      {
+                        "id": "1:17",
+                        "name": "StatusBadge",
+                        "type": "FRAME",
+                        "layoutMode": "HORIZONTAL",
+                        "layoutSizingHorizontal": "FIXED",
+                        "layoutSizingVertical": "HUG",
+                        "primaryAxisAlignItems": "MIN",
+                        "counterAxisAlignItems": "MIN",
+                        "itemSpacing": 0,
+                        "paddingTop": 10,
+                        "paddingRight": 10,
+                        "paddingBottom": 10,
+                        "paddingLeft": 10,
+                        "cornerRadius": 20,
+                        "children": [
+                          {
+                            "id": "1:16",
+                            "name": "BadgeText",
+                            "type": "TEXT",
+                            "characters": "●  你的成长工作台",
+                            "style": {
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": 600,
+                              "lineHeightPx": 16
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.2784313725490196,
+                                  "g": 0.4470588235294118,
+                                  "b": 0.39215686274509803
+                                }
+                              }
+                            ],
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "HUG",
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 146,
+                              "height": 16
+                            }
+                          }
+                        ],
+                        "absoluteBoundingBox": {
+                          "x": 0,
+                          "y": 0,
+                          "width": 174,
+                          "height": 0
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.9098039215686274,
+                              "g": 0.9372549019607843,
+                              "b": 0.9058823529411765
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "id": "1:18",
+                        "name": "HeroTitle",
+                        "type": "TEXT",
+                        "characters": "让每一次好奇，\n都成为成长的开始。",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 37,
+                          "fontWeight": 700,
+                          "lineHeightPx": 56
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.12941176470588237,
+                              "g": 0.23921568627450981,
+                              "b": 0.21176470588235294
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      },
+                      {
+                        "id": "1:19",
+                        "name": "HeroDescription",
+                        "type": "TEXT",
+                        "characters": "把复杂的知识拆成小步，和 AI 一起动手实践。\n今天也为未来的自己，多积累一点可能。",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": 400,
+                          "lineHeightPx": 21
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.44313725490196076,
+                              "g": 0.5019607843137255,
+                              "b": 0.47058823529411764
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      },
+                      {
+                        "id": "1:21",
+                        "name": "PrimaryButton",
+                        "type": "FRAME",
+                        "layoutMode": "HORIZONTAL",
+                        "layoutSizingHorizontal": "FIXED",
+                        "layoutSizingVertical": "HUG",
+                        "primaryAxisAlignItems": "CENTER",
+                        "counterAxisAlignItems": "MIN",
+                        "itemSpacing": 0,
+                        "paddingTop": 14,
+                        "paddingRight": 14,
+                        "paddingBottom": 14,
+                        "paddingLeft": 14,
+                        "cornerRadius": 10,
+                        "children": [
+                          {
+                            "id": "1:20",
+                            "name": "PrimaryButtonLabel",
+                            "type": "TEXT",
+                            "characters": "继续学习   ↗",
+                            "style": {
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": 600,
+                              "lineHeightPx": 21
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 1.0,
+                                  "g": 1.0,
+                                  "b": 1.0
+                                }
+                              }
+                            ],
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "HUG",
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 115,
+                              "height": 21
+                            }
+                          }
+                        ],
+                        "absoluteBoundingBox": {
+                          "x": 0,
+                          "y": 0,
+                          "width": 155,
+                          "height": 0
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.15294117647058825,
+                              "g": 0.42745098039215684,
+                              "b": 0.3568627450980392
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "id": "1:44",
+                    "name": "LearningStreak",
+                    "type": "FRAME",
+                    "layoutMode": "VERTICAL",
+                    "layoutSizingHorizontal": "FIXED",
+                    "layoutSizingVertical": "HUG",
+                    "primaryAxisAlignItems": "MIN",
+                    "counterAxisAlignItems": "MIN",
+                    "itemSpacing": 14,
+                    "paddingTop": 25,
+                    "paddingRight": 25,
+                    "paddingBottom": 25,
+                    "paddingLeft": 25,
+                    "cornerRadius": 20,
+                    "children": [
+                      {
+                        "id": "1:23",
+                        "name": "StreakEyebrow",
+                        "type": "TEXT",
+                        "characters": "KEEP YOUR MOMENTUM",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": 600,
+                          "lineHeightPx": 15
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.3764705882352941,
+                              "g": 0.47058823529411764,
+                              "b": 0.42745098039215684
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      },
+                      {
+                        "id": "1:26",
+                        "name": "StreakValue",
+                        "type": "FRAME",
+                        "layoutMode": "HORIZONTAL",
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG",
+                        "primaryAxisAlignItems": "MIN",
+                        "counterAxisAlignItems": "BASELINE",
+                        "itemSpacing": 8,
+                        "paddingTop": 0,
+                        "paddingRight": 0,
+                        "paddingBottom": 0,
+                        "paddingLeft": 0,
+                        "cornerRadius": 0,
+                        "children": [
+                          {
+                            "id": "1:24",
+                            "name": "StreakNumber",
+                            "type": "TEXT",
+                            "characters": "12",
+                            "style": {
+                              "fontFamily": "Inter",
+                              "fontSize": 56,
+                              "fontWeight": 700,
+                              "lineHeightPx": 84
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.15294117647058825,
+                                  "g": 0.42745098039215684,
+                                  "b": 0.3568627450980392
+                                }
+                              }
+                            ],
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "HUG",
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 86,
+                              "height": 84
+                            }
+                          },
+                          {
+                            "id": "1:25",
+                            "name": "StreakUnit",
+                            "type": "TEXT",
+                            "characters": "天连续学习",
+                            "style": {
+                              "fontFamily": "Inter",
+                              "fontSize": 13,
+                              "fontWeight": 500,
+                              "lineHeightPx": 20
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.3764705882352941,
+                                  "g": 0.47058823529411764,
+                                  "b": 0.42745098039215684
+                                }
+                              }
+                            ],
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "HUG",
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 95,
+                              "height": 20
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "id": "1:27",
+                        "name": "StreakDescription",
+                        "type": "TEXT",
+                        "characters": "微小的坚持，也在悄悄改变你。",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": 400,
+                          "lineHeightPx": 18
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.44313725490196076,
+                              "g": 0.5019607843137255,
+                              "b": 0.47058823529411764
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      },
+                      {
+                        "id": "1:42",
+                        "name": "WeekActivity",
+                        "type": "FRAME",
+                        "layoutMode": "HORIZONTAL",
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG",
+                        "primaryAxisAlignItems": "MIN",
+                        "counterAxisAlignItems": "MIN",
+                        "itemSpacing": 9,
+                        "paddingTop": 0,
+                        "paddingRight": 0,
+                        "paddingBottom": 0,
+                        "paddingLeft": 0,
+                        "cornerRadius": 0,
+                        "children": [
+                          {
+                            "id": "1:29",
+                            "name": "Day0",
+                            "type": "FRAME",
+                            "layoutMode": "HORIZONTAL",
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "FIXED",
+                            "primaryAxisAlignItems": "CENTER",
+                            "counterAxisAlignItems": "CENTER",
+                            "itemSpacing": 0,
+                            "paddingTop": 0,
+                            "paddingRight": 0,
+                            "paddingBottom": 0,
+                            "paddingLeft": 0,
+                            "cornerRadius": 8,
+                            "children": [
+                              {
+                                "id": "1:28",
+                                "name": "DayLabel0",
+                                "type": "TEXT",
+                                "characters": "一",
+                                "style": {
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": 500,
+                                  "lineHeightPx": 16
+                                },
+                                "fills": [
+                                  {
+                                    "type": "SOLID",
+                                    "color": {
+                                      "r": 1.0,
+                                      "g": 1.0,
+                                      "b": 1.0
+                                    }
+                                  }
+                                ],
+                                "layoutSizingHorizontal": "FIXED",
+                                "layoutSizingVertical": "HUG",
+                                "absoluteBoundingBox": {
+                                  "x": 0,
+                                  "y": 0,
+                                  "width": 12,
+                                  "height": 16
+                                }
+                              }
+                            ],
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 29,
+                              "height": 29
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.36470588235294116,
+                                  "g": 0.5529411764705883,
+                                  "b": 0.4196078431372549
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "id": "1:31",
+                            "name": "Day1",
+                            "type": "FRAME",
+                            "layoutMode": "HORIZONTAL",
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "FIXED",
+                            "primaryAxisAlignItems": "CENTER",
+                            "counterAxisAlignItems": "CENTER",
+                            "itemSpacing": 0,
+                            "paddingTop": 0,
+                            "paddingRight": 0,
+                            "paddingBottom": 0,
+                            "paddingLeft": 0,
+                            "cornerRadius": 8,
+                            "children": [
+                              {
+                                "id": "1:30",
+                                "name": "DayLabel1",
+                                "type": "TEXT",
+                                "characters": "二",
+                                "style": {
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": 500,
+                                  "lineHeightPx": 16
+                                },
+                                "fills": [
+                                  {
+                                    "type": "SOLID",
+                                    "color": {
+                                      "r": 1.0,
+                                      "g": 1.0,
+                                      "b": 1.0
+                                    }
+                                  }
+                                ],
+                                "layoutSizingHorizontal": "FIXED",
+                                "layoutSizingVertical": "HUG",
+                                "absoluteBoundingBox": {
+                                  "x": 0,
+                                  "y": 0,
+                                  "width": 12,
+                                  "height": 16
+                                }
+                              }
+                            ],
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 29,
+                              "height": 29
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.36470588235294116,
+                                  "g": 0.5529411764705883,
+                                  "b": 0.4196078431372549
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "id": "1:33",
+                            "name": "Day2",
+                            "type": "FRAME",
+                            "layoutMode": "HORIZONTAL",
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "FIXED",
+                            "primaryAxisAlignItems": "CENTER",
+                            "counterAxisAlignItems": "CENTER",
+                            "itemSpacing": 0,
+                            "paddingTop": 0,
+                            "paddingRight": 0,
+                            "paddingBottom": 0,
+                            "paddingLeft": 0,
+                            "cornerRadius": 8,
+                            "children": [
+                              {
+                                "id": "1:32",
+                                "name": "DayLabel2",
+                                "type": "TEXT",
+                                "characters": "三",
+                                "style": {
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": 500,
+                                  "lineHeightPx": 16
+                                },
+                                "fills": [
+                                  {
+                                    "type": "SOLID",
+                                    "color": {
+                                      "r": 1.0,
+                                      "g": 1.0,
+                                      "b": 1.0
+                                    }
+                                  }
+                                ],
+                                "layoutSizingHorizontal": "FIXED",
+                                "layoutSizingVertical": "HUG",
+                                "absoluteBoundingBox": {
+                                  "x": 0,
+                                  "y": 0,
+                                  "width": 12,
+                                  "height": 16
+                                }
+                              }
+                            ],
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 29,
+                              "height": 29
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.36470588235294116,
+                                  "g": 0.5529411764705883,
+                                  "b": 0.4196078431372549
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "id": "1:35",
+                            "name": "Day3",
+                            "type": "FRAME",
+                            "layoutMode": "HORIZONTAL",
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "FIXED",
+                            "primaryAxisAlignItems": "CENTER",
+                            "counterAxisAlignItems": "CENTER",
+                            "itemSpacing": 0,
+                            "paddingTop": 0,
+                            "paddingRight": 0,
+                            "paddingBottom": 0,
+                            "paddingLeft": 0,
+                            "cornerRadius": 8,
+                            "children": [
+                              {
+                                "id": "1:34",
+                                "name": "DayLabel3",
+                                "type": "TEXT",
+                                "characters": "四",
+                                "style": {
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": 500,
+                                  "lineHeightPx": 16
+                                },
+                                "fills": [
+                                  {
+                                    "type": "SOLID",
+                                    "color": {
+                                      "r": 1.0,
+                                      "g": 1.0,
+                                      "b": 1.0
+                                    }
+                                  }
+                                ],
+                                "layoutSizingHorizontal": "FIXED",
+                                "layoutSizingVertical": "HUG",
+                                "absoluteBoundingBox": {
+                                  "x": 0,
+                                  "y": 0,
+                                  "width": 12,
+                                  "height": 16
+                                }
+                              }
+                            ],
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 29,
+                              "height": 29
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.36470588235294116,
+                                  "g": 0.5529411764705883,
+                                  "b": 0.4196078431372549
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "id": "1:37",
+                            "name": "Day4",
+                            "type": "FRAME",
+                            "layoutMode": "HORIZONTAL",
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "FIXED",
+                            "primaryAxisAlignItems": "CENTER",
+                            "counterAxisAlignItems": "CENTER",
+                            "itemSpacing": 0,
+                            "paddingTop": 0,
+                            "paddingRight": 0,
+                            "paddingBottom": 0,
+                            "paddingLeft": 0,
+                            "cornerRadius": 8,
+                            "children": [
+                              {
+                                "id": "1:36",
+                                "name": "DayLabel4",
+                                "type": "TEXT",
+                                "characters": "五",
+                                "style": {
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": 500,
+                                  "lineHeightPx": 16
+                                },
+                                "fills": [
+                                  {
+                                    "type": "SOLID",
+                                    "color": {
+                                      "r": 1.0,
+                                      "g": 1.0,
+                                      "b": 1.0
+                                    }
+                                  }
+                                ],
+                                "layoutSizingHorizontal": "FIXED",
+                                "layoutSizingVertical": "HUG",
+                                "absoluteBoundingBox": {
+                                  "x": 0,
+                                  "y": 0,
+                                  "width": 12,
+                                  "height": 16
+                                }
+                              }
+                            ],
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 29,
+                              "height": 29
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.36470588235294116,
+                                  "g": 0.5529411764705883,
+                                  "b": 0.4196078431372549
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "id": "1:39",
+                            "name": "Day5",
+                            "type": "FRAME",
+                            "layoutMode": "HORIZONTAL",
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "FIXED",
+                            "primaryAxisAlignItems": "CENTER",
+                            "counterAxisAlignItems": "CENTER",
+                            "itemSpacing": 0,
+                            "paddingTop": 0,
+                            "paddingRight": 0,
+                            "paddingBottom": 0,
+                            "paddingLeft": 0,
+                            "cornerRadius": 8,
+                            "children": [
+                              {
+                                "id": "1:38",
+                                "name": "DayLabel5",
+                                "type": "TEXT",
+                                "characters": "六",
+                                "style": {
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": 500,
+                                  "lineHeightPx": 16
+                                },
+                                "fills": [
+                                  {
+                                    "type": "SOLID",
+                                    "color": {
+                                      "r": 0.6,
+                                      "g": 0.6666666666666666,
+                                      "b": 0.6313725490196078
+                                    }
+                                  }
+                                ],
+                                "layoutSizingHorizontal": "FIXED",
+                                "layoutSizingVertical": "HUG",
+                                "absoluteBoundingBox": {
+                                  "x": 0,
+                                  "y": 0,
+                                  "width": 12,
+                                  "height": 16
+                                }
+                              }
+                            ],
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 29,
+                              "height": 29
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.8941176470588236,
+                                  "g": 0.9215686274509803,
+                                  "b": 0.8862745098039215
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "id": "1:41",
+                            "name": "Day6",
+                            "type": "FRAME",
+                            "layoutMode": "HORIZONTAL",
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "FIXED",
+                            "primaryAxisAlignItems": "CENTER",
+                            "counterAxisAlignItems": "CENTER",
+                            "itemSpacing": 0,
+                            "paddingTop": 0,
+                            "paddingRight": 0,
+                            "paddingBottom": 0,
+                            "paddingLeft": 0,
+                            "cornerRadius": 8,
+                            "children": [
+                              {
+                                "id": "1:40",
+                                "name": "DayLabel6",
+                                "type": "TEXT",
+                                "characters": "日",
+                                "style": {
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": 500,
+                                  "lineHeightPx": 16
+                                },
+                                "fills": [
+                                  {
+                                    "type": "SOLID",
+                                    "color": {
+                                      "r": 0.6,
+                                      "g": 0.6666666666666666,
+                                      "b": 0.6313725490196078
+                                    }
+                                  }
+                                ],
+                                "layoutSizingHorizontal": "FIXED",
+                                "layoutSizingVertical": "HUG",
+                                "absoluteBoundingBox": {
+                                  "x": 0,
+                                  "y": 0,
+                                  "width": 12,
+                                  "height": 16
+                                }
+                              }
+                            ],
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 29,
+                              "height": 29
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.8941176470588236,
+                                  "g": 0.9215686274509803,
+                                  "b": 0.8862745098039215
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "id": "1:43",
+                        "name": "WeeklyNote",
+                        "type": "TEXT",
+                        "characters": "本周已完成 5 / 7 天的学习目标",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": 400,
+                          "lineHeightPx": 16
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.4823529411764706,
+                              "g": 0.5529411764705883,
+                              "b": 0.5019607843137255
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      }
+                    ],
+                    "absoluteBoundingBox": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 333,
+                      "height": 0
+                    },
+                    "fills": [
+                      {
+                        "type": "SOLID",
+                        "color": {
+                          "r": 0.9450980392156862,
+                          "g": 0.9529411764705882,
+                          "b": 0.9137254901960784
+                        }
+                      }
+                    ],
+                    "strokes": [
+                      {
+                        "type": "SOLID",
+                        "color": {
+                          "r": 0.8941176470588236,
+                          "g": 0.9098039215686274,
+                          "b": 0.8509803921568627
+                        }
+                      }
+                    ],
+                    "strokeWeight": 1
+                  }
+                ]
+              },
+              {
+                "id": "1:58",
+                "name": "LearningStats",
+                "type": "FRAME",
+                "layoutMode": "HORIZONTAL",
+                "layoutSizingHorizontal": "FILL",
+                "layoutSizingVertical": "HUG",
+                "primaryAxisAlignItems": "MIN",
+                "counterAxisAlignItems": "MIN",
+                "itemSpacing": 24,
+                "paddingTop": 23,
+                "paddingRight": 23,
+                "paddingBottom": 23,
+                "paddingLeft": 23,
+                "cornerRadius": 16,
+                "children": [
+                  {
+                    "id": "1:48",
+                    "name": "MetricTime",
+                    "type": "FRAME",
+                    "layoutMode": "VERTICAL",
+                    "layoutSizingHorizontal": "FILL",
+                    "layoutSizingVertical": "HUG",
+                    "primaryAxisAlignItems": "MIN",
+                    "counterAxisAlignItems": "MIN",
+                    "itemSpacing": 3,
+                    "paddingTop": 0,
+                    "paddingRight": 0,
+                    "paddingBottom": 0,
+                    "paddingLeft": 0,
+                    "cornerRadius": 0,
+                    "children": [
+                      {
+                        "id": "1:46",
+                        "name": "MetricValueTime",
+                        "type": "TEXT",
+                        "characters": "28.5 h",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 24,
+                          "fontWeight": 700,
+                          "lineHeightPx": 36
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.1803921568627451,
+                              "g": 0.3333333333333333,
+                              "b": 0.2823529411764706
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      },
+                      {
+                        "id": "1:47",
+                        "name": "MetricLabelTime",
+                        "type": "TEXT",
+                        "characters": "累计学习时长",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": 400,
+                          "lineHeightPx": 18
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.4823529411764706,
+                              "g": 0.5450980392156862,
+                              "b": 0.5058823529411764
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "1:51",
+                    "name": "MetricTasks",
+                    "type": "FRAME",
+                    "layoutMode": "VERTICAL",
+                    "layoutSizingHorizontal": "FILL",
+                    "layoutSizingVertical": "HUG",
+                    "primaryAxisAlignItems": "MIN",
+                    "counterAxisAlignItems": "MIN",
+                    "itemSpacing": 3,
+                    "paddingTop": 0,
+                    "paddingRight": 0,
+                    "paddingBottom": 0,
+                    "paddingLeft": 0,
+                    "cornerRadius": 0,
+                    "children": [
+                      {
+                        "id": "1:49",
+                        "name": "MetricValueTasks",
+                        "type": "TEXT",
+                        "characters": "16",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 24,
+                          "fontWeight": 700,
+                          "lineHeightPx": 36
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.1803921568627451,
+                              "g": 0.3333333333333333,
+                              "b": 0.2823529411764706
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      },
+                      {
+                        "id": "1:50",
+                        "name": "MetricLabelTasks",
+                        "type": "TEXT",
+                        "characters": "已完成实践",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": 400,
+                          "lineHeightPx": 18
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.4823529411764706,
+                              "g": 0.5450980392156862,
+                              "b": 0.5058823529411764
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "1:54",
+                    "name": "MetricNotes",
+                    "type": "FRAME",
+                    "layoutMode": "VERTICAL",
+                    "layoutSizingHorizontal": "FILL",
+                    "layoutSizingVertical": "HUG",
+                    "primaryAxisAlignItems": "MIN",
+                    "counterAxisAlignItems": "MIN",
+                    "itemSpacing": 3,
+                    "paddingTop": 0,
+                    "paddingRight": 0,
+                    "paddingBottom": 0,
+                    "paddingLeft": 0,
+                    "cornerRadius": 0,
+                    "children": [
+                      {
+                        "id": "1:52",
+                        "name": "MetricValueNotes",
+                        "type": "TEXT",
+                        "characters": "32",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 24,
+                          "fontWeight": 700,
+                          "lineHeightPx": 36
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.1803921568627451,
+                              "g": 0.3333333333333333,
+                              "b": 0.2823529411764706
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      },
+                      {
+                        "id": "1:53",
+                        "name": "MetricLabelNotes",
+                        "type": "TEXT",
+                        "characters": "知识笔记",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": 400,
+                          "lineHeightPx": 18
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.4823529411764706,
+                              "g": 0.5450980392156862,
+                              "b": 0.5058823529411764
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "1:57",
+                    "name": "MetricProgress",
+                    "type": "FRAME",
+                    "layoutMode": "VERTICAL",
+                    "layoutSizingHorizontal": "FILL",
+                    "layoutSizingVertical": "HUG",
+                    "primaryAxisAlignItems": "MIN",
+                    "counterAxisAlignItems": "MIN",
+                    "itemSpacing": 3,
+                    "paddingTop": 0,
+                    "paddingRight": 0,
+                    "paddingBottom": 0,
+                    "paddingLeft": 0,
+                    "cornerRadius": 0,
+                    "children": [
+                      {
+                        "id": "1:55",
+                        "name": "MetricValueProgress",
+                        "type": "TEXT",
+                        "characters": "Top 12%",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 24,
+                          "fontWeight": 700,
+                          "lineHeightPx": 36
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.1803921568627451,
+                              "g": 0.3333333333333333,
+                              "b": 0.2823529411764706
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      },
+                      {
+                        "id": "1:56",
+                        "name": "MetricLabelProgress",
+                        "type": "TEXT",
+                        "characters": "本月学习活跃度",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": 400,
+                          "lineHeightPx": 18
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.4823529411764706,
+                              "g": 0.5450980392156862,
+                              "b": 0.5058823529411764
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      }
+                    ]
+                  }
+                ],
+                "fills": [
+                  {
+                    "type": "SOLID",
+                    "color": {
+                      "r": 1.0,
+                      "g": 1.0,
+                      "b": 1.0
+                    }
+                  }
+                ],
+                "strokes": [
+                  {
+                    "type": "SOLID",
+                    "color": {
+                      "r": 0.9058823529411765,
+                      "g": 0.9215686274509803,
+                      "b": 0.8901960784313725
+                    }
+                  }
+                ],
+                "strokeWeight": 1
+              },
+              {
+                "id": "1:63",
+                "name": "CourseSectionHeading",
+                "type": "FRAME",
+                "layoutMode": "HORIZONTAL",
+                "layoutSizingHorizontal": "FILL",
+                "layoutSizingVertical": "HUG",
+                "primaryAxisAlignItems": "SPACE_BETWEEN",
+                "counterAxisAlignItems": "CENTER",
+                "itemSpacing": 20,
+                "paddingTop": 0,
+                "paddingRight": 0,
+                "paddingBottom": 0,
+                "paddingLeft": 0,
+                "cornerRadius": 0,
+                "children": [
+                  {
+                    "id": "1:61",
+                    "name": "CourseSectionTitle",
+                    "type": "FRAME",
+                    "layoutMode": "VERTICAL",
+                    "layoutSizingHorizontal": "FILL",
+                    "layoutSizingVertical": "HUG",
+                    "primaryAxisAlignItems": "MIN",
+                    "counterAxisAlignItems": "MIN",
+                    "itemSpacing": 5,
+                    "paddingTop": 0,
+                    "paddingRight": 0,
+                    "paddingBottom": 0,
+                    "paddingLeft": 0,
+                    "cornerRadius": 0,
+                    "children": [
+                      {
+                        "id": "1:59",
+                        "name": "SectionTitle",
+                        "type": "TEXT",
+                        "characters": "正在学习",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 22,
+                          "fontWeight": 700,
+                          "lineHeightPx": 33
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.12941176470588237,
+                              "g": 0.23137254901960785,
+                              "b": 0.2235294117647059
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      },
+                      {
+                        "id": "1:60",
+                        "name": "SectionSubtitle",
+                        "type": "TEXT",
+                        "characters": "从理解到实践，构建自己的知识地图。",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": 400,
+                          "lineHeightPx": 18
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.48627450980392156,
+                              "g": 0.5333333333333333,
+                              "b": 0.5098039215686274
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "1:62",
+                    "name": "ViewAll",
+                    "type": "TEXT",
+                    "characters": "查看全部课程  →",
+                    "style": {
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": 600,
+                      "lineHeightPx": 18
+                    },
+                    "fills": [
+                      {
+                        "type": "SOLID",
+                        "color": {
+                          "r": 0.3058823529411765,
+                          "g": 0.47058823529411764,
+                          "b": 0.396078431372549
+                        }
+                      }
+                    ],
+                    "layoutSizingHorizontal": "FIXED",
+                    "layoutSizingVertical": "HUG",
+                    "absoluteBoundingBox": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 130,
+                      "height": 18
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "1:100",
+                "name": "CourseGrid",
+                "type": "FRAME",
+                "layoutMode": "HORIZONTAL",
+                "layoutSizingHorizontal": "FILL",
+                "layoutSizingVertical": "HUG",
+                "primaryAxisAlignItems": "MIN",
+                "counterAxisAlignItems": "MIN",
+                "itemSpacing": 20,
+                "paddingTop": 0,
+                "paddingRight": 0,
+                "paddingBottom": 0,
+                "paddingLeft": 0,
+                "cornerRadius": 0,
+                "children": [
+                  {
+                    "id": "1:75",
+                    "name": "CourseCard人工智能",
+                    "type": "FRAME",
+                    "layoutMode": "VERTICAL",
+                    "layoutSizingHorizontal": "FIXED",
+                    "layoutSizingVertical": "HUG",
+                    "primaryAxisAlignItems": "MIN",
+                    "counterAxisAlignItems": "MIN",
+                    "itemSpacing": 17,
+                    "paddingTop": 24,
+                    "paddingRight": 24,
+                    "paddingBottom": 24,
+                    "paddingLeft": 24,
+                    "cornerRadius": 18,
+                    "children": [
+                      {
+                        "id": "1:67",
+                        "name": "CourseTop人工智能",
+                        "type": "FRAME",
+                        "layoutMode": "HORIZONTAL",
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG",
+                        "primaryAxisAlignItems": "SPACE_BETWEEN",
+                        "counterAxisAlignItems": "CENTER",
+                        "itemSpacing": 20,
+                        "paddingTop": 0,
+                        "paddingRight": 0,
+                        "paddingBottom": 0,
+                        "paddingLeft": 0,
+                        "cornerRadius": 0,
+                        "children": [
+                          {
+                            "id": "1:65",
+                            "name": "CourseIcon人工智能",
+                            "type": "FRAME",
+                            "layoutMode": "HORIZONTAL",
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "FIXED",
+                            "primaryAxisAlignItems": "CENTER",
+                            "counterAxisAlignItems": "CENTER",
+                            "itemSpacing": 0,
+                            "paddingTop": 0,
+                            "paddingRight": 0,
+                            "paddingBottom": 0,
+                            "paddingLeft": 0,
+                            "cornerRadius": 12,
+                            "children": [
+                              {
+                                "id": "1:64",
+                                "name": "IconLabel人工智能",
+                                "type": "TEXT",
+                                "characters": "AI",
+                                "style": {
+                                  "fontFamily": "Inter",
+                                  "fontSize": 16,
+                                  "fontWeight": 700,
+                                  "lineHeightPx": 24
+                                },
+                                "fills": [
+                                  {
+                                    "type": "SOLID",
+                                    "color": {
+                                      "r": 0.20784313725490197,
+                                      "g": 0.3568627450980392,
+                                      "b": 0.2980392156862745
+                                    }
+                                  }
+                                ],
+                                "layoutSizingHorizontal": "FIXED",
+                                "layoutSizingVertical": "HUG",
+                                "absoluteBoundingBox": {
+                                  "x": 0,
+                                  "y": 0,
+                                  "width": 38,
+                                  "height": 24
+                                }
+                              }
+                            ],
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 52,
+                              "height": 45
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.8980392156862745,
+                                  "g": 0.9333333333333333,
+                                  "b": 0.8745098039215686
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "id": "1:66",
+                            "name": "CourseCategory人工智能",
+                            "type": "TEXT",
+                            "characters": "人工智能",
+                            "style": {
+                              "fontFamily": "Inter",
+                              "fontSize": 10,
+                              "fontWeight": 600,
+                              "lineHeightPx": 15
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.47843137254901963,
+                                  "g": 0.5372549019607843,
+                                  "b": 0.4980392156862745
+                                }
+                              }
+                            ],
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "HUG",
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 100,
+                              "height": 15
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "id": "1:68",
+                        "name": "CourseTitle人工智能",
+                        "type": "TEXT",
+                        "characters": "Hello Agents 智能体入门",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 18,
+                          "fontWeight": 700,
+                          "lineHeightPx": 27
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.18823529411764706,
+                              "g": 0.29411764705882354,
+                              "b": 0.24705882352941178
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      },
+                      {
+                        "id": "1:69",
+                        "name": "CourseDescription人工智能",
+                        "type": "TEXT",
+                        "characters": "从第一个 Agent 开始，理解智能体的思考与行动。",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": 400,
+                          "lineHeightPx": 18
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.47843137254901963,
+                              "g": 0.5372549019607843,
+                              "b": 0.4980392156862745
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      },
+                      {
+                        "id": "1:71",
+                        "name": "ProgressTrack人工智能",
+                        "type": "FRAME",
+                        "layoutMode": "HORIZONTAL",
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "FIXED",
+                        "primaryAxisAlignItems": "MIN",
+                        "counterAxisAlignItems": "MIN",
+                        "itemSpacing": 0,
+                        "paddingTop": 0,
+                        "paddingRight": 0,
+                        "paddingBottom": 0,
+                        "paddingLeft": 0,
+                        "cornerRadius": 4,
+                        "children": [
+                          {
+                            "id": "1:70",
+                            "name": "ProgressValue人工智能",
+                            "type": "FRAME",
+                            "layoutMode": "HORIZONTAL",
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "FIXED",
+                            "primaryAxisAlignItems": "MIN",
+                            "counterAxisAlignItems": "MIN",
+                            "itemSpacing": 0,
+                            "paddingTop": 0,
+                            "paddingRight": 0,
+                            "paddingBottom": 0,
+                            "paddingLeft": 0,
+                            "cornerRadius": 4,
+                            "children": [],
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 203,
+                              "height": 5
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.4549019607843137,
+                                  "g": 0.5843137254901961,
+                                  "b": 0.5019607843137255
+                                }
+                              }
+                            ]
+                          }
+                        ],
+                        "absoluteBoundingBox": {
+                          "x": 0,
+                          "y": 0,
+                          "width": 0,
+                          "height": 5
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.9176470588235294,
+                              "g": 0.9411764705882353,
+                              "b": 0.9058823529411765
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "id": "1:74",
+                        "name": "CourseFooter人工智能",
+                        "type": "FRAME",
+                        "layoutMode": "HORIZONTAL",
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG",
+                        "primaryAxisAlignItems": "MIN",
+                        "counterAxisAlignItems": "CENTER",
+                        "itemSpacing": 12,
+                        "paddingTop": 0,
+                        "paddingRight": 0,
+                        "paddingBottom": 0,
+                        "paddingLeft": 0,
+                        "cornerRadius": 0,
+                        "children": [
+                          {
+                            "id": "1:72",
+                            "name": "ProgressLabel人工智能",
+                            "type": "TEXT",
+                            "characters": "第 10 / 16 章 · 已完成 68%",
+                            "style": {
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": 500,
+                              "lineHeightPx": 16
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.5294117647058824,
+                                  "g": 0.5647058823529412,
+                                  "b": 0.5294117647058824
+                                }
+                              }
+                            ],
+                            "layoutSizingHorizontal": "FILL",
+                            "layoutSizingVertical": "HUG"
+                          },
+                          {
+                            "id": "1:73",
+                            "name": "CourseArrow人工智能",
+                            "type": "TEXT",
+                            "characters": "↗",
+                            "style": {
+                              "fontFamily": "Inter",
+                              "fontSize": 17,
+                              "fontWeight": 600,
+                              "lineHeightPx": 26
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.2823529411764706,
+                                  "g": 0.4549019607843137,
+                                  "b": 0.3686274509803922
+                                }
+                              }
+                            ],
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "HUG",
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 24,
+                              "height": 26
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "absoluteBoundingBox": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 350,
+                      "height": 0
+                    },
+                    "fills": [
+                      {
+                        "type": "SOLID",
+                        "color": {
+                          "r": 1.0,
+                          "g": 1.0,
+                          "b": 1.0
+                        }
+                      }
+                    ],
+                    "strokes": [
+                      {
+                        "type": "SOLID",
+                        "color": {
+                          "r": 0.8980392156862745,
+                          "g": 0.9176470588235294,
+                          "b": 0.8862745098039215
+                        }
+                      }
+                    ],
+                    "strokeWeight": 1
+                  },
+                  {
+                    "id": "1:87",
+                    "name": "CourseCard前端工程",
+                    "type": "FRAME",
+                    "layoutMode": "VERTICAL",
+                    "layoutSizingHorizontal": "FIXED",
+                    "layoutSizingVertical": "HUG",
+                    "primaryAxisAlignItems": "MIN",
+                    "counterAxisAlignItems": "MIN",
+                    "itemSpacing": 17,
+                    "paddingTop": 24,
+                    "paddingRight": 24,
+                    "paddingBottom": 24,
+                    "paddingLeft": 24,
+                    "cornerRadius": 18,
+                    "children": [
+                      {
+                        "id": "1:79",
+                        "name": "CourseTop前端工程",
+                        "type": "FRAME",
+                        "layoutMode": "HORIZONTAL",
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG",
+                        "primaryAxisAlignItems": "SPACE_BETWEEN",
+                        "counterAxisAlignItems": "CENTER",
+                        "itemSpacing": 20,
+                        "paddingTop": 0,
+                        "paddingRight": 0,
+                        "paddingBottom": 0,
+                        "paddingLeft": 0,
+                        "cornerRadius": 0,
+                        "children": [
+                          {
+                            "id": "1:77",
+                            "name": "CourseIcon前端工程",
+                            "type": "FRAME",
+                            "layoutMode": "HORIZONTAL",
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "FIXED",
+                            "primaryAxisAlignItems": "CENTER",
+                            "counterAxisAlignItems": "CENTER",
+                            "itemSpacing": 0,
+                            "paddingTop": 0,
+                            "paddingRight": 0,
+                            "paddingBottom": 0,
+                            "paddingLeft": 0,
+                            "cornerRadius": 12,
+                            "children": [
+                              {
+                                "id": "1:76",
+                                "name": "IconLabel前端工程",
+                                "type": "TEXT",
+                                "characters": "</>",
+                                "style": {
+                                  "fontFamily": "Inter",
+                                  "fontSize": 16,
+                                  "fontWeight": 700,
+                                  "lineHeightPx": 24
+                                },
+                                "fills": [
+                                  {
+                                    "type": "SOLID",
+                                    "color": {
+                                      "r": 0.20784313725490197,
+                                      "g": 0.3568627450980392,
+                                      "b": 0.2980392156862745
+                                    }
+                                  }
+                                ],
+                                "layoutSizingHorizontal": "FIXED",
+                                "layoutSizingVertical": "HUG",
+                                "absoluteBoundingBox": {
+                                  "x": 0,
+                                  "y": 0,
+                                  "width": 38,
+                                  "height": 24
+                                }
+                              }
+                            ],
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 52,
+                              "height": 45
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.9529411764705882,
+                                  "g": 0.9215686274509803,
+                                  "b": 0.8627450980392157
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "id": "1:78",
+                            "name": "CourseCategory前端工程",
+                            "type": "TEXT",
+                            "characters": "前端工程",
+                            "style": {
+                              "fontFamily": "Inter",
+                              "fontSize": 10,
+                              "fontWeight": 600,
+                              "lineHeightPx": 15
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.47843137254901963,
+                                  "g": 0.5372549019607843,
+                                  "b": 0.4980392156862745
+                                }
+                              }
+                            ],
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "HUG",
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 100,
+                              "height": 15
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "id": "1:80",
+                        "name": "CourseTitle前端工程",
+                        "type": "TEXT",
+                        "characters": "从 Figma 到真实界面",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 18,
+                          "fontWeight": 700,
+                          "lineHeightPx": 27
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.18823529411764706,
+                              "g": 0.29411764705882354,
+                              "b": 0.24705882352941178
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      },
+                      {
+                        "id": "1:81",
+                        "name": "CourseDescription前端工程",
+                        "type": "TEXT",
+                        "characters": "把设计变成代码，亲手构建可使用的产品。",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": 400,
+                          "lineHeightPx": 18
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.47843137254901963,
+                              "g": 0.5372549019607843,
+                              "b": 0.4980392156862745
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      },
+                      {
+                        "id": "1:83",
+                        "name": "ProgressTrack前端工程",
+                        "type": "FRAME",
+                        "layoutMode": "HORIZONTAL",
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "FIXED",
+                        "primaryAxisAlignItems": "MIN",
+                        "counterAxisAlignItems": "MIN",
+                        "itemSpacing": 0,
+                        "paddingTop": 0,
+                        "paddingRight": 0,
+                        "paddingBottom": 0,
+                        "paddingLeft": 0,
+                        "cornerRadius": 4,
+                        "children": [
+                          {
+                            "id": "1:82",
+                            "name": "ProgressValue前端工程",
+                            "type": "FRAME",
+                            "layoutMode": "HORIZONTAL",
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "FIXED",
+                            "primaryAxisAlignItems": "MIN",
+                            "counterAxisAlignItems": "MIN",
+                            "itemSpacing": 0,
+                            "paddingTop": 0,
+                            "paddingRight": 0,
+                            "paddingBottom": 0,
+                            "paddingLeft": 0,
+                            "cornerRadius": 4,
+                            "children": [],
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 107,
+                              "height": 5
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.4549019607843137,
+                                  "g": 0.5843137254901961,
+                                  "b": 0.5019607843137255
+                                }
+                              }
+                            ]
+                          }
+                        ],
+                        "absoluteBoundingBox": {
+                          "x": 0,
+                          "y": 0,
+                          "width": 0,
+                          "height": 5
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.9176470588235294,
+                              "g": 0.9411764705882353,
+                              "b": 0.9058823529411765
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "id": "1:86",
+                        "name": "CourseFooter前端工程",
+                        "type": "FRAME",
+                        "layoutMode": "HORIZONTAL",
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG",
+                        "primaryAxisAlignItems": "MIN",
+                        "counterAxisAlignItems": "CENTER",
+                        "itemSpacing": 12,
+                        "paddingTop": 0,
+                        "paddingRight": 0,
+                        "paddingBottom": 0,
+                        "paddingLeft": 0,
+                        "cornerRadius": 0,
+                        "children": [
+                          {
+                            "id": "1:84",
+                            "name": "ProgressLabel前端工程",
+                            "type": "TEXT",
+                            "characters": "第 4 / 12 章 · 已完成 36%",
+                            "style": {
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": 500,
+                              "lineHeightPx": 16
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.5294117647058824,
+                                  "g": 0.5647058823529412,
+                                  "b": 0.5294117647058824
+                                }
+                              }
+                            ],
+                            "layoutSizingHorizontal": "FILL",
+                            "layoutSizingVertical": "HUG"
+                          },
+                          {
+                            "id": "1:85",
+                            "name": "CourseArrow前端工程",
+                            "type": "TEXT",
+                            "characters": "↗",
+                            "style": {
+                              "fontFamily": "Inter",
+                              "fontSize": 17,
+                              "fontWeight": 600,
+                              "lineHeightPx": 26
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.2823529411764706,
+                                  "g": 0.4549019607843137,
+                                  "b": 0.3686274509803922
+                                }
+                              }
+                            ],
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "HUG",
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 24,
+                              "height": 26
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "absoluteBoundingBox": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 350,
+                      "height": 0
+                    },
+                    "fills": [
+                      {
+                        "type": "SOLID",
+                        "color": {
+                          "r": 1.0,
+                          "g": 1.0,
+                          "b": 1.0
+                        }
+                      }
+                    ],
+                    "strokes": [
+                      {
+                        "type": "SOLID",
+                        "color": {
+                          "r": 0.8980392156862745,
+                          "g": 0.9176470588235294,
+                          "b": 0.8862745098039215
+                        }
+                      }
+                    ],
+                    "strokeWeight": 1
+                  },
+                  {
+                    "id": "1:99",
+                    "name": "CourseCard设计基础",
+                    "type": "FRAME",
+                    "layoutMode": "VERTICAL",
+                    "layoutSizingHorizontal": "FIXED",
+                    "layoutSizingVertical": "HUG",
+                    "primaryAxisAlignItems": "MIN",
+                    "counterAxisAlignItems": "MIN",
+                    "itemSpacing": 17,
+                    "paddingTop": 24,
+                    "paddingRight": 24,
+                    "paddingBottom": 24,
+                    "paddingLeft": 24,
+                    "cornerRadius": 18,
+                    "children": [
+                      {
+                        "id": "1:91",
+                        "name": "CourseTop设计基础",
+                        "type": "FRAME",
+                        "layoutMode": "HORIZONTAL",
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG",
+                        "primaryAxisAlignItems": "SPACE_BETWEEN",
+                        "counterAxisAlignItems": "CENTER",
+                        "itemSpacing": 20,
+                        "paddingTop": 0,
+                        "paddingRight": 0,
+                        "paddingBottom": 0,
+                        "paddingLeft": 0,
+                        "cornerRadius": 0,
+                        "children": [
+                          {
+                            "id": "1:89",
+                            "name": "CourseIcon设计基础",
+                            "type": "FRAME",
+                            "layoutMode": "HORIZONTAL",
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "FIXED",
+                            "primaryAxisAlignItems": "CENTER",
+                            "counterAxisAlignItems": "CENTER",
+                            "itemSpacing": 0,
+                            "paddingTop": 0,
+                            "paddingRight": 0,
+                            "paddingBottom": 0,
+                            "paddingLeft": 0,
+                            "cornerRadius": 12,
+                            "children": [
+                              {
+                                "id": "1:88",
+                                "name": "IconLabel设计基础",
+                                "type": "TEXT",
+                                "characters": "Aa",
+                                "style": {
+                                  "fontFamily": "Inter",
+                                  "fontSize": 16,
+                                  "fontWeight": 700,
+                                  "lineHeightPx": 24
+                                },
+                                "fills": [
+                                  {
+                                    "type": "SOLID",
+                                    "color": {
+                                      "r": 0.20784313725490197,
+                                      "g": 0.3568627450980392,
+                                      "b": 0.2980392156862745
+                                    }
+                                  }
+                                ],
+                                "layoutSizingHorizontal": "FIXED",
+                                "layoutSizingVertical": "HUG",
+                                "absoluteBoundingBox": {
+                                  "x": 0,
+                                  "y": 0,
+                                  "width": 38,
+                                  "height": 24
+                                }
+                              }
+                            ],
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 52,
+                              "height": 45
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.8941176470588236,
+                                  "g": 0.9215686274509803,
+                                  "b": 0.9450980392156862
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "id": "1:90",
+                            "name": "CourseCategory设计基础",
+                            "type": "TEXT",
+                            "characters": "设计基础",
+                            "style": {
+                              "fontFamily": "Inter",
+                              "fontSize": 10,
+                              "fontWeight": 600,
+                              "lineHeightPx": 15
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.47843137254901963,
+                                  "g": 0.5372549019607843,
+                                  "b": 0.4980392156862745
+                                }
+                              }
+                            ],
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "HUG",
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 100,
+                              "height": 15
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "id": "1:92",
+                        "name": "CourseTitle设计基础",
+                        "type": "TEXT",
+                        "characters": "写给开发者的设计课",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 18,
+                          "fontWeight": 700,
+                          "lineHeightPx": 27
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.18823529411764706,
+                              "g": 0.29411764705882354,
+                              "b": 0.24705882352941178
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      },
+                      {
+                        "id": "1:93",
+                        "name": "CourseDescription设计基础",
+                        "type": "TEXT",
+                        "characters": "掌握留白、层次与色彩，让作品清晰且有温度。",
+                        "style": {
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": 400,
+                          "lineHeightPx": 18
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.47843137254901963,
+                              "g": 0.5372549019607843,
+                              "b": 0.4980392156862745
+                            }
+                          }
+                        ],
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG"
+                      },
+                      {
+                        "id": "1:95",
+                        "name": "ProgressTrack设计基础",
+                        "type": "FRAME",
+                        "layoutMode": "HORIZONTAL",
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "FIXED",
+                        "primaryAxisAlignItems": "MIN",
+                        "counterAxisAlignItems": "MIN",
+                        "itemSpacing": 0,
+                        "paddingTop": 0,
+                        "paddingRight": 0,
+                        "paddingBottom": 0,
+                        "paddingLeft": 0,
+                        "cornerRadius": 4,
+                        "children": [
+                          {
+                            "id": "1:94",
+                            "name": "ProgressValue设计基础",
+                            "type": "FRAME",
+                            "layoutMode": "HORIZONTAL",
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "FIXED",
+                            "primaryAxisAlignItems": "MIN",
+                            "counterAxisAlignItems": "MIN",
+                            "itemSpacing": 0,
+                            "paddingTop": 0,
+                            "paddingRight": 0,
+                            "paddingBottom": 0,
+                            "paddingLeft": 0,
+                            "cornerRadius": 4,
+                            "children": [],
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 65,
+                              "height": 5
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.4549019607843137,
+                                  "g": 0.5843137254901961,
+                                  "b": 0.5019607843137255
+                                }
+                              }
+                            ]
+                          }
+                        ],
+                        "absoluteBoundingBox": {
+                          "x": 0,
+                          "y": 0,
+                          "width": 0,
+                          "height": 5
+                        },
+                        "fills": [
+                          {
+                            "type": "SOLID",
+                            "color": {
+                              "r": 0.9176470588235294,
+                              "g": 0.9411764705882353,
+                              "b": 0.9058823529411765
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "id": "1:98",
+                        "name": "CourseFooter设计基础",
+                        "type": "FRAME",
+                        "layoutMode": "HORIZONTAL",
+                        "layoutSizingHorizontal": "FILL",
+                        "layoutSizingVertical": "HUG",
+                        "primaryAxisAlignItems": "MIN",
+                        "counterAxisAlignItems": "CENTER",
+                        "itemSpacing": 12,
+                        "paddingTop": 0,
+                        "paddingRight": 0,
+                        "paddingBottom": 0,
+                        "paddingLeft": 0,
+                        "cornerRadius": 0,
+                        "children": [
+                          {
+                            "id": "1:96",
+                            "name": "ProgressLabel设计基础",
+                            "type": "TEXT",
+                            "characters": "第 2 / 9 章 · 已完成 22%",
+                            "style": {
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": 500,
+                              "lineHeightPx": 16
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.5294117647058824,
+                                  "g": 0.5647058823529412,
+                                  "b": 0.5294117647058824
+                                }
+                              }
+                            ],
+                            "layoutSizingHorizontal": "FILL",
+                            "layoutSizingVertical": "HUG"
+                          },
+                          {
+                            "id": "1:97",
+                            "name": "CourseArrow设计基础",
+                            "type": "TEXT",
+                            "characters": "↗",
+                            "style": {
+                              "fontFamily": "Inter",
+                              "fontSize": 17,
+                              "fontWeight": 600,
+                              "lineHeightPx": 26
+                            },
+                            "fills": [
+                              {
+                                "type": "SOLID",
+                                "color": {
+                                  "r": 0.2823529411764706,
+                                  "g": 0.4549019607843137,
+                                  "b": 0.3686274509803922
+                                }
+                              }
+                            ],
+                            "layoutSizingHorizontal": "FIXED",
+                            "layoutSizingVertical": "HUG",
+                            "absoluteBoundingBox": {
+                              "x": 0,
+                              "y": 0,
+                              "width": 24,
+                              "height": 26
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "absoluteBoundingBox": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 350,
+                      "height": 0
+                    },
+                    "fills": [
+                      {
+                        "type": "SOLID",
+                        "color": {
+                          "r": 1.0,
+                          "g": 1.0,
+                          "b": 1.0
+                        }
+                      }
+                    ],
+                    "strokes": [
+                      {
+                        "type": "SOLID",
+                        "color": {
+                          "r": 0.8980392156862745,
+                          "g": 0.9176470588235294,
+                          "b": 0.8862745098039215
+                        }
+                      }
+                    ],
+                    "strokeWeight": 1
+                  }
+                ]
+              },
+              {
+                "id": "1:103",
+                "name": "Footer",
+                "type": "FRAME",
+                "layoutMode": "HORIZONTAL",
+                "layoutSizingHorizontal": "FILL",
+                "layoutSizingVertical": "HUG",
+                "primaryAxisAlignItems": "SPACE_BETWEEN",
+                "counterAxisAlignItems": "CENTER",
+                "itemSpacing": 18,
+                "paddingTop": 0,
+                "paddingRight": 0,
+                "paddingBottom": 0,
+                "paddingLeft": 0,
+                "cornerRadius": 0,
+                "children": [
+                  {
+                    "id": "1:101",
+                    "name": "FooterQuote",
+                    "type": "TEXT",
+                    "characters": "“学习的意义，是发现自己还有更多可能。”",
+                    "style": {
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": 400,
+                      "lineHeightPx": 16
+                    },
+                    "fills": [
+                      {
+                        "type": "SOLID",
+                        "color": {
+                          "r": 0.5686274509803921,
+                          "g": 0.6078431372549019,
+                          "b": 0.5647058823529412
+                        }
+                      }
+                    ],
+                    "layoutSizingHorizontal": "FILL",
+                    "layoutSizingVertical": "HUG"
+                  },
+                  {
+                    "id": "1:102",
+                    "name": "FooterSignature",
+                    "type": "TEXT",
+                    "characters": "知行 · Lab  /  GROW A LITTLE, EVERY DAY",
+                    "style": {
+                      "fontFamily": "Inter",
+                      "fontSize": 9,
+                      "fontWeight": 500,
+                      "lineHeightPx": 14
+                    },
+                    "fills": [
+                      {
+                        "type": "SOLID",
+                        "color": {
+                          "r": 0.6078431372549019,
+                          "g": 0.6431372549019608,
+                          "b": 0.6
+                        }
+                      }
+                    ],
+                    "layoutSizingHorizontal": "FIXED",
+                    "layoutSizingVertical": "HUG",
+                    "absoluteBoundingBox": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 280,
+                      "height": 14
+                    }
+                  }
+                ]
+              }
+            ],
+            "absoluteBoundingBox": {
+              "x": 0,
+              "y": 0,
+              "width": 1180,
+              "height": 950
+            },
+            "fills": [
+              {
+                "type": "SOLID",
+                "color": {
+                  "r": 0.9725490196078431,
+                  "g": 0.9803921568627451,
+                  "b": 0.9607843137254902
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

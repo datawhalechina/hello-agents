@@ -1,0 +1,73 @@
+// Optional browser integration test. Requires Playwright and local Google Chrome.
+// Start `python main.py serve` first; set PLAYWRIGHT_MODULE to an absolute
+// Playwright index.mjs path when using an isolated npm installation.
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const baseURL = process.env.FRAMECRAFT_URL || 'http://127.0.0.1:7860';
+const output = path.resolve(process.env.FRAMECRAFT_BROWSER_OUTPUT || 'outputs/browser-check');
+await fs.mkdir(output, { recursive: true });
+const browser = await chromium.launch({ channel: 'chrome', headless: true });
+const checks = [];
+try {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1050 }, permissions: ['clipboard-read', 'clipboard-write'] });
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto(baseURL);
+  await page.waitForFunction(() => !document.querySelector('#run-button').disabled);
+  await page.screenshot({ path: path.join(output, 'workbench-empty.png'), fullPage: true });
+  await page.locator('#run-button').click();
+  await page.waitForFunction(() => document.querySelector('#run-status-label').textContent === '生成完成');
+  const preview = page.locator('#preview-frame').contentFrame();
+  await preview.locator('[data-node-id]').first().waitFor();
+  const runURL = await page.locator('#preview-frame').getAttribute('src');
+  const run = await (await page.request.get(new URL(runURL.replace(/\/preview$/, ''), baseURL).href)).json();
+  const count = await preview.locator('[data-node-id]').count();
+  assert.equal(count, run.result.design.stats.node_count);
+  checks.push({ name: 'demo_and_preview', passed: true, nodes: count });
+  await page.screenshot({ path: path.join(output, 'workbench-complete.png'), fullPage: true });
+  await page.getByRole('tab', { name: '源代码', exact: true }).click();
+  await page.locator('#file-select').selectOption('src/App.tsx');
+  await page.waitForFunction(() => document.querySelector('#file-code').textContent.includes('import'));
+  await page.locator('#copy-button').click();
+  await page.waitForFunction(() => document.querySelector('#copy-label').textContent === '已复制');
+  assert.equal(await page.evaluate(() => navigator.clipboard.readText()), await page.locator('#file-code').textContent());
+  checks.push({ name: 'source_and_clipboard', passed: true });
+  await page.getByRole('tab', { name: '审查报告', exact: true }).click();
+  await page.locator('#report-content').waitFor({ state: 'visible' });
+  assert.match(await page.locator('#report-content').textContent(), /不代表像素|不衡量视觉/);
+  checks.push({ name: 'report_scope', passed: true });
+  const [download] = await Promise.all([page.waitForEvent('download'), page.locator('#download-button').click()]);
+  await download.saveAs(path.join(output, 'project.zip'));
+  assert.equal((await fs.readFile(path.join(output, 'project.zip'))).subarray(0, 2).toString(), 'PK');
+  checks.push({ name: 'download_zip', passed: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('tab', { name: '页面预览', exact: true }).click();
+  await page.locator('#preview-frame').scrollIntoViewIfNeeded();
+  await preview.locator('[data-node-id]').first().waitFor();
+  await page.screenshot({ path: path.join(output, 'workbench-mobile.png') });
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), 390);
+  checks.push({ name: 'mobile_workbench_no_horizontal_overflow', passed: true, width: 390 });
+  await page.getByRole('tab', { name: 'JSON', exact: true }).click();
+  await page.locator('#json-input').fill('{broken');
+  await page.locator('#run-button').click();
+  await page.locator('#form-error').waitFor({ state: 'visible' });
+  assert.match(await page.locator('#form-error').textContent(), /JSON 格式/);
+  await page.locator('#json-input').fill('{}');
+  await page.locator('#run-button').click();
+  await page.waitForFunction(() => document.querySelector('#run-status-label').textContent === '执行失败');
+  checks.push({ name: 'invalid_json_and_invalid_design_errors', passed: true });
+  await page.getByRole('tab', { name: '内置样例', exact: true }).click();
+  await page.locator('#run-button').click();
+  await page.waitForFunction(() => document.querySelector('#run-status-label').textContent === '生成完成');
+  checks.push({ name: 'retry_after_failure', passed: true });
+  assert.deepEqual(errors, []);
+  checks.push({ name: 'no_browser_runtime_errors', passed: true });
+  const result = { recorded_at: new Date().toISOString(), browser: await browser.version(), checks, visual_fidelity: 'not_measured' };
+  await fs.writeFile(path.join(output, 'browser-report.json'), JSON.stringify(result, null, 2));
+  console.log(JSON.stringify(result));
+} finally {
+  await browser.close();
+}

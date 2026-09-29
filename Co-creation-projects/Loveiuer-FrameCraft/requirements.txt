@@ -1,0 +1,7 @@
+# Match the HelloAgents API verified in this learning workspace.
+hello-agents==0.2.2
+fastapi>=0.115,<1
+uvicorn>=0.30,<1
+httpx>=0.27,<1
+python-dotenv>=1,<2
+pydantic>=2.9,<3
