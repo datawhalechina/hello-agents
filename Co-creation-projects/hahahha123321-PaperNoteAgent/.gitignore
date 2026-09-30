@@ -1,0 +1,17 @@
+# 密钥：绝不提交
+.env
+
+# Python / Jupyter 临时文件
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# 下载的论文 PDF（有版权，而且体积大）
+data/*.pdf
+
+# 运行产生的笔记：只提交 example_ 开头的示例
+outputs/*
+!outputs/example_*
+
+# macOS 系统文件
+.DS_Store

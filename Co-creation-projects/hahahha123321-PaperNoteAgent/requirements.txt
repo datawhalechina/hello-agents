@@ -1,0 +1,15 @@
+# 智能体框架（本项目基于 0.2.9 开发和测试）
+hello-agents==0.2.9
+# hello-agents 0.2.9 基础安装缺少这个包，不装的话 import hello_agents 会报错
+huggingface-hub
+
+# PDF 文字提取
+pypdf>=6.0,<7
+
+# 数据校验与环境变量
+pydantic>=2.0,<3
+python-dotenv>=1.0
+
+# Jupyter 环境
+jupyterlab>=4.0
+ipykernel>=6.0
