@@ -45,7 +45,7 @@ class MyReActAgent(ReActAgent):
         max_steps: int = 5,
         custom_prompt: Optional[str] = None
     ):
-        super().__init__(name, llm, system_prompt, config)
+        super().__init__(name, llm, tool_registry, system_prompt, config)
         self.tool_registry = tool_registry
         self.max_steps = max_steps
         self.current_history: List[str] = []
