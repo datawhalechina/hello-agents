@@ -1,0 +1,48 @@
+# FitHealthAgent —— 默认（持久化）配置
+#
+# 开发时想要热重载：
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# 首次使用：
+#   1. cp .env.example .env 并填好各 API key；
+#   2. docker compose up -d --build
+
+services:
+  fithealth:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # 发布版默认使用 Python 3.12，可在部署时覆盖基础镜像。
+        BASE_IMAGE: python:3.12-bookworm
+    image: fit_health_agent:v1
+    container_name: fit_health_agent
+    restart: unless-stopped
+    ports:
+      # 个人自用：只绑本机回环，不对局域网暴露
+      - "127.0.0.1:9999:9999"
+    env_file:
+      - .env
+    environment:
+      PYTHONUNBUFFERED: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONPATH: /app
+      TZ: Asia/Shanghai
+      # 与下面的数据卷挂载点保持一致。
+      FITHEALTH_DATA_DIR: /app/data
+    volumes:
+      # 持久化 JSON、health.db、原始导入文件和心率流。
+      - ./data:/app/data
+    working_dir: /app
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:9999/health/storage-status', timeout=4).status == 200 else 1)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    # SQLite 异常可通过 /health/storage-status 检查存储状态。
+    stop_grace_period: 20s
