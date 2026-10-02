@@ -2810,3 +2810,4 @@ In the next chapter, we will explore agent communication protocols and learn how
 
 [2] David Kim. Context-Engineering (GitHub). `https://github.com/davidkimai/Context-Engineering`
 
+[3] Continuum AI. OrcaPromptVault: system prompts and tool schemas captured from shipped agents, one directory per product, each artifact labelled captured or vendor-reported, dated, with a reproduce command. `https://github.com/Continuum-AI-Corp/OrcaPromptVault`
