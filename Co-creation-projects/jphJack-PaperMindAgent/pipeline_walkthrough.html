@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PaperMind · 端到端运行流程详解</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg-elev: #161924;
+    --bg-card: #1c2030;
+    --bg-code: #0a0c14;
+    --border: #2a2f42;
+    --text: #e6e9f0;
+    --text-dim: #9aa0b0;
+    --text-mute: #6b7180;
+    --accent: #5b9dff;
+    --accent-2: #a78bfa;
+    --green: #4ade80;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --cyan: #22d3ee;
+    --pink: #f472b6;
+    --orange: #fb923c;
+    --step1: #60a5fa;
+    --step2: #a78bfa;
+    --step3: #22d3ee;
+    --step4: #4ade80;
+    --step5: #fbbf24;
+    --step6: #fb923c;
+    --step7: #f472b6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    font-size: 15px;
+  }
+  /* ===== Layout ===== */
+  .layout { display: flex; max-width: 1480px; margin: 0 auto; }
+  .sidebar {
+    position: sticky; top: 0; height: 100vh; width: 260px; flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    background: var(--bg-elev);
+    overflow-y: auto;
+    padding: 24px 16px;
+  }
+  .sidebar h2 { font-size: 13px; color: var(--text-mute); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; padding: 0 8px; }
+  .sidebar a {
+    display: block; padding: 7px 12px; color: var(--text-dim); text-decoration: none;
+    border-radius: 6px; font-size: 13.5px; transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .sidebar a:hover { color: var(--text); background: rgba(91,157,255,0.08); }
+  .sidebar a.active { color: var(--accent); background: rgba(91,157,255,0.12); border-left-color: var(--accent); }
+  .sidebar a.sub { padding-left: 24px; font-size: 12.5px; }
+  .main { flex: 1; min-width: 0; padding: 48px 56px 120px; }
+  /* ===== Hero ===== */
+  .hero {
+    background: linear-gradient(135deg, #1a1f3a 0%, #0f1117 60%);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px 44px;
+    margin-bottom: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute; top: -50%; right: -10%; width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(91,157,255,0.15), transparent 70%);
+    pointer-events: none;
+  }
+  .hero h1 { font-size: 34px; font-weight: 700; margin-bottom: 12px; background: linear-gradient(90deg, #fff, #9aa0b0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero .sub { font-size: 16px; color: var(--text-dim); max-width: 760px; }
+  .hero .meta { margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; }
+  .badge { background: rgba(91,157,255,0.12); border: 1px solid rgba(91,157,255,0.3); color: var(--accent); padding: 4px 12px; border-radius: 999px; font-size: 12.5px; }
+  /* ===== Section ===== */
+  section { margin-bottom: 56px; scroll-margin-top: 20px; }
+  h2.section-title {
+    font-size: 24px; font-weight: 700; margin-bottom: 8px;
+    padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2.section-title .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff; font-size: 15px; font-weight: 700;
+  }
+  .section-desc { color: var(--text-dim); margin-bottom: 24px; font-size: 14.5px; }
+  h3 { font-size: 18px; font-weight: 600; margin: 28px 0 14px; color: var(--text); }
+  h4 { font-size: 15px; font-weight: 600; margin: 18px 0 10px; color: var(--accent); }
+  p { margin-bottom: 10px; }
+  /* ===== Cards ===== */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 24px;
+    margin-bottom: 18px;
+  }
+  .card.glow { box-shadow: 0 0 0 1px rgba(91,157,255,0.15), 0 8px 32px rgba(0,0,0,0.3); }
+  .step-card { border-left: 3px solid var(--accent); }
+  .step-card.s1 { border-left-color: var(--step1); }
+  .step-card.s2 { border-left-color: var(--step2); }
+  .step-card.s3 { border-left-color: var(--step3); }
+  .step-card.s4 { border-left-color: var(--step4); }
+  .step-card.s5 { border-left-color: var(--step5); }
+  .step-card.s6 { border-left-color: var(--step6); }
+  .step-card.s7 { border-left-color: var(--step7); }
+  .step-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+  .step-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 5px 12px; border-radius: 6px; font-size: 13px; font-weight: 600;
+  }
+  .step-tag.s1 { background: rgba(96,165,250,0.15); color: var(--step1); }
+  .step-tag.s2 { background: rgba(167,139,250,0.15); color: var(--step2); }
+  .step-tag.s3 { background: rgba(34,211,238,0.15); color: var(--step3); }
+  .step-tag.s4 { background: rgba(74,222,128,0.15); color: var(--step4); }
+  .step-tag.s5 { background: rgba(251,191,36,0.15); color: var(--step5); }
+  .step-tag.s6 { background: rgba(251,146,60,0.15); color: var(--step6); }
+  .step-tag.s7 { background: rgba(244,114,182,0.15); color: var(--step7); }
+  .step-num { font-size: 18px; font-weight: 700; }
+  .step-title { font-size: 17px; font-weight: 600; }
+  .code-link {
+    font-family: "JetBrains Mono", Consolas, monospace; font-size: 12px;
+    color: var(--text-dim); text-decoration: none;
+    background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  .code-link:hover { color: var(--accent); border-color: var(--accent); }
+  /* ===== IO blocks ===== */
+  .io-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  @media (max-width: 900px) { .io-grid { grid-template-columns: 1fr; } }
+  .io-box {
+    background: var(--bg-code); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .io-box .label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+  }
+  .io-box.in .label { color: var(--cyan); }
+  .io-box.out .label { color: var(--green); }
+  .io-box .label::before { content: ""; width: 8px; height: 8px; border-radius: 50%; }
+  .io-box.in .label::before { background: var(--cyan); }
+  .io-box.out .label::before { background: var(--green); }
+  /* ===== Code blocks ===== */
+  pre {
+    background: var(--bg-code); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px; overflow-x: auto; font-size: 12.5px; line-height: 1.55;
+    font-family: "JetBrains Mono", Consolas, "Courier New", monospace;
+    color: #d4d4dc;
+  }
+  pre.prompt {
+    background: linear-gradient(180deg, #14111f 0%, #0a0c14 100%);
+    border-color: rgba(167,139,250,0.3);
+  }
+  code.inline {
+    background: rgba(91,157,255,0.12); color: var(--accent);
+    padding: 1px 6px; border-radius: 4px; font-size: 12.5px;
+    font-family: "JetBrains Mono", Consolas, monospace;
+  }
+  .tok-sys { color: #c792ea; }
+  .tok-user { color: #82aaff; }
+  .tok-kw { color: #c792ea; }
+  .tok-str { color: #c3e88d; }
+  .tok-com { color: #6b7180; font-style: italic; }
+  .tok-num { color: #f78c6c; }
+  /* ===== Collapsible ===== */
+  details {
+    background: var(--bg-code); border: 1px solid var(--border); border-radius: 8px;
+    margin: 10px 0; overflow: hidden;
+  }
+  details[open] { border-color: rgba(167,139,250,0.4); }
+  summary {
+    cursor: pointer; padding: 12px 16px; font-size: 13.5px; font-weight: 600;
+    color: var(--accent-2); user-select: none;
+    display: flex; align-items: center; gap: 8px;
+    background: linear-gradient(90deg, rgba(167,139,250,0.08), transparent);
+  }
+  summary:hover { background: rgba(167,139,250,0.1); }
+  summary::before { content: "▸"; transition: transform 0.15s; font-size: 11px; }
+  details[open] summary::before { transform: rotate(90deg); }
+  details > pre, details > div { border: none; border-radius: 0; margin: 0; border-top: 1px solid var(--border); }
+  /* ===== Tables ===== */
+  table {
+    width: 100%; border-collapse: collapse; margin: 14px 0;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
+    overflow: hidden; font-size: 13px;
+  }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: rgba(91,157,255,0.06); color: var(--accent); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(91,157,255,0.04); }
+  /* ===== Pipeline diagram ===== */
+  .pipeline {
+    display: flex; flex-direction: column; gap: 0; margin: 24px 0;
+  }
+  .pipeline-row {
+    display: flex; align-items: stretch; gap: 0;
+  }
+  .pipe-node {
+    flex: 1; background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px; position: relative;
+    transition: transform 0.15s;
+  }
+  .pipe-node:hover { transform: translateY(-2px); }
+  .pipe-node .pn-num {
+    font-size: 11px; font-weight: 700; color: var(--text-mute); margin-bottom: 4px;
+  }
+  .pipe-node .pn-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .pipe-node .pn-desc { font-size: 11.5px; color: var(--text-dim); line-height: 1.5; }
+  .pipe-node .pn-llm { font-size: 10.5px; margin-top: 6px; color: var(--accent-2); }
+  .pipe-arrow {
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; color: var(--text-mute); font-size: 18px;
+  }
+  /* ===== Tags ===== */
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 600; margin-right: 4px;
+  }
+  .tag.llm { background: rgba(167,139,250,0.15); color: var(--accent-2); }
+  .tag.tool { background: rgba(34,211,238,0.15); color: var(--cyan); }
+  .tag.local { background: rgba(74,222,128,0.15); color: var(--green); }
+  .tag.cache { background: rgba(251,191,36,0.15); color: var(--yellow); }
+  .tag.degrade { background: rgba(248,113,113,0.15); color: var(--red); }
+  .tag.parallel { background: rgba(244,114,182,0.15); color: var(--pink); }
+  /* ===== List ===== */
+  ul, ol { margin: 8px 0 12px 22px; }
+  li { margin-bottom: 5px; }
+  li code.inline { font-size: 12px; }
+  .callout {
+    background: rgba(91,157,255,0.06); border-left: 3px solid var(--accent);
+    padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 13.5px;
+  }
+  .callout.warn { background: rgba(251,191,36,0.06); border-color: var(--yellow); }
+  .callout.danger { background: rgba(248,113,113,0.06); border-color: var(--red); }
+  .callout.ok { background: rgba(74,222,128,0.06); border-color: var(--green); }
+  .flow-arrow { color: var(--text-mute); text-align: center; font-size: 18px; margin: 6px 0; }
+  .pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .keyword { color: #c3e88d; }
+  .placeholder { color: #f78c6c; }
+  .footer { text-align: center; color: var(--text-mute); padding: 40px 0 0; border-top: 1px solid var(--border); margin-top: 60px; font-size: 12.5px; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: #3a4060; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <h2>导航</h2>
+    <a href="#overview">总览</a>
+    <a href="#startup">1. 启动阶段</a>
+    <a href="#submit">2. 提交任务</a>
+    <a href="#phase1">3. Phase 1 预处理</a>
+    <a href="#step1" class="sub">① PDF 解析</a>
+    <a href="#step2" class="sub">② 结构化抽取</a>
+    <a href="#step3" class="sub">③ 向量索引</a>
+    <a href="#phase2">4. Phase 2 Plan</a>
+    <a href="#phase3">5. Phase 3 Execute</a>
+    <a href="#step4" class="sub">④ Gap 识别</a>
+    <a href="#reflexion" class="sub">↳ Reflexion</a>
+    <a href="#step5" class="sub">⑤ 创新点生成</a>
+    <a href="#step6" class="sub">⑥ 实验设计</a>
+    <a href="#step7" class="sub">⑦ 整合输出</a>
+    <a href="#eval">6. 评估阶段</a>
+    <a href="#summary">7. LLM 调用清单</a>
+    <a href="#principles">8. Prompt 设计原则</a>
+    <a href="#degrade">9. 降级与容错</a>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Hero -->
+    <div class="hero">
+      <h1>PaperMind · 端到端运行流程详解</h1>
+      <p class="sub">从用户提交 PDF 文件夹，到生成结构化研究提案（含创新点 + 实验方案）的完整代码执行路径、每次 LLM 调用与工具调用的输入输出全记录。</p>
+      <div class="meta">
+        <span class="badge">Plan-and-Execute + Reflexion</span>
+        <span class="badge">7 步漏斗式信息收敛</span>
+        <span class="badge">DeepSeek Function Calling</span>
+        <span class="badge">BGE-m3 + Chroma 混合检索</span>
+      </div>
+    </div>
+
+    <!-- Overview -->
+    <section id="overview">
+      <h2 class="section-title"><span class="num">0</span>总览：七步漏斗流水线</h2>
+      <p class="section-desc">整个系统由 <code class="inline">WorkflowOrchestrator</code> 编排，分三大阶段：预处理（步骤 1-3，带缓存）→ Plan（LLM 动态规划步骤 4-7）→ Execute（步骤 4-7，每步后插入 Reflexion 自校验）。</p>
+
+      <div class="pipeline">
+        <div class="pipeline-row">
+          <div class="pipe-node" style="border-left:3px solid var(--step1)">
+            <div class="pn-num">STEP 1</div>
+            <div class="pn-title">PDF 解析</div>
+            <div class="pn-desc">PyMuPDF 提取章节结构</div>
+            <div class="pn-llm"><span class="tag local">本地</span></div>
+          </div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-node" style="border-left:3px solid var(--step2)">
+            <div class="pn-num">STEP 2</div>
+            <div class="pn-title">结构化抽取</div>
+            <div class="pn-desc">Function Calling 抽 9 字段</div>
+            <div class="pn-llm"><span class="tag llm">LLM</span> <span class="tag parallel">并行</span></div>
+          </div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-node" style="border-left:3px solid var(--step3)">
+            <div class="pn-num">STEP 3</div>
+            <div class="pn-title">向量索引</div>
+            <div class="pn-desc">BGE-m3 → Chroma + BM25</div>
+            <div class="pn-llm"><span class="tag local">本地</span></div>
+          </div>
+        </div>
+        <div class="flow-arrow">↓</div>
+        <div class="pipeline-row">
+          <div class="pipe-node" style="border-left:3px solid var(--step4)">
+            <div class="pn-num">STEP 4</div>
+            <div class="pn-title">Gap 识别</div>
+            <div class="pn-desc">四类 Gap 信号综合推理</div>
+            <div class="pn-llm"><span class="tag llm">LLM</span> <span class="tag tool">RAG</span></div>
+          </div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-node" style="border-left:3px solid var(--step5)">
+            <div class="pn-num">STEP 5</div>
+            <div class="pn-title">创新点生成</div>
+            <div class="pn-desc">四类来源 + 三维评分筛选</div>
+            <div class="pn-llm"><span class="tag llm">LLM</span> <span class="tag tool">联网</span></div>
+          </div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-node" style="border-left:3px solid var(--step6)">
+            <div class="pn-num">STEP 6</div>
+            <div class="pn-title">实验设计</div>
+            <div class="pn-desc">8 要素可执行方案</div>
+            <div class="pn-llm"><span class="tag llm">LLM</span></div>
+          </div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-node" style="border-left:3px solid var(--step7)">
+            <div class="pn-num">STEP 7</div>
+            <div class="pn-title">整合输出</div>
+            <div class="pn-desc">Markdown 研究提案</div>
+            <div class="pn-llm"><span class="tag llm">LLM</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>核心设计哲学：</strong>漏斗式信息收敛 — 每步压缩信息，最后一步才做创造性推理（避免早期噪声干扰）。所有中间产物都是结构化 JSON / 向量，不依赖长上下文记忆。
+      </div>
+    </section>
+
+    <!-- Startup -->
+    <section id="startup">
+      <h2 class="section-title"><span class="num">1</span>启动阶段（进程级）</h2>
+      <p class="section-desc">用户运行 <code class="inline">python run_backend.py</code> 启动 FastAPI 服务，前端 <code class="inline">npm run dev</code> 启动 Vite。</p>
+
+      <div class="card">
+        <h4>启动命令</h4>
+<pre>python run_backend.py
+# 等价于：uvicorn backend.api.main:app --host 0.0.0.0 --port 8000</pre>
+
+        <h4>启动钩子（on_startup）</h4>
+        <p>应用启动时预加载重型依赖，避免首次请求时才触发 import（torch 单独 import 100+ 秒）：</p>
+<pre><span class="tok-com"># 顺序预加载</span>
+import torch              <span class="tok-com"># ~5s</span>
+from transformers import AutoModel, AutoTokenizer   <span class="tok-com"># ~3s</span>
+import chromadb           <span class="tok-com"># ~2s</span>
+
+<span class="tok-com"># 预热 Embedder 单例：加载 BGE-m3 模型 + 首次 forward（初始化 CUDA 上下文）</span>
+_embedder = get_default_embedder()
+_embedder.embed_texts([<span class="tok-str">"预加载测试文本"</span>])</pre>
+
+        <div class="io-grid">
+          <div class="io-box in">
+            <div class="label">输入</div>
+            <div>无（进程启动）</div>
+          </div>
+          <div class="io-box out">
+            <div class="label">输出</div>
+            <div>FastAPI 服务监听 <code class="inline">0.0.0.0:8000</code>，BGE 模型已 warmup，前端可访问 <code class="inline">localhost:5173</code></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Submit -->
+    <section id="submit">
+      <h2 class="section-title"><span class="num">2</span>用户提交分析任务</h2>
+      <p class="section-desc">前端发 HTTP 请求，后端创建任务并后台异步启动，立即返回 task_id。</p>
+
+      <div class="card">
+        <h4>HTTP 请求</h4>
+<pre><span class="tok-com"># POST /api/analyze</span>
+{
+  <span class="tok-str">"folder_path"</span>: <span class="tok-str">"D:/papers"</span>,
+  <span class="tok-str">"research_direction"</span>: <span class="tok-str">"多模态学习"</span>
+}</pre>
+
+        <h4>路由处理 <a class="code-link" href="file:///d:/code/aa-my-idea/agent/paper-agent-trae/backend/api/routes.py#L157">routes.py:157</a></h4>
+        <ol>
+          <li><code class="inline">task_manager.create_task()</code> → 生成 <code class="inline">task_id</code>（uuid），状态 <code class="inline">pending</code></li>
+          <li><code class="inline">asyncio.create_task(run_analysis(...))</code> → 后台异步启动，<strong>不阻塞响应</strong></li>
+          <li>立即返回 <code class="inline">{"task_id": "..."}</code></li>
+        </ol>
+
+        <h4>后台主流程 <a class="code-link" href="file:///d:/code/aa-my-idea/agent/paper-agent-trae/backend/api/routes.py#L51">routes.py:51</a></h4>
+<pre><span class="tok-com"># 初始化组件</span>
+client = DeepSeekClient()                                    <span class="tok-com"># LLM 客户端</span>
+registry = build_default_registry()                          <span class="tok-com"># 工具注册表</span>
+memory = MemoryManager()                                     <span class="tok-com"># 双层记忆</span>
+orchestrator = WorkflowOrchestrator(client, registry, memory)
+
+<span class="tok-com"># 执行流水线</span>
+pipeline_output = await orchestrator.run_pipeline(...)
+
+<span class="tok-com"># 生成报告 + 评估</span>
+report = await ReportAgent(client).generate_report(final_results)
+evaluation = await Evaluator(client).evaluate(...)
+
+<span class="tok-com"># 存结果</span>
+task_manager.update_task(task_id, status=<span class="tok-str">"completed"</span>, result={...})</pre>
+
+        <div class="callout ok">
+          <strong>SSE 进度推送：</strong>整个后台流程通过 <code class="inline">progress_callback</code> 实时推送 <code class="inline">{stage, status, message, progress, payload}</code> 到 <code class="inline">GET /api/progress/{task_id}</code>，前端可流式渲染进度条。
+        </div>
+      </div>
+    </section>
+
+    <!-- Phase 1 -->
+    <section id="phase1">
+      <h2 class="section-title"><span class="num">3</span>Phase 1：预处理（步骤 1-3，带缓存）</h2>
+      <p class="section-desc">由 <code class="inline">Controller._preprocess_papers()</code> 编排，对每篇论文检查 PaperLibrary 缓存状态：已完成的步骤直接从磁盘加载（标记 cached），未完成的执行后写盘。</p>
+    </section>
+
+    <!-- Step 1 -->
+    <section id="step1">
+      <div class="card step-card s1">
+        <div class="step-header">
+          <div>
+            <span class="step-tag s1"><span class="step-num">①</span> PDF 解析</span>
+            <span class="step-title">PyMuPDF 提取章节结构</span>
+          </div>
+          <a class="code-link" href="file:///d:/code/aa-my-idea/agent/paper-agent-trae/backend/tools/parse_pdf.py">parse_pdf.py</a>
+        </div>
+
+        <div class="pill-row">
+          <span class="tag local">本地处理</span>
+          <span class="tag parallel">并发 asyncio.gather</span>
+          <span class="tag cache">缓存 data/cache/parsed/{paper_id}.json</span>
+        </div>
+
+        <h4>处理流程</h4>
+        <ul>
+          <li>PyMuPDF 提取每页文本 + 字号/字体信息</li>
+          <li>启发式识别章节标题（字号 > 正文×1.15 或加粗 + 关键词匹配 <code class="inline">abstract|introduction|method...</code>）</li>
+          <li>去页眉页脚（短行 &lt; 80 字符且重复出现）</li>
+          <li>提取图表标题（<code class="inline">Figure X</code> / <code class="inline">表 X</code> 正则）</li>
+          <li>合并跨页段落，修复断句</li>
+        </ul>
+
+        <div class="io-grid">
+          <div class="io-box in">
+            <div class="label">输入</div>
+<pre>{
+  <span class="tok-str">"file_path"</span>: <span class="tok-str">"D:/papers/xxx.pdf"</span>
+}</pre>
+          </div>
+          <div class="io-box out">
+            <div class="label">输出：ParsedPaper</div>
+<pre>{
+  <span class="tok-str">"path"</span>: <span class="tok-str">"D:/papers/xxx.pdf"</span>,
+  <span class="tok-str">"title"</span>: <span class="tok-str">"Attention Is All You Need"</span>,
+  <span class="tok-str">"sections"</span>: [
+    {
+      <span class="tok-str">"heading"</span>: <span class="tok-str">"Abstract"</span>,
+      <span class="tok-str">"content"</span>: <span class="tok-str">"..."</span>,
+      <span class="tok-str">"figure_captions"</span>: [<span class="tok-str">"Figure 1: ..."</span>]
+    }
+  ]
+}</pre>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>缓存复用：</strong>解析结果写入 <code class="inline">data/cache/parsed/{paper_id}.json</code>，PaperLibrary 标记 <code class="inline">parse_status=done</code>。下次同一论文直接 <code class="inline">load_parsed()</code> 加载，跳过解析。
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 2 -->
+    <section id="step2">
+      <div class="card step-card s2">
+        <div class="step-header">
+          <div>
+            <span class="step-tag s2"><span class="step-num">②</span> 结构化抽取</span>
+            <span class="step-title">核心主干 · Function Calling 强制 JSON</span>
+          </div>
+          <a class="code-link" href="file:///d:/code/aa-my-idea/agent/paper-agent-trae/backend/tools/extract_paper_structure.py#L214">extract_paper_structure.py:214</a>
+        </div>
+
+        <div class="pill-row">
+          <span class="tag llm">LLM 调用</span>
+          <span class="tag parallel">并行 asyncio.gather + Semaphore(5)</span>
+          <span class="tag cache">缓存 data/cache/papers/{paper_id}.json + papers.jsonl</span>
+        </div>
+
+        <h4>处理流程</h4>
+        <ol>
+          <li><strong>长度判断</strong>：总字符 &gt; 20000 → 按章节分块抽取后合并；否则一次性抽取</li>
+          <li><strong>调用 LLM</strong>（<code class="inline">_call_extract</code>）：强制 <code class="inline">tool_choice={"type":"function","function":{"name":"extract_paper_fields"}}</code></li>
+          <li><strong>字段完整性校验</strong>：缺失字段 → 针对性补抽（<code class="inline">focus_fields</code> 只补缺失的，不重跑整篇）</li>
+          <li><strong>长论文合并</strong>：多块记录按置信度取最高 value，<code class="inline">source_sections</code> 去重合并</li>
+        </ol>
+
+        <details open>
+          <summary>LLM Prompt · 抽取（核心）</summary>
+<pre class="prompt"><span class="tok-sys">[System]</span>
+你是论文结构化抽取助手。严格通过函数调用输出 JSON，
+每个字段含 value/source_sections/confidence。
+limitations 必须真实可溯源，严禁臆造。
+
+<span class="tok-user">[User]</span>
+请从以下论文中抽取结构化字段。
+
+论文标题：<span class="placeholder">{title}</span>
+
+论文正文：
+## Abstract
+<span class="placeholder">{...}</span>
+## Introduction
+<span class="placeholder">{...}</span>
+
+抽取要求：
+1. 必须抽取以下字段：title、task_problem、method、key_contributions、
+   datasets、metrics、results、limitations、future_work
+2. 每个字段必须是 FieldSource 结构：
+   {
+     "value": "字段值（字符串，尽量简洁完整）",
+     "source_sections": ["原文出处章节标题列表"],
+     "confidence": 0.0-1.0
+   }
+3. source_sections 必须标注字段信息来源于上面哪个章节（用章节标题原文），便于回溯核查
+4. <span class="tok-kw">limitations 字段特别要求</span>：必须是论文明确承认的局限，或可从实验结果直接推断的局限，
+   严禁臆造或泛泛而谈。若论文未明确提及局限，value 填写"论文未明确陈述局限"，confidence 设为较低值（如 0.3）
+5. confidence 反映可信度：
+   - 信息明确且原文直述 → 0.9-1.0
+   - 需要从原文推断 → 0.6-0.8
+   - 信息不足或模糊 → 低于 0.6
+6. 严格输出 JSON，不要添加任何额外说明文字或 markdown 代码块标记</pre>
+        </details>
+
+        <details>
+          <summary>LLM Prompt · 针对性补抽（缺失字段）</summary>
+<pre class="prompt"><span class="tok-user">[User]</span>
+前一次抽取缺失了以下字段：<span class="placeholder">{", ".join(focus_fields)}</span>。
+请重点从原文中补抽这些字段，其他字段可留空。
+
+<span class="tok-com">{...同上 prompt...}</span></pre>
+        </details>
+
+        <details>
+          <summary>Function Calling Schema · extract_paper_fields</summary>
+<pre>{
+  "type": "function",
+  "function": {
+    "name": "extract_paper_fields",
+    "description": "从论文中抽取结构化字段，每个字段含 value/source_sections/confidence",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "object", "properties": {
+          "value": {"type":"string"},
+          "source_sections": {"type":"array","items":{"type":"string"}},
+          "confidence": {"type":"number"}
+        }},
+        "task_problem": { ... 同上 ... },
+        "method": { ... },
+        "key_contributions": { ... },
+        "datasets": { ... },
+        "metrics": { ... },
+        "results": { ... },
+        "limitations": { ... },
+        "future_work": { ... }
+      },
+      "required": ["title","task_problem","method","key_contributions",
+                   "datasets","metrics","results","limitations","future_work"]
+    }
+  }
+}</pre>
+        </details>
+
+        <div class="io-grid">
+          <div class="io-box in">
+            <div class="label">输入</div>
+<pre>{
+  <span class="tok-str">"paper_path"</span>: <span class="tok-str">"D:/papers/xxx.pdf"</span>,
+  <span class="tok-str">"parsed_paper"</span>: <span class="tok-com">{ParsedPaper dict}</span>
+}</pre>
+          </div>
+          <div class="io-box out">
+            <div class="label">输出：PaperRecord</div>
+<pre>{
+  "path": "...",
+  "title": {
+    "value": "Attention Is All You Need",
+    "source_sections": ["Title"],
+    "confidence": 1.0
+  },
+  "task_problem": {
+    "value": "序列建模任务...",
+    "source_sections": ["Introduction"],
+    "confidence": 0.9
+  },
+  "method": {
+    "value": "Transformer 架构...",
+    "source_sections": ["3 Method","3.1"],
+    "confidence": 0.95
+  },
+  "limitations": {
+    "value": "位置编码外推性差...",
+    "source_sections": ["6 Conclusion"],
+    "confidence": 0.7
+  },
+  <span class="tok-com">...</span>
+}</pre>
+          </div>
+        </div>
+
+        <div class="callout warn">
+          <strong>防编造机制：</strong>每个字段强制 <code class="inline">source_sections</code> 回溯到具体章节，<code class="inline">limitations</code> 严禁臆造。这是后续创新点论证可追溯性的基石。
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 3 -->
+    <section id="step3">
+      <div class="card step-card s3">
+        <div class="step-header">
+          <div>
+            <span class="step-tag s3"><span class="step-num">③</span> 向量索引构建</span>
+            <span class="step-title">BGE-m3 → Chroma + BM25</span>
+          </div>
+          <a class="code-link" href="file:///d:/code/aa-my-idea/agent/paper-agent-trae/backend/tools/build_vector_index.py">build_vector_index.py</a>
+        </div>
+
+        <div class="pill-row">
+          <span class="tag local">本地处理</span>
+          <span class="tag cache">Chroma PersistentClient 持久化</span>
+          <span class="tag degrade">失败降级 skip_rag</span>
+        </div>
+
+        <h4>处理流程</h4>
+        <ol>
+          <li><strong>分块</strong>：按段落累积到 ~500 字符落块，每块携带 <code class="inline">section</code> 标题</li>
+          <li><strong>向量化</strong>：BGE-m3 本地 Embedding（无 API 成本），块内容 = <code class="inline">section_heading + text</code></li>
+          <li><strong>写入 Chroma</strong>：<code class="inline">paper_chunks</code> collection，metadata 含 <code class="inline">paper_path/title/section</code></li>
+          <li><strong>同步构建 BM25</strong>：倒排索引供关键词检索</li>
+        </ol>
+
+        <div class="io-grid">
+          <div class="io-box in">
+            <div class="label">输入</div>
+<pre>{
+  <span class="tok-str">"papers_json"</span>: [<span class="tok-com">{ParsedPaper}</span>, ...]
+}</pre>
+          </div>
+          <div class="io-box out">
+            <div class="label">输出</div>
+<pre>{
+  "indexed_count": 12,
+  "status": "done"
+}</pre>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>定位：</strong>RAG 是"点查询工具"而非"分析引擎"，仅在结构化摘要不够用时调用（步骤④⑤ 中需原文细节佐证时）。混合搜索 = Chroma 向量（α=0.6）+ BM25（α=0.4）分数归一化加权融合。
+        </div>
+      </div>
+    </section>
+
+    <!-- Phase 2 -->
+    <section id="phase2">
+      <h2 class="section-title"><span class="num">4</span>Phase 2：Plan（LLM 动态规划）</h2>
+      <p class="section-desc">让 LLM 根据任务自主规划步骤顺序/增减，体现动态编排。失败时回退默认七步计划。实际执行时过滤掉步骤 1-3（已由预处理完成），只执行步骤 4-7。</p>
+
+      <div class="card">
+        <h4>调用位置 <a class="code-link" href="file:///d:/code/aa-my-idea/agent/paper-agent-trae/backend/orchestrator/controller.py#L126">controller.py:126</a></h4>
+
+        <details open>
+          <summary>LLM Prompt · 动态规划</summary>
+<pre class="prompt"><span class="tok-sys">[System]</span>
+你是 Agent 编排器，负责生成可执行的动态计划。只输出 JSON。
+
+<span class="tok-user">[User]</span>
+你是论文创新 Agent 的 Controller。请为以下任务生成动态执行计划。
+
+任务：分析文件夹 <span class="placeholder">{folder_path}</span> 中的 PDF 论文，
+识别研究空白，生成 2-3 个创新点并设计实验方案。
+
+可用 Agent：
+- PaperParser：扫描文件夹并解析 PDF
+- Extractor：单篇论文结构化抽取
+- Indexer：向量索引构建
+- GapAnalyzer：跨论文 Gap 识别
+- InnovationGenerator：创新点生成与筛选
+- ExperimentDesigner：实验方案设计
+- Integration：整合输出研究提案
+
+请生成执行计划，输出 JSON 数组，每个元素含：
+- step: 步骤序号（整数）
+- agent: Agent 名称（上述之一）
+- action: 该步骤具体任务描述
+- depends_on: 依赖的步骤序号列表
+
+你可以根据任务自主调整顺序或增减步骤。
+默认链路：解析→抽取→索引→Gap分析→创新生成→实验设计→整合。
+严格只输出 JSON 数组，不要其他文本。</pre>
+        </details>
+
+        <div class="io-grid">
+          <div class="io-box in">
+            <div class="label">输入</div>
+<pre><span class="tok-str">"D:/papers"</span> <span class="tok-com">或</span>
+<span class="tok-str">"已上传的 12 篇论文"</span></pre>
+          </div>
+          <div class="io-box out">
+            <div class="label">输出：计划列表</div>
+<pre>[
+  {"step":4,"agent":"GapAnalyzer",
+   "action":"跨论文综合分析识别研究空白",
+   "depends_on":[2]},
+  {"step":5,"agent":"InnovationGenerator",
+   "action":"针对 Gap 生成创新点并筛选",
+   "depends_on":[4]},
+  <span class="tok-com">...</span>
+]</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Phase 3 -->
+    <section id="phase3">
+      <h2 class="section-title"><span class="num">5</span>Phase 3：Execute（步骤 4-7 + Reflexion）</h2>
+      <p class="section-desc">逐步执行计划，每步完成后插入 Reflexion 自校验钩子（仅对 Extractor / GapAnalyzer / InnovationGenerator 启用）。每步还根据结果动态调整剩余计划。</p>
+
+      <div class="callout warn">
+        <strong>绕过 Function Calling 的设计：</strong>步骤 ④⑤⑥ 中，Controller 直接调用工具（参数已确定），不让模型再选一次工具。因为 DeepSeek 实测会把整段 JSON 当字符串传或漏传参数，浪费迭代次数。只让 LLM 做推理，不让它做参数路由。
+      </div>
+    </section>
+
+    <!-- Step 4 -->
+    <section id="step4">
+      <div class="card step-card s4">
+        <div class="step-header">
+          <div>
+            <span class="step-tag s4"><span class="step-num">④</span> Gap 识别</span>
+            <span class="step-title">跨论文综合推理 · 四类 Gap 信号</span>
+          </div>
+          <a class="code-link" href="file:///d:/code/aa-my-idea/agent/paper-agent-trae/backend/tools/analyze_gaps.py#L88">analyze_gaps.py:88</a>
+        </div>
+
+        <div class="pill-row">
+          <span class="tag llm">LLM 调用</span>
+          <span class="tag tool">hybrid_search 工具</span>
+          <span class="tag parallel">RAG 增强 evidence</span>
+        </div>
+
+        <h4>处理流程</h4>
+        <ol>
+          <li><strong>聚合对比矩阵</strong>：把 N 篇论文的 8 个字段聚合成文本（关键：让模型在全局视野下识别 Gap）</li>
+          <li><strong>调用 LLM</strong> 做跨论文综合推理，识别四类 Gap</li>
+          <li><strong>RAG 增强</strong>：对每个 Gap 调用 <code class="inline">hybrid_search</code> 检索原文细节，补充 evidence</li>
+        </ol>
+
+        <details open>
+          <summary>LLM Prompt · Gap 识别</summary>
+<pre class="prompt"><span class="tok-sys">[System]</span>
+你是一位严谨的学术研究分析专家，擅长跨论文综合推理与 Gap 识别。
+只输出严格 JSON，不要输出任何其他内容。
+
+<span class="tok-user">[User]</span>
+你是一位资深学术研究者，需要从以下多篇论文的结构化对比中识别研究空白（Gap）。
+
+## 论文对比矩阵
+===== 论文 1: Attention Is All You Need =====
+[研究任务/问题] 序列建模任务...
+[核心方法] Transformer 架构...
+[局限性] 位置编码外推性差...
+[未来工作] 扩展到多模态...
+===== 论文 2: BERT =====
+[研究任务/问题] ...
+[核心方法] ...
+[局限性] ...
+
+## 任务
+请综合分析上述论文，识别以下四类 Gap 信号：
+1. <span class="tok-kw">repeated_limitation</span>（重复局限）：多篇论文提到同一局限性，但无人解决
+2. <span class="tok-kw">method_gap</span>（方法空白）：某类问题只有少数方法尝试且效果不佳
+3. <span class="tok-kw">contradictory</span>（矛盾结论）：不同论文对同一问题给出冲突结论
+4. <span class="tok-kw">unfulfilled_future</span>（未兑现的未来工作）：多篇论文指向同一未来方向但无人完成
+
+对于单篇论文场景，重点关注该论文自身的 limitations 与 future_work 字段。
+
+## 输出要求
+严格输出 JSON：
+{
+  "gaps": [
+    {
+      "description": "Gap 的清晰描述",
+      "gap_type": "repeated_limitation|method_gap|contradictory|unfulfilled_future",
+      "source_papers": ["来源论文标题1"],
+      "evidence": "论证依据，引用具体论文的具体字段",
+      "confidence": 0.0到1.0之间的置信度
+    }
+  ]
+}
+
+只输出真正有证据支撑的 Gap，不要编造。每个 Gap 的 source_papers 至少包含 2 篇论文。</pre>
+        </details>
+
+        <div class="io-grid">
+          <div class="io-box in">
+            <div class="label">输入</div>
+<pre>{
+  <span class="tok-str">"papers_records"</span>: [
+    <span class="tok-com">{PaperRecord 1}</span>,
+    <span class="tok-com">{PaperRecord 2}</span>,
+    ...
+  ]
+}</pre>
+          </div>
+          <div class="io-box out">
+            <div class="label">输出</div>
+<pre>{
+  "gaps": [
+    {
+      "description": "位置编码外推性普遍较差",
+      "gap_type": "repeated_limitation",
+      "source_papers": ["Attention...","BERT..."],
+      "evidence": "两篇均提及... [原文佐证]\n  - 《Attention》6 Conclusion: ...",
+      "confidence": 0.85
+    }
+  ]
+}</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reflexion -->
+    <section id="reflexion">
+      <div class="card step-card" style="border-left-color: var(--accent-2);">
+        <div class="step-header">
+          <div>
+            <span class="step-tag" style="background:rgba(167,139,250,0.15);color:var(--accent-2);">↻ Reflexion 自校验</span>
+            <span class="step-title">针对性补抽（非整篇重跑）</span>
+          </div>
+          <a class="code-link" href="file:///d:/code/aa-my-idea/agent/paper-agent-trae/backend/orchestrator/reflexion.py#L67">reflexion.py:67</a>
+        </div>
+
+        <div class="pill-row">
+          <span class="tag llm">LLM 调用</span>
+          <span class="tag degrade">置信度 &lt; 0.7 触发重试</span>
+        </div>
+
+        <h4>触发条件</h4>
+        <p>仅对 <code class="inline">Extractor</code> / <code class="inline">GapAnalyzer</code> / <code class="inline">InnovationGenerator</code> 启用。步骤完成后，让 LLM 对照上下文检查结果质量。</p>
+
+        <details open>
+          <summary>LLM Prompt · 自校验</summary>
+<pre class="prompt"><span class="tok-sys">[System]</span>
+你是质量审核员，负责对照上下文检查 Agent 输出质量。只输出 JSON。
+
+<span class="tok-user">[User]</span>
+请对照上下文检查以下步骤的结果质量。
+
+步骤：<span class="placeholder">{step_name}</span>
+上下文：
+步骤 2 结果：{抽取记录摘要...}
+
+结果：
+<span class="placeholder">{result_str}</span>
+
+检查要求：
+1. 评估结果是否准确、完整、无臆造；
+2. 输出 0-1 的置信度（confidence）；
+3. 列出发现的问题（issues）；
+4. 置信度低于 <span class="placeholder">{CONFIDENCE_THRESHOLD=0.7}</span> 时 needs_retry=true；
+5. 指出需重试的字段或方面（retry_fields）。
+
+严格以 JSON 输出：
+{"confidence": 0.85, "issues": ["问题1"], "needs_retry": false, "retry_fields": []}</pre>
+        </details>
+
+        <h4>重试逻辑</h4>
+        <ol>
+          <li><code class="inline">confidence &lt; 0.7</code> → <code class="inline">needs_retry = true</code></li>
+          <li>调用 <code class="inline">retry_func()</code> 重新执行该步骤（针对性补抽，非整篇重跑）</li>
+          <li>最多重试 <code class="inline">MAX_RETRIES=2</code> 次</li>
+          <li>仍不达标 → 标记 <code class="inline">needs_human_review</code>，流程继续不阻塞</li>
+        </ol>
+
+        <div class="io-grid">
+          <div class="io-box in">
+            <div class="label">输入</div>
+<pre>{
+  <span class="tok-str">"step_name"</span>: <span class="tok-str">"GapAnalyzer"</span>,
+  <span class="tok-str">"result"</span>: <span class="tok-com">{步骤结果}</span>,
+  <span class="tok-str">"context"</span>: <span class="tok-com">{依赖步骤结果}</span>
+}</pre>
+          </div>
+          <div class="io-box out">
+            <div class="label">输出</div>
+<pre>{
+  "confidence": 0.85,
+  "issues": ["..."],
+  "needs_retry": false,
+  "retry_fields": []
+}</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 5 -->
+    <section id="step5">
+      <div class="card step-card s5">
+        <div class="step-header">
+          <div>
+            <span class="step-tag s5"><span class="step-num">⑤</span> 创新点生成</span>
+            <span class="step-title">四类来源 + 三维评分筛选 + 联网去重</span>
+          </div>
+          <a class="code-link" href="file:///d:/code/aa-my-idea/agent/paper-agent-trae/backend/tools/generate_innovations.py#L58">generate_innovations.py:58</a>
+        </div>
+
+        <div class="pill-row">
+          <span class="tag llm">LLM 调用</span>
+          <span class="tag tool">web_search 工具（DuckDuckGo）</span>
+          <span class="tag degrade">联网失败降级 skip_novelty_check</span>
+        </div>
+
+        <h4>处理流程</h4>
+        <ol>
+          <li><strong>调用 LLM</strong>：针对每个 Gap 从四类来源生成候选创新方向</li>
+          <li><strong>规范化 + 排序</strong>：按三维评分之和降序</li>
+          <li><strong>取 Top 2-3</strong></li>
+          <li><strong>联网新颖性去重</strong>：对每个创新点用 DuckDuckGo 搜索近 1-2 年 arXiv/Google Scholar，验证是否已有相同工作</li>
+        </ol>
+
+        <details open>
+          <summary>LLM Prompt · 创新生成</summary>
+<pre class="prompt"><span class="tok-sys">[System]</span>
+你是一位学术创新生成专家，擅长从研究空白中挖掘可执行的创新方向。
+只输出严格 JSON，不要输出任何其他内容。
+
+<span class="tok-user">[User]</span>
+你是一位富有创造力的学术研究者，需要基于以下研究空白（Gap）生成候选创新方向。
+
+## 用户研究方向约束
+用户的研究方向为：<span class="placeholder">{research_direction}</span>
+生成的创新点应尽量与该方向相关，并在 supporting_evidence 中说明创新点与该方向的关联。
+
+## 研究空白列表
+- [repeated_limitation] 位置编码外推性普遍较差（来源: Attention..., BERT...）
+- [method_gap] ...
+
+## 任务
+针对每个 Gap，从以下四类来源生成候选创新方向：
+1. <span class="tok-kw">method_combination</span>（方法组合）：把 A 论文方法迁移到 B 论文问题
+2. <span class="tok-kw">limitation_fix</span>（局限改进）：直接解决被反复提及的局限
+3. <span class="tok-kw">cross_domain</span>（跨域迁移）：引入其他领域方法
+4. <span class="tok-kw">new_scenario</span>（新场景应用）：把现有方法用到未被覆盖的数据/场景
+
+对每个候选创新方向，用三维评分（0-10 分）：
+- novelty（新颖性）
+- feasibility（可行性）
+- significance（显著性）
+
+## 输出要求
+严格输出 JSON：
+{
+  "innovations": [
+    {
+      "title": "创新点标题",
+      "idea": "创新思路详细描述",
+      "source": "method_combination|limitation_fix|cross_domain|new_scenario",
+      "gap_origin": "对应的 Gap 描述",
+      "score": {"novelty": 8.0, "feasibility": 7.5, "significance": 8.0},
+      "supporting_evidence": "论据支撑"
+    }
+  ]
+}
+
+生成多个候选（每个 Gap 至少 1-2 个），按综合得分（三项之和）从高到低排序。</pre>
+        </details>
+
+        <div class="io-grid">
+          <div class="io-box in">
+            <div class="label">输入</div>
+<pre>{
+  <span class="tok-str">"gaps"</span>: [<span class="tok-com">{Gap}</span>, ...],
+  <span class="tok-str">"research_direction"</span>: <span class="tok-str">"多模态学习"</span>
+}</pre>
+          </div>
+          <div class="io-box out">
+            <div class="label">输出</div>
+<pre>{
+  "innovations": [
+    {
+      "title": "基于 RoPE 的多模态位置编码",
+      "idea": "...",
+      "source": "limitation_fix",
+      "gap_origin": "位置编码外推性差",
+      "score": {"novelty":8.0,"feasibility":7.5,"significance":8.5},
+      "novelty_check": "近 1-2 年无相同工作",
+      "supporting_evidence": "..."
+    }
+  ]
+}</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 6 -->
+    <section id="step6">
+      <div class="card step-card s6">
+        <div class="step-header">
+          <div>
+            <span class="step-tag s6"><span class="step-num">⑥</span> 实验方案设计</span>
+            <span class="step-title">8 要素可执行研究方案</span>
+          </div>
+          <a class="code-link" href="file:///d:/code/aa-my-idea/agent/paper-agent-trae/backend/tools/design_experiments.py#L34">design_experiments.py:34</a>
+        </div>
+
+        <div class="pill-row">
+          <span class="tag llm">LLM 调用</span>
+        </div>
+
+        <details open>
+          <summary>LLM Prompt · 实验设计</summary>
+<pre class="prompt"><span class="tok-sys">[System]</span>
+你是一位学术实验设计专家，擅长设计严谨可执行的研究方案。
+只输出严格 JSON，不要输出任何其他内容。
+
+<span class="tok-user">[User]</span>
+你是一位资深学术研究者，需要为以下创新点设计可执行的研究方案。
+
+## 创新点列表
+- 基于 RoPE 的多模态位置编码: ...（来源: limitation_fix，Gap: 位置编码外推性差）
+
+## 任务
+为每个创新点设计完整、可执行的研究方案，包含：
+- <span class="tok-kw">hypothesis</span>（研究假设）：清晰可验证的假设
+- <span class="tok-kw">datasets</span>（数据集列表）：适合该研究的公开数据集
+- <span class="tok-kw">baselines</span>（基线方法列表）：需要对比的现有方法
+- <span class="tok-kw">metrics</span>（评估指标列表）：量化评估指标
+- <span class="tok-kw">ablation</span>（消融实验设计列表）：验证各组件贡献
+- <span class="tok-kw">steps</span>（实验步骤列表）：可复现的实验流程
+- <span class="tok-kw">expected_results</span>（预期结果）：预期达到的性能或发现
+- <span class="tok-kw">risks</span>（风险）：可能的失败点与应对
+
+## 输出要求
+严格输出 JSON：
+{
+  "experiment_plans": [
+    {
+      "innovation_title": "对应的创新点标题",
+      "hypothesis": "研究假设",
+      "datasets": ["数据集1","数据集2"],
+      "baselines": ["基线方法1","基线方法2"],
+      "metrics": ["指标1","指标2"],
+      "ablation": ["消融实验1"],
+      "steps": ["步骤1","步骤2","步骤3"],
+      "expected_results": "预期结果描述",
+      "risks": "风险与应对描述"
+    }
+  ]
+}
+
+每个创新点对应一条方案，方案须具体可执行。</pre>
+        </details>
+
+        <div class="io-grid">
+          <div class="io-box in">
+            <div class="label">输入</div>
+<pre>{
+  <span class="tok-str">"innovations"</span>: [<span class="tok-com">{Innovation}</span>, ...]
+}</pre>
+          </div>
+          <div class="io-box out">
+            <div class="label">输出</div>
+<pre>{
+  "experiment_plans": [
+    {
+      "innovation_title": "基于 RoPE 的多模态位置编码",
+      "hypothesis": "RoPE 能提升多模态任务外推性",
+      "datasets": ["COCO","VQA"],
+      "baselines": ["ALiBi"," vanilla PE"],
+      "metrics": ["BLEU","Accuracy"],
+      "ablation": ["移除旋转矩阵"],
+      "steps": ["..."],
+      "expected_results": "...",
+      "risks": "..."
+    }
+  ]
+}</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 7 -->
+    <section id="step7">
+      <div class="card step-card s7">
+        <div class="step-header">
+          <div>
+            <span class="step-tag s7"><span class="step-num">⑦</span> 整合输出</span>
+            <span class="step-title">Markdown 研究提案 · 可追溯</span>
+          </div>
+          <a class="code-link" href="file:///d:/code/aa-my-idea/agent/paper-agent-trae/backend/agents/report_agent.py#L47">report_agent.py:47</a>
+        </div>
+
+        <div class="pill-row">
+          <span class="tag llm">LLM 调用（max_tokens=8192）</span>
+          <span class="tag degrade">LLM 失败降级本地格式化</span>
+        </div>
+
+        <h4>输入聚合 <a class="code-link" href="file:///d:/code/aa-my-idea/agent/paper-agent-trae/backend/orchestrator/workflow.py#L127">workflow.py:127</a></h4>
+        <p><code class="inline">_build_final_results()</code> 从各步骤的 <code class="inline">tool_calls</code> 里聚合 4 字段：</p>
+<pre>{
+  "papers_records": [...],    <span class="tok-com"># 步骤②所有抽取记录</span>
+  "gaps": [...],              <span class="tok-com"># 步骤④所有 Gap</span>
+  "innovations": [...],       <span class="tok-com"># 步骤⑤所有创新点</span>
+  "experiment_plans": [...]   <span class="tok-com"># 步骤⑥所有实验方案</span>
+}</pre>
+
+        <details open>
+          <summary>LLM Prompt · 整合报告</summary>
+<pre class="prompt"><span class="tok-sys">[System]</span>
+你是学术研究提案撰写专家，擅长把多篇论文的 Gap 分析、创新点与实验方案
+整合为结构清晰、可追溯的研究提案。严格输出 JSON，不要输出任何额外说明文本。
+
+<span class="tok-user">[User]</span>
+请基于以下前序步骤产物，整合为一份结构化研究提案。
+
+## 研究主题
+<span class="placeholder">{topic}</span>
+
+## 一、论文结构化记录（含 source_sections，可追溯）
+----- 论文 1: Attention Is All You Need (path=...) -----
+  [研究任务/问题] 序列建模...  (出处章节: Introduction)
+  [核心方法] Transformer...  (出处章节: 3 Method; 3.1)
+  [局限性] 位置编码外推性差  (出处章节: 6 Conclusion)
+  ...
+
+## 二、识别到的 Gap 列表
+Gap 1 [repeated_limitation] (置信度=0.85): 位置编码外推性普遍较差
+  来源论文: Attention...; BERT...
+  论证: 两篇均提及...
+
+## 三、创新点列表（含三维评分）
+创新点 1: 基于 RoPE 的多模态位置编码 (来源=limitation_fix)
+  创新思路: ...
+  三维评分: 新颖性 8 / 可行性 7 / 显著性 9
+  新颖性验证: 近 1-2 年无相同工作
+  论据支撑: ...
+
+## 四、实验方案列表
+方案 1 (对应: 基于 RoPE 的多模态位置编码)
+  研究假设: ...
+  数据集: COCO, VQA
+  ...
+
+## 整合任务
+1. 背景综述：基于 Gap 分析梳理领域现状与脉络
+2. 创新点论证：对每个创新点补充 Gap 来源 + 创新思路 + 三维评分 + 论据支撑
+3. 实验方案：保留每个创新点的完整实验方案要素
+4. 参考文献溯源：所有引用论文的来源标注，可追溯至具体章节（source_sections）
+5. Markdown 报告：按指定结构生成完整 Markdown 文本
+
+## Markdown 报告结构要求
+# 研究提案：[主题]
+## 一、背景综述
+## 二、创新点论证
+### 创新点 1：[标题]
+- Gap 来源：...
+- 创新思路：...
+- 三维评分：新颖性 X / 可行性 X / 显著性 X
+- 论据支撑：...
+## 三、实验方案
+## 四、参考文献溯源
+
+## 输出要求
+严格输出 JSON：
+{
+  "background_review": "背景综述文本",
+  "innovations": [...],
+  "experiment_plans": [...],
+  "references": [{"title":"...","path":"...","sections":[...]}],
+  "markdown": "完整 Markdown 报告字符串"
+}
+
+注意：
+- references 必须可追溯至具体章节（source_sections）
+- 不得编造论文或证据，所有引用须来自上述论文记录
+- 若某字段在输入中缺失，对应位置写"暂无"而非编造</pre>
+        </details>
+
+        <div class="io-grid">
+          <div class="io-box in">
+            <div class="label">输入</div>
+<pre>{
+  "papers_records": [...],
+  "gaps": [...],
+  "innovations": [...],
+  "experiment_plans": [...]
+}</pre>
+          </div>
+          <div class="io-box out">
+            <div class="label">输出</div>
+<pre>{
+  "background_review": "...",
+  "innovations": [...],
+  "experiment_plans": [...],
+  "references": [
+    {"title":"...","path":"...",
+     "sections":["3 Method","6 Conclusion"]}
+  ],
+  "markdown": "# 研究提案：...\n## 一、背景综述\n..."
+}</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Evaluation -->
+    <section id="eval">
+      <h2 class="section-title"><span class="num">6</span>评估阶段</h2>
+      <p class="section-desc">流水线完成后，<code class="inline">Evaluator</code> 汇总工具调用追踪 + 输出质量评估，产出统一评估结果。</p>
+
+      <div class="card">
+        <h4>调用位置 <a class="code-link" href="file:///d:/code/aa-my-idea/agent/paper-agent-trae/backend/evaluator/evaluator.py#L28">evaluator.py:28</a></h4>
+        <ol>
+          <li><code class="inline">ToolCallTracker</code> 汇总工具调用成功率 / 总数 / 失败数 / 耗时</li>
+          <li><code class="inline">QualityEvaluator</code> 对每个创新点调 LLM 做三维评分校验</li>
+        </ol>
+
+        <details open>
+          <summary>LLM Prompt · 质量评估</summary>
+<pre class="prompt"><span class="tok-sys">[System]</span>
+你是一位学术评审专家，擅长对创新点进行多维评分。只输出严格 JSON。
+
+<span class="tok-user">[User]</span>
+你是一位严谨的学术评审专家，请对以下创新点进行三维评分（0-10 分，保留一位小数）。
+
+## 创新点信息
+- 标题：<span class="placeholder">{title}</span>
+- 思路：<span class="placeholder">{idea}</span>
+- 论据支撑：<span class="placeholder">{supporting_evidence}</span>
+- 新颖性检查：<span class="placeholder">{novelty_check}</span>
+
+## 评分维度
+- <span class="tok-kw">novelty</span>（新颖性）：与现有工作的差异程度
+- <span class="tok-kw">feasibility</span>（可行性）：技术实现与资源获取的难度
+- <span class="tok-kw">significance</span>（显著性）：学术或应用价值
+
+## 输出要求
+严格输出 JSON：
+{
+  "innovation_title": "...",
+  "score": {"novelty": 8.0, "feasibility": 7.5, "significance": 8.0},
+  "reasoning": "评分理由，简明扼要"
+}</pre>
+        </details>
+
+        <h4>输出</h4>
+<pre>{
+  "innovations_scores": [...],
+  "tool_call_success_rate": 0.89,
+  "total_tool_calls": 47,
+  "failed_tool_calls": 5,
+  "avg_confidence": 0.78,
+  "tool_calls": [...],
+  "quality_assessment": {...}
+}</pre>
+      </div>
+    </section>
+
+    <!-- Summary -->
+    <section id="summary">
+      <h2 class="section-title"><span class="num">7</span>完整 LLM 调用清单</h2>
+      <p class="section-desc">单次完整运行共触发 11 次 LLM 调用（不含工具内部重试）。</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>阶段</th>
+            <th>调用位置</th>
+            <th>Prompt 设计要点</th>
+            <th>输出格式</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Plan</td><td>controller.py:151</td><td>Agent 编排器，生成动态计划</td><td>JSON 数组</td></tr>
+          <tr><td>2</td><td>步骤②</td><td>extract_schema.py:102</td><td>强制 Function Calling，source_sections 防编造，limitations 严禁臆造</td><td>FieldSource JSON</td></tr>
+          <tr><td>3</td><td>步骤②补抽</td><td>extract_paper_structure.py:161</td><td>只补缺失字段，不重跑整篇</td><td>FieldSource JSON</td></tr>
+          <tr><td>4</td><td>步骤②自校验</td><td>extract_paper_structure.py:306</td><td>对照原文逐字段检查置信度</td><td>JSON</td></tr>
+          <tr><td>5</td><td>步骤④</td><td>analyze_gaps.py:113</td><td>四类 Gap 信号识别，对比矩阵输入</td><td>JSON gaps 列表</td></tr>
+          <tr><td>6</td><td>步骤④ Reflexion</td><td>reflexion.py:67</td><td>质量审核员，对照上下文检查</td><td>JSON confidence</td></tr>
+          <tr><td>7</td><td>步骤⑤</td><td>generate_innovations.py:81</td><td>四类创新方向 + 三维评分 + 方向约束</td><td>JSON innovations</td></tr>
+          <tr><td>8</td><td>步骤⑤ Reflexion</td><td>reflexion.py:67</td><td>同上</td><td>JSON confidence</td></tr>
+          <tr><td>9</td><td>步骤⑥</td><td>design_experiments.py:51</td><td>8 要素实验方案</td><td>JSON plans</td></tr>
+          <tr><td>10</td><td>步骤⑦</td><td>report_agent.py:197</td><td>整合 4 字段为 Markdown 研究提案</td><td>JSON + markdown</td></tr>
+          <tr><td>11</td><td>评估</td><td>quality.py:73</td><td>学术评审专家三维评分校验</td><td>JSON score</td></tr>
+        </tbody>
+      </table>
+
+      <h3>工具调用清单</h3>
+      <table>
+        <thead>
+          <tr><th>工具</th><th>步骤</th><th>输入</th><th>输出</th><th>特性</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code class="inline">scan_folder</code></td><td>①</td><td>folder_path</td><td>pdf_files 列表</td><td>本地</td></tr>
+          <tr><td><code class="inline">parse_pdf</code></td><td>①</td><td>file_path</td><td>ParsedPaper</td><td>本地 · 并发 · 缓存</td></tr>
+          <tr><td><code class="inline">extract_paper_structure</code></td><td>②</td><td>paper_path, parsed_paper</td><td>PaperRecord</td><td>LLM · 并发 · 缓存</td></tr>
+          <tr><td><code class="inline">build_vector_index</code></td><td>③</td><td>papers_json</td><td>indexed_count</td><td>本地 · 持久化</td></tr>
+          <tr><td><code class="inline">analyze_gaps</code></td><td>④</td><td>papers_records</td><td>gaps 列表</td><td>LLM · 内部调 RAG</td></tr>
+          <tr><td><code class="inline">hybrid_search</code></td><td>④⑤</td><td>query</td><td>检索片段 + 分数</td><td>Chroma + BM25</td></tr>
+          <tr><td><code class="inline">generate_innovations</code></td><td>⑤</td><td>gaps, research_direction</td><td>innovations 列表</td><td>LLM · 内部调 web_search</td></tr>
+          <tr><td><code class="inline">web_search</code></td><td>⑤</td><td>query</td><td>搜索结果摘要</td><td>DuckDuckGo</td></tr>
+          <tr><td><code class="inline">design_experiments</code></td><td>⑥</td><td>innovations</td><td>experiment_plans</td><td>LLM</td></tr>
+          <tr><td><code class="inline">load_memory / save_memory</code></td><td>⑤</td><td>type, query</td><td>历史 Gap/创新点</td><td>Chroma 长期记忆</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Principles -->
+    <section id="principles">
+      <h2 class="section-title"><span class="num">8</span>Prompt 设计的 5 个核心原则</h2>
+      <p class="section-desc">贯穿所有 prompt 的设计哲学。</p>
+
+      <div class="card">
+        <h4>① System 角色锚定</h4>
+        <p>每个 prompt 都用 system 消息锁定角色（"你是 XX 专家"），并在末尾强调"只输出严格 JSON"，避免自由文本。</p>
+
+        <h4>② 结构化输出强制</h4>
+        <p>全部用 Function Calling 或显式 JSON Schema，避免 LLM 自由发挥导致解析失败。步骤② 用 <code class="inline">tool_choice={"type":"function",...}</code> 强制调用。</p>
+
+        <h4>③ 防编造机制</h4>
+        <p><code class="inline">source_sections</code> 强制溯源 + "严禁臆造" + "缺失填暂无"。步骤② limitations 字段特别约束：论文未明确承认时填"论文未明确陈述局限"而非编造。</p>
+
+        <h4>④ 上下文注入</h4>
+        <p>把前序步骤的结构化产物作为"证据"喂给模型，而非让模型凭空推理。步骤④ 喂对比矩阵、步骤⑦ 喂 4 字段聚合。</p>
+
+        <h4>⑤ 降级兜底</h4>
+        <p>每个 LLM 调用都有 <code class="inline">try/except</code>，失败时回退到本地格式化或默认值。步骤⑦ LLM 失败 → <code class="inline">_format_markdown()</code> 本地组装。</p>
+      </div>
+    </section>
+
+    <!-- Degradation -->
+    <section id="degrade">
+      <h2 class="section-title"><span class="num">9</span>降级与容错策略</h2>
+      <p class="section-desc">每个步骤都有失败兜底，局部失败不阻塞全局。</p>
+
+      <table>
+        <thead>
+          <tr><th>失败点</th><th>降级路径</th><th>影响</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>单篇论文解析失败</td><td>隔离跳过，独立缓存可单独重跑</td><td>不影响其他论文</td></tr>
+          <tr><td>LLM 输出非 JSON</td><td>Function Calling 强制 schema + <code class="inline">parse_json_safe</code> 程序层兜底</td><td>该字段降级为空</td></tr>
+          <tr><td>工具调用超时/失败</td><td>3 次重试 + 降级路径</td><td>记录 <code class="inline">degraded_steps</code></td></tr>
+          <tr><td>论文超长截断</td><td>按章节分块抽取后合并去重</td><td>无影响</td></tr>
+          <tr><td>Controller 规划失败</td><td>异常捕获 + 回退默认七步</td><td>无影响</td></tr>
+          <tr><td>向量索引构建失败</td><td>跳过 RAG，仅用结构化字段做 Gap 分析</td><td>Gap evidence 无原文佐证</td></tr>
+          <tr><td>联网搜索失败</td><td>跳过新颖性去重，标记"未验证"</td><td>novelty_check 为空</td></tr>
+          <tr><td>Reflexion 重试 2 次仍不达标</td><td>标记 <code class="inline">needs_human_review</code>，流程继续</td><td>评估报告标注</td></tr>
+          <tr><td>步骤⑦ LLM 整合失败</td><td>本地 <code class="inline">_format_markdown()</code> 格式化组装</td><td>报告样式简化</td></tr>
+          <tr><td>LLM 编造内容</td><td>所有字段强制 <code class="inline">source_sections</code> 字段级回溯</td><td>可人工核查</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout ok">
+        <strong>设计哲学：</strong>"工具即思维" — Function Calling 把"决策"显式化为工具调用，可观测、可回放；"降级即韧性" — 每个步骤都有失败兜底，局部失败不阻塞全局。
+      </div>
+    </section>
+
+    <div class="footer">
+      PaperMind · 论文创新点发现 Agent · 端到端运行流程详解<br>
+      基于源码 <code style="background:rgba(255,255,255,0.05);padding:2px 6px;border-radius:4px;">backend/</code> 自动生成 · 共 11 次 LLM 调用 · 10 个工具
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // 侧边栏高亮当前 section
+  const links = document.querySelectorAll('.sidebar a');
+  const sections = document.querySelectorAll('section[id], div[id]');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        links.forEach(l => {
+          l.classList.toggle('active', l.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
