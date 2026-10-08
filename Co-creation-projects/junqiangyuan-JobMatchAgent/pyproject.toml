@@ -1,0 +1,28 @@
+[project]
+name = "jobmatch-agent"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "hello-agents==0.2.0",
+    "pydantic>=2,<3",
+    "python-dotenv>=1.2,<2",
+]
+
+[project.optional-dependencies]
+proxy = [
+    "httpx[socks]>=0.28,<0.29",
+]
+
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/jobmatch"]
+
+[dependency-groups]
+dev = [
+    "mypy>=2.3.1",
+    "pytest>=9.1.1",
+    "ruff>=0.16.9",
+]

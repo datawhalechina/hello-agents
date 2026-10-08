@@ -1,0 +1,26 @@
+# Local credentials and environment
+.env
+.venv/
+
+# Python and tooling artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.vscode/*
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Agent planning/context artifacts (not project deliverables)
+.wayfinder/
+.agents/
+CONTEXT.md
+CODE_STANDARDS.md
+GLOSSARY.md
+CODING_STANDARDS.md
+# The repository-wide test_*.py ignore must not hide this project's acceptance tests.
+tests/test_*.py
