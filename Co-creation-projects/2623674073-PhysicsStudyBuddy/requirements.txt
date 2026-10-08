@@ -1,0 +1,5 @@
+hello-agents==0.2.8
+huggingface-hub>=0.30,<3
+ddgs>=9,<10
+python-dotenv>=1.0,<2
+notebook>=7,<8
