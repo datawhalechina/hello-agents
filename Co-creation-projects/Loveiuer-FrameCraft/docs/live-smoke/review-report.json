@@ -1,0 +1,101 @@
+{
+  "review": {
+    "status": "passed",
+    "passed": true,
+    "checks": [
+      {
+        "name": "required_files",
+        "passed": true,
+        "detail": "必备文件齐全"
+      },
+      {
+        "name": "node_coverage",
+        "passed": true,
+        "detail": "设计节点 6；预览匹配 6；缺失 0；额外 0；重复 0"
+      },
+      {
+        "name": "manifest_json",
+        "passed": true,
+        "detail": "manifest 是有效 JSON 对象"
+      },
+      {
+        "name": "basic_accessibility",
+        "passed": true,
+        "detail": "通过基础语义检查；不代表完整 WCAG 合规"
+      }
+    ],
+    "issues": [],
+    "node_coverage_percent": 100.0,
+    "node_count": 6,
+    "rendered_node_count": 6,
+    "scope": "仅静态结构与基础语义校验；未执行生成代码，未进行截图比较，不是像素还原率。",
+    "repair_applied": false,
+    "repair_count": 0,
+    "model_review": {
+      "summary": "语义计划与节点覆盖检查通过，6 个设计节点均映射到合适的 HTML 标签，按钮具备可访问文本，无需替换计划。",
+      "issues": [],
+      "plan": null
+    }
+  },
+  "metrics": {
+    "duration_ms": 118537.83,
+    "llm_calls": 4,
+    "llm_latency_ms": 116751.71,
+    "input_chars": 6834,
+    "output_chars": 1970,
+    "input_chars_note": "输入字符数统计摘要 JSON，不含角色系统提示词。",
+    "context_omitted_nodes": 0,
+    "truncated_context_calls": 0,
+    "token_usage": null,
+    "estimated_cost_usd": null,
+    "cost_note": "HelloAgents 0.2.2 不暴露 usage；未估算 token 或费用，请以供应商账单为准。",
+    "files_count": 10,
+    "node_count": 6,
+    "node_coverage_percent": 100.0,
+    "coverage_note": "节点覆盖率仅表示导入节点出现在预览 DOM 中，不是视觉还原率。",
+    "calls": [
+      {
+        "role": "DesignAnalyst",
+        "input_chars": 1242,
+        "status": "completed",
+        "design_nodes_in_context": 6,
+        "omitted_nodes": 0,
+        "context_truncated": false,
+        "output_chars": 628,
+        "duration_ms": 41281.17
+      },
+      {
+        "role": "ComponentPlanner",
+        "input_chars": 1817,
+        "status": "completed",
+        "design_nodes_in_context": 6,
+        "omitted_nodes": 0,
+        "context_truncated": false,
+        "output_chars": 553,
+        "duration_ms": 30007.32
+      },
+      {
+        "role": "CodeEngineer",
+        "input_chars": 1717,
+        "status": "completed",
+        "design_nodes_in_context": 6,
+        "omitted_nodes": 0,
+        "context_truncated": false,
+        "output_chars": 697,
+        "duration_ms": 22181.82
+      },
+      {
+        "role": "Reviewer",
+        "input_chars": 2058,
+        "status": "completed",
+        "design_nodes_in_context": 6,
+        "omitted_nodes": 0,
+        "context_truncated": false,
+        "output_chars": 92,
+        "duration_ms": 23281.4
+      }
+    ],
+    "runner": "hello_agents.SimpleAgent"
+  },
+  "mode": "live"
+}

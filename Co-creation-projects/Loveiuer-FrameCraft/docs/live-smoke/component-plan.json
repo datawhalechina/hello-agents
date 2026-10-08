@@ -1,0 +1,39 @@
+{
+  "components": [
+    {
+      "node_id": "20:1",
+      "name": "LearningCard",
+      "tag": "article"
+    },
+    {
+      "node_id": "20:2",
+      "name": "CardTitle",
+      "tag": "h1"
+    },
+    {
+      "node_id": "20:3",
+      "name": "CardDescription",
+      "tag": "p"
+    },
+    {
+      "node_id": "20:4",
+      "name": "PrimaryButton",
+      "tag": "button"
+    },
+    {
+      "node_id": "20:5",
+      "name": "ButtonLabel",
+      "tag": "span"
+    },
+    {
+      "node_id": "20:6",
+      "name": "FooterNote",
+      "tag": "p"
+    }
+  ],
+  "notes": [
+    "根节点使用 article 表示独立的学习引导卡片。",
+    "主按钮使用原生 button，按钮内文本使用 span 以保证可访问文本。",
+    "原始数据缺少 padding、gap、border-radius 与交互态，建议实现时补齐。"
+  ]
+}
