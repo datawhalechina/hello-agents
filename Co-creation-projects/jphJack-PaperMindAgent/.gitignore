@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# 环境变量
+.env
+
+# 数据与缓存
+data/
+*.jsonl
+!backend/**/__init__.py
+
+# HelloAgents 框架运行时输出（traces/devlogs/todos/sessions，位于项目根目录）
+memory/
+
+# 保留 backend/memory 目录（根仓库 .gitignore 全局排除了 memory/）
+!backend/memory/
+!backend/memory/**
+# 但继续忽略其中的编译缓存
+backend/memory/__pycache__/
+
+# 前端
+frontend/node_modules/
+frontend/dist/
+frontend/tsconfig.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+.trae/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 日志
+日志.docx
+
+# 临时脚本（含密钥，禁止提交）
+create_pr_retry.py
+pr_result.json

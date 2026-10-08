@@ -1,0 +1,4 @@
+interface:
+  display_name: "Paper Innovation Designer"
+  short_description: "Generate evidence-grounded research ideas and experiment plans from papers."
+  default_prompt: "Use $paper-innovation-designer to generate innovation ideas and experiment plans from these papers."

@@ -1,0 +1,24 @@
+# PaperMind - 项目依赖（HelloAgents 框架 + 后端 + 评估）
+# 安装：pip install -r requirements.txt
+
+# 核心框架
+hello-agents>=1.0.0
+openai==1.51.0
+
+# Web 框架
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+sse-starlette==2.1.3
+python-multipart==0.0.12
+
+# RAG 与文档解析
+chromadb==0.5.5
+sentence-transformers==3.0.1
+pymupdf==1.24.10
+rank-bm25==0.2.2
+
+# 工程基础
+pydantic==2.9.2
+python-dotenv==1.0.1
+httpx==0.27.2
+aiosqlite==0.20.0
