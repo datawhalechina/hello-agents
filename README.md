@@ -166,6 +166,18 @@
 - [Pranav Janakiraman-个人开发者](https://github.com/pranavjana) (TinyFish, Extra11 内容贡献)
 - [王雨飞-个人开发者](https://github.com/nameless0120) (北京邮电大学，Extra12 内容贡献)
 
+### 视频课程贡献者
+
+- 范丽（第四章 ReAct、Plan-and-Solve 与 Reflection 视频讲解）
+- 西芹百合（第五章 Coze 视频讲解）
+- 长庚（第五章第二节 Coze 跟练实战）
+- 高鸿飞（第六章第五节 LangGraph 跟练实战）
+- [柠檬酸（不吃柠檬🍋）](https://github.com/HnuLemons)（第八章第一、二节视频讲解与配套课件）
+- [楚客（秦川楚客）](https://www.xiaohongshu.com/user/profile/643f4844000000002a009e81)（第九章上下文工程讲解与实战）
+- 潘钲日（第十四章自动化深度研究智能体讲解与实战）
+
+视频链接和配套材料见 [Hello-Agents 视频课录制共创](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra13-Hello-Agents视频课录制共创.md)。
+
 ### 特别感谢
 - 感谢 [@Sm1les](https://github.com/Sm1les) 对本项目的帮助与支持
 - 感谢所有为本项目做出贡献的开发者们 ❤️

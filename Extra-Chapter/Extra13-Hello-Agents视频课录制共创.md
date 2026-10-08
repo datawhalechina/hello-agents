@@ -1,16 +1,19 @@
 # Hello-Agents 视频课录制共创
 
-Hello-Agents 正在推进配套视频课录制，希望把教程中的关键章节讲得更直观、更容易上手。目前已经有多个章节和小节完成录制，欢迎学习者先观看参考，也欢迎大家一起参与后续章节的视频共创。
+Hello-Agents 正在持续更新配套视频课程，帮助大家结合教程理解关键概念，并跟着演示完成代码实践。目前已发布智能体经典范式、Coze、LangGraph、智能体记忆、上下文工程和 DeepResearch 等内容，欢迎按学习进度观看，也欢迎一起参与后续章节的视频共创。
 
 ## 📖 视频课程录制导航
-(这里存在的都是已录制好的内容，会持续放出)
+
+已发布的视频可点击链接观看；已完成录制但尚未提供公开链接的内容标为“待发布”。同一章节可以有不同贡献者提供的讲解版本。
+
 | 章节 | 关键内容 | 视频链接 | 制作人 |
 | ---- | -------- | -------- | ------ |
 | 第四章 智能体经典范式构建 | 手把手实现 ReAct、Plan-and-Solve、Reflection | [ReAct Agent](https://www.xiaohongshu.com/explore/6979d7ff0000000022032e0e?xsec_token=ABSY14m67mHBI0EVYKUqJkhLM6OTAqX2TpzEgsyhqXhN8=&xsec_source=pc_user)<br>[P&S 和 Reflection](https://www.xiaohongshu.com/explore/6a1ed2070000000036019d59?xsec_token=ABvPV0TAjOGgpvyySndlKfQhxzBU9g5vDdUBIqKXaH4tU=&xsec_source=pc_user) | 范丽 |
-| 第五章 基于低代码平台的智能体搭建 | 了解 Coze、Dify、n8n 等低代码智能体平台使用 | [Coze](https://www.xiaohongshu.com/explore/6a26326f0000000007024052?xsec_token=ABpUnw5GIjk0603FDLRE_jlV_5RKcvI-wl6VjZHTeGEYg=&xsec_source=pc_user) | 西芹百合 |
-| 第六章第五节 框架四：LangGraph | LangGraph 结构梳理与三步问答助手 | 待发布 | 待补充 |
-| 第九章 上下文工程 | 持续交互的“情境理解” | 待发布 | 待补充 |
-| 第十四章 自动化深度研究智能体 | DeepResearch Agent 复现与解析 | 待发布 | 待补充 |
+| 第五章 基于低代码平台的智能体搭建 | 了解 Coze、Dify、n8n 等低代码智能体平台使用，跟练 Coze 案例搭建 | [Coze](https://www.xiaohongshu.com/explore/6a26326f0000000007024052?xsec_token=ABpUnw5GIjk0603FDLRE_jlV_5RKcvI-wl6VjZHTeGEYg=&xsec_source=pc_user)<br>[Coze （26.10月版）](https://www.xiaohongshu.com/explore/6ac510e8000000000a020427?xsec_token=ABSqS-aZt7wQXNSVk5-rBvmQhyr4fY8pwhW8PM5PB1T1I=&xsec_source=pc_user) | 西芹百合<br>长庚 |
+| 第六章第五节 框架四：LangGraph | LangGraph 结构梳理、案例搭建与调试 | [LangGraph 跟练实战](https://www.xiaohongshu.com/explore/6a2e5987000000001702b364?xsec_token=ABwhS5O80zU9r1FHjfC1dfvOF5174jSy8WRqRlrg09728=&xsec_source=pc_user) | 高鸿飞 |
+| 第八章 记忆与检索 | 智能体记忆的理论基础、记忆系统搭建与实战讲解 | [从认知科学到智能体记忆](https://www.xiaohongshu.com/explore/6abf3bc8000000000b0066de?xsec_token=ABKR7X0IlM91XIo92snKRMRgaYHYcYDvirIeootgLcWG0=&xsec_source=pc_user)<br>[让智能体拥有记忆](https://www.xiaohongshu.com/explore/6ac24647000000001500487e?xsec_token=ABV6QCFQZUgWaIPrl5Mk7ai4SkE9V6HXQ4v6LuyiHvIMI=&xsec_source=pc_user) | [柠檬酸（不吃柠檬🍋）](https://github.com/HnuLemons) |
+| 第九章 上下文工程 | 上下文工程理论梳理、案例搭建与代码运行 | [上下文工程讲解与实战](https://www.xiaohongshu.com/explore/6a3f7ba2000000001c026d7d?xsec_token=ABH1IhOu1qqBOqMt7NQ6mqWIS2G3NFpEoWVN4i8fw6Ku4=&xsec_source=pc_user) | [楚客（秦川楚客）](https://www.xiaohongshu.com/user/profile/643f4844000000002a009e81) |
+| 第十四章 自动化深度研究智能体 | DeepResearch Agent 理论梳理、案例演示与代码拆解 | [自动化深度研究智能体](https://www.xiaohongshu.com/explore/6a91361a000000002a03376b?xsec_token=ABx_2-KaBqs725Uy8w3L5uiwAqs8QhTnWKk9eq0Vr9lJY=&xsec_source=pc_user) | 潘钲日 |
 | 附录二 上下文工程补充内存 | 上下文工程中的记忆与内存机制补充 | 待发布 | 待补充 |
 
 ## 欢迎参与视频课程共创
@@ -28,6 +31,10 @@ Hello-Agents 是一个开放共创项目，视频课程也希望由更多学习�
 如果还不确定怎么录、讲解风格怎么把控，可以先参考已经录制完成的打样视频：
 
 - [点击查看示例视频](https://n1zliytfodx.feishu.cn/wiki/ErnZwX6bSiw4hDkK5RFcYppun5c?from=from_copylink)
+
+观看第八章记忆相关视频时，可以结合配套讲解材料复习：
+
+- [第八章配套课件与讲义（HTML / PDF）](https://github.com/HnuLemons/HelloAgents-Memeory-HTML)：包含记忆理论、记忆系统、RAG 和智能文档问答助手的材料；当前视频导航已收录第一、二节的视频。
 
 ## 参与权益
 
