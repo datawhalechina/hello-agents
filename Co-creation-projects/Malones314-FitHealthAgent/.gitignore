@@ -1,0 +1,38 @@
+.env
+.env.*
+!.env.example
+
+__pycache__/
+*.py[cod]
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# 阶段基线的中间产物（JUnit XML）。可复现的基线本身在 tests/baseline/ 里，已入库。
+.baseline/
+
+.idea/
+.agents/
+
+tool-output/
+dist/
+memory/todos/
+memory/traces/
+memory/sessions/
+
+*.log
+
+# Local runtime data may contain personal health information.
+data/*.json
+data/*.lock
+data/*.db
+data/*.db-*
+data/health-imports/
+data/hr_streams/
+data/pending_workout.corrupt-*
+data/*.dismissed
+
+# 构建依赖只放行经过锁文件校验的 HelloAgents wheel。
+vendor/*
+!vendor/hello_agents-1.0.0-py3-none-any.whl
