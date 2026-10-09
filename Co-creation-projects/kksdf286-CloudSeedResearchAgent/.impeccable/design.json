@@ -1,0 +1,272 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-29T08:40:05.6669007Z",
+  "title": "Design System: CloudSeed",
+  "extensions": {
+    "provenance": {
+      "scope": "代码扫描；无新增浏览器或网络审查。",
+      "tonalRamps": "为面板预览合成的OKLCH色阶，非实现令牌，不用于替换规范颜色。",
+      "source": "ui/index.html"
+    },
+    "typographyMeta": {
+      "table": {
+        "displayName": "对比表正文",
+        "purpose": "密集的论文比较内容。"
+      },
+      "body": {
+        "displayName": "研究正文",
+        "purpose": "说明、输入和研究文字。"
+      },
+      "headline": {
+        "displayName": "主标题",
+        "purpose": "主页面标题；移动端缩小为24px。"
+      }
+    },
+    "motion": [
+      {
+        "name": "control-background",
+        "value": "background .15s",
+        "purpose": "按钮悬停背景过渡。"
+      },
+      {
+        "name": "panel-arrival",
+        "value": "arrive .2s ease-out",
+        "purpose": "从clip-path:inset(0 0 6px 0)展开至inset(0)；减少动态效果偏好关闭动画和过渡。"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-desktop",
+        "value": "1100px"
+      },
+      {
+        "name": "stacked-mobile",
+        "value": "700px"
+      }
+    ],
+    "focus": {
+      "purpose": "所有操作元素的可见键盘焦点；证据目标内偏移-3px。",
+      "offset": "3px",
+      "value": "3px solid #369889"
+    },
+    "colorMeta": {
+      "ink": {
+        "tonalRamp": [
+          "oklch(15% 0.045 240)",
+          "oklch(27% 0.045 240)",
+          "oklch(39% 0.045 240)",
+          "oklch(51% 0.045 240)",
+          "oklch(63% 0.045 240)",
+          "oklch(75% 0.045 240)",
+          "oklch(87% 0.045 240)",
+          "oklch(95% 0.045 240)"
+        ],
+        "displayName": "深灰蓝正文",
+        "role": "neutral"
+      },
+      "muted": {
+        "tonalRamp": [
+          "oklch(15% 0.04 245)",
+          "oklch(27% 0.04 245)",
+          "oklch(39% 0.04 245)",
+          "oklch(51% 0.04 245)",
+          "oklch(63% 0.04 245)",
+          "oklch(75% 0.04 245)",
+          "oklch(87% 0.04 245)",
+          "oklch(95% 0.04 245)"
+        ],
+        "displayName": "次要灰蓝",
+        "role": "neutral"
+      },
+      "blue": {
+        "tonalRamp": [
+          "oklch(15% 0.1 245)",
+          "oklch(27% 0.1 245)",
+          "oklch(39% 0.1 245)",
+          "oklch(51% 0.1 245)",
+          "oklch(63% 0.1 245)",
+          "oklch(75% 0.1 245)",
+          "oklch(87% 0.1 245)",
+          "oklch(95% 0.1 245)"
+        ],
+        "displayName": "科研蓝",
+        "role": "primary"
+      },
+      "teal": {
+        "tonalRamp": [
+          "oklch(15% 0.08 180)",
+          "oklch(27% 0.08 180)",
+          "oklch(39% 0.08 180)",
+          "oklch(51% 0.08 180)",
+          "oklch(63% 0.08 180)",
+          "oklch(75% 0.08 180)",
+          "oklch(87% 0.08 180)",
+          "oklch(95% 0.08 180)"
+        ],
+        "displayName": "证据青绿",
+        "role": "secondary"
+      },
+      "line": {
+        "tonalRamp": [
+          "oklch(15% 0.015 235)",
+          "oklch(27% 0.015 235)",
+          "oklch(39% 0.015 235)",
+          "oklch(51% 0.015 235)",
+          "oklch(63% 0.015 235)",
+          "oklch(75% 0.015 235)",
+          "oklch(87% 0.015 235)",
+          "oklch(95% 0.015 235)"
+        ],
+        "displayName": "浅灰蓝边界",
+        "role": "neutral"
+      },
+      "canvas": {
+        "tonalRamp": [
+          "oklch(15% 0.008 235)",
+          "oklch(27% 0.008 235)",
+          "oklch(39% 0.008 235)",
+          "oklch(51% 0.008 235)",
+          "oklch(63% 0.008 235)",
+          "oklch(75% 0.008 235)",
+          "oklch(87% 0.008 235)",
+          "oklch(95% 0.008 235)"
+        ],
+        "displayName": "灰蓝画布",
+        "role": "neutral"
+      },
+      "white": {
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(27% 0 0)",
+          "oklch(39% 0 0)",
+          "oklch(51% 0 0)",
+          "oklch(63% 0 0)",
+          "oklch(75% 0 0)",
+          "oklch(87% 0 0)",
+          "oklch(95% 0 0)"
+        ],
+        "displayName": "纸白内容区",
+        "role": "neutral"
+      },
+      "wash": {
+        "tonalRamp": [
+          "oklch(15% 0.015 210)",
+          "oklch(27% 0.015 210)",
+          "oklch(39% 0.015 210)",
+          "oklch(51% 0.015 210)",
+          "oklch(63% 0.015 210)",
+          "oklch(75% 0.015 210)",
+          "oklch(87% 0.015 210)",
+          "oklch(95% 0.015 210)"
+        ],
+        "displayName": "浅青蓝洗色",
+        "role": "neutral"
+      },
+      "error": {
+        "tonalRamp": [
+          "oklch(15% 0.14 25)",
+          "oklch(27% 0.14 25)",
+          "oklch(39% 0.14 25)",
+          "oklch(51% 0.14 25)",
+          "oklch(63% 0.14 25)",
+          "oklch(75% 0.14 25)",
+          "oklch(87% 0.14 25)",
+          "oklch(95% 0.14 25)"
+        ],
+        "displayName": "错误红",
+        "role": "secondary"
+      }
+    },
+    "shadows": []
+  },
+  "components": [
+    {
+      "refersTo": "button-primary",
+      "css": ".ds-primary{font-family:\"Segoe UI\",\"Microsoft YaHei\",sans-serif;font-size:14px;line-height:1.65;width:100%;background:var(--blue,#164f7b);color:var(--white,#fff);border:0;padding:12px 16px;font-weight:600;border-radius:6px;cursor:pointer;transition:background .15s}.ds-primary:hover{background:#103e61}.ds-primary:focus-visible{outline:3px solid #369889;outline-offset:3px}.ds-primary:disabled{cursor:wait;opacity:.65}",
+      "kind": "button",
+      "description": "执行本次论文分析。",
+      "name": "Primary Button",
+      "html": "<button class=\"ds-primary\">分析论文，生成选题</button>"
+    },
+    {
+      "refersTo": "button-secondary",
+      "css": ".ds-button{font-family:\"Segoe UI\",\"Microsoft YaHei\",sans-serif;font-size:14px;line-height:1.65;border:1px solid #b9cbd5;padding:8px 12px;background:var(--white,#fff);border-radius:6px;color:var(--ink,#172c3b);cursor:pointer;transition:background .15s}.ds-button:hover{background:#e7f0f4}.ds-button:focus-visible{outline:3px solid #369889;outline-offset:3px}.ds-button:disabled{cursor:wait;opacity:.65}",
+      "kind": "button",
+      "description": "资料导入和次要操作。",
+      "name": "Secondary Button",
+      "html": "<button class=\"ds-button\">导入 PDF</button>"
+    },
+    {
+      "refersTo": "input",
+      "css": ".ds-label{font-family:\"Segoe UI\",\"Microsoft YaHei\",sans-serif;font-size:14px;line-height:1.65;display:block;font-weight:600;margin-bottom:6px;color:var(--ink,#172c3b)}.ds-input{font-family:\"Segoe UI\",\"Microsoft YaHei\",sans-serif;font-size:14px;line-height:1.65;width:100%;padding:10px 11px;border:1px solid #b9cbd5;border-radius:6px;background:var(--white,#fff);color:var(--ink,#172c3b);caret-color:var(--teal,#146c63);resize:vertical}.ds-input:focus-visible{outline:3px solid #369889;outline-offset:3px}",
+      "kind": "input",
+      "description": "有独立标题的研究输入。",
+      "name": "Research Field",
+      "html": "<label class=\"ds-label\" for=\"ds-question\">你想研究什么</label><textarea class=\"ds-input\" id=\"ds-question\" rows=\"3\">人工增雨作业条件识别</textarea>"
+    },
+    {
+      "refersTo": "tab-selected",
+      "css": ".ds-tabs{display:flex;gap:24px;border-bottom:1px solid #bdcfd9;overflow-x:auto}.ds-tab{font-family:\"Segoe UI\",\"Microsoft YaHei\",sans-serif;font-size:14px;line-height:1.65;border:0;border-bottom:3px solid transparent;background:none;padding:10px 1px;color:var(--muted,#526679);font-weight:600;white-space:nowrap;cursor:pointer}.ds-tab[aria-selected=true]{color:var(--blue,#164f7b);border-bottom-color:var(--blue,#164f7b)}.ds-tab:hover{color:var(--blue,#164f7b)}.ds-tab:focus-visible{outline:3px solid #369889;outline-offset:3px}",
+      "kind": "nav",
+      "description": "结果视图的平面文字导航。",
+      "name": "Result Tabs",
+      "html": "<nav class=\"ds-tabs\"><button class=\"ds-tab\" aria-selected=\"true\">论文对比</button><button class=\"ds-tab\" aria-selected=\"false\">来源证据</button></nav>"
+    },
+    {
+      "refersTo": "badge",
+      "css": ".ds-badge{font-family:\"Segoe UI\",\"Microsoft YaHei\",sans-serif;font-size:14px;line-height:1.65;display:inline-flex;align-items:center;gap:7px;padding:4px 9px;border-radius:4px;background:var(--wash,#e8f2f4);color:#12554e;font-size:12px;white-space:nowrap}",
+      "kind": "chip",
+      "description": "小型阅读范围和上下文提示。",
+      "name": "Context Badge",
+      "html": "<span class=\"ds-badge\">指标不能直接排名</span>"
+    },
+    {
+      "description": "连接结论和来源的编号操作。",
+      "html": "<button class=\"ds-cite\" title=\"查看证据 P1-E1\">P1-E1</button>",
+      "name": "Evidence Reference",
+      "kind": "button",
+      "css": ".ds-cite{font-family:\"Segoe UI\",\"Microsoft YaHei\",sans-serif;font-size:14px;line-height:1.65;display:inline-block;border:0;padding:1px 5px;margin:2px;background:#e5f1ef;color:#12574f;border-radius:3px;font-size:11px;cursor:pointer;font-variant-numeric:tabular-nums;transition:background .15s}.ds-cite:hover{background:#e7f0f4}.ds-cite:focus-visible{outline:3px solid #369889;outline-offset:3px}"
+    },
+    {
+      "refersTo": "topic",
+      "css": ".ds-topic{font-family:\"Segoe UI\",\"Microsoft YaHei\",sans-serif;font-size:14px;line-height:1.65;padding:23px 26px;background:var(--white,#fff);border:1px solid var(--line,#d8e2e8);border-radius:8px;color:var(--ink,#172c3b)}.ds-topic-title{font-size:20px;line-height:1.5;margin:0 0 10px}.ds-topic-note{font-size:12px;color:#4f577c;background:#eef0f8;padding:4px 9px;border-radius:4px}.ds-topic-text{margin:8px 0 14px}",
+      "kind": "card",
+      "description": "承载候选研究问题和可证伪假设。",
+      "name": "Topic Container",
+      "html": "<article class=\"ds-topic\"><h2 class=\"ds-topic-title\">候选选题与实验</h2><span class=\"ds-topic-note\">候选假设 · 新颖性待核实</span><p class=\"ds-topic-text\">以来源证据建立可验证的研究问题。</p></article>"
+    }
+  ],
+  "narrative": {
+    "rules": [
+      {
+        "body": "颜色伴随状态文字；示例、草案、待核验和错误不能仅靠色彩辨认。",
+        "name": "The State With Text Rule",
+        "section": "colors"
+      },
+      {
+        "body": "继续使用平面内容区与细分隔，保持资料和结论的阅读优先级。",
+        "name": "The Flat Workbench Rule",
+        "section": "elevation"
+      }
+    ],
+    "donts": [
+      "Don't 给平面研究内容区添加装饰性阴影或夸大的展示标题。",
+      "Don't 在研究输入已修改后继续显示旧结果的下载入口或完成标记。",
+      "Don't 将候选假设、摘要转述或示例资料表现为已验证的论文结论。"
+    ],
+    "northStar": "科研处理工作台",
+    "dos": [
+      "Do 保留来源编号、材料阅读范围、示例与草案状态的文字层级。",
+      "Do 延续科研蓝行动、青绿证据、中性背景的颜色分工。",
+      "Do 用细分隔、行和表格承载密集资料，并保留局部滚动与长文本换行。",
+      "Do 保留所有可操作元素的可见键盘焦点和减少动态效果偏好。"
+    ],
+    "keyCharacteristics": [
+      "系统字体与紧凑但有段落间距的阅读密度。",
+      "平面白色内容区、灰蓝设置区和细边界。",
+      "蓝色行动与青绿证据状态分工。",
+      "来源编号、阅读范围和研究草案标记始终有独立层级。"
+    ],
+    "overview": "浅灰蓝画布托起高密度的研究资料和结果。科研蓝标识主要操作、资料编号与当前页，克制青绿标识证据与完成状态。系统使用行、表格、标签和明确的字段标题，让研究者在阅读与操作之间切换。\n\n视觉以正文可读性、证据归属和状态清晰为中心。形状和颜色支持信息组织；本文记录 `ui/index.html` 的实际实现，不将候选研究结论变成视觉上的确定事实。"
+  }
+}

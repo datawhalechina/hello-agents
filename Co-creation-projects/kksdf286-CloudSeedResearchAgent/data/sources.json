@@ -1,0 +1,67 @@
+{
+  "sources": [
+    {
+      "id": "P1",
+      "title": "A Real-Time Remote-Sensing-Guided Decision-Support Framework for Cloud-Seeding Operations: A Field Demonstration Using Himawari-9 and C-band Phased Array Weather Radar",
+      "authors": ["Shunji Kotsuki", "Kazuaki Yasunaga", "Atsushi Hamada", "Kazuhiro Yoshimi", "Kenta Shiraishi", "Akira Takeshima", "Yoshiki Terashima", "Kaya Kanemaru", "Yusuke Hiraga", "Takuya Funatomi", "Hiroyuki Kubo", "Kohei Suzuki", "Masanao Ohashi", "Tadashi Tsuyuki"],
+      "year": 2026,
+      "venue": "arXiv preprint 2607.05050v1",
+      "doi": "10.48550/arXiv.2607.05050",
+      "url": "https://arxiv.org/abs/2607.05050v1",
+      "kind": "paper",
+      "reading_scope": "摘要人工转述；未导入全文",
+      "verified_on": "2026-09-29",
+      "pages": [
+        {"page": "摘要·研究设计", "provenance": "人工转述，非原文引句", "text": "作者把快速扫描静止卫星和地基雷达结合，用于候选云评估、人工决策支持和飞机引导。现场示例来自日本富山湾2026年1月，Himawari-9观测间隔2.5分钟，C波段相控阵雷达观测间隔60秒。"},
+        {"page": "摘要·结论边界", "provenance": "人工转述，非原文引句", "text": "作者利用卫星红外指标识别候选云，并以近实时雷达降水回波辅助选择。由于干冰释放量有限，论文不尝试把后续云演变归因于播撒效果。本示例支持实时目标选择与飞机引导，不能作为增雨效果已被证明的证据。摘要未给出可用于本地监督分类的独立多事件标签集。"}
+      ]
+    },
+    {
+      "id": "P2",
+      "title": "Structured dataset of reported cloud seeding activities in the United States (2000-2025) using an LLM",
+      "authors": ["Jared Joseph Donohue", "Kara D. Lamb"],
+      "year": 2025,
+      "venue": "arXiv preprint 2505.01555v5",
+      "doi": "10.48550/arXiv.2505.01555",
+      "url": "https://arxiv.org/abs/2505.01555v5",
+      "kind": "paper",
+      "reading_scope": "摘要人工转述；未导入全文",
+      "verified_on": "2026-09-29",
+      "pages": [
+        {"page": "摘要·数据与方法", "provenance": "人工转述，非原文引句", "text": "作者使用多阶段PDF文本抽取流程与LLM，从832份NOAA历史报告整理美国2000—2025年人工增雨作业记录，字段包括项目、年份、地区、催化剂、设备、目的、目标与对照区域和日期等。数据公开于Zenodo。"},
+        {"page": "摘要·评价口径及研究者提示", "provenance": "摘要数值人工转述＋研究者标签语义解释，非作者原句", "text": "摘要报告：人工核对200条随机抽样记录后，估计信息抽取准确率为98.38%。研究者解释：此数值评价历史报告的结构化抽取，不评价候选云条件识别或增雨效果；记录实施了作业不能自动作为具备适宜作业条件的标签。后一句是本项目的标签语义判断，不是作者的原文声明。"}
+      ]
+    },
+    {
+      "id": "P3",
+      "title": "Inferring the controlling factors of ice aggregation from targeted cloud seeding experiments",
+      "authors": ["Huiying Zhang", "Fabiola Ramelli", "Christopher Fuchs", "Nadja Omanovic", "Anna J. Miller", "Robert Spirig", "Zhaolong Wu", "Yunpei Chu", "Xia Li", "Ulrike Lohmann", "Jan Henneberger"],
+      "year": 2026,
+      "venue": "Atmospheric Chemistry and Physics, 26, 1459–1481",
+      "doi": "10.5194/acp-26-1459-2026",
+      "url": "https://acp.copernicus.org/articles/26/1459/2026/",
+      "kind": "paper",
+      "reading_scope": "摘要及第2节人工转述；未导入全文",
+      "verified_on": "2026-09-29",
+      "pages": [
+        {"page": "摘要·方法", "provenance": "人工转述，非原文引句", "text": "CLOUDLAB通过针对性冰相催化实验与现场观测研究过冷层状云中的冰晶聚合，使用IceDetectNet识别聚合体中的单个冰晶，并结合因果推断、物理方程与机器学习分析聚合速率的控制因素。"},
+        {"page": "摘要及第2节·范围", "provenance": "人工转述，非原文引句", "text": "研究观测来自瑞士高原持续冬季层云。摘要指出初始冰晶数浓度是主要控制因素；在统计预测中CatBoost表现最佳，物理模型在敏感性测试中更稳健。这是微物理聚合速率研究，不能直接作为中国本地作业条件分类准确率的基线。"}
+      ]
+    },
+    {
+      "id": "S1",
+      "title": "QX/T 679—2023 人工增雨（雪）作业条件基本要求 北方层状冷云",
+      "authors": ["中国气象局"],
+      "year": 2023,
+      "venue": "气象行业标准",
+      "doi": "",
+      "url": "https://www.cma.gov.cn/zfxxgk/gknr/flfgbz/bz/202401/P020240125693736569729.pdf",
+      "kind": "standard",
+      "reading_scope": "标题与适用范围提示；未录入具体条款或阈值",
+      "verified_on": "2026-09-29",
+      "pages": [
+        {"page": "标准标题·适用范围提示", "provenance": "人工范围提示，非条款全文", "text": "此标准针对北方层状冷云人工增雨（雪）作业条件。使用前需要核对本地地区与云型是否处于适用范围；当前材料未录入具体条款或阈值，不能据此生成实际作业判定规则。研究标签需由专家依据适用标准和决策时刻观测独立确认。"}
+      ]
+    }
+  ]
+}
