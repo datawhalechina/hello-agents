@@ -56,14 +56,21 @@ class SummarizationService:
         emit_index = 0
         agent = self._agent_factory()
 
-        def flush_visible() -> Iterator[str]:
+        def flush_visible(*, final: bool = False) -> Iterator[str]:
             nonlocal emit_index, raw_buffer
             while True:
                 start = raw_buffer.find("<think>", emit_index)
                 if start == -1:
-                    if emit_index < len(raw_buffer):
-                        segment = raw_buffer[emit_index:]
-                        emit_index = len(raw_buffer)
+                    visible_end = len(raw_buffer)
+                    if not final:
+                        # A trailing tag prefix may be completed by the next chunk.
+                        for length in range(min(len("<think>") - 1, visible_end - emit_index), 0, -1):
+                            if raw_buffer.endswith("<think>"[:length]):
+                                visible_end -= length
+                                break
+                    if emit_index < visible_end:
+                        segment = raw_buffer[emit_index:visible_end]
+                        emit_index = visible_end
                         if segment:
                             yield segment
                     break
@@ -93,12 +100,12 @@ class SummarizationService:
                         visible_output += chunk
                         if chunk:
                             yield chunk
-            finally:
                 if remove_thinking:
-                    for segment in flush_visible():
+                    for segment in flush_visible(final=True):
                         visible_output += segment
                         if segment:
                             yield segment
+            finally:
                 agent.clear_history()
 
         def get_summary() -> str:
