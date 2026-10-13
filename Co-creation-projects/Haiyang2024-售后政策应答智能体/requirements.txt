@@ -1,0 +1,33 @@
+# ── 核心依赖 ──
+# 本工程实测于 HelloAgents 0.2.9，用到的接口：SimpleAgent、FunctionCallAgent、ReActAgent、
+# Tool、ToolParameter、ToolRegistry、HelloAgentsLLM。
+#
+# 写法上的三点注意事项（都经过实测，不是随手写的）：
+#   1. 不写 `hello-agents[all]`：该包确实声明了 extras，但 all 会连带
+#      torch / transformers / gradio / datasets 等数百 MB 的重依赖，
+#      而本工程一个都用不到；基础包 + 下面显式补的一项就已足够；
+#   2. 上限收到 1.0.0 以下：1.0.0 是比 0.2.9 更晚发布的大版本，未经兼容性验证，
+#      若只写 `>=0.2.7`，安装时会解析到 1.0.0，可能直接导致代码跑不通；
+#   3. 必须显式补 huggingface-hub，原因见下面那段说明。
+hello-agents>=0.2.9,<1.0.0
+
+# ── 框架导入链的必需品（不要删）──
+# hello-agents 的 tools/__init__.py 会**无条件导入**第 12 章的评测工具
+# （BFCLEvaluationTool / GAIAEvaluationTool / LLMJudgeTool），而这些工具依赖
+# evaluation extra 里的 huggingface_hub。也就是说：哪怕本工程完全不用评测功能，
+# 只要 `import hello_agents` 就会连带加载它。
+#
+# 实测（全新虚拟环境执行 pip install -r requirements.txt 后）：缺少该包时
+# `import hello_agents` 直接抛 ModuleNotFoundError: No module named 'huggingface_hub'。
+# 这是基础包之外唯一需要额外补的一项，其余依赖均由 hello-agents 自动带入。
+huggingface-hub>=0.20.0,<1.0.0
+
+# ── 政策检索 ──
+# 中文分词 + 纯 Python BM25，刻意不引入向量库与嵌入模型：
+# 本工程要保证自包含、可离线跑、体积远小于 5MB
+jieba>=0.42.1
+
+# ── 配置与数据读取 ──
+# 两者已由 hello-agents 传递带入，这里显式声明以表明是本工程的直接依赖
+PyYAML>=6.0
+python-dotenv>=1.0

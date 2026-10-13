@@ -1,0 +1,10 @@
+# 开发与测试依赖（运行项目本身不需要装这些）
+# 用法：
+#   pip install -r requirements.txt -r requirements-dev.txt
+#   pytest                      # 全部离线用例
+#   pytest -m slow              # 额外跑需要真实模型的冒烟用例（需配置 LLM_API_KEY）
+
+pytest>=8.0
+
+# 生成与校验 Notebook 用（scripts/build_notebook.py）
+nbformat>=5.9
