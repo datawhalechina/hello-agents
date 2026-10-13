@@ -727,7 +727,9 @@ class ContextAwareAgent(SimpleAgent):
             {"role": "system", "content": optimized_context},
             {"role": "user", "content": user_input}
         ]
-        response = self.llm.invoke(messages)
+        result = self.llm.invoke(messages)
+        # Version 0.2.8 returns text; response objects expose it through .content.
+        response = result if isinstance(result, str) else result.content
 
         # 3. Update conversation history
         from hello_agents.core.message import Message
