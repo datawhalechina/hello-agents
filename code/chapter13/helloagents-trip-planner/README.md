@@ -210,3 +210,14 @@ CC BY-NC-SA 4.0
 
 **HelloAgents智能旅行助手** - 让旅行计划变得简单而智能 🌈
 
+
+
+## 离线回归测试
+
+安装后端依赖后，在 `backend` 目录运行：
+
+```bash
+python -m unittest discover -s tests -p test_request_isolation.py -v
+```
+
+测试执行真实 FastAPI 路由、HelloAgents Agent、LLM 客户端和计算器工具，仅替换外部模型 HTTP 响应并关闭高德 MCP 工具发现，不需要 API 密钥。覆盖连续请求、回退计划后的新请求、重叠请求的历史隔离，以及单次 Agent 运行中的工具结果保留。重叠用例使用两个独立 TestClient 执行环境控制请求交错；当前异步路由内的同步规划仍会阻塞单个事件循环，该用例不代表单 worker 的并行性能。
