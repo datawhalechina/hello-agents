@@ -30,6 +30,9 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+"*" = ["py.typed"]
+
 [tool.ruff]
 lint.select = [
     "E",    # pycodestyle
