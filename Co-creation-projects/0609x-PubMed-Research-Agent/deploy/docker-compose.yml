@@ -1,0 +1,107 @@
+# Production-shaped local deployment for PubMed-Research-Agent.
+# Run from the repository root:
+#   docker compose -f deploy/docker-compose.yml up -d --build
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-pubmed_agent}
+      POSTGRES_USER: ${POSTGRES_USER:-pubmed_agent}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pubmed_agent_change_me}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.backend
+    env_file:
+      - ../.env
+    environment:
+      APP_ENV: production
+      DEBUG: "false"
+      LOG_FORMAT: json
+      ENABLE_API_DOCS: ${ENABLE_API_DOCS:-false}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+      TRUSTED_HOSTS: ${TRUSTED_HOSTS:-localhost,127.0.0.1}
+      DATABASE_URL: ${POSTGRES_DATABASE_URL:-postgresql+asyncpg://${POSTGRES_USER:-pubmed_agent}:${POSTGRES_PASSWORD:-pubmed_agent_change_me}@postgres:5432/${POSTGRES_DB:-pubmed_agent}}
+      REDIS_URL: redis://redis:6379/0
+      PROMPT_CACHE_REDIS_URL: redis://redis:6379/1
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - runtime_data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/ready')"
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.backend
+    command: ["celery", "-A", "backend.worker:celery_app", "worker", "--loglevel=INFO", "--concurrency=2"]
+    env_file:
+      - ../.env
+    environment:
+      APP_ENV: production
+      DEBUG: "false"
+      LOG_FORMAT: json
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+      TRUSTED_HOSTS: ${TRUSTED_HOSTS:-localhost,127.0.0.1}
+      DATABASE_URL: ${POSTGRES_DATABASE_URL:-postgresql+asyncpg://${POSTGRES_USER:-pubmed_agent}:${POSTGRES_PASSWORD:-pubmed_agent_change_me}@postgres:5432/${POSTGRES_DB:-pubmed_agent}}
+      REDIS_URL: redis://redis:6379/0
+      PROMPT_CACHE_REDIS_URL: redis://redis:6379/1
+    volumes:
+      - runtime_data:/app/data
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.frontend
+    ports:
+      - "8080:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  runtime_data:

@@ -1,0 +1,28 @@
+{
+  "name": "pubmed-research-agent-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && tsc -p tsconfig.node.json --noEmit && vite build",
+    "check:bundle": "node scripts/check-bundle-budget.mjs",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
+    "dompurify": "^3.4.15",
+    "element-plus": "^2.8.8",
+    "marked": "^12.0.2",
+    "pinia": "^2.2.6",
+    "vue": "^3.5.13",
+    "vue-router": "^4.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vue-tsc": "^2.1.10"
+  }
+}
