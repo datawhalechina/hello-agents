@@ -27,9 +27,6 @@ dev = ["mypy>=1.11.1", "ruff>=0.6.1"]
 requires = ["setuptools>=73.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-packages = ["src"]
-
 [tool.setuptools.packages.find]
 where = ["src"]
 
