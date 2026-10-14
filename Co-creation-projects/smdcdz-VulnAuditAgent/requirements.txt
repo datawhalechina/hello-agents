@@ -1,0 +1,8 @@
+# 核心依赖
+hello-agents>=0.2.4,<=0.2.9
+python-dotenv>=1.0.0
+
+# Web 图形界面（可选）
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pywebview>=5.0  # 桌面应用窗口
