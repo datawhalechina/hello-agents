@@ -50,7 +50,7 @@ editor = A2AServer(
 @editor.skill("edit")
 def edit_article(text: str) -> str:
     import re
-    match = re.search(r'edit\s+(.+)', text, re.IGNORECASE)
+    match = re.search(r'edit\s+(.+)', text, re.IGNORECASE | re.DOTALL)
     article = match.group(1).strip() if match else text
     
     result = {
@@ -60,18 +60,12 @@ def edit_article(text: str) -> str:
     }
     return str(result)
 
-# 2. 启动所有服务
-threading.Thread(target=lambda: researcher.run(port=5000), daemon=True).start()
-threading.Thread(target=lambda: writer.run(port=5001), daemon=True).start()
-threading.Thread(target=lambda: editor.run(port=5002), daemon=True).start()
-time.sleep(2)  # 等待服务启动
-
-# 3. 创建客户端连接到各个Agent
+# 2. 创建客户端连接到各个Agent
 researcher_client = A2AClient("http://localhost:5000")
 writer_client = A2AClient("http://localhost:5001")
 editor_client = A2AClient("http://localhost:5002")
 
-# 4. 协作流程
+# 3. 协作流程
 def create_content(topic):
     # 步骤1：研究
     research = researcher_client.execute_skill("research", f"research {topic}")
@@ -87,6 +81,12 @@ def create_content(topic):
 
 # 使用
 if __name__ == "__main__":
+    # 4. 启动所有服务
+    threading.Thread(target=lambda: researcher.run(port=5000), daemon=True).start()
+    threading.Thread(target=lambda: writer.run(port=5001), daemon=True).start()
+    threading.Thread(target=lambda: editor.run(port=5002), daemon=True).start()
+    time.sleep(2)  # 等待服务启动
+
     result = create_content("AI在医疗领域的应用")
     print(f"\n最终结果：\n{result}")
 

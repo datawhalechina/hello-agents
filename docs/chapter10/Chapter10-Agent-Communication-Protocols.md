@@ -1418,7 +1418,7 @@ editor = A2AServer(
 @editor.skill("edit")
 def edit_article(text: str) -> str:
     import re
-    match = re.search(r'edit\s+(.+)', text, re.IGNORECASE)
+    match = re.search(r'edit\s+(.+)', text, re.IGNORECASE | re.DOTALL)
     article = match.group(1).strip() if match else text
 
     result = {
