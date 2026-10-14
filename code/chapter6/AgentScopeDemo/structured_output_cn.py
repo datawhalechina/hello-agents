@@ -103,6 +103,26 @@ def get_hunter_model_cn(agents: list[AgentBase]) -> type[BaseModel]:
     return HunterModelCN
 
 
+def get_guardian_model_cn(agents: list[AgentBase]) -> type[BaseModel]:
+    """获取中文版守护者模型"""
+    
+    class GuardianModelCN(BaseModel):
+        """中文版守护者守护格式"""
+        
+        target: Literal[tuple(_.name for _ in agents)] = Field(
+            description="要守护的玩家姓名",
+        )
+        protect_reason: str = Field(
+            description="守护此人的原因",
+        )
+        priority_level: int = Field(
+            description="守护优先级(1-10)",
+            ge=1, le=10
+        )
+    
+    return GuardianModelCN
+
+
 class WerewolfKillModelCN(BaseModel):
     """中文版狼人击杀模型"""
     
