@@ -1171,7 +1171,7 @@ $$
 GRPO's objective function is simplified to:
 
 $$
-J_{\text{GRPO}}(\theta) = \mathbb{E}_{s,a \sim \pi_\theta} \left[ \frac{\pi_\theta(a|s)}{\pi_{\text{ref}}(a|s)} \cdot (r(s,a) - \bar{r}_{\text{group}}) \right] - \beta \cdot D_{KL}(\pi_\theta || \pi_{\text{ref}})
+J_{\text{GRPO}}(\theta) = \mathbb{E}_{s,a \sim \pi_\theta} \left[ \frac{\pi_\theta(a|s)}{\pi_{\text{old}}(a|s)} \cdot (r(s,a) - \bar{r}_{\text{group}}) \right] - \beta \cdot D_{KL}(\pi_\theta || \pi_{\text{ref}})
 $$
 
 Where $\bar{r}_{\text{group}}$ is the group average reward and $\beta$ is the KL divergence penalty coefficient. Key differences are: GRPO uses $r(s,a) - \bar{r}_{\text{group}}$ instead of advantage function $A(s,a)$, no need for Value Model; GRPO uses group-relative rewards, reducing reward variance; GRPO adds KL divergence penalty, preventing policy from deviating too far.
@@ -1378,7 +1378,7 @@ As can be seen, the relative reward mechanism encourages the model to generate a
 KL divergence penalty is a key component of GRPO, preventing policy from deviating too far from the reference model. KL divergence is defined as:
 
 $$
-D_{KL}(\pi_\theta || \pi_{\text{ref}}) = \mathbb{E}_{s,a \sim \pi_\theta} \left[ \log \frac{\pi_\theta(a|s)}{\pi_{\text{ref}}(a|s)} \right]
+D_{KL}(\pi_\theta || \pi_{\text{ref}}) = \mathbb{E}_{s,a \sim \pi_\theta} \left[ \log \frac{\pi_\theta(a|s)}{\pi_{\text{old}}(a|s)} \right]
 $$
 
 In practice, we calculate KL divergence for each token, then sum:
