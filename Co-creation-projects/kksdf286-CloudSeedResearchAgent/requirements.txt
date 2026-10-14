@@ -1,0 +1,4 @@
+hello-agents==0.2.9
+python-dotenv>=1.0,<2
+pypdf>=5,<7
+requests>=2.32,<3
