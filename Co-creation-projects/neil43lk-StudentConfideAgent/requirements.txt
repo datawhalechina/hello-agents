@@ -1,0 +1,12 @@
+# 核心依赖
+hello-agents[all]>=0.2.7
+python-dotenv>=1.0.1
+
+# Notebook
+jupyter>=1.0.0
+notebook>=7.0.0
+ipykernel>=6.0.0
+
+# 可选：后续若做轻量 Web
+# fastapi>=0.109.0
+# uvicorn>=0.27.0
