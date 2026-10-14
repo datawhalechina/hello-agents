@@ -1,5 +1,8 @@
 from hello_agents import SimpleAgent, HelloAgentsLLM
 from hello_agents.tools import MCPTool
+from dotenv import load_dotenv
+
+load_dotenv()
 
 print("=" * 70)
 print("方式1：使用内置演示服务器")
