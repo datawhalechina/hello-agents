@@ -910,6 +910,7 @@ class SearchAPI(str, Enum):
     DUCKDUCKGO = "duckduckgo"
     PERPLEXITY = "perplexity"
     SEARXNG = "searxng"
+    KEENABLE = "keenable"
     ADVANCED = "advanced"
 
 class Configuration(BaseModel):
@@ -923,6 +924,8 @@ SEARCH_API=tavily
 ```
 
 This way, users can select the search engine by modifying the `.env` file without modifying the code.
+
+The `keenable` backend calls the public search API of [Keenable](https://keenable.ai) and needs no API key, so it is the only search API option here that works on a fresh checkout: set `SEARCH_API=keenable` and run. (DuckDuckGo needs no key either, but it scrapes result pages rather than calling an API.) An optional `KEENABLE_API_KEY` only lifts the per-IP rate limits. Because `SearchTool` in `hello-agents` 0.2.9 has a fixed set of backends, this one lives in `services/keenable_search.py` and `dispatch_search` routes to it; it returns the same dictionary shape, so the deduplication and formatting code below is unchanged.
 
 The result returned by `SearchTool` is a dictionary containing:
 
