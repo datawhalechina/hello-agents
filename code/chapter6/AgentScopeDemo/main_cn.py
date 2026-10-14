@@ -8,10 +8,17 @@ import os
 import random
 from typing import List, Dict, Optional
 
+# 可选加载 .env（装了 python-dotenv 才生效，没装也不影响运行）
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 from agentscope.agent import ReActAgent
-from agentscope.model import DashScopeChatModel
+from agentscope.model import OpenAIChatModel
 from agentscope.pipeline import MsgHub, sequential_pipeline, fanout_pipeline
-from agentscope.formatter import DashScopeMultiAgentFormatter
+from agentscope.formatter import OpenAIMultiAgentFormatter
 
 from prompt_cn import ChinesePrompts
 from game_roles import GameRoles
@@ -32,6 +39,35 @@ from utils_cn import (
     MAX_GAME_ROUND,
     MAX_DISCUSSION_ROUND,
 )
+
+
+# ---------------------------------------------------------------- 模型配置
+# 走 OpenAI 兼容接口，不再依赖 dashscope SDK。
+# 默认指向阿里云百炼的兼容端点（原来用的 qwen-max 在这里同样可用）；
+# 换成 DeepSeek 只需要改 LLM_BASE_URL 和 LLM_MODEL，见 README。
+LLM_MODEL = os.environ.get("LLM_MODEL", "qwen-max")
+LLM_API_KEY = os.environ.get("LLM_API_KEY") or os.environ.get("DASHSCOPE_API_KEY", "")
+LLM_BASE_URL = os.environ.get(
+    "LLM_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1"
+)
+# enable_thinking 是通义千问/百炼特有的扩展参数，其他家模型不认，所以默认关闭
+LLM_ENABLE_THINKING = os.environ.get("LLM_ENABLE_THINKING", "").lower() in (
+    "1", "true", "yes", "on",
+)
+
+
+def build_model() -> OpenAIChatModel:
+    """按环境变量构造模型实例。"""
+    generate_kwargs = {}
+    if LLM_ENABLE_THINKING:
+        generate_kwargs["extra_body"] = {"enable_thinking": True}
+    return OpenAIChatModel(
+        model_name=LLM_MODEL,
+        api_key=LLM_API_KEY,
+        stream=True,
+        client_args={"base_url": LLM_BASE_URL},
+        generate_kwargs=generate_kwargs,
+    )
 
 
 class ThreeKingdomsWerewolfGame:
@@ -60,12 +96,8 @@ class ThreeKingdomsWerewolfGame:
         agent = ReActAgent(
             name=name,
             sys_prompt=ChinesePrompts.get_role_prompt(role, character),
-            model=DashScopeChatModel(
-                model_name="qwen-max",
-                api_key=os.environ["DASHSCOPE_API_KEY"],
-                enable_thinking=True,
-            ),
-            formatter=DashScopeMultiAgentFormatter(),
+            model=build_model(),
+            formatter=OpenAIMultiAgentFormatter(),
         )
         
         # 角色身份确认
@@ -368,11 +400,13 @@ class ThreeKingdomsWerewolfGame:
 async def main():
     """主函数"""
     # 检查环境变量
-    if "DASHSCOPE_API_KEY" not in os.environ:
-        print("❌ 请设置环境变量 DASHSCOPE_API_KEY")
+    if not LLM_API_KEY:
+        print("❌ 请设置环境变量 LLM_API_KEY（阿里云百炼或 DeepSeek 的 API Key）")
+        print("   也可以复制 .env.example 为 .env 后填写")
         return
-    
+
     print("🎮 欢迎来到三国狼人杀！")
+    print(f"   模型：{LLM_MODEL}　端点：{LLM_BASE_URL}")
     
     # 创建并运行游戏
     game = ThreeKingdomsWerewolfGame()
