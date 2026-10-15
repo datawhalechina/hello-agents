@@ -1487,6 +1487,8 @@ def my_calculate(expression: str) -> str:
         ast.Sub: operator.sub,      # -
         ast.Mult: operator.mul,     # *
         ast.Div: operator.truediv,  # /
+        ast.UAdd: operator.pos,     # unary +
+        ast.USub: operator.neg,     # unary -
     }
 
     # Supported basic functions
@@ -1499,26 +1501,31 @@ def my_calculate(expression: str) -> str:
         node = ast.parse(expression, mode='eval')
         result = _eval_node(node.body, operators, functions)
         return str(result)
-    except:
+    except Exception:
         return "Calculation failed, please check expression format"
 
 def _eval_node(node, operators, functions):
     """Simplified expression evaluation"""
-    if isinstance(node, ast.Constant):
+    if isinstance(node, ast.Constant) and type(node.value) in (int, float):
         return node.value
-    elif isinstance(node, ast.BinOp):
+    elif isinstance(node, ast.BinOp) and type(node.op) in operators:
         left = _eval_node(node.left, operators, functions)
         right = _eval_node(node.right, operators, functions)
-        op = operators.get(type(node.op))
+        op = operators[type(node.op)]
         return op(left, right)
-    elif isinstance(node, ast.Call):
-        func_name = node.func.id
-        if func_name in functions:
+    elif isinstance(node, ast.UnaryOp) and type(node.op) in operators:
+        operand = _eval_node(node.operand, operators, functions)
+        return operators[type(node.op)](operand)
+    elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and not node.keywords:
+        func = functions.get(node.func.id)
+        if callable(func):
             args = [_eval_node(arg, operators, functions) for arg in node.args]
-            return functions[func_name](*args)
+            return func(*args)
     elif isinstance(node, ast.Name):
-        if node.id in functions:
+        if node.id in functions and not callable(functions[node.id]):
             return functions[node.id]
+
+    raise ValueError("Unsupported calculation expression")
 
 def create_calculator_registry():
     """Create tool registry containing calculator"""
