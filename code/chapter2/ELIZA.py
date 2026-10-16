@@ -8,12 +8,12 @@ rules = {
         "Would it really help you to get {0}?",
         "Are you sure you need {0}?"
     ],
-    r'Why don\'t you (.*)\?': [
+    r"Why don't you (.*)\?": [
         "Do you really think I don't {0}?",
         "Perhaps eventually I will {0}.",
         "Do you really want me to {0}?"
     ],
-    r'Why can\'t I (.*)\?': [
+    r"Why can't I (.*)\?": [
         "Do you think you should be able to {0}?",
         "If you could {0}, what would you do?",
         "I don't know -- why can't you {0}?"
