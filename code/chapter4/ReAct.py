@@ -69,7 +69,8 @@ class ReActAgent:
             self.history.append(f"Action: {action}")
             self.history.append(f"Observation: {observation}")
 
-        print("已达到最大步数，流程终止。")
+        else:
+            print("已达到最大步数，流程终止。")
         return None
 
     def _parse_output(self, text: str):
