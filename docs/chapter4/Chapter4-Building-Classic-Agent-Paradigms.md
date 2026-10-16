@@ -508,12 +508,15 @@ The last step, and the key to forming a closed loop, is to add the `Action` itse
             self.history.append(f"Action: {action}")
             self.history.append(f"Observation: {observation}")
 
-        # Loop ends
-        print("Maximum steps reached, process terminated.")
+        else:
+            # Run only when the step limit is exhausted without an early break
+            print("Maximum steps reached, process terminated.")
         return None
 ```
 
 By appending `Observation` to `self.history`, the agent can "see" the results of the previous action when generating the prompt in the next round, and conduct new thinking and planning accordingly.
+
+The `else` is aligned with `while` and runs only when the loop exhausts its step limit normally. A `break` caused by an empty response or a missing `Action` skips this branch, so the existing error message is not followed by a misleading step-limit warning.
 
 (6) Running Instance and Analysis
 
