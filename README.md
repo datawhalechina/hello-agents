@@ -94,6 +94,7 @@
 | [11-WebAgent科普与实战](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra11-WebAgent科普与实战.md) | Web Agent 原理、反爬实战与 HelloAgents 集成 |
 | [12-旅行助手后训练实战](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra12-旅行助手后训练实战.md) | 把旅行助手 Demo 打磨成能用的 Planner |
 | [13-Hello-Agents视频课录制共创](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra13-Hello-Agents视频课录制共创.md) | 视频课程共创录制资源 |
+| [14-MCP Tasks 异步工具调用实战](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra14-MCP-Tasks异步工具调用实战.md) | MCP 2026-07-28 Tasks 扩展与最小 JSON-RPC 示例 |
 
 ### PDF 版本下载
 
