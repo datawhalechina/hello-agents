@@ -1,0 +1,15 @@
+# 核心框架
+hello-agents==1.0.1
+
+# 数据分析
+pandas==3.0.6
+numpy==2.5.4
+scikit-learn==1.9.1
+matplotlib==3.11.2
+openpyxl==3.1.5
+
+# 配置加载
+python-dotenv==1.2.4
+
+# 运行 Notebook（可选，本地开发用）
+# jupyter
