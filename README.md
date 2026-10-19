@@ -94,6 +94,7 @@
 | [11-WebAgent科普与实战](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra11-WebAgent科普与实战.md) | Web Agent 原理、反爬实战与 HelloAgents 集成 |
 | [12-旅行助手后训练实战](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra12-旅行助手后训练实战.md) | 把旅行助手 Demo 打磨成能用的 Planner |
 | [13-Hello-Agents视频课录制共创](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra13-Hello-Agents视频课录制共创.md) | 视频课程共创录制资源 |
+| [16-Dify客服草稿的输出验证实践](Extra-Chapter/Extra16-Dify客服草稿的输出验证实践.md) | 四个合成样例、参数校验与内容遗漏复盘 |
 
 ### PDF 版本下载
 
