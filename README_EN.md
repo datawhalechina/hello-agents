@@ -94,6 +94,7 @@ If you wish to read locally or contribute content, please refer to the learning 
 | [11-Web Agent: Principles and Practice](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra11-WebAgent科普与实战.md) | Web Agent principles, anti-bot practice, and HelloAgents integration |
 | [12-Trip Planner Post-Training in Practice](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra12-旅行助手后训练实战.md) | Turning a trip-planner demo into a usable planner |
 | [13-Hello-Agents Video Course Co-creation](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra13-Hello-Agents视频课录制共创.md) | Video course co-creation recording resources |
+| [16-Reviewing Dify Support Drafts (Chinese)](Extra-Chapter/Extra16-Dify客服草稿的输出验证实践.md) | Four synthetic cases, parameter validation and omitted advice |
 
 ### PDF Version Download
 
