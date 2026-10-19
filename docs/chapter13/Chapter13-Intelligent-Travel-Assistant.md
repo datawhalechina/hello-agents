@@ -407,7 +407,7 @@ async def create_trip_plan(request: TripPlanRequest) -> TripPlan:
     return trip_plan
 ```
 
-When a user sends a POST request to `/api/trip/plan`, FastAPI will automatically convert the JSON data into a `TripPlanRequest` object. If the data format is incorrect (such as missing required fields or type mismatch), FastAPI will automatically return a 400 error and tell the user where the error is.
+When a user sends a POST request to `/api/trip/plan`, FastAPI will automatically convert the JSON data into a `TripPlanRequest` object. If the data format is incorrect (such as missing required fields or type mismatch), FastAPI returns HTTP 422 by default, not 400. The response JSON contains a `detail` array whose entries identify the invalid field in `loc` and explain the error in `msg`. For example, sending an empty object `{}` produces an entry with `loc` set to `["body", "city"]`, indicating that the required `city` field is missing from the request body; the travel-planning logic is not executed.
 
 On the front-end, we also need to define corresponding TypeScript types. Although TypeScript and Python are different languages, the data structures are the same:
 
