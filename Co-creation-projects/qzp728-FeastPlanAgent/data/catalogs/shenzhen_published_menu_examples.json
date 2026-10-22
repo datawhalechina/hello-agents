@@ -1,0 +1,28 @@
+[
+  {
+    "city": "深圳",
+    "banquet_type": "婚宴",
+    "venue": "深圳机场希尔顿逸林酒店",
+    "package_name": "百年好合",
+    "price": "¥12,999/桌（10位）",
+    "dishes": ["江南精美六彩碟", "花胶羊肚菌炖辽参", "鸿运全体乳金猪", "芝士伊面焗红龙", "清蒸深海东星斑", "明炉吊烧脆皮鸡", "鲍汁鹅掌扣鲍鱼", "浓汤葛山娃娃菜", "粒粒幸福炒丝苗", "好伴侣美点双辉", "杏汁炖奶配牛油果燕窝", "时令幸福鲜果盘"],
+    "source": "深圳机场希尔顿逸林酒店公开婚宴菜单 PDF",
+    "source_url": "https://www.hilton.com.cn/file/pdf_doc/file_202406251525575152RR6fDb.pdf",
+    "source_date": "2026-10-22",
+    "evidence_level": "酒店公开菜单样本",
+    "notes": "网页索引可见套餐名、价格和菜名；文件公开时间较早，必须重新确认是否仍在售、服务费和可替换菜品。"
+  },
+  {
+    "city": "深圳",
+    "banquet_type": "婚宴",
+    "venue": "深圳香格里拉",
+    "package_name": "华丽婚庆专案菜单（Indulgence Wedding Menu）",
+    "price": "¥6,999/桌（10位，另计服务费及税费）",
+    "dishes": ["鸿运乳猪全体", "芝士焗青龙虾伊面", "淮杞响螺炖花胶", "原只鲜鲍扣鹅掌", "清蒸老虎斑", "吊烧鸡", "瑶柱鲜菇扒菜苗", "香宫荷叶饭", "杏汁白果芋泥", "生果拼盘"],
+    "source": "深圳香格里拉公开婚庆菜单 PDF",
+    "source_url": "https://www.shangri-la.com/-/media/Shangri-La/shenzhen_shangrila/weddings-celebrations/1fae184599154dbfba32abcfe1fc4c85.pdf",
+    "source_date": "2026-10-22",
+    "evidence_level": "酒店公开菜单样本",
+    "notes": "资料页说明价格还需加收服务费及税费；该菜单只作为同城酒店套餐样本，不能推断为所有广东婚宴的固定做法。"
+  }
+]
