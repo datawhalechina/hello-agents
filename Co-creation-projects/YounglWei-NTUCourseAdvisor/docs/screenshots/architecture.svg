@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820" font-family="Segoe UI, Microsoft YaHei, PingFang SC, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#64748b"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#2f6fed"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#d97706"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="820" fill="#f8fafc"/>
+  <text x="40" y="48" font-size="28" font-weight="700" fill="#0f172a">NTU 选课助手 — 三 Agent 架构</text>
+  <text x="40" y="78" font-size="15" fill="#475569">官方数据 → 课程卡片 → 混合检索 → Planner / Retrieval / Reviewer → 可溯源回答</text>
+
+  <!-- 数据层 -->
+  <rect x="40" y="110" width="1120" height="150" rx="16" fill="#ffffff" stroke="#dbe4f0" stroke-width="1.5"/>
+  <text x="60" y="140" font-size="16" font-weight="700" fill="#2f6fed">数据层</text>
+  <g font-size="13" fill="#334155">
+    <rect x="60" y="156" width="220" height="44" rx="10" fill="#eff6ff" stroke="#bfdbfe"/>
+    <text x="76" y="183">WIS 本科目录（2026 Sem 1/2）</text>
+    <rect x="300" y="156" width="180" height="44" rx="10" fill="#eff6ff" stroke="#bfdbfe"/>
+    <text x="316" y="183">CCA 项目页</text>
+    <rect x="500" y="156" width="200" height="44" rx="10" fill="#eff6ff" stroke="#bfdbfe"/>
+    <text x="516" y="183">Robotics 项目页</text>
+    <rect x="720" y="156" width="160" height="44" rx="10" fill="#eff6ff" stroke="#bfdbfe"/>
+    <text x="736" y="183">WIS 课表</text>
+    <rect x="920" y="156" width="220" height="44" rx="10" fill="#f0fdf4" stroke="#bbf7d0"/>
+    <text x="936" y="183">课程卡片 201 张（1 卡 1 chunk）</text>
+  </g>
+  <line x1="700" y1="200" x2="700" y2="228" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="380" y="228" width="640" height="22" rx="8" fill="#f1f5f9"/>
+  <text x="400" y="244" font-size="12" fill="#475569">RAGStore（SQLite + BM25） ⊕ 智谱 embedding-3 向量索引（2048 维）→ RRF 融合</text>
+
+  <!-- 检索层 -->
+  <rect x="40" y="290" width="1120" height="130" rx="16" fill="#ffffff" stroke="#dbe4f0" stroke-width="1.5"/>
+  <text x="60" y="320" font-size="16" font-weight="700" fill="#2f6fed">检索层</text>
+  <g font-size="13" fill="#334155">
+    <rect x="60" y="336" width="340" height="56" rx="10" fill="#f8fafc" stroke="#cbd5e1"/>
+    <text x="76" y="360">HybridSearch</text>
+    <text x="76" y="380" font-size="12" fill="#64748b">BM25 ⊕ 余弦 → RRF（rrf_k=60）</text>
+    <rect x="440" y="336" width="240" height="56" rx="10" fill="#f8fafc" stroke="#cbd5e1"/>
+    <text x="456" y="360">rag_search</text>
+    <text x="456" y="380" font-size="12" fill="#64748b">level / programme 确定性过滤</text>
+    <rect x="720" y="336" width="420" height="56" rx="10" fill="#f8fafc" stroke="#cbd5e1"/>
+    <text x="736" y="360">DegreeAuditTool（expandable，4 子工具）</text>
+    <text x="736" y="380" font-size="12" fill="#64748b">课表冲突 / 专选门数 / AU 上限 / 先修互斥</text>
+  </g>
+
+  <!-- Agent 层 -->
+  <rect x="40" y="450" width="1120" height="300" rx="16" fill="#ffffff" stroke="#dbe4f0" stroke-width="1.5"/>
+  <text x="60" y="480" font-size="16" font-weight="700" fill="#2f6fed">Agent 层（Python 编排，无 AgentTeam，Reflection ≤3 轮）</text>
+
+  <g font-size="13" fill="#0f172a">
+    <rect x="60" y="510" width="120" height="64" rx="12" fill="#f1f5f9" stroke="#cbd5e1"/>
+    <text x="82" y="538" font-weight="700">用户</text>
+    <text x="78" y="558" font-size="11" fill="#64748b">原话 + 历史</text>
+
+    <rect x="220" y="510" width="200" height="64" rx="12" fill="#eff6ff" stroke="#bfdbfe"/>
+    <text x="238" y="536" font-weight="700">Planner</text>
+    <text x="238" y="555" font-size="11" fill="#475569">LLM + 历史 + 库覆盖事实</text>
+    <text x="238" y="569" font-size="11" fill="#475569">→ steps + assumed_identity</text>
+
+    <rect x="460" y="510" width="200" height="64" rx="12" fill="#eff6ff" stroke="#bfdbfe"/>
+    <text x="478" y="536" font-weight="700">Retrieval</text>
+    <text x="478" y="555" font-size="11" fill="#475569">ReActAgent + rag_search</text>
+    <text x="478" y="569" font-size="11" fill="#475569">+ 4 个学位校验工具</text>
+
+    <rect x="700" y="510" width="160" height="64" rx="12" fill="#f0fdf4" stroke="#bbf7d0"/>
+    <text x="718" y="536" font-weight="700">Polish</text>
+    <text x="718" y="555" font-size="11" fill="#475569">单轮精炼</text>
+    <text x="718" y="569" font-size="11" fill="#475569">溯源 + 组合逻辑</text>
+
+    <rect x="900" y="510" width="220" height="64" rx="12" fill="#fff7ed" stroke="#fed7aa"/>
+    <text x="918" y="536" font-weight="700">Reviewer</text>
+    <text x="918" y="555" font-size="11" fill="#475569">机械审查（guards.py）</text>
+    <text x="918" y="569" font-size="11" fill="#475569">+ LLM 语义审查</text>
+
+    <rect x="900" y="650" width="220" height="64" rx="12" fill="#f0fdf4" stroke="#bbf7d0"/>
+    <text x="918" y="676" font-weight="700">回答 + 来源清单</text>
+    <text x="918" y="695" font-size="11" fill="#475569">只引用工具返回的 source</text>
+  </g>
+
+  <g stroke="#64748b" stroke-width="2" fill="none">
+    <line x1="180" y1="542" x2="212" y2="542" marker-end="url(#arrow)"/>
+    <line x1="420" y1="542" x2="452" y2="542" marker-end="url(#arrow)"/>
+    <line x1="660" y1="542" x2="692" y2="542" marker-end="url(#arrow)"/>
+    <line x1="860" y1="542" x2="892" y2="542" marker-end="url(#arrow)"/>
+    <line x1="1010" y1="574" x2="1010" y2="642" marker-end="url(#arrow)"/>
+  </g>
+  <!-- Reflection 回环 -->
+  <path d="M 900 574 C 820 610, 620 610, 560 578" fill="none" stroke="#d97706" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrowOrange)"/>
+  <text x="690" y="622" font-size="12" fill="#b45309">FAIL → 打回修订（≤3 轮）</text>
+
+  <!-- 过滤型护栏 -->
+  <rect x="60" y="650" width="780" height="64" rx="12" fill="#faf5ff" stroke="#e9d5ff"/>
+  <text x="78" y="674" font-size="13" font-weight="700" fill="#7e22ce">过滤型代码护栏（不改写用户输入）</text>
+  <text x="78" y="694" font-size="11" fill="#6b21a8">层次未知 → 反问 ｜ 库外项目 → grounding ｜ 单课属性查询 → 忽略身份 ｜ 来源逐课验真 ｜ 越权校验拦截</text>
+
+  <text x="40" y="786" font-size="12" fill="#64748b">数据边界：本科 CCDS 5 专业（CSC/CE/DSAI/AISC/COMP）+ 研究生 CCA / Robotics；课程数据版权归 NTU。</text>
+</svg>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NTU 选课助手 — 演示</title>
+<style>
+  :root {
+    --bg: #f6f8fb;
+    --card: #ffffff;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --line: #dbe4f0;
+    --blue: #2f6fed;
+    --green: #1f9d55;
+    --orange: #d97706;
+    --term: #0b1220;
+    --term-line: #1e293b;
+    --term-text: #dbeafe;
+    --term-dim: #94a3b8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 40px 28px 64px; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 34px; line-height: 1.2; margin: 0 0 10px; letter-spacing: -0.02em; }
+  .sub { color: var(--muted); font-size: 16px; margin: 0 0 16px; }
+  .badges { display: flex; gap: 10px; flex-wrap: wrap; }
+  .badge {
+    font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 999px;
+    background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;
+  }
+  .badge.green { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+  .badge.orange { background: #fff7ed; color: #b45309; border-color: #fed7aa; }
+  .note {
+    margin: 18px 0 0; padding: 12px 14px; border-radius: 10px;
+    background: #ffffff; border: 1px solid var(--line); color: var(--muted); font-size: 13px;
+  }
+  section { margin-top: 30px; }
+  h2 { font-size: 20px; margin: 0 0 14px; }
+  h3 { font-size: 15px; margin: 0 0 10px; color: var(--muted); font-weight: 600; }
+  .terminal {
+    background: var(--term); border-radius: 14px; overflow: hidden;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+    border: 1px solid #111c33;
+  }
+  .term-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 16px; background: #111c33; border-bottom: 1px solid var(--term-line);
+  }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .dot.r { background: #ef4444; } .dot.y { background: #f59e0b; } .dot.g { background: #22c55e; }
+  .term-title { margin-left: 8px; color: #93a4bd; font-size: 12px; font-family: ui-monospace, Consolas, monospace; }
+  .term-body {
+    padding: 18px 20px; max-height: 620px; overflow: auto;
+    color: var(--term-text); font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 13px; line-height: 1.65; white-space: pre-wrap;
+  }
+  .term-body .u { color: #7dd3fc; font-weight: 700; }
+  .term-body .a { color: #86efac; font-weight: 700; }
+  .term-body .dim { color: var(--term-dim); }
+  .term-body .src { color: #fcd34d; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px; box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+  }
+  .card h3 { margin-top: 0; }
+  .card p { margin: 0 0 8px; color: var(--muted); font-size: 13px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; background: #f8fafc; }
+  td.num { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .ok { color: var(--green); font-weight: 600; }
+  .warn { color: var(--orange); font-weight: 600; }
+  .img-card { padding: 12px; }
+  .img-card img { width: 100%; height: auto; display: block; border-radius: 8px; }
+  .caption { color: var(--muted); font-size: 12px; margin-top: 8px; }
+  .howto { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .howto .card { padding: 16px; }
+  .howto b { display: block; margin-bottom: 4px; }
+  footer { margin-top: 42px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+  @media (max-width: 860px) {
+    .grid2, .howto { grid-template-columns: 1fr; }
+    h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>NTU 选课助手</h1>
+    <p class="sub">可溯源的课程信息问答与选课建议多 Agent 系统 · 毕业设计演示</p>
+    <div class="badges">
+      <span class="badge">可溯源</span>
+      <span class="badge green">三 Agent 编排</span>
+      <span class="badge orange">真实跑分</span>
+      <span class="badge">数据边界如实告知</span>
+    </div>
+    <p class="note">本页内容来自真实运行记录与评测结果，未做美化。可直接截取终端卡片、评估表与架构图用于 PR；录屏建议演示「推荐 → 反问 → 研究生 → 回答」这一条链路。</p>
+  </header>
+
+  <section>
+    <h2>1. 多轮身份反问（真实运行，68.0s）</h2>
+    <div class="terminal">
+      <div class="term-bar">
+        <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <span class="term-title">scripts/team_chat.py — 场景 10：身份消歧·反问答复流</span>
+      </div>
+      <div class="term-body"><span class="u">你:</span> 推荐几门好课
+<span class="a">助手:</span> 要推荐或列出课程，我需要先知道你的身份。
+当前课程库覆盖：研究生侧 MSc Computer Control &amp; Automation（CCA）、MSc Robotics and Intelligent Systems；本科侧 CCDS 学院 5 个专业（CSC / CE / DSAI / AISC / COMP）。
+请回复「本科」或「研究生」；如果是 CCA 学生，回复「我是 CCA 研究生」更准确。
+
+<span class="u">你:</span> 研究生
+<span class="a">助手:</span> 已理解身份：研究生（本次按此检索）
+
+（课程信息全部来自 NTU 官方课程库，未使用模型自身知识，来源见文末）
+
+推荐以下研究生选修课程：
+- EE6204 SYSTEMS ANALYSIS：3 AU，专业选修课，内容涵盖线性、动态和整数规划、优化技术、随机过程、排队模型、马尔可夫决策过程。
+- EE6010 PROJECT MANAGEMENT &amp; TECHNOPRENEURSHIP：3 AU，通识选修课，涉及项目启动和规划、项目调度和实施、项目监控和控制、创新和创业。
+- EE6203 COMPUTER CONTROL SYSTEMS：3 AU，专业选修课，包括离散时间系统建模和分析、级联补偿、状态空间设计方法、最优控制、数字控制器的设计和实现。
+- EE6534 MODERN DISTRIBUTION SYSTEMS WITH RENEWABLE RESOURCES：3 AU，通识选修课，涉及配电系统的运行、电能质量、太阳能系统、风能系统。
+- EE6511 POWER SYSTEM MODELLING &amp; CONTROL：3 AU，通识选修课，包括稳态电力系统网络、网络组件、稳定性分析、电力系统控制。
+
+<span class="src">来源：</span>
+- EE6204 / EE6010 / EE6203 / EE6534 / EE6511 — https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation
+
+<span class="dim">注：来源清单为便于展示已合并；完整原文见 eval/e2e_results.json / 自测输出。</span>
+<span class="dim">[耗时 68.0s]</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>2. 属性查询与边界场景（真实评测回答）</h2>
+    <div class="grid2">
+      <div class="terminal">
+        <div class="term-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="term-title">Q01 · 属性查询</span>
+        </div>
+        <div class="term-body"><span class="u">你:</span> SC2001 是几 AU？哪些学期开课？
+<span class="a">助手:</span> （课程信息全部来自 NTU 官方课程库，未使用模型自身知识，来源见文末）
+
+SC2001 是一门 3.0 AU 的课程，属于本科课程，开设在 CCDS 专业 curriculum 中。该课程在 2026 学年的第一学期和第二学期开课。先修课程包括 MH1812 和 SC1007，与 CE2001、CE2101、CZ2001、CZ2101、SC2301 互斥。
+
+<span class="src">来源：</span>
+- SC2001 课程详情 — https://wis.ntu.edu.sg/webexe/owa/aus_subj_cont.main</div>
+      </div>
+      <div class="terminal">
+        <div class="term-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="term-title">Q15 · 库外课码</span>
+        </div>
+        <div class="term-body"><span class="u">你:</span> CS1010S 这门课怎么样？讲什么内容？
+<span class="a">助手:</span> （课程信息全部来自 NTU 官方课程库，未使用模型自身知识，来源见文末）
+
+在当前课程库中未查到 CS1010S 这门课的具体内容信息。
+
+<span class="src">来源：</span>
+- NTU 官方课程库（具体来源 URL 无法提供，因为未检索到相关内容）</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>3. 评测结果（真实跑分）</h2>
+    <div class="card img-card">
+      <img src="eval-results.svg" alt="20 条端到端评测结果">
+      <div class="caption">v1 与 v2 判据不可直接比较；Q16 定向修复 PASS 未计入 v2 全量。逐条归因见 04-评估报告.md。</div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <table>
+        <thead>
+          <tr><th>版本</th><th>判据</th><th>准确率</th><th>单轮中位</th><th>结论</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>D4 基线</td><td>v1 预注册</td><td class="num">12/20 = 60.0%</td><td class="num">28.01s</td><td>修复起点</td></tr>
+          <tr><td>D4.1 修复</td><td>v1 预注册</td><td class="num">17/20 = 85.0%</td><td class="num">25.44s</td><td class="ok">7 条系统失败全部修复</td></tr>
+          <tr><td>D4.2 判据修订</td><td>v2</td><td class="num">19/20 = 95.0%</td><td class="num">33.41s</td><td class="warn">Q16 单次遗漏，定向修复 PASS</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>4. 架构</h2>
+    <div class="card img-card">
+      <img src="architecture.svg" alt="三 Agent 架构图">
+      <div class="caption">Planner → Retrieval → Polish → Reviewer；Reviewer FAIL 时打回 Retrieval 修订，≤3 轮。机械审查与来源验真在 src/guards.py。</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>5. 截图与录屏建议</h2>
+    <div class="howto">
+      <div class="card"><b>截图 1：多轮反问</b><p>截取第 1 节终端卡片的上半部分：推荐 → 反问 → 研究生 → 身份回显。</p></div>
+      <div class="card"><b>截图 2：边界与评测</b><p>截取第 2 节 Q15 卡片 + 第 3 节评估表，突出「查不到就明说」与真实数字。</p></div>
+      <div class="card"><b>录屏：30 秒</b><p>在本机运行 <code>python scripts/team_chat.py</code>，输入「推荐几门好课」→「研究生」，再问「CS1010S 这门课讲什么？」。</p></div>
+    </div>
+  </section>
+
+  <footer>
+    数据边界：本科仅 CCDS 学院 5 专业（CSC/CE/DSAI/AISC/COMP）；研究生仅 CCA + Robotics；研究生课表官方不公开。<br>
+    课程数据版权归 Nanyang Technological University (NTU)；本项目仅用于学习/毕业设计。作者：@YounglWei。
+  </footer>
+</div>
+</body>
+</html>
