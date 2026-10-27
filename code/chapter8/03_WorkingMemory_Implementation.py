@@ -251,7 +251,7 @@ class WorkingMemoryDemo:
         print(f"批量搜索10次耗时: {search_time:.3f}秒")
         
         # 获取最终统计
-        final_stats = self.memory_tool.run("stats")
+        final_stats = self.memory_tool.run({"action":"stats"})
         print(f"\n📊 最终统计: {final_stats}")
 
 def main():
