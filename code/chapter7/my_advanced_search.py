@@ -65,31 +65,37 @@ class MyAdvancedSearchTool:
             try:
                 if source == "tavily":
                     result = self._search_with_tavily(query)
-                    if result and "未找到" not in result:
+                    if result:
                         return f"📊 Tavily AI搜索结果：\n\n{result}"
 
                 elif source == "serpapi":
                     result = self._search_with_serpapi(query)
-                    if result and "未找到" not in result:
+                    if result:
                         return f"🌐 SerpApi Google搜索结果：\n\n{result}"
 
             except Exception as e:
                 print(f"⚠️ {source} 搜索失败: {e}")
                 continue
 
-        return "❌ 所有搜索源都失败了，请检查网络连接和API密钥配置"
+        return "❌ 所有搜索源均未返回有效结果，请检查查询内容、网络连接和API密钥配置"
 
     def _search_with_tavily(self, query: str) -> str:
         """使用Tavily搜索"""
         response = self.tavily_client.search(query=query, max_results=3)
 
-        if response.get('answer'):
-            result = f"💡 AI直接答案：{response['answer']}\n\n"
+        answer = (response.get('answer') or '').strip()
+        results = response.get('results') or []
+        if not answer and not results:
+            return ""
+
+        if answer:
+            result = f"💡 AI直接答案：{answer}\n\n"
         else:
             result = ""
 
-        result += "🔗 相关结果：\n"
-        for i, item in enumerate(response.get('results', [])[:3], 1):
+        if results:
+            result += "🔗 相关结果：\n"
+        for i, item in enumerate(results[:3], 1):
             result += f"[{i}] {item.get('title', '')}\n"
             result += f"    {item.get('content', '')[:150]}...\n\n"
 
@@ -107,11 +113,14 @@ class MyAdvancedSearchTool:
 
         results = search.get_dict()
 
+        organic_results = results.get("organic_results") or []
+        if not organic_results:
+            return ""
+
         result = "🔗 Google搜索结果：\n"
-        if "organic_results" in results:
-            for i, res in enumerate(results["organic_results"][:3], 1):
-                result += f"[{i}] {res.get('title', '')}\n"
-                result += f"    {res.get('snippet', '')}\n\n"
+        for i, res in enumerate(organic_results[:3], 1):
+            result += f"[{i}] {res.get('title', '')}\n"
+            result += f"    {res.get('snippet', '')}\n\n"
 
         return result
 
