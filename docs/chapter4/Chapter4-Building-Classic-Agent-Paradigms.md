@@ -473,13 +473,13 @@ The LLM returns plain text, and we need to precisely extract `Thought` and `Acti
                 break
 
             # 4. Execute Action
-            if action.startswith("Finish"):
+            tool_name, tool_input = self._parse_action(action)
+            if tool_name == "Finish":
                 # If it's a Finish instruction, extract the final answer and end
-                final_answer = re.match(r"Finish\[(.*)\]", action).group(1)
+                final_answer = tool_input
                 print(f"🎉 Final Answer: {final_answer}")
                 return final_answer
 
-            tool_name, tool_input = self._parse_action(action)
             if not tool_name or not tool_input:
                 # ... Handle invalid Action format ...
                 continue

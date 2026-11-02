@@ -51,13 +51,13 @@ class ReActAgent:
             if thought: print(f"🤔 思考: {thought}")
             if not action: print("警告：未能解析出有效的Action，流程终止。"); break
             
-            if action.startswith("Finish"):
+            tool_name, tool_input = self._parse_action(action)
+            if tool_name == "Finish":
                 # 如果是Finish指令，提取最终答案并结束
-                final_answer = self._parse_action_input(action)
+                final_answer = tool_input
                 print(f"🎉 最终答案: {final_answer}")
                 return final_answer
             
-            tool_name, tool_input = self._parse_action(action)
             if not tool_name or not tool_input:
                 self.history.append("Observation: 无效的Action格式，请检查。"); continue
 
