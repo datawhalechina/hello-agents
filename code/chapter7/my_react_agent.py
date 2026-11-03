@@ -28,9 +28,12 @@ Action: 你决定采取的行动，必须是以下格式之一：
 
 import re
 from typing import Optional, List, Tuple
-from hello_agents import ReActAgent, HelloAgentsLLM, Config, Message, ToolRegistry
+from hello_agents.core import Agent
+from hello_agents import HelloAgentsLLM, Config, Message, ToolRegistry
 
-class MyReActAgent(ReActAgent):
+# 这里修改为继承自Agent，不然后面调用父类的构造函数参数不匹配，并且对成员的赋值属于重复操作。
+# 为了实现完整的运行功能，需要增加_parse_output， _parse_action， _parse_action_input这几个函数。
+class MyReActAgent(Agent): 
     """
     重写的ReAct Agent - 推理与行动结合的智能体
     """
@@ -50,8 +53,9 @@ class MyReActAgent(ReActAgent):
         self.max_steps = max_steps
         self.current_history: List[str] = []
         self.prompt_template = custom_prompt if custom_prompt else MY_REACT_PROMPT
-        print(f"✅ {name} 初始化完成，最大步数: {max_steps}")
-
+        
+        print(f"✅ {name} 初始化完成hhhh")
+    
     def run(self, input_text: str, **kwargs) -> str:
         """运行ReAct Agent"""
         self.current_history = []
@@ -98,3 +102,27 @@ class MyReActAgent(ReActAgent):
         self.add_message(Message(input_text, "user"))
         self.add_message(Message(final_answer, "assistant"))
         return final_answer
+
+    def _parse_output(self, text: str) -> Tuple[Optional[str], Optional[str]]:
+        """解析LLM输出，提取思考和行动"""
+        thought_match = re.search(r"Thought: (.*)", text)
+        action_match = re.search(r"Action: (.*)", text)
+        
+        thought = thought_match.group(1).strip() if thought_match else None
+        action = action_match.group(1).strip() if action_match else None
+        
+        return thought, action
+    
+    def _parse_action(self, action_text: str) -> Tuple[Optional[str], Optional[str]]:
+        """解析行动文本，提取工具名称和输入"""
+        match = re.match(r"(\w+)\[(.*)\]", action_text)
+        if match:
+            return match.group(1), match.group(2)
+        return None, None
+    
+    def _parse_action_input(self, action_text: str) -> str:
+        """解析行动输入"""
+        match = re.match(r"\w+\[(.*)\]", action_text)
+        return match.group(1) if match else ""
+
+    
