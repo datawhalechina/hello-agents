@@ -94,16 +94,13 @@ class MySimpleAgent(SimpleAgent):
                 print(f"🔧 检测到 {len(tool_calls)} 个工具调用")
                 # 执行所有工具调用并收集结果
                 tool_results = []
-                clean_response = response
 
                 for call in tool_calls:
                     result = self._execute_tool_call(call['tool_name'], call['parameters'])
                     tool_results.append(result)
-                    # 从响应中移除工具调用标记
-                    clean_response = clean_response.replace(call['original'], "")
 
-                # 构建包含工具结果的消息
-                messages.append({"role": "assistant", "content": clean_response})
+                # 保留原始工具调用，使模型能将结果与请求对应起来
+                messages.append({"role": "assistant", "content": response})
 
                 # 添加工具结果
                 tool_results_text = "\n\n".join(tool_results)
@@ -137,7 +134,6 @@ class MySimpleAgent(SimpleAgent):
             tool_calls.append({
                 'tool_name': tool_name.strip(),
                 'parameters': parameters.strip(),
-                'original': f'[TOOL_CALL:{tool_name}:{parameters}]'
             })
 
         return tool_calls
