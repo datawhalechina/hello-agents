@@ -10,6 +10,7 @@ CodebaseMaintainer 三天工作流演示
 """
 
 import os
+from pathlib import Path
 # 配置嵌入模型（三选一）
 # 方案一：TF-IDF（最简单，无需额外依赖）
 os.environ['EMBED_MODEL_TYPE'] = 'tfidf'
@@ -34,6 +35,8 @@ import time
 import sys
 sys.path.append('.')
 from codebase_maintainer import CodebaseMaintainer
+
+CODEBASE_PATH = Path(__file__).resolve().parent / "codebase"
 
 
 def day_1_exploration(maintainer):
@@ -158,8 +161,7 @@ def demonstrate_cross_session_continuity():
     print("### 第一次会话 (session_1) ###")
     maintainer_1 = CodebaseMaintainer(
         project_name="demo_codebase",
-        #实际使用的时候替换代码路径
-        codebase_path="/Users/suntao/Documents/GitHub/hello-agents/code/chapter9/codebase",
+        codebase_path=str(CODEBASE_PATH),
         llm=HelloAgentsLLM()
     )
 
@@ -181,8 +183,7 @@ def demonstrate_cross_session_continuity():
     print("### 第二次会话 (session_2) ###")
     maintainer_2 = CodebaseMaintainer(
         project_name="demo_codebase",  # 同一个项目
-        #实际使用的时候替换代码路径
-        codebase_path="/Users/suntao/Documents/GitHub/hello-agents/code/chapter9/codebase",
+        codebase_path=str(CODEBASE_PATH),
         llm=HelloAgentsLLM()
     )
 
@@ -215,8 +216,7 @@ def demonstrate_tool_synergy():
 
     maintainer = CodebaseMaintainer(
         project_name="synergy_demo",
-        #实际使用的时候替换代码路径
-        codebase_path="/Users/suntao/Documents/GitHub/hello-agents/code/chapter9/codebase",
+        codebase_path=str(CODEBASE_PATH),
         llm=HelloAgentsLLM()
     )
 
@@ -249,7 +249,7 @@ def main():
     
     print("\n✨ 核心特性：Agent 自主决策")
     print("💡 使用我们在 chapter9 创建的示例代码库")
-    print("📁 代码库路径: ./codebase")
+    print(f"📁 代码库路径: {CODEBASE_PATH}")
     print("📦 包含文件: data_processor.py, api_client.py, utils.py, models.py")
     print("\n🔧 Agent 可用工具：")
     print("   - TerminalTool: 执行 shell 命令")
@@ -263,8 +263,7 @@ def main():
     # 初始化助手
     maintainer = CodebaseMaintainer(
         project_name="demo_codebase",
-        #实际使用的时候替换代码路径
-        codebase_path="/Users/suntao/Documents/GitHub/hello-agents/code/chapter9/codebase",
+        codebase_path=str(CODEBASE_PATH),
         llm=HelloAgentsLLM()
     )
 
