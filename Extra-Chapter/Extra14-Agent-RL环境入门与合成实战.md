@@ -92,7 +92,7 @@ observation, reward, terminated, truncated, info = env.step(action)
 
 <div align="center">
   <img src="./images/Extra14-figures/01-Agent与RL术语对照.png" alt="Agent 术语和 RL 术语的对照" width="88%"/>
-  <p><strong>图 2</strong> 同一件事的两套说法</p>
+  <p><strong>图 2</strong> Agent 术语和 RL 术语对照</p>
 </div>
 
 不过 Agent 环境和经典 RL 环境有几处不太一样，刚接触时容易想岔。
@@ -147,7 +147,7 @@ Harbor 还内置了两个不调模型的 Agent，用起来不花钱，写任务�
 
 <div align="center">
   <img src="./images/Extra14-figures/03-Trial生命周期.png" alt="一次 Trial 的生命周期，分为 Agent 容器和 Verifier 容器两个阶段" width="88%"/>
-  <p><strong>图 4</strong> 一次 Trial 里发生了什么</p>
+  <p><strong>图 4</strong> 一次 Trial 的执行过程</p>
 </div>
 
 这是 Harbor 的 separate verifier 模式：判分时另起一个干净的容器，里面只有 `tests/` 和你声明过的 artifacts。用 `harbor init` 新建任务，默认就是这个模式。
@@ -307,7 +307,7 @@ variant_rewrite         == 1    1.00    ok
 
 <div align="center">
   <img src="./images/Extra14-figures/04-两版Verifier实测对比.png" alt="8 种解法在 v1 和 v2 两版 verifier 上的实测得分对比" width="88%"/>
-  <p><strong>图 5</strong> 同样 8 种解法，v1 判错 5 种，v2 全部判对</p>
+  <p><strong>图 5</strong> 8 种解法在两版 verifier 上的得分</p>
 </div>
 
 再看 `mutant_clamp_negative` 和 `mutant_truncate`，它们都只丢了一条检查的分，得 0.75，丢的正好是对应的那一条。改坏哪里就只有哪里报错，以后看日志就能直接定位问题。
@@ -510,7 +510,7 @@ EvoEnv 的准入条件很直接：当前模型的通过率必须在 0 和 1 之�
 
 <div align="center">
   <img src="./images/Extra14-figures/06-难度与公平四象限.png" alt="按是否公平和是否有区分度划分的四个象限" width="88%"/>
-  <p><strong>图 10</strong> 先问公平不公平，再谈难度</p>
+  <p><strong>图 10</strong> 难度与公平的四种情况</p>
 </div>
 
 提难度有正当的做法，也有不该用的做法：
@@ -570,7 +570,7 @@ Harbor 用 `reward_valid` 来区分：
 
 <div align="center">
   <img src="./images/Extra14-figures/07-回放还是重跑.png" alt="根据修改内容决定回放还是重跑的决策树" width="88%"/>
-  <p><strong>图 12</strong> 改完任务之后，回放还是重跑</p>
+  <p><strong>图 12</strong> 改完任务后，回放还是重跑</p>
 </div>
 
 只改 verifier 时可以回放。我实际试了一次：故意把 v2 的一个期望值写错，参考解只拿到 0.75；改回来以后用旧结果回放，没有重跑 Agent，分数就更新了：
