@@ -1,0 +1,8 @@
+[
+  {"id": "refund", "event": "refund", "meaning": "退款，应从总额中扣除", "multiplier": -1},
+  {"id": "cancelled", "event": "cancelled", "meaning": "已取消的订单，不计入总额", "multiplier": 0},
+  {"id": "promo", "event": "promo", "meaning": "促销翻倍订单，按金额的两倍计入", "multiplier": 2},
+  {"id": "voided", "event": "voided", "meaning": "已作废的订单，不计入总额", "multiplier": 0},
+  {"id": "no-bug", "event": "reorder", "meaning": "补单，按原金额计入", "multiplier": 1},
+  {"id": "bad-solution", "event": "subsidy", "meaning": "补贴单，按金额的一半计入", "multiplier": 0.5, "solution_multiplier": -0.5}
+]

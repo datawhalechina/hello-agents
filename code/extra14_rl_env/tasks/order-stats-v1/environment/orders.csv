@@ -1,0 +1,4 @@
+user,type,amount
+alice,order,100
+alice,refund,30
+bob,order,50
