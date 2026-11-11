@@ -761,6 +761,10 @@ class Executor:
 
             response_text = self.llm_client.think(messages=messages) or ""
 
+            if not response_text.strip():
+                print(f"❌ Step {i+1} returned no usable result; stopping plan execution.")
+                return ""
+
             # Update history for the next step
             history += f"Step {i+1}: {step}\nResult: {response_text}\n\n"
 
@@ -799,6 +803,9 @@ class PlanAndSolveAgent:
 
         # 2. Call executor to execute plan
         final_answer = self.executor.execute(question, plan)
+        if not final_answer:
+            print("\n--- Task Terminated ---\nA planned step could not be completed.")
+            return
 
         print(f"\n--- Task Completed ---\nFinal Answer: {final_answer}")
 ```
