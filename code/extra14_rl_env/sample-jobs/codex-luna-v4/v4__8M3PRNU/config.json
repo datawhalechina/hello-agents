@@ -1,0 +1,13 @@
+{
+    "task": {
+        "path": "expense-summary/v4"
+    },
+    "trial_name": "v4__8M3PRNU",
+    "trials_dir": "sample-jobs/codex-luna-v4",
+    "agent_setup_timeout_multiplier": 4.0,
+    "agent": {
+        "name": "codex",
+        "model_name": "openai/gpt-6-luna"
+    },
+    "job_id": "cb2f6f5c-b2dd-457d-bc7d-74b65cac2973"
+}

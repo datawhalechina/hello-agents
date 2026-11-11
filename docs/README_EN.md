@@ -86,6 +86,7 @@
 | [11-Web Agent: Principles and Practice](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra11-WebAgent科普与实战.md) | Web Agent principles, anti-bot practice, and HelloAgents integration |
 | [12-Trip Planner Post-Training in Practice](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra12-旅行助手后训练实战.md) | Turning a trip-planner demo into a usable planner |
 | [13-Hello-Agents Video Course Co-creation](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra13-Hello-Agents视频课录制共创.md) | Video course co-creation recording resources |
+| [14-Agent RL Environments: Basics and Synthesis](https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra14-Agent-RL环境入门与合成实战.md) | Agent RL environment concepts, Harbor hands-on, agent-driven task synthesis, and reward hacking |
 
 ### PDF Version Download
 
@@ -146,6 +147,7 @@ We are an open-source community and welcome any form of contribution!
 - [Yin Xin - Individual Developer](https://github.com/vinci-grape) (Zhejiang University, Extra10 content contribution)
 - [Pranav Janakiraman - Individual Developer](https://github.com/pranavjana) (TinyFish, Extra11 content contribution)
 - [Wang Yufei - Individual Developer](https://github.com/nameless0120) (Beijing University of Posts and Telecommunications, Extra12 content contribution)
+- [fengju0213](https://github.com/fengju0213) (Extra14 content contribution)
 
 ### Video Course Contributors
 
