@@ -75,22 +75,7 @@ export async function runResearchStream(
     }
 
     if (done) {
-      // 处理可能的尾巴事件
-      if (buffer.trim()) {
-        const rawEvent = buffer.trim();
-        if (rawEvent.startsWith("data:")) {
-          const dataPayload = rawEvent.slice(5).trim();
-          if (dataPayload) {
-            try {
-              const event = JSON.parse(dataPayload) as ResearchStreamEvent;
-              onEvent(event);
-            } catch (error) {
-              console.error("解析流式事件失败：", error, dataPayload);
-            }
-          }
-        }
-      }
-      break;
+      throw new Error("研究响应中断，未收到结束事件");
     }
   }
 }

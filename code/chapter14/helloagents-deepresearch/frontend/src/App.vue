@@ -136,13 +136,13 @@
       <!-- 右侧：研究结果 -->
       <section
         class="panel panel-result"
-        v-if="todoTasks.length || reportMarkdown || progressLogs.length"
+        v-if="error || todoTasks.length || reportMarkdown || progressLogs.length"
       >
         <header class="status-bar">
           <div class="status-main">
             <div class="status-chip" :class="{ active: loading }">
               <span class="dot"></span>
-              {{ loading ? "研究进行中" : "研究流程完成" }}
+              {{ loading ? "研究进行中" : error ? "研究流程失败" : "研究流程完成" }}
             </div>
             <span class="status-meta">
               任务进度：{{ completedTasks }} / {{ totalTasks || todoTasks.length || 1 }}
@@ -155,6 +155,8 @@
             </button>
           </div>
         </header>
+
+        <p v-if="error" class="error-chip" role="alert">{{ error }}</p>
 
         <div class="timeline-wrapper" v-show="!logsCollapsed && progressLogs.length">
           <transition-group name="timeline" tag="ul" class="timeline">
