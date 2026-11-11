@@ -165,6 +165,8 @@ python -m spacy download en_core_web_sm
 
 In addition, you need to configure the graph database, vector database, LLM, and Embedding solution API in `.env`. In the tutorial, Qdrant is used for the vector database, Neo4J for the graph database, and Bailian platform is preferred for Embedding. If no API is available, you can switch to a local deployment model solution.
 
+The Neo4j URI scheme must match the server's encryption and certificate configuration. Aura usually uses `neo4j+s://`, which validates certificates. If the server uses a self-signed certificate and the administrator explicitly requires accepting it, use `neo4j+ssc://`. The `neo4j+ssc://` scheme relaxes certificate verification and should not be used as a general workaround for connection errors. Use unencrypted `bolt://` only for local development. `NEO4J_USERNAME`, `NEO4J_PASSWORD`, and `NEO4J_DATABASE` are instance-specific settings: values in this example are placeholders or common defaults and must be replaced with the actual credentials and database name.
+
 ```bash
 # ================================
 # Qdrant Vector Database Configuration - Get API key: https://cloud.qdrant.io/
@@ -190,6 +192,8 @@ QDRANT_TIMEOUT=30
 NEO4J_URI=neo4j+s://your-instance.databases.neo4j.io
 NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=your_neo4j_password_here
+# If the server uses a self-signed certificate and the administrator explicitly requires it:
+# NEO4J_URI=neo4j+ssc://your-instance.example.com
 
 # Or use local Neo4j (requires Docker)
 # NEO4J_URI=bolt://localhost:7687
@@ -197,6 +201,7 @@ NEO4J_PASSWORD=your_neo4j_password_here
 # NEO4J_PASSWORD=hello-agents-password
 
 # Neo4j connection configuration
+# Replace with the actual database name; `neo4j` is common for single-instance setups, but Aura and multi-database deployments may differ.
 NEO4J_DATABASE=neo4j
 NEO4J_MAX_CONNECTION_LIFETIME=3600
 NEO4J_MAX_CONNECTION_POOL_SIZE=50
