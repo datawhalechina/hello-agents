@@ -1085,6 +1085,9 @@ class ReflectionAgent:
                 feedback=feedback
             )
             refined_code = self._get_llm_response(refine_prompt)
+            if not refined_code.strip():
+                print("\n⚠️ Refinement returned no content; keeping the previous code and stopping.")
+                break
             self.memory.add_record("execution", refined_code)
 
         final_code = self.memory.get_last_execution()
@@ -1100,6 +1103,8 @@ class ReflectionAgent:
 ```
 
 ### 4.4.4 Running Instance and Analysis
+
+If a refinement call fails and returns `None`, or returns an empty or whitespace-only string, the agent stops iterating and returns the most recently generated successful code without adding an empty execution record.
 
 The complete code can also be found in the `code` folder of this book's accompanying code repository; here we provide an output instance.
 

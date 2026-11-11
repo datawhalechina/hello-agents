@@ -133,6 +133,9 @@ class ReflectionAgent:
                 feedback=feedback
             )
             refined_code = self._get_llm_response(refine_prompt)
+            if not refined_code.strip():
+                print("\n⚠️ 优化未返回有效内容，保留上一版代码并停止迭代。")
+                break
             self.memory.add_record("execution", refined_code)
         
         final_code = self.memory.get_last_execution()
