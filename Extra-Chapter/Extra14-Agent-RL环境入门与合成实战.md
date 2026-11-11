@@ -360,9 +360,9 @@ variant_float           == 1    1.00    ok
 harbor run -p expense-summary/v4 -a codex -m openai/gpt-6-luna --agent-setup-timeout-multiplier 4
 ```
 
-这一步要用你自己的 API key，或者 Codex 的登录凭证。Harbor 会先在任务容器里装好 Codex，再让它做题。安装默认限时 360 秒，我这边网络慢，前几次都没走到做题这一步，有一次是代理返回 502，有一次是安装超时，所以加了 `--agent-setup-timeout-multiplier`。这几次 Harbor 都记成了异常，而不是 Agent 得了 0 分，第七节会讲为什么要这样区分。
+这一步要用你自己的 API key，或者 Codex 的登录凭证。Harbor 会先在任务容器里装好 Codex，再让它做题。安装默认限时 360 秒，我这边网络慢，这点时间装不完，所以加了 `--agent-setup-timeout-multiplier`，把时间放宽到 4 倍。
 
-后来跑通了，拿到 1 分。这次的 job 放在配套代码的 `sample-jobs/` 里，去掉了日志和带本机路径、账号信息的文件，轨迹里 Codex 自带的系统提示词也省略了。剩下的结构是这样：
+跑完拿到 1 分。这次的 job 放在配套代码的 `sample-jobs/` 里，去掉了日志和带本机路径、账号信息的文件，轨迹里 Codex 自带的系统提示词也省略了。剩下的结构是这样：
 
 ```text
 sample-jobs/codex-luna-v4/
