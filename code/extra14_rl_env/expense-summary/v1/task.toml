@@ -1,0 +1,13 @@
+schema_version = "1.4"
+artifacts = ["/app/summary.csv", "/app/over_500.csv"]
+
+[task]
+name = "expense-summary/monthly-reimbursements"
+description = "按人汇总报销金额并筛出超过 500 元的记录"
+
+[environment]
+network_mode = "no-network"
+
+[verifier]
+environment_mode = "separate"
+timeout_sec = 60

@@ -1,6 +1,6 @@
 """用 oracle agent 跑不同的 solve.sh，检查 verifier 会不会判错。
 
-用法：python3 probe.py tasks/order-stats-v2
+用法：python3 probe.py <任务目录> [探针目录]，探针目录默认是 probes/
 """
 import shutil
 import subprocess
@@ -12,7 +12,7 @@ HERE = Path(__file__).parent
 
 
 def expectation(name):
-    if name in ("oracle", "variant_rewrite"):
+    if name == "oracle" or name.startswith("variant"):
         return "== 1", lambda r: r == 1.0
     if name == "nop" or name.startswith("shortcut"):
         return "== 0", lambda r: r == 0.0
@@ -34,9 +34,9 @@ def run_trial(task_dir, agent, solve_script=None):
         return float(rewards[0].read_text()) if rewards else None
 
 
-def main(task_dir):
+def main(task_dir, probe_dir=HERE / "probes"):
     probes = [("oracle", "oracle", None), ("nop", "nop", None)]
-    probes += [(p.stem, "oracle", p) for p in sorted((HERE / "probes").glob("*.sh"))]
+    probes += [(p.stem, "oracle", p) for p in sorted(Path(probe_dir).glob("*.sh"))]
     print(f"{'probe':<24}{'expect':<8}{'reward':<8}result")
     failures = 0
     for name, agent, script in probes:
@@ -51,4 +51,4 @@ def main(task_dir):
 
 
 if __name__ == "__main__":
-    sys.exit(main(Path(sys.argv[1]).resolve()))
+    sys.exit(main(Path(sys.argv[1]).resolve(), *sys.argv[2:3]))

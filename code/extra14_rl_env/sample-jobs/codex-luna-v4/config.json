@@ -1,0 +1,17 @@
+{
+    "job_name": "codex-luna-v4",
+    "jobs_dir": "sample-jobs",
+    "agent_setup_timeout_multiplier": 4.0,
+    "n_concurrent_trials": 1,
+    "agents": [
+        {
+            "name": "codex",
+            "model_name": "openai/gpt-6-luna"
+        }
+    ],
+    "tasks": [
+        {
+            "path": "expense-summary/v4"
+        }
+    ]
+}
