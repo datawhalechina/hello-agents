@@ -689,7 +689,11 @@ class Planner:
             plan_str = response_text.split("```python")[1].split("```")[0].strip()
             # Use ast.literal_eval to safely execute the string and convert it to a Python list
             plan = ast.literal_eval(plan_str)
-            return plan if isinstance(plan, list) else []
+            if not isinstance(plan, list) or not all(
+                isinstance(step, str) and step.strip() for step in plan
+            ):
+                raise ValueError("The plan must be a list of non-empty strings.")
+            return plan
         except (ValueError, SyntaxError, IndexError) as e:
             print(f"❌ Error parsing plan: {e}")
             print(f"Raw response: {response_text}")
@@ -698,6 +702,8 @@ class Planner:
             print(f"❌ Unknown error occurred while parsing plan: {e}")
             return []
 ```
+
+`ast.literal_eval` parses Python literals but does not validate the task descriptions. Check that every step is a non-empty string; if any step is invalid, return an empty plan so the agent stops before execution. An empty list also follows the existing task-termination path.
 
 ### 4.3.3 Executor and State Management
 
