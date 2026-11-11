@@ -1,36 +1,14 @@
 """多智能体旅行规划系统"""
 
 import json
-from typing import Dict, Any, List
+from functools import cache
+
 from hello_agents import SimpleAgent
-from hello_agents.tools import MCPTool
+from ..services.amap_service import get_amap_service, parse_poi_location
 from ..services.llm_service import get_llm
-from ..models.schemas import TripRequest, TripPlan, DayPlan, Attraction, Meal, WeatherInfo, Location, Hotel
-from ..config import get_settings
+from ..models.schemas import TripRequest, TripPlan, DayPlan, Attraction, Meal, WeatherInfo, Hotel
 
 # ============ Agent提示词 ============
-
-ATTRACTION_AGENT_PROMPT = """你是景点搜索专家。你的任务是根据城市和用户偏好搜索合适的景点。
-
-**重要提示:**
-你必须使用工具来搜索景点!不要自己编造景点信息!
-
-**工具调用格式:**
-使用maps_text_search工具时,必须严格按照以下格式:
-`[TOOL_CALL:amap_maps_text_search:keywords=景点关键词,city=城市名]`
-
-**示例:**
-用户: "搜索北京的历史文化景点"
-你的回复: [TOOL_CALL:amap_maps_text_search:keywords=历史文化,city=北京]
-
-用户: "搜索上海的公园"
-你的回复: [TOOL_CALL:amap_maps_text_search:keywords=公园,city=上海]
-
-**注意:**
-1. 必须使用工具,不要直接回答
-2. 格式必须完全正确,包括方括号和冒号
-3. 参数用逗号分隔
-"""
 
 WEATHER_AGENT_PROMPT = """你是天气查询专家。你的任务是查询指定城市的天气信息。
 
@@ -100,8 +78,7 @@ PLANNER_AGENT_PROMPT = """你是行程规划专家。你的任务是根据景点
       "attractions": [
         {
           "name": "景点名称",
-          "address": "详细地址",
-          "location": {"longitude": 116.397128, "latitude": 39.916527},
+          "poi_id": "从候选景点复制的高德ID",
           "visit_duration": 120,
           "description": "景点详细描述",
           "category": "景点类别",
@@ -160,28 +137,13 @@ class MultiAgentTripPlanner:
         print("🔄 开始初始化多智能体旅行规划系统...")
 
         try:
-            settings = get_settings()
             self.llm = get_llm()
 
             # 创建共享的MCP工具(只创建一次)
             print("  - 创建共享MCP工具...")
-            self.amap_tool = MCPTool(
-                name="amap",
-                description="高德地图服务",
-                server_command=["uvx", "amap-mcp-server"],
-                env={"AMAP_MAPS_API_KEY": settings.amap_api_key},
-                auto_expand=True
-            )
-            self.amap_tool.expandable=True
-
-            # 创建景点搜索Agent
-            print("  - 创建景点搜索Agent...")
-            self.attraction_agent = SimpleAgent(
-                name="景点搜索专家",
-                llm=self.llm,
-                system_prompt=ATTRACTION_AGENT_PROMPT
-            )
-            self.attraction_agent.add_tool(self.amap_tool)
+            self.amap_service = get_amap_service()
+            self.amap_tool = self.amap_service.mcp_tool
+            self.amap_tool.expandable = True
 
             # 创建天气查询Agent
             print("  - 创建天气查询Agent...")
@@ -210,7 +172,6 @@ class MultiAgentTripPlanner:
             )
 
             print(f"✅ 多智能体系统初始化成功")
-            print(f"   景点搜索Agent: {len(self.attraction_agent.list_tools())} 个工具")
             print(f"   天气查询Agent: {len(self.weather_agent.list_tools())} 个工具")
             print(f"   酒店推荐Agent: {len(self.hotel_agent.list_tools())} 个工具")
 
@@ -239,11 +200,12 @@ class MultiAgentTripPlanner:
             print(f"偏好: {', '.join(request.preferences) if request.preferences else '无'}")
             print(f"{'='*60}\n")
 
-            # 步骤1: 景点搜索Agent搜索景点
+            # 步骤1: 从高德候选结果保留原始景点 ID
             print("📍 步骤1: 搜索景点...")
-            attraction_query = self._build_attraction_query(request)
-            attraction_response = self.attraction_agent.run(attraction_query)
-            print(f"景点搜索结果: {attraction_response[:200]}...\n")
+            keywords = request.preferences[0] if request.preferences else "景点"
+            candidates = self.amap_service.search_poi_candidates(keywords, request.city)
+            attraction_response = json.dumps(candidates, ensure_ascii=False)
+            print(f"高德候选景点: {len(candidates)} 个\n")
 
             # 步骤2: 天气查询Agent查询天气
             print("🌤️  步骤2: 查询天气...")
@@ -265,6 +227,7 @@ class MultiAgentTripPlanner:
 
             # 解析最终计划
             trip_plan = self._parse_response(planner_response, request)
+            self._resolve_attraction_locations(trip_plan, candidates)
 
             print(f"{'='*60}")
             print(f"✅ 旅行计划生成完成!")
@@ -278,18 +241,27 @@ class MultiAgentTripPlanner:
             traceback.print_exc()
             return self._create_fallback_plan(request)
     
-    def _build_attraction_query(self, request: TripRequest) -> str:
-        """构建景点搜索查询 - 直接包含工具调用"""
-        keywords = []
-        if request.preferences:
-            # 只取第一个偏好作为关键词
-            keywords = request.preferences[0]
-        else:
-            keywords = "景点"
+    def _resolve_attraction_locations(self, trip_plan: TripPlan, candidates: list[dict[str, str]]) -> None:
+        """按本次搜索中的景点 ID 查询详情，回填核实后的坐标。"""
+        candidates_by_id = {poi["id"]: poi for poi in candidates}
+        detail_lookup = cache(self.amap_service.get_poi_detail)
+        for day in trip_plan.days:
+            for attraction in day.attractions:
+                candidate = candidates_by_id.get(attraction.poi_id or "")
+                if candidate is None:
+                    attraction.poi_id = None
+                    continue
 
-        # 直接返回工具调用格式
-        query = f"请使用amap_maps_text_search工具搜索{request.city}的{keywords}相关景点。\n[TOOL_CALL:amap_maps_text_search:keywords={keywords},city={request.city}]"
-        return query
+                attraction.name = candidate["name"]
+                attraction.address = candidate["address"]
+                detail = detail_lookup(candidate["id"])
+                if detail.get("id") != candidate["id"] or detail.get("error"):
+                    continue
+
+                attraction.location = parse_poi_location(detail.get("location"))
+                address = detail.get("address")
+                if isinstance(address, str) and address.strip():
+                    attraction.address = address.strip()
 
     def _build_planner_query(self, request: TripRequest, attractions: str, weather: str, hotels: str = "") -> str:
         """构建行程规划查询"""
@@ -303,7 +275,7 @@ class MultiAgentTripPlanner:
 - 住宿: {request.accommodation}
 - 偏好: {', '.join(request.preferences) if request.preferences else '无'}
 
-**景点信息:**
+**高德候选景点:**
 {attractions}
 
 **天气信息:**
@@ -318,7 +290,7 @@ class MultiAgentTripPlanner:
 3. 每天推荐一个具体的酒店(从酒店信息中选择)
 3. 考虑景点之间的距离和交通方式
 4. 返回完整的JSON格式数据
-5. 景点的经纬度坐标要真实准确
+5. 将选中候选景点的 id 原样复制到 poi_id，无法匹配时填 null。景点地址和坐标由后端填写。
 """
         if request.free_text_input:
             query += f"\n**额外要求:** {request.free_text_input}"
@@ -357,6 +329,14 @@ class MultiAgentTripPlanner:
             
             # 解析JSON
             data = json.loads(json_str)
+
+            for day in data.get("days", []):
+                for attraction in day.get("attractions", []):
+                    # 景点地址和坐标以高德数据为准。
+                    attraction["address"] = ""
+                    attraction["location"] = None
+                    poi_id = attraction.get("poi_id")
+                    attraction["poi_id"] = poi_id.strip() if isinstance(poi_id, str) else None
             
             # 转换为TripPlan对象
             trip_plan = TripPlan(**data)
@@ -390,7 +370,6 @@ class MultiAgentTripPlanner:
                     Attraction(
                         name=f"{request.city}景点{j+1}",
                         address=f"{request.city}市",
-                        location=Location(longitude=116.4 + i*0.01 + j*0.005, latitude=39.9 + i*0.01 + j*0.005),
                         visit_duration=120,
                         description=f"这是{request.city}的著名景点",
                         category="景点"

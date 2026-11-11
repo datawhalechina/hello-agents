@@ -1,9 +1,36 @@
 """高德地图MCP服务封装"""
 
+import json
+import re
 from typing import List, Dict, Any, Optional
 from hello_agents.tools import MCPTool
 from ..config import get_settings
 from ..models.schemas import Location, POIInfo, WeatherInfo
+
+
+def parse_poi_location(value: Any) -> Optional[Location]:
+    """高德详情将经纬度作为逗号分隔的字符串返回。"""
+    if not isinstance(value, str):
+        return None
+
+    try:
+        longitude, latitude = map(float, value.split(","))
+    except ValueError:
+        return None
+
+    if -180 <= longitude <= 180 and -90 <= latitude <= 90:
+        return Location(longitude=longitude, latitude=latitude)
+    return None
+
+
+def _parse_poi_result(result: str) -> Dict[str, Any]:
+    match = re.search(r'\{.*\}', result, re.DOTALL)
+    if match:
+        data = json.loads(match.group())
+        if isinstance(data, dict):
+            return data
+    return {"raw": result}
+
 
 # 全局MCP工具实例
 _amap_mcp_tool = None
@@ -53,6 +80,46 @@ class AmapService:
     def __init__(self):
         """初始化服务"""
         self.mcp_tool = get_amap_mcp_tool()
+
+    def _search_poi_result(self, keywords: str, city: str, citylimit: bool) -> str:
+        return self.mcp_tool.run({
+            "action": "call_tool",
+            "tool_name": "maps_text_search",
+            "arguments": {
+                "keywords": keywords,
+                "city": city,
+                "citylimit": str(citylimit).lower(),
+            },
+        })
+
+    def search_poi_candidates(self, keywords: str, city: str) -> List[Dict[str, str]]:
+        """保留关键词搜索返回的原始景点 ID，供行程规划选择。"""
+        try:
+            pois = _parse_poi_result(self._search_poi_result(keywords, city, True)).get("pois")
+            if not isinstance(pois, list):
+                return []
+
+            candidates = []
+            for poi in pois:
+                if not isinstance(poi, dict):
+                    continue
+                poi_id, name = poi.get("id"), poi.get("name")
+                if not isinstance(poi_id, str) or not poi_id.strip():
+                    continue
+                if not isinstance(name, str) or not name.strip():
+                    continue
+                address = poi.get("address")
+                category = poi.get("type") or poi.get("typecode")
+                candidates.append({
+                    "id": poi_id.strip(),
+                    "name": name.strip(),
+                    "address": address.strip() if isinstance(address, str) else "",
+                    "type": category if isinstance(category, str) else "",
+                })
+            return candidates
+        except Exception as error:
+            print(f"❌ POI候选搜索失败: {type(error).__name__}")
+            return []
     
     def search_poi(self, keywords: str, city: str, citylimit: bool = True) -> List[POIInfo]:
         """
@@ -68,15 +135,7 @@ class AmapService:
         """
         try:
             # 调用MCP工具
-            result = self.mcp_tool.run({
-                "action": "call_tool",
-                "tool_name": "maps_text_search",
-                "arguments": {
-                    "keywords": keywords,
-                    "city": city,
-                    "citylimit": str(citylimit).lower()
-                }
-            })
+            result = self._search_poi_result(keywords, city, citylimit)
             
             # 解析结果
             # 注意: MCP工具返回的是字符串,需要解析
@@ -237,17 +296,7 @@ class AmapService:
 
             print(f"POI详情结果: {result[:200]}...")
 
-            # 解析结果并提取图片
-            import json
-            import re
-
-            # 尝试从结果中提取JSON
-            json_match = re.search(r'\{.*\}', result, re.DOTALL)
-            if json_match:
-                data = json.loads(json_match.group())
-                return data
-
-            return {"raw": result}
+            return _parse_poi_result(result)
 
         except Exception as e:
             print(f"❌ 获取POI详情失败: {str(e)}")

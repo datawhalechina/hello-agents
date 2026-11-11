@@ -61,7 +61,7 @@ class Attraction(BaseModel):
     """景点信息"""
     name: str = Field(..., description="景点名称")
     address: str = Field(..., description="地址")
-    location: Location = Field(..., description="经纬度坐标")
+    location: Optional[Location] = Field(default=None, description="已核实的经纬度坐标")
     visit_duration: int = Field(..., description="建议游览时间(分钟)")
     description: str = Field(..., description="景点描述")
     category: Optional[str] = Field(default="景点", description="景点类别")

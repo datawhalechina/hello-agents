@@ -8,7 +8,7 @@ export interface Location {
 export interface Attraction {
   name: string
   address: string
-  location: Location
+  location: Location | null
   visit_duration: number
   description: string
   category?: string
