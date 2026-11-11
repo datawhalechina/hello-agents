@@ -1,0 +1,7 @@
+*.py text eol=lf
+*.sh text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.ipynb text eol=lf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf

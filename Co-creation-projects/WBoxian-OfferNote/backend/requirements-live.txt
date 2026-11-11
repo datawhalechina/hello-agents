@@ -1,0 +1,4 @@
+-r requirements.txt
+hello-agents==0.2.9
+# 0.2.9 的顶层导入会间接引用评测数据集加载器，需要显式补足此依赖。
+huggingface-hub==0.36.2

@@ -1,0 +1,3 @@
+# 共创项目完整依赖：Web 后端、HelloAgents 适配和 Notebook/CLI 验收。
+-r backend/requirements-live.txt
+httpx==0.28.1
