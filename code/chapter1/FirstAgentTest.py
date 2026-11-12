@@ -189,13 +189,27 @@ for i in range(5): # 设置最大循环次数
     action_str = action_match.group(1).strip()
 
     if action_str.startswith("Finish"):
-        final_answer = re.match(r"Finish\[(.*)\]", action_str).group(1)
+        finish_match = re.match(r"Finish\[(.*)\]", action_str, re.DOTALL)
+        if finish_match:
+            final_answer = finish_match.group(1).strip()
+        else:
+            # 兼容 Finish 答案、漏写右括号等写法，避免解析失败导致整个流程中断
+            final_answer = re.sub(r"^Finish\s*\[?", "", action_str, flags=re.DOTALL).rstrip("]").strip()
         print(f"任务完成，最终答案: {final_answer}")
         break
-    
-    tool_name = re.search(r"(\w+)\(", action_str).group(1)
-    args_str = re.search(r"\((.*)\)", action_str).group(1)
-    kwargs = dict(re.findall(r'(\w+)="([^"]*)"', args_str))
+
+    tool_match = re.search(r"(\w+)\(", action_str)
+    if not tool_match:
+        observation = "错误: 无法解析工具调用。请使用 function_name(arg_name=\"arg_value\") 格式，或使用 Finish[最终答案] 结束任务。"
+        observation_str = f"Observation: {observation}"
+        print(f"{observation_str}\n" + "="*40)
+        prompt_history.append(observation_str)
+        continue
+
+    tool_name = tool_match.group(1)
+    args_match = re.search(r"\((.*)\)", action_str, re.DOTALL)
+    args_str = args_match.group(1) if args_match else ""
+    kwargs = dict(re.findall(r"""(\w+)\s*=\s*["']([^"']*)["']""", args_str))
 
     if tool_name in available_tools:
         observation = available_tools[tool_name](**kwargs)
