@@ -21,7 +21,7 @@ class Config(BaseModel):
     log_level: str = Field(default="INFO", description="日志级别")
     
     # ==================== LLM 配置 ====================
-    default_model: str = Field(default="gpt-3.5-turbo", description="默认模型")
+    default_model: str = Field(default="gpt-5.6-terra", description="默认模型")
     default_provider: str = Field(default="openai", description="默认提供商")
     temperature: float = Field(default=0.7, ge=0.0, le=2.0, description="温度参数")
     max_tokens: Optional[int] = Field(default=None, description="最大 token 数")

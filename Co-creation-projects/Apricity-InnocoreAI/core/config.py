@@ -28,7 +28,7 @@ class VectorDBType(Enum):
 class LLMConfig:
     """LLM配置"""
     provider: LLMProvider = LLMProvider.OPENAI
-    model_name: str = "gpt-3.5-turbo"  # OpenAI: gpt-4, gpt-3.5-turbo, gpt-4-turbo-preview
+    model_name: str = "gpt-5.6-terra"  # OpenAI: gpt-5.6-sol, gpt-5.6-terra
                                         # DashScope: qwen-turbo, qwen-plus, qwen-max
                                         # ModelScope: qwen/Qwen2.5-7B-Instruct
     api_key: Optional[str] = None

@@ -15,13 +15,13 @@ class Settings(BaseSettings):
     # LLM配置（支持多种命名方式）
     llm_api_key: str = ""
     llm_base_url: str = "https://api.openai.com/v1"
-    llm_model_id: str = "gpt-4"
+    llm_model_id: str = "gpt-5.6-sol"
     llm_timeout: int = 180
     
     # 兼容旧字段名
     openai_api_key: str = ""  # 兼容字段，会自动映射到 llm_api_key
     openai_base_url: str = "https://api.openai.com/v1"
-    openai_model: str = "gpt-4"
+    openai_model: str = "gpt-5.6-sol"
     
     # 搜索 API 配置
     tavily_api_key: str = ""
@@ -75,7 +75,7 @@ def get_settings() -> Settings:
             _settings.llm_api_key = _settings.openai_api_key
         if _settings.openai_base_url and _settings.llm_base_url == "https://api.openai.com/v1":
             _settings.llm_base_url = _settings.openai_base_url
-        if _settings.openai_model and _settings.llm_model_id == "gpt-4":
+        if _settings.openai_model and _settings.llm_model_id == "gpt-5.6-sol":
             _settings.llm_model_id = _settings.openai_model
     return _settings
 

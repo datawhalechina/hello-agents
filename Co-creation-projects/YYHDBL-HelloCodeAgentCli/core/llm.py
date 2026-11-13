@@ -220,7 +220,7 @@ class HelloAgentsLLM:
     def _get_default_model(self) -> str:
         """获取默认模型"""
         if self.provider == "openai":
-            return "gpt-3.5-turbo"
+            return "gpt-5.6-terra"
         elif self.provider == "deepseek":
             return "deepseek-chat"
         elif self.provider == "qwen":
@@ -258,7 +258,7 @@ class HelloAgentsLLM:
             elif "localhost" in base_url_lower or "127.0.0.1" in base_url_lower:
                 return "local-model"
             else:
-                return "gpt-3.5-turbo"
+                return "gpt-5.6-terra"
 
     def think(self, messages: list[dict[str, str]], temperature: Optional[float] = None) -> Iterator[str]:
         """
