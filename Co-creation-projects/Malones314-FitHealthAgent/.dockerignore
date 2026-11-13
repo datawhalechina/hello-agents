@@ -1,0 +1,45 @@
+# 防止运行数据、密钥和开发产物进入镜像。
+
+# ── 运行时数据：只能来自挂载卷，绝不进镜像 ──────────────────────────────
+data/
+
+# ── 机密 ────────────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── 版本控制与 IDE ──────────────────────────────────────────────────────
+.git/
+.gitignore
+.idea/
+.vscode/
+.agents/
+
+# ── Python 缓存与测试产物 ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.test-tmp/
+.tmp-tests/
+
+# ── 本地开发杂物 ────────────────────────────────────────────────────────
+*.log
+tool-output/
+dist/
+memory/todos/
+memory/traces/
+memory/sessions/
+
+# ── 容器里用不到的东西 ──────────────────────────────────────────────────
+tests/
+scripts/
+docker-compose*.yml
+Dockerfile
+LICENSE
+*.md
+!README.md
