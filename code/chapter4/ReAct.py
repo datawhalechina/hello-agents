@@ -82,12 +82,25 @@ class ReActAgent:
         return thought, action
 
     def _parse_action(self, action_text: str):
-        match = re.match(r"(\w+)\[(.*)\]", action_text, re.DOTALL)
-        return (match.group(1), match.group(2)) if match else (None, None)
+        match = re.match(r"(\w+)\[", action_text)
+        if not match:
+            return None, None
+
+        input_start = match.end()
+        bracket_depth = 1
+        for index in range(input_start, len(action_text)):
+            if action_text[index] == "[":
+                bracket_depth += 1
+            elif action_text[index] == "]":
+                bracket_depth -= 1
+                if bracket_depth == 0:
+                    return match.group(1), action_text[input_start:index]
+
+        return None, None
 
     def _parse_action_input(self, action_text: str):
-        match = re.match(r"\w+\[(.*)\]", action_text, re.DOTALL)
-        return match.group(1) if match else ""
+        _, action_input = self._parse_action(action_text)
+        return action_input or ""
 
 if __name__ == '__main__':
     llm = HelloAgentsLLM()

@@ -449,14 +449,30 @@ The LLM returns plain text, and we need to precisely extract `Thought` and `Acti
     def _parse_action(self, action_text: str):
         """Parse Action string to extract tool name and input.
         """
-        match = re.match(r"(\w+)\[(.*)\]", action_text, re.DOTALL)
-        if match:
-            return match.group(1), match.group(2)
+        match = re.match(r"(\w+)\[", action_text)
+        if not match:
+            return None, None
+
+        input_start = match.end()
+        bracket_depth = 1
+        for index in range(input_start, len(action_text)):
+            if action_text[index] == "[":
+                bracket_depth += 1
+            elif action_text[index] == "]":
+                bracket_depth -= 1
+                if bracket_depth == 0:
+                    return match.group(1), action_text[input_start:index]
+
         return None, None
+
+    def _parse_action_input(self, action_text: str):
+        """Parse a Finish string and extract the answer in its first complete bracket pair."""
+        _, action_input = self._parse_action(action_text)
+        return action_input or ""
 ```
 
 - `_parse_output`: Responsible for separating the two main parts `Thought` and `Action` from the LLM's complete response.
-- `_parse_action`: Responsible for further parsing the `Action` string, for example, extracting the tool name `Search` and tool input `Huawei's latest phone` from `Search[Huawei's latest phone]`.
+- `_parse_action`: Responsible for further parsing the `Action` string, for example, extracting the tool name `Search` and tool input `Huawei's latest phone` from `Search[Huawei's latest phone]`. It matches the first complete bracketed input, so later returned `Action` blocks are not merged into the current input, while multiline and nested bracketed content are preserved.
 
 (4) Tool Invocation and Execution
 
@@ -475,7 +491,7 @@ The LLM returns plain text, and we need to precisely extract `Thought` and `Acti
             # 4. Execute Action
             if action.startswith("Finish"):
                 # If it's a Finish instruction, extract the final answer and end
-                final_answer = re.match(r"Finish\[(.*)\]", action).group(1)
+                final_answer = self._parse_action_input(action)
                 print(f"🎉 Final Answer: {final_answer}")
                 return final_answer
 
