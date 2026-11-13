@@ -1,0 +1,20 @@
+[
+  {
+    "id": "TC-001",
+    "type": "explain",
+    "input": "用通俗的语言解释一下什么是递归",
+    "expected_keywords": ["函数调用自身", "终止条件"]
+  },
+  {
+    "id": "TC-002",
+    "type": "code_review",
+    "input_file": "data/sample_code.py",
+    "expected_keywords": ["重复计算", "空列表"]
+  },
+  {
+    "id": "TC-003",
+    "type": "quiz",
+    "input": "围绕 Python 列表出 3 道选择题",
+    "expected_keywords": ["A", "B", "C", "D"]
+  }
+]
