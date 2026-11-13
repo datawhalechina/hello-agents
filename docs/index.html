@@ -18,7 +18,7 @@
             right: 80px;
             z-index: 999;
         }
-        .lang-switch button {
+        .lang-switch select {
             background: #42b983;
             color: white;
             border: none;
@@ -28,7 +28,7 @@
             font-size: 14px;
             transition: background 0.3s;
         }
-        .lang-switch button:hover {
+        .lang-switch select:hover {
             background: #33a06f;
         }
 
@@ -205,9 +205,13 @@
 </head>
 
 <body>
-    <!-- 语言切换按钮 -->
+    <!-- 语言切换 -->
     <div class="lang-switch">
-        <button id="langBtn" onclick="switchLanguage()">English</button>
+        <select id="langSelect" onchange="switchLanguage(this.value)" aria-label="Language">
+            <option value="zh">中文</option>
+            <option value="en">English</option>
+            <option value="vi">Tiếng Việt</option>
+        </select>
     </div>
     <div id="app"></div>
     <script src="//cdn.jsdelivr.net/npm/mermaid@8.0.0-rc.8/dist/mermaid.min.js"></script>
@@ -228,6 +232,10 @@
                 '/en/.*/_sidebar.md': '/_sidebar_en.md',
                 '/en/(.*)': '/$1',
 
+                // 越南语路径映射
+                '/vi/_sidebar.md': '/vi/_sidebar.md',
+                '/vi/.*/_sidebar.md': '/vi/_sidebar.md',
+
                 // 默认中文侧边栏
                 '/_sidebar.md': '/_sidebar.md',
                 '/.*/_sidebar.md': '/_sidebar.md'
@@ -246,6 +254,7 @@
             fallbackLanguages: ['en'],
             nameLink: {
                 '/en/': '#/en/',
+                '/vi/': '#/vi/',
                 '/': '#/'
             },
             // 使用钩子动态处理侧边栏
@@ -342,7 +351,8 @@
 
                         // 获取语言设置
                         const preferredLang = localStorage.getItem('preferredLanguage');
-                        const isEnglish = currentPath.includes('/en/') || preferredLang === 'en';
+                        const isVietnamese = currentPath.startsWith('/vi/');
+                        const isEnglish = !isVietnamese && (currentPath.includes('/en/') || preferredLang === 'en');
 
                         // --- 获取当前主题状态 (新增逻辑) ---
                         // 这里是为了在创建 Giscus 时就设置正确的初始主题
@@ -354,13 +364,17 @@
 
                         const titleDiv = document.createElement('div');
                         titleDiv.className = 'giscus-toggle-title';
-                        titleDiv.innerHTML = isEnglish
+                        titleDiv.innerHTML = isVietnamese
+                            ? '💬 Thảo luận & Hỏi đáp'
+                            : isEnglish
                             ? '💬 Discussion & Questions'
                             : '💬 讨论与提问';
 
                         const hintText = document.createElement('p');
                         hintText.className = 'giscus-hint';
-                        hintText.textContent = isEnglish
+                        hintText.textContent = isVietnamese
+                            ? 'Nhấp để mở rộng/thu gọn'
+                            : isEnglish
                             ? 'Click to expand/collapse'
                             : '点击展开/收起';
 
@@ -396,7 +410,7 @@
                         // 如果当前 body 有 dark-mode 类，则初始化为 'dark'，否则 'light'
                         giscusScript.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
                         
-                        giscusScript.setAttribute('data-lang', isEnglish ? 'en' : 'zh-CN');
+                        giscusScript.setAttribute('data-lang', isVietnamese ? 'vi' : isEnglish ? 'en' : 'zh-CN');
                         giscusScript.setAttribute('data-loading', 'lazy');
                         giscusScript.crossOrigin = 'anonymous';
                         giscusScript.async = true;
@@ -426,6 +440,33 @@
                             article.appendChild(giscusContainer);
                         }
                     });
+
+                    // Localize docsify chrome (word count and pagination) on Vietnamese routes.
+                    hook.doneEach(function() {
+                        if (!vm.route.path.startsWith('/vi/')) {
+                            return;
+                        }
+
+                        const countLabel = document.querySelector('.markdown-section > div > span[style*="float"]');
+                        if (countLabel) {
+                            const match = countLabel.textContent.trim().match(/^(\d+)\s*字\s*\|\s*(\d+)\s*分钟$/);
+                            if (match) {
+                                countLabel.textContent = match[1] + ' từ | ' + match[2] + ' phút';
+                            }
+                        }
+
+                        document.querySelectorAll('.pagination-item').forEach(function(item) {
+                            const label = item.querySelector('.pagination-item-label > span');
+                            if (!label) {
+                                return;
+                            }
+                            if (item.classList.contains('pagination-item--previous')) {
+                                label.textContent = 'Chương trước';
+                            } else if (item.classList.contains('pagination-item--next')) {
+                                label.textContent = 'Chương sau';
+                            }
+                        });
+                    });
                 }
             ]
         }
@@ -449,157 +490,213 @@
     <!-- 字数统计 -->
     <script src="//unpkg.com/docsify-count/dist/countable.js"></script>
 
-    <!-- 语言切换脚本 (保留原样) -->
+    <!-- 语言切换脚本 -->
     <script>
-        // 章节文件名映射
-        const chapterMapping = {
-            // 中文 -> 英文
-            'zh2en': {
-                'README.md': 'README_EN.md',
-                '前言.md': 'Preface.md',
-                '第一章 初识智能体.md': 'Chapter1-Introduction-to-Agents.md',
-                '第二章 智能体发展史.md': 'Chapter2-History-of-Agents.md',
-                '第三章 大语言模型基础.md': 'Chapter3-Fundamentals-of-Large-Language-Models.md',
-                '第四章 智能体经典范式构建.md': 'Chapter4-Building-Classic-Agent-Paradigms.md',
-                '第五章 基于低代码平台的智能体搭建.md': 'Chapter5-Building-Agents-with-Low-Code-Platforms.md',
-                '第六章 框架开发实践.md': 'Chapter6-Framework-Development-Practice.md',
-                '第七章 构建你的Agent框架.md': 'Chapter7-Building-Your-Agent-Framework.md',
-                '第八章 记忆与检索.md': 'Chapter8-Memory-and-Retrieval.md',
-                '第九章 上下文工程.md': 'Chapter9-Context-Engineering.md',
-                '第十章 智能体通信协议.md': 'Chapter10-Agent-Communication-Protocols.md',
-                '第十一章 Agentic-RL.md': 'Chapter11-Agentic-RL.md',
-                '第十二章 智能体性能评估.md': 'Chapter12-Agent-Performance-Evaluation.md',
-                '第十三章 智能旅行助手.md': 'Chapter13-Intelligent-Travel-Assistant.md',
-                '第十四章 自动化深度研究智能体.md': 'Chapter14-Automated-Deep-Research-Agent.md',
-                '第十五章 构建赛博小镇.md': 'Chapter15-Building-Cyber-Town.md',
-                '第十六章 毕业设计.md': 'Chapter16-Graduation-Project.md'
-            },
-            // 英文 -> 中文
-            'en2zh': {
-                'README_EN.md': 'README.md',
-                'Preface.md': '前言.md',
-                'Chapter1-Introduction-to-Agents.md': '第一章 初识智能体.md',
-                'Chapter2-History-of-Agents.md': '第二章 智能体发展史.md',
-                'Chapter3-Fundamentals-of-Large-Language-Models.md': '第三章 大语言模型基础.md',
-                'Chapter4-Building-Classic-Agent-Paradigms.md': '第四章 智能体经典范式构建.md',
-                'Chapter5-Building-Agents-with-Low-Code-Platforms.md': '第五章 基于低代码平台的智能体搭建.md',
-                'Chapter6-Framework-Development-Practice.md': '第六章 框架开发实践.md',
-                'Chapter7-Building-Your-Agent-Framework.md': '第七章 构建你的Agent框架.md',
-                'Chapter8-Memory-and-Retrieval.md': '第八章 记忆与检索.md',
-                'Chapter9-Context-Engineering.md': '第九章 上下文工程.md',
-                'Chapter10-Agent-Communication-Protocols.md': '第十章 智能体通信协议.md',
-                'Chapter11-Agentic-RL.md': '第十一章 Agentic-RL.md',
-                'Chapter12-Agent-Performance-Evaluation.md': '第十二章 智能体性能评估.md',
-                'Chapter13-Intelligent-Travel-Assistant.md': '第十三章 智能旅行助手.md',
-                'Chapter14-Automated-Deep-Research-Agent.md': '第十四章 自动化深度研究智能体.md',
-                'Chapter15-Building-Cyber-Town.md': '第十五章 构建赛博小镇.md',
-                'Chapter16-Graduation-Project.md': '第十六章 毕业设计.md'
-            }
+        // Canonical per-language filenames for chapters 1-16.
+        const chapterFiles = {
+            zh: [
+                '第一章 初识智能体.md',
+                '第二章 智能体发展史.md',
+                '第三章 大语言模型基础.md',
+                '第四章 智能体经典范式构建.md',
+                '第五章 基于低代码平台的智能体搭建.md',
+                '第六章 框架开发实践.md',
+                '第七章 构建你的Agent框架.md',
+                '第八章 记忆与检索.md',
+                '第九章 上下文工程.md',
+                '第十章 智能体通信协议.md',
+                '第十一章 Agentic-RL.md',
+                '第十二章 智能体性能评估.md',
+                '第十三章 智能旅行助手.md',
+                '第十四章 自动化深度研究智能体.md',
+                '第十五章 构建赛博小镇.md',
+                '第十六章 毕业设计.md'
+            ],
+            en: [
+                'Chapter1-Introduction-to-Agents.md',
+                'Chapter2-History-of-Agents.md',
+                'Chapter3-Fundamentals-of-Large-Language-Models.md',
+                'Chapter4-Building-Classic-Agent-Paradigms.md',
+                'Chapter5-Building-Agents-with-Low-Code-Platforms.md',
+                'Chapter6-Framework-Development-Practice.md',
+                'Chapter7-Building-Your-Agent-Framework.md',
+                'Chapter8-Memory-and-Retrieval.md',
+                'Chapter9-Context-Engineering.md',
+                'Chapter10-Agent-Communication-Protocols.md',
+                'Chapter11-Agentic-RL.md',
+                'Chapter12-Agent-Performance-Evaluation.md',
+                'Chapter13-Intelligent-Travel-Assistant.md',
+                'Chapter14-Automated-Deep-Research-Agent.md',
+                'Chapter15-Building-Cyber-Town.md',
+                'Chapter16-Graduation-Project.md'
+            ],
+            vi: [
+                'Chuong1-Gioi-thieu-ve-Agent.md',
+                'Chuong2-Lich-su-phat-trien-cua-Agent.md',
+                'Chuong3-Co-so-mo-hinh-ngon-ngu-lon.md',
+                'Chuong4-Xay-dung-cac-mo-hinh-Agent-kinh-dien.md',
+                'Chuong5-Xay-dung-Agent-voi-nen-tang-low-code.md',
+                'Chuong6-Thuc-hanh-phat-trien-voi-framework.md',
+                'Chuong7-Xay-dung-framework-Agent-cua-ban.md',
+                'Chuong8-Bo-nho-va-truy-xuat.md',
+                'Chuong9-Ky-thuat-ngu-canh.md',
+                'Chuong10-Giao-thuc-giao-tiep-Agent.md',
+                'Chuong11-Agentic-RL.md',
+                'Chuong12-Danh-gia-hieu-nang-Agent.md',
+                'Chuong13-Tro-ly-du-lich-thong-minh.md',
+                'Chuong14-Agent-nghien-cuu-chuyen-sau-tu-dong.md',
+                'Chuong15-Xay-dung-thi-tran-cyber.md',
+                'Chuong16-Do-an-tot-nghiep.md'
+            ]
         };
 
-        function switchLanguage() {
-            const currentHash = window.location.hash;
-            const langBtn = document.getElementById('langBtn');
+        // Capture the stored preference before Docsify can emit hashchange events.
+        const initialPreferredLanguage = localStorage.getItem('preferredLanguage');
+        let startupPreferenceApplied = false;
 
-            // 检测当前语言
-            if (currentHash.includes('/en/')) {
-                // 从英文切换到中文
-                localStorage.setItem('preferredLanguage', 'zh');
-
-                let newHash = currentHash.replace('#/', '').replace('en/', '');
-
-                // 提取文件名
-                const parts = newHash.split('/');
-                const filename = parts[parts.length - 1];
-
-                // 查找对应的中文文件名
-                if (chapterMapping.en2zh[filename]) {
-                    parts[parts.length - 1] = chapterMapping.en2zh[filename];
-                    newHash = '#/' + parts.join('/');
-                } else {
-                    newHash = '#/';
-                }
-
-                window.location.hash = newHash;
-                langBtn.textContent = 'English';
-                window.$docsify.pagination.previousText = '上一章节';
-                window.$docsify.pagination.nextText = '下一章节';
-            } else {
-                // 从中文切换到英文
-                localStorage.setItem('preferredLanguage', 'en');
-
-                let path = currentHash.replace('#/', '');
-
-                if (path === '' || path === '/') {
-                    // 首页
-                    window.location.hash = '#/en/README_EN.md';
-                } else {
-                    // 提取文件名
-                    const parts = path.split('/');
-                    const filename = parts[parts.length - 1];
-
-                    // 查找对应的英文文件名
-                    if (chapterMapping.zh2en[filename]) {
-                        parts[parts.length - 1] = chapterMapping.zh2en[filename];
-                        window.location.hash = '#/en/' + parts.join('/');
-                    } else {
-                        window.location.hash = '#/en/README_EN.md';
-                    }
-                }
-
-                langBtn.textContent = '中文';
-                window.$docsify.pagination.previousText = 'Previous';
-                window.$docsify.pagination.nextText = 'Next';
+        function decodeRoute(hash) {
+            let path = hash.replace(/^#\/?/, '').split('?')[0];
+            try {
+                path = decodeURIComponent(path);
+            } catch (e) {
+                // Keep the raw path when it is not valid percent-encoding.
             }
-
-            // 重新加载页面以应用新的 sidebar
-            window.location.reload();
+            return path.replace(/\.md$/i, '').replace(/\/+$/, '');
         }
 
-        // 页面加载时设置按钮文本和检查语言偏好
-        window.addEventListener('load', function() {
-            const currentHash = window.location.hash;
-            const langBtn = document.getElementById('langBtn');
-            const preferredLang = localStorage.getItem('preferredLanguage');
+        function detectLanguage(hash) {
+            if (/^#\/vi(?:\/|$)/.test(hash)) {
+                return 'vi';
+            }
+            if (/^#\/en(?:\/|$)/.test(hash) || /^#\/README_EN\.md(?:[?#]|$)/.test(hash)) {
+                return 'en';
+            }
+            return 'zh';
+        }
 
-            // 只有在用户明确设置了语言偏好后,才自动切换
-            // 首次访问(没有偏好设置)时,默认显示中文版
-            if (preferredLang) {
-                // 如果用户有语言偏好,且当前 URL 不匹配偏好,则自动切换
-                if (preferredLang === 'en' && !currentHash.includes('/en/')) {
-                    // 用户偏好英文,但当前是中文页面
-                    let path = currentHash.replace('#/', '');
+        function getRouteKey(hash) {
+            const path = decodeRoute(hash);
+            if (!path || path === 'README' || path === 'README_EN' ||
+                path === 'en' || path === 'vi' ||
+                path === 'en/README' || path === 'en/README_EN' || path === 'vi/README') {
+                return 'landing';
+            }
+            if (path === 'Preface' || path === 'en/Preface' ||
+                path === 'vi/Preface' || path === '前言') {
+                return 'preface';
+            }
+            const match = path.match(/(?:^|\/)chapter(\d+)\//i);
+            return match ? 'chapter' + Number(match[1]) : null;
+        }
 
-                    if (path === '' || path === '/') {
-                        window.location.hash = '#/en/README_EN.md';
-                    } else {
-                        const parts = path.split('/');
-                        const filename = parts[parts.length - 1];
+        function routeFor(lang, key) {
+            if (key === 'preface') {
+                return lang === 'zh'
+                    ? '#/前言.md'
+                    : lang === 'en'
+                    ? '#/en/Preface.md'
+                    : '#/vi/Preface.md';
+            }
 
-                        if (chapterMapping.zh2en[filename]) {
-                            parts[parts.length - 1] = chapterMapping.zh2en[filename];
-                            window.location.hash = '#/en/' + parts.join('/');
-                        }
-                    }
-                } else if (preferredLang === 'zh' && currentHash.includes('/en/')) {
-                    // 用户偏好中文,但当前是英文页面
-                    let newHash = currentHash.replace('#/', '').replace('en/', '');
-                    const parts = newHash.split('/');
-                    const filename = parts[parts.length - 1];
-
-                    if (chapterMapping.en2zh[filename]) {
-                        parts[parts.length - 1] = chapterMapping.en2zh[filename];
-                        window.location.hash = '#/' + parts.join('/');
-                    }
+            const chapter = /^chapter(\d+)$/.exec(key || '');
+            if (chapter) {
+                const number = Number(chapter[1]);
+                const filename = chapterFiles[lang] && chapterFiles[lang][number - 1];
+                if (filename) {
+                    const prefix = lang === 'en' ? 'en/' : lang === 'vi' ? 'vi/' : '';
+                    return '#/' + prefix + 'chapter' + number + '/' + filename;
                 }
             }
 
-            // 设置按钮文本
-            if (currentHash.includes('/en/')) {
-                langBtn.textContent = '中文';
-            } else {
-                langBtn.textContent = 'English';
+            return lang === 'zh'
+                ? '#/README.md'
+                : lang === 'en'
+                ? '#/en/README_EN.md'
+                : '#/vi/README.md';
+        }
+
+        function updateLanguageSelector() {
+            const selector = document.getElementById('langSelect');
+            if (selector) {
+                selector.value = detectLanguage(window.location.hash);
             }
+        }
+
+        function switchLanguage(lang) {
+            if (lang !== 'zh' && lang !== 'en' && lang !== 'vi') {
+                return;
+            }
+
+            const key = getRouteKey(window.location.hash) || 'landing';
+            const route = routeFor(lang, key);
+            localStorage.setItem('preferredLanguage', lang);
+
+            if (window.location.hash !== route) {
+                window.location.hash = route;
+                // Reload to apply the language-specific sidebar.
+                window.location.reload();
+            } else {
+                updateLanguageSelector();
+            }
+        }
+
+        // Apply the captured startup preference before hashchange may persist the route language.
+        window.addEventListener('load', function() {
+            const preferredLang = initialPreferredLanguage;
+            if ((preferredLang === 'zh' || preferredLang === 'en' || preferredLang === 'vi') &&
+                preferredLang !== detectLanguage(window.location.hash)) {
+                const key = getRouteKey(window.location.hash) || 'landing';
+                window.location.hash = routeFor(preferredLang, key);
+            }
+            startupPreferenceApplied = true;
+            updateLanguageSelector();
+        });
+
+        window.addEventListener('hashchange', function() {
+            updateLanguageSelector();
+            if (startupPreferenceApplied) {
+                localStorage.setItem('preferredLanguage', detectLanguage(window.location.hash));
+            }
+        });
+
+        // Route language-selector links through Docsify instead of loading raw Markdown.
+        document.addEventListener('click', function(event) {
+            const link = event.target.closest && event.target.closest('a[href]');
+            if (!link || link.target || event.defaultPrevented ||
+                event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                return;
+            }
+
+            let url;
+            try {
+                url = new URL(link.href, window.location.href);
+            } catch (e) {
+                return;
+            }
+
+            if (url.origin !== window.location.origin) {
+                return;
+            }
+
+            // Resolve from the authored href, not the served path, so this also
+            // works when the site is hosted under a sub-path.
+            const href = (link.getAttribute('href') || '').split('#')[0].split('?')[0];
+            const filename = href.split('/').pop();
+            let route = null;
+            if (filename === 'README_EN.md') {
+                route = '#/en/README_EN.md';
+            } else if (filename === 'README.md') {
+                route = href.indexOf('vi/') !== -1 ? '#/vi/README.md' : '#/README.md';
+            }
+
+            if (!route) {
+                return;
+            }
+
+            localStorage.setItem('preferredLanguage', detectLanguage(route));
+            event.preventDefault();
+            window.location.hash = route;
+            updateLanguageSelector();
         });
     </script>
 </body>

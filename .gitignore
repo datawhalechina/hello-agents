@@ -167,3 +167,4 @@ test_*.py
 !test_tools.py
 .workbuddy/
 memory/
+.worktrees/
