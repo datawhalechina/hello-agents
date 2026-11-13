@@ -72,7 +72,10 @@ class PDFLearningAssistant:
 
             process_time = time.time() - start_time
 
-            # RAG工具返回的是字符串消息
+            # RAG工具返回状态字符串；失败或未解析出内容时不更新学习状态
+            if not result.startswith("✅"):
+                return {"success": False, "message": f"加载失败: {result}"}
+
             self.current_document = os.path.basename(pdf_path)
             self.stats["documents_loaded"] += 1
 

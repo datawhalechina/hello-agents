@@ -1759,7 +1759,8 @@ def load_document(self, pdf_path: str) -> Dict[str, Any]:
 
     process_time = time.time() - start_time
 
-    if result.get("success", False):
+    # RAGTool returns a status string; only ✅ means the document was added.
+    if result.startswith("✅"):
         self.current_document = os.path.basename(pdf_path)
         self.stats["documents_loaded"] += 1
 
@@ -1781,7 +1782,7 @@ def load_document(self, pdf_path: str) -> Dict[str, Any]:
     else:
         return {
             "success": False,
-            "message": f"Loading failed: {result.get('error', 'Unknown error')}"
+            "message": f"Loading failed: {result}"
         }
 ```
 
@@ -1801,7 +1802,7 @@ This call triggers the complete processing workflow of RAGTool (MarkItDown conve
 - **Operation Type**: `"add_document"` - Add document to knowledge base
 - **File Path**: `file_path` - Path to the PDF file
 - **Chunking Parameters**: `chunk_size=1000, chunk_overlap=200` - Control text chunking
-- **Return Result**: Dictionary containing processing status and statistical information
+- **Return Result**: A status string. A `✅` prefix means the document was added; `❌` or `⚠️` indicates a failure or no extracted content. In those cases, do not update the current document, loaded-document count, or learning memory. The `load_document()` method above wraps this result in a dictionary containing `success` and `message` for the UI.
 
 After the document is successfully loaded, we use MemoryTool to record it to episodic memory:
 
