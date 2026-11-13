@@ -106,7 +106,22 @@ class ThreeKingdomsWerewolfGame:
                 self.hunter.append(agent)
             else:
                 self.villagers.append(agent)
-        
+
+        # 私下告知狼人队友身份：开局只确认了各自角色，狼人并不知道
+        # 队友是谁，白天讨论时会误把队友当击杀目标（见 issue #933）
+        if len(self.werewolves) > 1:
+            for wolf in self.werewolves:
+                teammates = "、".join(
+                    w.name for w in self.werewolves if w is not wolf
+                )
+                await wolf.observe(
+                    await self.moderator.announce(
+                        f"【私密消息】{wolf.name}，你的狼人队友是：{teammates}。"
+                        "白天讨论时请避免投票给队友，夜间请与队友配合击杀好人阵营，"
+                        "同时注意不要暴露队友的身份。"
+                    )
+                )
+
         # 游戏开始公告
         await self.moderator.announce(
             f"三国狼人杀游戏开始！参与者：{format_player_list(self.alive_players)}"
