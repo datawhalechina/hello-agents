@@ -1,0 +1,4 @@
+interface:
+  display_name: "项目中文注释"
+  short_description: "为完整项目补充中文文件头和逐函数说明，解释每个参数、返回值及专业术语"
+  default_prompt: "使用 $annotate-project-zh 为完整项目原地补充五项中文文件头，并给每个函数按函数用途、输入说明、输出说明添加注释，解释全部参数、返回结果和专业术语，不生成额外输出文件。"

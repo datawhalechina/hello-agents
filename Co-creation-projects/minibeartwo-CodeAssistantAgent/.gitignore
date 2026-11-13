@@ -1,0 +1,22 @@
+# Local configuration and environments
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+
+# Python and Notebook caches
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+*.log
+
+# Client dependencies and builds
+node_modules/
+build/
+dist/
+.test-artifacts/
+.runtime/
+!tests/test_*.py
+!examples/buggy-calculator/test_*.py

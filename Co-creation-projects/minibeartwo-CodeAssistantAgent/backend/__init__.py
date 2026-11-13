@@ -1,0 +1,1 @@
+"""CodeAssistantAgent local service."""

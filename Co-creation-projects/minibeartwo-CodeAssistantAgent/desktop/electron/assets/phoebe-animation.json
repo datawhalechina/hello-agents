@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 1,
+  "width": 256,
+  "height": 256,
+  "hoverDurationMs": 1100,
+  "clickDurationMs": 800,
+  "sourceSheet": "phoebe-actions-sheet.png",
+  "sourceSha256": "00025626b9b59964fb9f44a6db4ca960dff15be47e84a85616cec8253fce53e2",
+  "layout": {
+    "columns": 3,
+    "rows": 2,
+    "cellWidth": 512,
+    "cellHeight": 512
+  },
+  "alphaCleanup": {
+    "method": "largest-8-connected-component-with-low-alpha-fringe",
+    "coreAlphaThreshold": 32,
+    "fringeRadiusPixels": 2,
+    "transparentRgb": "zero",
+    "sourceSheetModified": false,
+    "frames": [
+      {
+        "frame": 0,
+        "componentsFound": 1,
+        "mainCorePixels": 157229,
+        "discardedCorePixels": 0,
+        "originalVisiblePixels": 168348,
+        "keptVisiblePixels": 161472,
+        "droppedVisiblePixels": 6876,
+        "normalizedTransparentPixels": 93796
+      },
+      {
+        "frame": 1,
+        "componentsFound": 2,
+        "mainCorePixels": 155069,
+        "discardedCorePixels": 130,
+        "originalVisiblePixels": 165985,
+        "keptVisiblePixels": 159476,
+        "droppedVisiblePixels": 6509,
+        "normalizedTransparentPixels": 96159
+      },
+      {
+        "frame": 2,
+        "componentsFound": 1,
+        "mainCorePixels": 152462,
+        "discardedCorePixels": 0,
+        "originalVisiblePixels": 163416,
+        "keptVisiblePixels": 156702,
+        "droppedVisiblePixels": 6714,
+        "normalizedTransparentPixels": 98728
+      },
+      {
+        "frame": 3,
+        "componentsFound": 1,
+        "mainCorePixels": 157169,
+        "discardedCorePixels": 0,
+        "originalVisiblePixels": 170985,
+        "keptVisiblePixels": 161685,
+        "droppedVisiblePixels": 9300,
+        "normalizedTransparentPixels": 91159
+      },
+      {
+        "frame": 4,
+        "componentsFound": 2,
+        "mainCorePixels": 143470,
+        "discardedCorePixels": 51,
+        "originalVisiblePixels": 153140,
+        "keptVisiblePixels": 147797,
+        "droppedVisiblePixels": 5343,
+        "normalizedTransparentPixels": 109004
+      },
+      {
+        "frame": 5,
+        "componentsFound": 1,
+        "mainCorePixels": 153513,
+        "discardedCorePixels": 0,
+        "originalVisiblePixels": 166724,
+        "keptVisiblePixels": 158002,
+        "droppedVisiblePixels": 8722,
+        "normalizedTransparentPixels": 95420
+      }
+    ]
+  },
+  "transform": {
+    "crop": {
+      "left": 19,
+      "top": 10,
+      "right": 511,
+      "bottom": 498
+    },
+    "scale": 0.47058823529411764,
+    "padding": 12,
+    "outputBounds": {
+      "left": 12,
+      "top": 13,
+      "width": 232,
+      "height": 230
+    },
+    "sourceBottomAnchor": 499,
+    "outputBottomAnchor": 243
+  },
+  "cellBounds": [
+    {
+      "left": 38,
+      "top": 31,
+      "right": 511,
+      "bottom": 498
+    },
+    {
+      "left": 23,
+      "top": 37,
+      "right": 511,
+      "bottom": 498
+    },
+    {
+      "left": 35,
+      "top": 35,
+      "right": 503,
+      "bottom": 498
+    },
+    {
+      "left": 37,
+      "top": 10,
+      "right": 511,
+      "bottom": 478
+    },
+    {
+      "left": 19,
+      "top": 13,
+      "right": 511,
+      "bottom": 439
+    },
+    {
+      "left": 37,
+      "top": 13,
+      "right": 507,
+      "bottom": 478
+    }
+  ],
+  "runtime": {
+    "renderer": "registered-pose-mesh-with-continuous-timeline",
+    "atlas": "phoebe-poses.png",
+    "metadata": "phoebe-poses.js",
+    "groundY": 243,
+    "footCenterX": 117.22,
+    "poseIds": [
+      "idle",
+      "hover0",
+      "hover1",
+      "hover2",
+      "anticipate",
+      "air",
+      "land"
+    ],
+    "shifts": [
+      {
+        "x": 0,
+        "y": 0
+      },
+      {
+        "x": -3,
+        "y": 1
+      },
+      {
+        "x": 5,
+        "y": 1
+      },
+      {
+        "x": -1,
+        "y": 1
+      },
+      {
+        "x": -4,
+        "y": 10
+      },
+      {
+        "x": -3,
+        "y": 29
+      },
+      {
+        "x": -4,
+        "y": 10
+      }
+    ]
+  },
+  "hover": {
+    "gif": "phoebe-hover.gif",
+    "still": "phoebe-hover-still.png",
+    "frameIndices": [
+      0,
+      1,
+      2,
+      1,
+      0
+    ],
+    "delaysMs": [
+      180,
+      220,
+      260,
+      220,
+      220
+    ],
+    "loop": true,
+    "frameCount": 5,
+    "durationMs": 1100
+  },
+  "click": {
+    "gif": "phoebe-click.gif",
+    "still": "phoebe-click-still.png",
+    "frameIndices": [
+      3,
+      4,
+      4,
+      5
+    ],
+    "delaysMs": [
+      100,
+      180,
+      220,
+      300
+    ],
+    "loop": false,
+    "frameCount": 4,
+    "durationMs": 800
+  }
+}

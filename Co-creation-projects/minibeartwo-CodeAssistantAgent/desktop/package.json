@@ -1,0 +1,32 @@
+{
+  "name": "code-assistant-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local CodeAssistantAgent desktop client",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "tsc --noEmit && vite build",
+    "start": "npm run build && electron .",
+    "test:desktop": "node scripts/smoke.mjs",
+    "test:bubble": "node scripts/bubble-smoke.mjs"
+  },
+  "dependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "electron": "44.9.0",
+    "gifenc": "1.0.3",
+    "playwright": "1.64.1",
+    "pngjs": "7.0.0",
+    "prettier": "3.6.2",
+    "typescript": "5.9.3",
+    "vite": "8.3.4"
+  }
+}

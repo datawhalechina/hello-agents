@@ -1,0 +1,196 @@
+:root {
+  font-family: 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif;
+  color: #e7f3ff;
+  background: transparent;
+  font-synthesis: none;
+  color-scheme: dark;
+  font-size: 13px;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+body,
+#root {
+  height: 100vh;
+  overflow: hidden;
+}
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+  border: 0;
+  color: inherit;
+  background: none;
+}
+button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+button,
+input,
+textarea,
+select {
+  outline-offset: 3px;
+}
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #9bdfff;
+}
+input,
+textarea,
+select {
+  border: 1px solid #5a94c97a;
+  background: #051b3edb;
+  border-radius: 7px;
+  color: #e4f2ff;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #83a6ce;
+}
+button:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+.app-shell {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px;
+  overflow: hidden;
+}
+html.is-maximized .app-shell {
+  border-radius: 0;
+}
+.primary,
+.secondary {
+  padding: 9px 16px;
+  border-radius: 8px;
+}
+.primary {
+  background: linear-gradient(120deg, #176fed, #1249be);
+  border: 1px solid #7aceff;
+  box-shadow: inset 0 0 12px #4cbaff55;
+  color: white;
+}
+.secondary {
+  background: #15366799;
+  border: 1px solid #81bbf059;
+  color: #cae6ff;
+}
+.icon-button {
+  font-size: 25px;
+  padding: 0 6px;
+  line-height: 1;
+}
+.muted {
+  color: #b0cceb;
+  line-height: 1.7;
+}
+.hint {
+  color: #94bde3;
+  font-size: 12px;
+  line-height: 1.8;
+}
+.modal-shade {
+  position: absolute;
+  inset: 64px 0 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #00102dd9;
+  backdrop-filter: blur(4px);
+  padding: 16px;
+}
+.settings-shade {
+  z-index: 30;
+}
+.settings-dialog {
+  width: 570px;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: auto;
+  padding: 24px;
+  border: 1px solid #8bd3ff;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #143d71fa, #071d42fc);
+  box-shadow: 0 0 25px #0d79c050;
+}
+.dialog-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+.dialog-heading h2 {
+  margin: 8px 0;
+  font-size: 23px;
+}
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #9cd8ff;
+}
+.settings-dialog > label,
+.form-row > label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 15px;
+  color: #c3ddf5;
+}
+.settings-dialog input {
+  width: 100%;
+  padding: 9px 12px;
+}
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+.form-row > label {
+  flex: 1;
+  min-width: 0;
+}
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+.error-inline,
+.error-banner {
+  padding: 10px 14px;
+  color: #ffdbca;
+  border: 1px solid #f7b4757a;
+  background: #52263bed;
+  border-radius: 7px;
+  overflow-wrap: anywhere;
+}
+.error-banner {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+.error-banner button {
+  font-size: 20px;
+}
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-thumb {
+  background: #5382b38c;
+  border-radius: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}

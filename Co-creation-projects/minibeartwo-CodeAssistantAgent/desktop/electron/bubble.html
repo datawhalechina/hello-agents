@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'"
+    />
+    <title>CodeAssistantAgent · 菲比桌面助手</title>
+    <link rel="stylesheet" href="./bubble.css" />
+    <script src="./assets/phoebe-poses.js" defer></script>
+    <script src="./mascot-motion.js" defer></script>
+    <script src="./bubble.js" defer></script>
+  </head>
+  <body>
+    <button
+      id="bubble"
+      class="bubble connecting"
+      type="button"
+      aria-label="打开代码助手，服务正在启动"
+      aria-description="菲比桌面助手。拖动可以移动，右键可以打开菜单。"
+      aria-expanded="false"
+      aria-busy="true"
+      title="代码助手正在启动 · 点击打开 · 拖动移动 · 右键菜单"
+      data-pose="idle"
+      data-motion="static"
+      data-render="image"
+    >
+      <img
+        id="bubble-character"
+        class="bubble-character"
+        src="./assets/phoebe-idle.png"
+        alt=""
+        aria-hidden="true"
+        draggable="false"
+        decoding="async"
+      />
+      <canvas id="bubble-motion" class="bubble-character bubble-motion" width="256" height="256" aria-hidden="true"></canvas>
+      <span class="bubble-status" aria-hidden="true"></span>
+    </button>
+  </body>
+</html>
