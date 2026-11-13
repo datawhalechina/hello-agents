@@ -612,7 +612,11 @@ class Agent(ABC):
 
 ### 7.4.1 SimpleAgent
 
-SimpleAgent是最基础的Agent实现，它展示了如何在框架基础上构建一个完整的对话智能体。我们将通过继承框架中已有的`SimpleAgent`类并重写其核心方法，来实现一个可扩展的版本。首先，在你的项目目录中创建一个`my_simple_agent.py`文件：
+SimpleAgent是最基础的Agent实现，它展示了如何在框架基础上构建一个完整的对话智能体。我们将通过继承框架中已有的`SimpleAgent`类并重写其核心方法，来实现一个可扩展的版本。
+
+这里导入的 [`SimpleAgent`](https://github.com/jjyaoao/HelloAgents/blob/V0.1.1/hello_agents/agents/simple_agent.py) 来自前面安装的 `hello-agents==0.1.1` 框架包，链接指向 HelloAgents 框架仓库中 `V0.1.1` 标签下的类实现。前面介绍的 `Agent` 是框架的基类抽象，并不是这里导入的 `SimpleAgent` 的定义。
+
+本节编写的 `MySimpleAgent` 是对已有 `SimpleAgent` 的本地扩展，完整示例见 [`code/chapter7/my_simple_agent.py`](../../code/chapter7/my_simple_agent.py)。首先，在你的项目目录中创建一个 `my_simple_agent.py` 文件：
 
 ```python
 # my_simple_agent.py
@@ -953,7 +957,7 @@ print(f"可用工具: {basic_agent.list_tools()}")
 print(f"\n对话历史: {len(basic_agent.get_history())} 条消息")
 ```
 
-在本节中，我们通过继承 `Agent` 基类，成功构建了一个功能完备且遵循框架规范的基础对话智能体 `MySimpleAgent`。它不仅支持基础对话，还具备可选的工具调用能力、流式响应和便利的工具管理方法。
+在本节中，我们通过继承框架中已有的 `SimpleAgent` 类，成功构建了一个功能完备且遵循框架规范的基础对话智能体 `MySimpleAgent`。它不仅支持基础对话，还具备可选的工具调用能力、流式响应和便利的工具管理方法。
 
 ### 7.4.2 ReActAgent
 

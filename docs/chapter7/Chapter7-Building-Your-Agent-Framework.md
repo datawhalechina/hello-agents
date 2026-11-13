@@ -612,7 +612,11 @@ The content of this section will perform framework refactoring based on the thre
 
 ### 7.4.1 SimpleAgent
 
-SimpleAgent is the most basic Agent implementation, demonstrating how to build a complete conversational agent on the framework foundation. We will extend the existing `SimpleAgent` class and override its core methods to build a more extensible version. First, create a `my_simple_agent.py` file in your project directory:
+SimpleAgent is the most basic Agent implementation, demonstrating how to build a complete conversational agent on the framework foundation. We will extend the existing `SimpleAgent` class and override its core methods to build a more extensible version.
+
+The imported [`SimpleAgent`](https://github.com/jjyaoao/HelloAgents/blob/V0.1.1/hello_agents/agents/simple_agent.py) comes from the `hello-agents==0.1.1` framework package installed earlier. The link points to the class implementation at tag `V0.1.1` in the HelloAgents framework repository. The earlier `Agent` section describes the framework's base abstraction; it does not define the imported `SimpleAgent`.
+
+The `MySimpleAgent` written in this section is a local extension of the existing `SimpleAgent`. See [`code/chapter7/my_simple_agent.py`](../../code/chapter7/my_simple_agent.py) for the complete local example. First, create a `my_simple_agent.py` file in your project directory:
 
 ```python
 # my_simple_agent.py
@@ -953,7 +957,7 @@ print(f"Available tools: {basic_agent.list_tools()}")
 print(f"\nConversation history: {len(basic_agent.get_history())} messages")
 ```
 
-In this section, by inheriting the `Agent` base class, we successfully built a fully functional basic conversational agent `MySimpleAgent` that follows framework specifications. It not only supports basic conversation but also has optional tool calling capabilities, streaming response, and convenient tool management methods.
+In this section, by extending the framework's existing `SimpleAgent` class, we successfully built a fully functional basic conversational agent `MySimpleAgent` that follows framework specifications. It not only supports basic conversation but also has optional tool calling capabilities, streaming response, and convenient tool management methods.
 
 ### 7.4.2 ReActAgent
 
