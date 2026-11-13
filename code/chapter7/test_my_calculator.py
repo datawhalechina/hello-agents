@@ -56,7 +56,7 @@ def test_with_simple_agent():
     print("\n🎯 SimpleAgent的回答:")
     response = llm.think(final_messages)
     for chunk in response:
-        print(chunk, end="", flush=True)
+        pass
     print("\n")
 
 if __name__ == "__main__":
