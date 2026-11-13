@@ -191,7 +191,7 @@ Role setting and prompt writing are the core steps for defining agent behavior a
 On the Coze platform, you can define the agent’s behavioral logic by configuring the system prompt（System Prompt）and user prompt（User Prompt）, as shown in Figure 5.12.
 
 <div align="center"> 
-  <img src="ttps://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/5-figures/coze-12.png" alt="Prompt configuration page" width="90%"/> 
+  <img src="https://raw.githubusercontent.com/datawhalechina/Hello-Agents/main/docs/images/5-figures/coze-12.png" alt="Prompt configuration page" width="90%"/>
   <p>Figure 5.12 Prompt configuration page</p> 
 </div>
 
