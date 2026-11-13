@@ -213,7 +213,8 @@
 
                       <!-- 查看模式 -->
                       <div v-else>
-                        <p><strong>地址:</strong> {{ item.address }}</p>
+                        <p v-if="item.address"><strong>地址:</strong> {{ item.address }}</p>
+                        <a-tag v-if="!item.location" color="orange">位置待确认</a-tag>
                         <p><strong>游览时长:</strong> {{ item.visit_duration }}分钟</p>
                         <p><strong>描述:</strong> {{ item.description }}</p>
                         <p v-if="item.rating"><strong>评分:</strong> {{ item.rating }}⭐</p>
@@ -315,7 +316,7 @@ import { DownOutlined } from '@ant-design/icons-vue'
 import AMapLoader from '@amap/amap-jsapi-loader'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
-import type { TripPlan } from '@/types'
+import type { Attraction, Location, TripPlan } from '@/types'
 
 const router = useRouter()
 const tripPlan = ref<TripPlan | null>(null)
@@ -812,19 +813,23 @@ const initMap = async () => {
   }
 }
 
+type LocatedAttraction = Attraction & { location: Location; dayIndex: number; attrIndex: number }
+
 // 添加景点标记
 const addAttractionMarkers = (AMap: any) => {
   if (!tripPlan.value) return
 
   const markers: any[] = []
-  const allAttractions: any[] = []
+  const allAttractions: LocatedAttraction[] = []
 
   // 收集所有景点
   tripPlan.value.days.forEach((day, dayIndex) => {
     day.attractions.forEach((attraction, attrIndex) => {
-      if (attraction.location && attraction.location.longitude && attraction.location.latitude) {
+      const location = attraction.location
+      if (location) {
         allAttractions.push({
           ...attraction,
+          location,
           dayIndex,
           attrIndex
         })
@@ -865,11 +870,9 @@ const addAttractionMarkers = (AMap: any) => {
     markers.push(marker)
   })
 
-  // 添加标记到地图
-  map.add(markers)
-
-  // 自动调整视野以包含所有标记
-  if (allAttractions.length > 0) {
+  // 添加标记并调整视野
+  if (markers.length > 0) {
+    map.add(markers)
     map.setFitView(markers)
   }
 
@@ -878,29 +881,25 @@ const addAttractionMarkers = (AMap: any) => {
 }
 
 // 绘制路线
-const drawRoutes = (AMap: any, attractions: any[]) => {
-  if (attractions.length < 2) return
+const drawRoutes = (AMap: any, attractions: LocatedAttraction[]) => {
+  const paths: [number, number][][] = []
+  let path: [number, number][] = []
+  let previous: LocatedAttraction | undefined
 
-  // 按天分组绘制路线
-  const dayGroups: any = {}
-  attractions.forEach(attr => {
-    if (!dayGroups[attr.dayIndex]) {
-      dayGroups[attr.dayIndex] = []
+  // 每日路线在缺少坐标的景点处断开。
+  for (const attraction of attractions) {
+    if (!previous || attraction.dayIndex !== previous.dayIndex ||
+        attraction.attrIndex !== previous.attrIndex + 1) {
+      path = []
+      paths.push(path)
     }
-    dayGroups[attr.dayIndex].push(attr)
-  })
+    path.push([attraction.location.longitude, attraction.location.latitude])
+    previous = attraction
+  }
 
-  // 为每天的景点绘制路线
-  Object.values(dayGroups).forEach((dayAttractions: any) => {
-    if (dayAttractions.length < 2) return
-
-    const path = dayAttractions.map((attr: any) => [
-      attr.location.longitude,
-      attr.location.latitude
-    ])
-
+  paths.filter(path => path.length >= 2).forEach(path => {
     const polyline = new AMap.Polyline({
-      path: path,
+      path,
       strokeColor: '#1890ff',
       strokeWeight: 4,
       strokeOpacity: 0.8,
