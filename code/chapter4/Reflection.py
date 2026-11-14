@@ -1,3 +1,4 @@
+import json
 from typing import List, Dict, Any
 # 假设 llm_client.py 文件已存在，并从中导入 HelloAgentsLLM 类
 from llm_client import HelloAgentsLLM
@@ -71,9 +72,9 @@ REFLECT_PROMPT_TEMPLATE = """
 
 请分析该代码的时间复杂度，并思考是否存在一种**算法上更优**的解决方案来显著提升性能。
 如果存在，请清晰地指出当前算法的不足，并提出具体的、可行的改进算法建议（例如，使用筛法替代试除法）。
-如果代码在算法层面已经达到最优，才能回答“无需改进”。
-
-请直接输出你的反馈，不要包含任何额外的解释。
+请仅返回 JSON：{{"needs_improvement": true, "feedback": "评审意见"}}。
+needs_improvement 为布尔值：true 表示需要改进，false 表示无需改进；feedback 为非空字符串。
+只有代码在算法层面已经达到最优时，needs_improvement 才能为 false。
 """
 
 # 3. 优化提示词
@@ -100,6 +101,33 @@ class ReflectionAgent:
         self.memory = Memory()
         self.max_iterations = max_iterations
 
+    @staticmethod
+    def _parse_reflection(response: str):
+        """精确读取是否需要改进；格式错误时继续优化。"""
+        text = response.strip()
+        if not text:
+            raise ValueError("反思响应为空，无法判断是否需要改进。")
+        # 兼容模型偶尔为 JSON 添加代码围栏，但不从任意正文中猜测结论。
+        if text.startswith("```json\n") and text.endswith("```"):
+            text = text[len("```json\n"):-3].strip()
+        elif text.startswith("```\n") and text.endswith("```"):
+            text = text[len("```\n"):-3].strip()
+        try:
+            result = json.loads(text)
+            if not isinstance(result, dict):
+                raise ValueError("反思必须为 JSON 对象。")
+            needs_improvement = result.get("needs_improvement")
+            feedback = result.get("feedback")
+            # 严格要求布尔类型，避免数字 0 或字符串 "false" 被误判。
+            if type(needs_improvement) is not bool:
+                raise ValueError("needs_improvement 必须是布尔值。")
+            if not isinstance(feedback, str) or not feedback.strip():
+                raise ValueError("feedback 必须是非空字符串。")
+            return needs_improvement, feedback.strip()
+        except (ValueError, TypeError):
+            print("⚠️ 反思格式不合法，不作为停止依据；保留原反馈继续优化。")
+            return True, response
+
     def run(self, task: str):
         print(f"\n--- 开始处理任务 ---\n任务: {task}")
 
@@ -117,12 +145,13 @@ class ReflectionAgent:
             print("\n-> 正在进行反思...")
             last_code = self.memory.get_last_execution()
             reflect_prompt = REFLECT_PROMPT_TEMPLATE.format(task=task, code=last_code)
-            feedback = self._get_llm_response(reflect_prompt)
+            reflection_response = self._get_llm_response(reflect_prompt)
+            needs_improvement, feedback = self._parse_reflection(reflection_response)
             self.memory.add_record("reflection", feedback)
 
             # b. 检查是否需要停止
-            if "无需改进" in feedback or "no need for improvement" in feedback.lower():
-                print("\n✅ 反思认为代码已无需改进，任务完成。")
+            if needs_improvement is False:
+                print("\n✅ 评审明确认为无需改进，结束迭代（尚未执行代码测试）。")
                 break
 
             # c. 优化
@@ -134,9 +163,11 @@ class ReflectionAgent:
             )
             refined_code = self._get_llm_response(refine_prompt)
             self.memory.add_record("execution", refined_code)
+        else:
+            print("\n已达到反思迭代上限，返回最新代码；最后一版可能尚未评审。")
         
         final_code = self.memory.get_last_execution()
-        print(f"\n--- 任务完成 ---\n最终生成的代码:\n{final_code}")
+        print(f"\n--- 反思流程结束 ---\n最终生成的代码:\n{final_code}")
         return final_code
 
     def _get_llm_response(self, prompt: str) -> str:
