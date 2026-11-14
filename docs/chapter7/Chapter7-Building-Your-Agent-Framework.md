@@ -728,16 +728,13 @@ class MySimpleAgent(SimpleAgent):
                 print(f"🔧 Detected {len(tool_calls)} tool calls")
                 # Execute all tool calls and collect results
                 tool_results = []
-                clean_response = response
 
                 for call in tool_calls:
                     result = self._execute_tool_call(call['tool_name'], call['parameters'])
                     tool_results.append(result)
-                    # Remove tool call markers from response
-                    clean_response = clean_response.replace(call['original'], "")
 
-                # Build message containing tool results
-                messages.append({"role": "assistant", "content": clean_response})
+                # Keep the original tool calls so the model can match results to requests
+                messages.append({"role": "assistant", "content": response})
 
                 # Add tool results
                 tool_results_text = "\n\n".join(tool_results)
@@ -771,7 +768,6 @@ class MySimpleAgent(SimpleAgent):
             tool_calls.append({
                 'tool_name': tool_name.strip(),
                 'parameters': parameters.strip(),
-                'original': f'[TOOL_CALL:{tool_name}:{parameters}]'
             })
 
         return tool_calls
