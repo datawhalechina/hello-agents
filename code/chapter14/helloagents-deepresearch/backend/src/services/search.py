@@ -8,6 +8,7 @@ from typing import Any, Optional, Tuple
 from hello_agents.tools import SearchTool
 
 from config import Configuration
+from services.keenable_search import KEENABLE_BACKEND, search_keenable
 from utils import (
     deduplicate_and_format_sources,
     format_sources,
@@ -30,17 +31,26 @@ def dispatch_search(
     search_api = get_config_value(config.search_api)
 
     try:
-        raw_response = _GLOBAL_SEARCH_TOOL.run(
-            {
-                "input": query,
-                "backend": search_api,
-                "mode": "structured",
-                "fetch_full_page": config.fetch_full_page,
-                "max_results": 5,
-                "max_tokens_per_source": MAX_TOKENS_PER_SOURCE,
-                "loop_count": loop_count,
-            }
-        )
+        if search_api == KEENABLE_BACKEND:
+            # Not one of SearchTool's built-in backends; see services/keenable_search.py.
+            raw_response = search_keenable(
+                query,
+                fetch_full_page=config.fetch_full_page,
+                max_results=5,
+                max_tokens=MAX_TOKENS_PER_SOURCE,
+            )
+        else:
+            raw_response = _GLOBAL_SEARCH_TOOL.run(
+                {
+                    "input": query,
+                    "backend": search_api,
+                    "mode": "structured",
+                    "fetch_full_page": config.fetch_full_page,
+                    "max_results": 5,
+                    "max_tokens_per_source": MAX_TOKENS_PER_SOURCE,
+                    "loop_count": loop_count,
+                }
+            )
     except Exception as exc:  # pragma: no cover - defensive logging
         logger.exception("Search backend %s failed: %s", search_api, exc)
         raise
