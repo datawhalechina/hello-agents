@@ -1,0 +1,6 @@
+fastapi==0.115.14
+uvicorn==0.32.1
+pydantic==2.13.4
+python-dotenv==1.2.1
+python-multipart==0.0.32
+pypdf==6.14.2

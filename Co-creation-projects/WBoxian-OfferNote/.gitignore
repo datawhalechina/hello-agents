@@ -1,0 +1,14 @@
+.env
+.env-*.tmp
+.venv/
+data/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+node_modules/
+frontend/dist/
+*.pyc
+*.sqlite3*
+*.tsbuildinfo
+# 上游 Hello-Agents 忽略 test_*.py；在本项目内保留回归测试。
+!backend/tests/test_*.py

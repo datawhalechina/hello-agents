@@ -1,0 +1,339 @@
+.agent-pending {
+  padding: 36px 28px;
+  text-align: center;
+}
+
+.agent-pending .spin {
+  animation: agent-spin 1s linear infinite;
+}
+@keyframes agent-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.agent-pending .stat-icon {
+  margin: 0 auto 18px;
+}
+.agent-pending h2 {
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+.agent-pending p {
+  color: #69728a;
+  font-size: 16px;
+  line-height: 1.9;
+  max-width: 560px;
+  margin: 0 auto 24px;
+}
+.agent-topic-list {
+  padding: 0 23px 15px;
+}
+.agent-topic {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 16px 5px;
+  border-bottom: 1px solid #eef0f7;
+}
+.agent-topic > span {
+  color: #a4aabe;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #f3f4f9;
+  text-align: center;
+}
+.agent-topic strong {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+.agent-topic small {
+  font-size: 14px;
+  color: #7c8499;
+}
+.agent-topic.active > span,
+.agent-topic.closed > span {
+  color: #7764d7;
+  background: #eeebff;
+}
+.agent-topic.active strong {
+  color: #6c58ca;
+}
+.agent-side-note {
+  display: flex;
+  gap: 12px;
+  margin: 5px 25px 24px;
+  color: #7c72ad;
+}
+.agent-side-note svg {
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.agent-side-note p {
+  font-size: 15px;
+  line-height: 1.9;
+  margin: 0;
+}
+.agent-score-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  padding: 32px;
+  background: #f0edff;
+  border: 1px solid #e2ddfa;
+  border-radius: 15px;
+  margin-bottom: 20px;
+}
+.agent-score-hero h2 {
+  margin: 12px 0;
+  font-size: 25px;
+}
+.agent-score-hero > div:first-child {
+  max-width: 760px;
+}
+.agent-score-hero p {
+  font-size: 16px;
+  line-height: 1.9;
+  color: #686382;
+}
+.agent-total {
+  flex-shrink: 0;
+  text-align: center;
+  min-width: 145px;
+}
+.agent-total strong {
+  font-size: 58px;
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -2px;
+  color: #6b56c6;
+}
+.agent-total > span {
+  margin-left: 5px;
+  color: #8e86ad;
+  font-size: 18px;
+}
+.agent-total p {
+  font-size: 14px;
+  margin: 10px 0 0;
+}
+.agent-dimension-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 22px;
+}
+.agent-dimension {
+  padding: 23px;
+  margin: 0;
+  min-width: 0;
+}
+.agent-dimension h3 {
+  font-size: 17px;
+  margin: 0;
+}
+.agent-dimension > strong {
+  font-size: 33px;
+  display: block;
+  font-weight: 600;
+  margin: 22px 0 10px;
+}
+.agent-dimension > strong small {
+  font-size: 14px;
+  font-weight: 400;
+  color: #8a91a6;
+  margin-left: 9px;
+}
+.agent-dimension > p {
+  font-size: 15px;
+  line-height: 1.9;
+  color: #69728a;
+}
+.agent-score-bar {
+  height: 5px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f0edf8;
+}
+.agent-score-bar span {
+  display: block;
+  height: 100%;
+  background: #8b77dd;
+  border-radius: 10px;
+}
+.agent-evidence blockquote {
+  margin: 14px 0 0;
+  padding: 10px 13px;
+  background: #f8f8fc;
+  border-left: 2px solid #c6baf0;
+  border-radius: 0 5px 5px 0;
+}
+.agent-evidence a {
+  font-size: 13px;
+  color: #7c69cc;
+  text-decoration: none;
+}
+.agent-evidence p {
+  font-size: 14px;
+  line-height: 1.9;
+  color: #6f768b;
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.agent-findings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.agent-findings {
+  padding: 0 26px 25px;
+}
+.agent-findings > p {
+  font-size: 15px;
+  line-height: 1.8;
+}
+.agent-findings article + article {
+  margin-top: 23px;
+}
+.agent-findings h3 {
+  display: flex;
+  gap: 10px;
+  font-size: 16px;
+  line-height: 1.9;
+}
+.agent-findings h3 svg {
+  color: #8c7ac8;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+.agent-improvements,
+.agent-topic-report {
+  padding: 0 26px 26px;
+}
+.agent-improvements article,
+.agent-topic-report article {
+  padding: 19px 0;
+  border-bottom: 1px solid #edf0f6;
+}
+.agent-improvements article:first-child,
+.agent-topic-report article:first-child {
+  padding-top: 0;
+}
+.agent-improvements article:last-child,
+.agent-topic-report article:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.agent-improvements h3,
+.agent-topic-report h3 {
+  font-size: 17px;
+  margin: 0;
+}
+.agent-improvements p,
+.agent-topic-report p {
+  font-size: 15px;
+  line-height: 1.9;
+  color: #69728a;
+}
+.agent-exercise {
+  margin-top: 14px;
+  padding: 14px 17px;
+  background: #f8f7fd;
+  border: 1px solid #eeebf8;
+  border-radius: 8px;
+}
+.agent-exercise strong {
+  font-size: 14px;
+  color: #7d6ab8;
+}
+.agent-exercise p {
+  margin-bottom: 0;
+}
+.agent-decision-list {
+  padding: 0 26px 26px;
+}
+.agent-decision-list article {
+  display: flex;
+  gap: 15px;
+  padding: 17px 0;
+  border-bottom: 1px solid #eef0f7;
+}
+.agent-decision-list article:last-child {
+  border: 0;
+}
+.agent-decision-list strong {
+  font-size: 16px;
+}
+.agent-decision-list p {
+  font-size: 15px;
+  line-height: 1.9;
+  color: #69728a;
+  margin: 7px 0;
+}
+.agent-native-check {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: white;
+  border: 1px solid #e5e8f2;
+  padding: 17px 21px;
+  border-radius: 10px;
+  margin-bottom: 23px;
+}
+.agent-native-check p {
+  font-size: 14px;
+  line-height: 1.9;
+  color: #727a91;
+  margin: 0;
+}
+.turn-card:target {
+  outline: 2px solid #ae9de7;
+  scroll-margin-top: 90px;
+}
+@media (max-width: 1100px) {
+  .agent-dimension-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 680px) {
+  .agent-dimension-grid,
+  .agent-findings-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .agent-score-hero {
+    padding: 23px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .agent-score-hero h2 {
+    font-size: 21px;
+  }
+  .agent-total {
+    text-align: left;
+  }
+  .agent-total strong {
+    font-size: 44px;
+  }
+  .agent-dimension {
+    padding: 21px;
+  }
+  .agent-native-check {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .agent-improvements,
+  .agent-topic-report,
+  .agent-findings,
+  .agent-decision-list {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .agent-dimension .row-between {
+    gap: 10px;
+  }
+}
