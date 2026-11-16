@@ -1,0 +1,2 @@
+# Application and verification dependencies pinned in the existing lockfile.
+-r requirements.lock

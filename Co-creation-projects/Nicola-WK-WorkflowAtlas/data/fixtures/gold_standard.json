@@ -1,0 +1,42 @@
+{
+  "scope": "Manually labeled synthetic tagged-demo fixture only; not a production-quality estimate.",
+  "non_work": {"demo-01":"chitchat","demo-26":"chitchat","demo-28":"uncertain","demo-29":"background"},
+  "facts": [
+    {"message_id":"demo-02","kind":"plan","project":"北辰门户","entity":"需求梳理"},
+    {"message_id":"demo-03","kind":"task","project":"北辰门户","entity":"接口开发"},
+    {"message_id":"demo-04","kind":"task","project":"北辰门户","entity":"界面实现"},
+    {"message_id":"demo-05","kind":"issue","project":"北辰门户","entity":"登录故障"},
+    {"message_id":"demo-06","kind":"task","project":"北辰门户","entity":"联调测试"},
+    {"message_id":"demo-07","kind":"decision","project":"北辰门户","entity":"登录方案"},
+    {"message_id":"demo-08","kind":"task","project":"北辰门户","entity":"界面实现"},
+    {"message_id":"demo-09","kind":"plan","project":"北辰门户","entity":"移动端"},
+    {"message_id":"demo-10","kind":"task","project":"北辰门户","entity":"接口开发"},
+    {"message_id":"demo-11","kind":"event","project":"北辰门户","entity":"认证修复"},
+    {"message_id":"demo-12","kind":"task","project":"北辰门户","entity":"界面调整"},
+    {"message_id":"demo-13","kind":"task","project":"北辰门户","entity":"压力测试"},
+    {"message_id":"demo-14","kind":"task","project":"北辰门户","entity":"移动端"},
+    {"message_id":"demo-15","kind":"artifact","project":"北辰门户","entity":"验收报告"},
+    {"message_id":"demo-16","kind":"artifact","project":"北辰门户","entity":"验收交付"},
+    {"message_id":"demo-17","kind":"event","project":"北辰门户","entity":"发布评审"},
+    {"message_id":"demo-18","kind":"event","project":"北辰门户","entity":"正式发布"},
+    {"message_id":"demo-19","kind":"plan","project":"星河数据平台","entity":"数据接入"},
+    {"message_id":"demo-20","kind":"task","project":"星河数据平台","entity":"数据清洗"},
+    {"message_id":"demo-21","kind":"task","project":"星河数据平台","entity":"指标计算"},
+    {"message_id":"demo-22","kind":"decision","project":"星河数据平台","entity":"刷新策略"},
+    {"message_id":"demo-23","kind":"issue","project":"星河数据平台","entity":"数据质量问题"},
+    {"message_id":"demo-24","kind":"event","project":"星河数据平台","entity":"质量修复"},
+    {"message_id":"demo-25","kind":"artifact","project":"星河数据平台","entity":"数据报告"},
+    {"message_id":"demo-27","kind":"plan","project":null,"entity":null}
+  ],
+  "relations": [
+    {"message_id":"demo-05","relation":"blocks","target_entity":"联调测试"},
+    {"message_id":"demo-06","relation":"depends_on","target_entity":"接口开发"},
+    {"message_id":"demo-08","relation":"branches_to","target_entity":"移动端"},
+    {"message_id":"demo-11","relation":"resolves","target_entity":"登录故障"},
+    {"message_id":"demo-12","relation":"revises","target_entity":"界面实现"},
+    {"message_id":"demo-14","relation":"parallel_with","target_entity":"压力测试"},
+    {"message_id":"demo-16","relation":"produces","target_entity":"验收报告"},
+    {"message_id":"demo-21","relation":"depends_on","target_entity":"数据清洗"},
+    {"message_id":"demo-24","relation":"resolves","target_entity":"数据质量问题"}
+  ]
+}

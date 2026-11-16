@@ -1,0 +1,13 @@
+services:
+  workflow:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      WORKFLOW_PROVIDER: local-demo
+      WORKFLOW_DATABASE_PATH: /app/data/workflow.db
+      WORKFLOW_API_TOKEN: ${WORKFLOW_API_TOKEN:-}
+    volumes:
+      - workflow-data:/app/data
+volumes:
+  workflow-data:

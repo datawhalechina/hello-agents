@@ -1,0 +1,17 @@
+.import-preview{margin-top:18px;border:1px solid #dce5f2;border-radius:5px;overflow:hidden;background:#fafbfd}.import-preview-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 16px 10px}.import-preview-heading h3{font-size:13px;font-weight:500;color:#24344d}.import-preview-heading>span{font-size:10px;color:#596b84;overflow-wrap:anywhere}.import-preview-state{font-size:11px;line-height:1.85;color:#256454;padding:0 16px 12px}.import-preview-state.has-issues{color:#795620}.import-preview-counts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px 12px;padding:14px 16px;border-top:1px solid #e2e8f2;background:#fff}.import-preview-counts dt{font-size:10px;color:#596b84;line-height:1.8}.import-preview-counts dd{font-size:17px;line-height:1.6;margin:3px 0 0;color:#24344d;overflow-wrap:anywhere}.import-preview-help{font-size:10px;line-height:1.85;color:#596b84;padding:11px 16px}.import-issues-scroll{overflow:auto;max-height:330px;max-width:100%;border-top:1px solid #e2e8f2;border-bottom:1px solid #e2e8f2;background:#fff}.import-issues-scroll table{width:100%;min-width:450px;border-collapse:collapse;text-align:left;font-size:11px}.import-issues-scroll th{font-weight:500;color:#596b84;background:#f4f7fc;position:sticky;top:0}.import-issues-scroll th,.import-issues-scroll td{padding:11px 12px;border-bottom:1px solid #e5ebf3;line-height:1.85;vertical-align:top;overflow-wrap:anywhere;white-space:pre-wrap}.import-issues-scroll td{color:#354964}.import-issues-scroll th:first-child{min-width:75px}.import-issues-scroll th:last-child{min-width:180px}.import-preview-actions{padding:4px 16px 13px;display:flex;gap:10px;flex-wrap:wrap}.import-preview-actions .button{font-size:11px;min-width:0}.import-preview-warnings{font-size:11px;color:#596b84;line-height:1.9;margin:0;padding:9px 16px 13px 31px;overflow-wrap:anywhere}.import-local-note{font-size:10px;line-height:1.9;color:#596b84;margin-top:14px}.import-surface .dropzone strong{overflow-wrap:anywhere;max-width:100%}
+@media(max-width:480px){.import-preview-counts{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.import-preview-actions .button{width:100%;justify-content:center}.import-preview-heading,.import-preview-help,.import-preview-state{padding-left:13px;padding-right:13px}.import-preview-actions{padding-left:13px;padding-right:13px}.import-preview-counts dd{font-size:16px}}
+
+.import-issues-pagination{padding:12px 16px 0;display:flex;justify-content:space-between;gap:9px;align-items:center;flex-wrap:wrap;font-size:10px;color:#596b84;line-height:1.8}.import-issues-pagination>div{display:flex;gap:8px}.import-issues-pagination .button{font-size:10px;padding:6px 9px}
+
+.import-report-backup{padding:0 16px 13px}.import-report-backup label{font-size:11px;color:#596b84}.import-report-backup textarea{width:100%;font-family:Consolas,monospace;font-size:11px;line-height:1.8;resize:vertical}.import-report-backup .button{font-size:11px;margin-top:10px}
+
+.import-surface > label {
+  margin-top: 15px;
+}
+
+.import-surface .dropzone span {
+  max-width: 100%;
+  line-height: 1.9;
+  text-align: center;
+  overflow-wrap: anywhere;
+}

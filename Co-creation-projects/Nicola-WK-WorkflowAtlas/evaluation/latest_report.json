@@ -1,0 +1,44 @@
+{
+  "scope": "Manually labeled synthetic tagged-demo fixture only; not a production-quality estimate.",
+  "provider": "local-demo",
+  "messages": 29,
+  "work_classification": {
+    "expected": 25,
+    "predicted": 25,
+    "matched": 25,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+  },
+  "atomic_fact_fields": {
+    "expected": 25,
+    "predicted": 25,
+    "matched": 25,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+  },
+  "explicit_relations": {
+    "expected": 9,
+    "predicted": 9,
+    "matched": 9,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+  },
+  "evidence_integrity": {
+    "references": 49,
+    "valid": 49,
+    "ratio": 1.0
+  },
+  "unassigned_facts": 1,
+  "stage_count": 6,
+  "warnings": [
+    "Fact fact_51378a8d66907ac667aa456f: no explicit project identity; left unassigned"
+  ],
+  "limitations": [
+    "Handwritten project/entity tags and explicit relation phrases make this a controlled acceptance fixture.",
+    "No live Feishu data, remote LLM calls or semantic causality benchmark is included.",
+    "Literal evidence integrity does not establish semantic truth or trusted training labels."
+  ]
+}

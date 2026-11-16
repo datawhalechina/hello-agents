@@ -8,6 +8,10 @@
 
 <!-- 项目列表将在这里自动更新 -->
 
+### 生产力工具
+
+- [Nicola-WK-WorkflowAtlas](./Nicola-WK-WorkflowAtlas/README.md) — 溯流，基于 HelloAgents 的本地消息分析与工作流重建工作台，支持原文证据核验和人工审核。
+
 ### 示例项目
 
 - **EXAMPLE-ProjectTemplate**：项目模板，展示标准的项目结构和文档规范

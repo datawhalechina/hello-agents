@@ -1,0 +1,14 @@
+.git
+.venv
+.venv313
+vendor
+.runtime
+artifacts
+node_modules
+frontend/node_modules
+frontend/dist
+**/__pycache__
+**/*.egg-info
+.env
+data/*.db*
+**/.workflow-model.key
