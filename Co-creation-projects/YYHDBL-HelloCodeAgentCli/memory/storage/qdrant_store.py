@@ -16,7 +16,7 @@ try:
     from qdrant_client.http import models
     from qdrant_client.http.models import (
         Distance, VectorParams, PointStruct, 
-        Filter, FieldCondition, MatchValue, SearchRequest
+        Filter, FieldCondition, MatchValue
     )
     QDRANT_AVAILABLE = True
 except ImportError:
@@ -489,13 +489,21 @@ class QdrantVectorStore:
         """
         try:
             collection_info = self.client.get_collection(self.collection_name)
+
+            def _count(name: str, default: int = 0) -> int:
+                # 新版qdrant-client移除了部分字段(如vectors_count)，部分字段也可能为None
+                value = getattr(collection_info, name, None)
+                return default if value is None else value
+
+            points_count = _count("points_count")
             
             info = {
                 "name": self.collection_name,
-                "vectors_count": collection_info.vectors_count,
-                "indexed_vectors_count": collection_info.indexed_vectors_count,
-                "points_count": collection_info.points_count,
-                "segments_count": collection_info.segments_count,
+                # 新版CollectionInfo不再提供vectors_count，回退为points_count
+                "vectors_count": _count("vectors_count", points_count),
+                "indexed_vectors_count": _count("indexed_vectors_count"),
+                "points_count": points_count,
+                "segments_count": _count("segments_count"),
                 "config": {
                     "vector_size": self.vector_size,
                     "distance": self.distance.value,
