@@ -131,7 +131,7 @@ team = DataAnalystTeam(
     data_source="sales_data.csv",
     llm_config={
         "provider": "openai",
-        "model": "gpt-4",
+        "model": "gpt-5.6-sol",
         "api_key": "your-api-key"
     }
 )

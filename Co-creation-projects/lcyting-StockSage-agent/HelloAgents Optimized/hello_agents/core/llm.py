@@ -303,7 +303,7 @@ class HelloAgentsLLM:
     def _get_default_model(self) -> str:
         """获取默认模型"""
         if self.provider == "openai":
-            return "gpt-3.5-turbo"
+            return "gpt-5.6-terra"
         elif self.provider == "deepseek":
             return "deepseek-chat"
         elif self.provider == "qwen":
@@ -321,7 +321,7 @@ class HelloAgentsLLM:
         elif self.provider == "local":
             return "local-model"  # 本地模型占位符
         elif self.provider == "custom":
-            return self.model or "gpt-3.5-turbo"
+            return self.model or "gpt-5.6-terra"
         else:
             # auto或其他情况：根据base_url智能推断默认模型
             base_url = os.getenv("LLM_BASE_URL", "")
@@ -343,7 +343,7 @@ class HelloAgentsLLM:
             elif "localhost" in base_url_lower or "127.0.0.1" in base_url_lower:
                 return "local-model"
             else:
-                return "gpt-3.5-turbo"
+                return "gpt-5.6-terra"
 
     def think(
         self, messages: list[dict[str, str]], temperature: Optional[float] = None

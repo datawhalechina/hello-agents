@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     # LLM配置 (从环境变量读取,由HelloAgents管理)
     openai_api_key: str = ""
     openai_base_url: str = "https://api.openai.com/v1"
-    openai_model: str = "gpt-4"
+    openai_model: str = "gpt-5.6-sol"
 
     # 日志配置
     log_level: str = "INFO"
