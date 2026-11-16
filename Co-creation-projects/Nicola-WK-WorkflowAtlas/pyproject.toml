@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "enterprise-workflow-atlas"
+version = "0.1.0"
+description = "Evidence-backed enterprise workflow reconstruction with HelloAgents"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+  "fastapi>=0.142,<0.163",
+  "uvicorn>=0.54,<0.55",
+  "pydantic>=2.13.5,<2.14",
+  "pydantic-settings>=2.12,<3",
+  "cryptography>=46,<51",
+  "hello-agents @ git+https://github.com/jjyaoao/HelloAgents.git@c597a7ca46ea9969e5b21d9e130549ab69626ff9",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=9,<10", "httpx>=0.28,<0.29"]
+
+[tool.setuptools.packages.find]
+where = ["backend"]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+pythonpath = ["backend"]
+addopts = "-ra"

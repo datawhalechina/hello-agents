@@ -1,0 +1,20 @@
+.venv/
+.venv313/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+*.db
+*.db-shm
+*.db-wal
+node_modules/
+frontend/dist/
+.runtime/
+vendor/
+artifacts/
+*.egg-info/
+**/.workflow-model.key
+
+# Keep regression tests when embedded in the Hello-Agents repository.
+!backend/tests/test_*.py
+!backend/app/connectors/tests/test_*.py
