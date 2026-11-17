@@ -165,5 +165,6 @@ cython_debug/
 AGENTS.md
 test_*.py
 !test_tools.py
+!code/chapter4/test_planner_validation.py
 .workbuddy/
 memory/

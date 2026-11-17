@@ -44,7 +44,11 @@ class Planner:
         try:
             plan_str = response_text.split("```python")[1].split("```")[0].strip()
             plan = ast.literal_eval(plan_str)
-            return plan if isinstance(plan, list) else []
+            if not isinstance(plan, list) or not all(
+                isinstance(step, str) and step.strip() for step in plan
+            ):
+                raise ValueError("计划必须是由非空字符串组成的列表。")
+            return plan
         except (ValueError, SyntaxError, IndexError) as e:
             print(f"❌ 解析计划时出错: {e}")
             print(f"原始响应: {response_text}")
