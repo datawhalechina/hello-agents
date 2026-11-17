@@ -107,6 +107,9 @@ class GameRoles:
             if remaining >= 1:
                 roles.append("猎人")
                 remaining -= 1
+            if player_count >= 9 and remaining >= 1:
+                roles.append("守护者")
+                remaining -= 1
             
             # 剩余为村民
             roles.extend(["村民"] * remaining)

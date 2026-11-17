@@ -47,6 +47,13 @@ class ChinesePrompts:
 - 要在关键时刻使用技能，带走狼人
 - 以{character}的勇猛和决断力行动
 """
+        elif role == "守护者":
+            return base_prompt + f"""
+- 你是好人阵营的守护者
+- 每晚可以守护一名玩家，使其免受狼人击杀
+- 要判断狼人今夜最可能袭击谁，保护关键角色
+- 以{character}的沉稳与担当行动
+"""
         else:  # 村民
             return base_prompt + f"""
 - 你是好人阵营的村民
