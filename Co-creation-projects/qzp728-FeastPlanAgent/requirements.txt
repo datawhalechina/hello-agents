@@ -1,0 +1,4 @@
+# The course's old PyPI command no longer resolves. Pin the official source revision
+# so `ToolRegistry` and `Tool` are genuinely supplied by HelloAgents.
+hello-agents @ git+https://github.com/jjyaoao/helloagents.git@c597a7ca46ea9969e5b21d9e130549ab69626ff9
+python-dotenv>=1.0.1
