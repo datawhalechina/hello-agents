@@ -50,7 +50,10 @@ class ContextAwareAgent(SimpleAgent):
             {"role": "system", "content": optimized_context},
             {"role": "user", "content": user_input}
         ]
-        response = self.llm.invoke(messages).content
+        response = self.llm.invoke(messages)
+        # 兼容教程使用的字符串返回值和新版 LLMResponse。
+        if not isinstance(response, str):
+            response = response.content
 
         # 3. 更新对话历史
         self.conversation_history.append(
