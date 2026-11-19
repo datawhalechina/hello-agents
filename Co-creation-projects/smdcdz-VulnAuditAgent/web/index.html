@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VulnAuditAgent · 智能代码漏洞审计</title>
+<style>
+:root{--bg:#0a0e14;--panel:#111827;--panel2:#0f1622;--border:#1f2b3a;--cyan:#22d3ee;--green:#34d399;--red:#f87171;--orange:#fb923c;--yellow:#facc15;--blue:#60a5fa;--text:#e5e7eb;--muted:#8b98a9}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(1200px 600px at 80% -10%,rgba(34,211,238,.08),transparent),radial-gradient(900px 500px at 10% 110%,rgba(52,211,153,.06),transparent),var(--bg);color:var(--text);font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif;min-height:100vh}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 20px 80px}
+header{display:flex;align-items:center;gap:16px;margin-bottom:28px}
+.logo{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#164e63,#065f46);display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 0 24px rgba(34,211,238,.25)}
+h1{font-size:26px;letter-spacing:1px;background:linear-gradient(90deg,var(--cyan),var(--green));-webkit-background-clip:text;background-clip:text;color:transparent}
+.subtitle{color:var(--muted);font-size:13px;margin-top:4px}
+.card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-bottom:20px;box-shadow:0 4px 24px rgba(0,0,0,.35)}
+.controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+select{flex:1;min-width:240px;background:#0b1220;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-size:14px;outline:none}
+select:focus{border-color:var(--cyan)}
+button{background:linear-gradient(135deg,#0891b2,#059669);border:none;color:#fff;font-size:15px;font-weight:600;padding:12px 30px;border-radius:10px;cursor:pointer;transition:.2s;letter-spacing:1px}
+button:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 20px rgba(34,211,238,.35)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.section-title{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px}
+#log{font-family:"Cascadia Code","JetBrains Mono",Consolas,monospace;font-size:13px;background:#050a10;border:1px solid var(--border);border-radius:10px;padding:14px 16px;min-height:120px;max-height:240px;overflow-y:auto;color:var(--green);line-height:1.8}
+#log .t{color:#3b4553;margin-right:8px}
+#log .llm{color:var(--cyan)}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:18px}
+.stat{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+.stat .num{font-size:30px;font-weight:700}
+.stat .lbl{font-size:12px;color:var(--muted);margin-top:4px}
+.stat.crit .num{color:var(--red)}.stat.high .num{color:var(--orange)}.stat.mid .num{color:var(--yellow)}.stat.low .num{color:var(--blue)}.stat.total .num{color:var(--cyan)}
+#report h1{font-size:22px;color:var(--cyan);margin:18px 0 12px;background:none;-webkit-text-fill-color:var(--cyan)}
+#report h2{font-size:17px;color:var(--green);margin:20px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px}
+#report h3{font-size:15px;color:var(--text);margin:16px 0 8px}
+#report table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+#report th,#report td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+#report th{background:#0b1220;color:var(--cyan)}
+#report code{background:#0b1220;border:1px solid var(--border);border-radius:5px;padding:1px 6px;font-family:Consolas,monospace;font-size:12.5px;color:var(--orange)}
+#report pre{background:#050a10;border:1px solid var(--border);border-radius:10px;padding:14px;overflow-x:auto;margin:10px 0}
+#report pre code{background:none;border:none;color:#a5f3c9;padding:0;display:block;font-size:13px;line-height:1.6}
+#report ul,#report ol{margin:8px 0 8px 22px;line-height:1.9}
+#report p{margin:8px 0;line-height:1.9}
+#report blockquote{border-left:3px solid var(--cyan);padding:6px 14px;margin:10px 0;background:rgba(34,211,238,.05);color:var(--muted)}
+#report strong{color:#fff}
+.badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.hidden{display:none}
+.footer-note{color:#3b4553;font-size:12px;text-align:center;margin-top:40px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">🛡️</div>
+    <div>
+      <h1>VulnAuditAgent</h1>
+      <div class="subtitle">智能代码漏洞审计 · 规则引擎 + 污点追踪 + LLM 研判 三通道协同</div>
+    </div>
+  </header>
+
+  <div class="card">
+    <div class="section-title">目标文件</div>
+    <div class="controls">
+      <select id="fileSel"></select>
+      <button id="startBtn" onclick="startAudit()">▶ 开始审计</button>
+    </div>
+  </div>
+
+  <div class="card hidden" id="progressCard">
+    <div class="section-title">执行过程</div>
+    <div id="log"></div>
+  </div>
+
+  <div id="resultArea" class="hidden">
+    <div class="stats" id="stats"></div>
+    <div class="card"><div id="report"></div></div>
+  </div>
+
+  <div class="footer-note">HelloAgents 毕业设计 · @smdcdz</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let taskId=null,pollTimer=null;
+
+async function loadFiles(){
+  const r=await fetch('/api/files');const d=await r.json();
+  $('fileSel').innerHTML=d.files.map(f=>`<option value="${f}">${f}</option>`).join('');
+}
+async function startAudit(){
+  const file=$('fileSel').value;if(!file)return;
+  $('startBtn').disabled=true;$('resultArea').classList.add('hidden');
+  $('progressCard').classList.remove('hidden');$('log').innerHTML='';
+  const r=await fetch('/api/audit?file='+encodeURIComponent(file),{method:'POST'});
+  const d=await r.json();
+  if(d.error){log('错误: '+d.error);$('startBtn').disabled=false;return;}
+  taskId=d.task_id;pollTimer=setInterval(poll,1200);
+}
+function log(msg,cls){
+  const t=new Date().toLocaleTimeString('zh-CN',{hour12:false});
+  $('log').innerHTML+=`<div><span class="t">[${t}]</span><span class="${cls||''}">${msg}</span></div>`;
+  $('log').scrollTop=$('log').scrollHeight;
+}
+async function poll(){
+  const r=await fetch('/api/status?task_id='+taskId);const d=await r.json();
+  const shown=$('log').dataset.n||0;
+  d.log.slice(shown).forEach(m=>log(m,m.includes('LLM')?'llm':''));
+  $('log').dataset.n=d.log.length;
+  if(d.status==='done'){clearInterval(pollTimer);showResult();}
+  if(d.status==='error'){clearInterval(pollTimer);log('❌ 出错: '+d.error);$('startBtn').disabled=false;}
+}
+async function showResult(){
+  const r=await fetch('/api/result?task_id='+taskId);const d=await r.json();
+  renderStats(d.report);
+  $('report').innerHTML=md(d.report);
+  $('resultArea').classList.remove('hidden');
+  $('startBtn').disabled=false;
+  $('resultArea').scrollIntoView({behavior:'smooth'});
+}
+function renderStats(report){
+  const sev={'严重':0,'高危':0,'中危':0,'低危':0};
+  (report.match(/风险等级[:：]\s*(严重|高危|中危|低危)/g)||[]).forEach(m=>{const s=m.match(/(严重|高危|中危|低危)/)[1];sev[s]++});
+  const total=Object.values(sev).reduce((a,b)=>a+b,0);
+  $('stats').innerHTML=
+    `<div class="stat total"><div class="num">${total}</div><div class="lbl">漏洞总数</div></div>`+
+    `<div class="stat crit"><div class="num">${sev['严重']}</div><div class="lbl">严重</div></div>`+
+    `<div class="stat high"><div class="num">${sev['高危']}</div><div class="lbl">高危</div></div>`+
+    `<div class="stat mid"><div class="num">${sev['中危']}</div><div class="lbl">中危</div></div>`+
+    `<div class="stat low"><div class="num">${sev['低危']}</div><div class="lbl">低危</div></div>`;
+}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function inline(s){return esc(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<code>$1</code>')}
+function md(src){
+  const lines=src.split('\n');let html='',inCode=false,inTable=false;
+  for(const line of lines){
+    if(line.trim().startsWith('```')){html+=inCode?'</code></pre>':'<pre><code>';inCode=!inCode;continue}
+    if(inCode){html+=esc(line)+'\n';continue}
+    if(/^\s*\|.*\|\s*$/.test(line)){
+      if(!inTable){html+='<table>';inTable=true}
+      if(/^\s*\|[\s:-]+\|/.test(line))continue;
+      const cells=line.trim().replace(/^\||\|$/g,'').split('|').map(c=>inline(c.trim()));
+      const tag=html.endsWith('<table>')?'th':'td';
+      html+='<tr>'+cells.map(c=>`<${tag}>${c}</${tag}>`).join('')+'</tr>';continue}
+    if(inTable){html+='</table>';inTable=false}
+    const t=line.trim();
+    if(t.startsWith('### '))html+='<h3>'+inline(t.slice(4))+'</h3>';
+    else if(t.startsWith('## '))html+='<h2>'+inline(t.slice(3))+'</h2>';
+    else if(t.startsWith('# '))html+='<h1>'+inline(t.slice(2))+'</h1>';
+    else if(t.startsWith('> '))html+='<blockquote>'+inline(t.slice(2))+'</blockquote>';
+    else if(/^[-*] /.test(t))html+='<ul><li>'+inline(t.slice(2))+'</li></ul>';
+    else if(/^\d+\. /.test(t))html+='<p>'+inline(t)+'</p>';
+    else if(t==='')html+='';
+    else html+='<p>'+inline(t)+'</p>';
+  }
+  if(inTable)html+='</table>';
+  return html.replace(/<\/ul>\s*<ul>/g,'');
+}
+loadFiles();
+</script>
+</body>
+</html>
