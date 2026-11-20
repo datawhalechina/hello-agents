@@ -1,0 +1,26 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# ===== 虚拟环境 =====
+.venv/
+venv/
+
+# ===== 环境变量 =====
+.env
+
+# ===== IDE =====
+.idea/
+.vscode/
+
+# ===== Jupyter =====
+.ipynb_checkpoints/
+
+# ===== 框架运行时产物 =====
+memory/
+tool-output/
+skills/
+
+# ===== 大文件（超过仓库 5MB 红线，改用外链） =====
+data/ai_student_impact_dataset.csv
