@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.cache/
+outputs/
+data/private/
+*.pdf
+*.log
+.DS_Store
