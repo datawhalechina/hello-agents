@@ -220,6 +220,23 @@ class MultiAgentTripPlanner:
             traceback.print_exc()
             raise
     
+    def _create_request_agents(self) -> List[SimpleAgent]:
+        """复用模型和工具配置，为每个请求建立独立的对话历史。"""
+        return [
+            SimpleAgent(
+                name=agent.name,
+                llm=agent.llm,
+                system_prompt=agent.system_prompt,
+                config=agent.config,
+                tool_registry=agent.tool_registry,
+                enable_tool_calling=agent.enable_tool_calling,
+            )
+            for agent in (
+                self.attraction_agent, self.weather_agent,
+                self.hotel_agent, self.planner_agent,
+            )
+        ]
+
     def plan_trip(self, request: TripRequest) -> TripPlan:
         """
         使用多智能体协作生成旅行计划
@@ -231,6 +248,7 @@ class MultiAgentTripPlanner:
             旅行计划
         """
         try:
+            attraction_agent, weather_agent, hotel_agent, planner_agent = self._create_request_agents()
             print(f"\n{'='*60}")
             print(f"🚀 开始多智能体协作规划旅行...")
             print(f"目的地: {request.city}")
@@ -242,25 +260,25 @@ class MultiAgentTripPlanner:
             # 步骤1: 景点搜索Agent搜索景点
             print("📍 步骤1: 搜索景点...")
             attraction_query = self._build_attraction_query(request)
-            attraction_response = self.attraction_agent.run(attraction_query)
+            attraction_response = attraction_agent.run(attraction_query)
             print(f"景点搜索结果: {attraction_response[:200]}...\n")
 
             # 步骤2: 天气查询Agent查询天气
             print("🌤️  步骤2: 查询天气...")
             weather_query = f"请查询{request.city}的天气信息"
-            weather_response = self.weather_agent.run(weather_query)
+            weather_response = weather_agent.run(weather_query)
             print(f"天气查询结果: {weather_response[:200]}...\n")
 
             # 步骤3: 酒店推荐Agent搜索酒店
             print("🏨 步骤3: 搜索酒店...")
             hotel_query = f"请搜索{request.city}的{request.accommodation}酒店"
-            hotel_response = self.hotel_agent.run(hotel_query)
+            hotel_response = hotel_agent.run(hotel_query)
             print(f"酒店搜索结果: {hotel_response[:200]}...\n")
 
             # 步骤4: 行程规划Agent整合信息生成计划
             print("📋 步骤4: 生成行程计划...")
             planner_query = self._build_planner_query(request, attraction_response, weather_response, hotel_response)
-            planner_response = self.planner_agent.run(planner_query)
+            planner_response = planner_agent.run(planner_query)
             print(f"行程规划结果: {planner_response[:300]}...\n")
 
             # 解析最终计划

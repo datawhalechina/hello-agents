@@ -568,19 +568,37 @@ class TripPlannerAgent:
         self.hotel_agent = SimpleAgent(name="Hotel Recommendation", prompt=HOTEL_PROMPT)
         self.planner_agent = SimpleAgent(name="Itinerary Planning", prompt=PLANNER_PROMPT)
 
+    def _create_request_agents(self):
+        """Reuse model and tool configuration with independent history for each request."""
+        return [
+            SimpleAgent(
+                name=agent.name,
+                llm=agent.llm,
+                system_prompt=agent.system_prompt,
+                config=agent.config,
+                tool_registry=agent.tool_registry,
+                enable_tool_calling=agent.enable_tool_calling,
+            )
+            for agent in (
+                self.attraction_agent, self.weather_agent,
+                self.hotel_agent, self.planner_agent,
+            )
+        ]
+
     def plan_trip(self, request: TripPlanRequest) -> TripPlan:
+        attraction_agent, weather_agent, hotel_agent, planner_agent = self._create_request_agents()
         # Step 1: Attraction search
-        attraction_response = self.attraction_agent.run(
+        attraction_response = attraction_agent.run(
             f"Please search for {request.preferences} attractions in {request.city}"
         )
 
         # Step 2: Weather query
-        weather_response = self.weather_agent.run(
+        weather_response = weather_agent.run(
             f"Please query weather for {request.city}"
         )
 
         # Step 3: Hotel recommendation
-        hotel_response = self.hotel_agent.run(
+        hotel_response = hotel_agent.run(
             f"Please search for {request.accommodation} hotels in {request.city}"
         )
 
@@ -588,12 +606,14 @@ class TripPlannerAgent:
         planner_query = self._build_planner_query(
             request, attraction_response, weather_response, hotel_response
         )
-        planner_response = self.planner_agent.run(planner_query)
+        planner_response = planner_agent.run(planner_query)
 
         # Step 5: Parse JSON
         trip_plan = self._parse_trip_plan(planner_response)
         return trip_plan
 ```
+
+The planner instance can reuse its LLM and tool registries, but each `plan_trip` call creates four request-local Agents. The configured Agents serve as templates; their conversation history is not reused. This prevents a previous or overlapping request from entering another request's prompts, while preserving tool-call context within a single Agent run. The shared MCP instance described in Section 13.4.3 does not need to be recreated.
 
 This flow executes four steps sequentially, with the output of each step serving as input for the next step. Note that we use the `TripPlanRequest` and `TripPlan` Pydantic models defined in Section 13.2.
 
