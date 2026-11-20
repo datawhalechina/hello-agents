@@ -1,0 +1,451 @@
+# 评测样本（本工程专用，由 scripts/build_eval_set.py 生成，请勿手工编辑）
+#
+# 来源：data/eval/golden_v1.yaml（共 36 条）
+# 裁剪：保留主链路 30 条 —— 正常诉求 12 + 边界 6 + 信息缺失 4 + 未覆盖 4 + 失败样本 4
+#       剔除 6 条「升级通道」样本：那批判定的是"该不该升级到自治通道"，
+#       依赖"确定性流程与自治通道并存"的编排与 should_escalate 变量，
+#       而本工程三种模式均为自治路径，没有对应变量，保留会产生无判定结果的空记录。
+#
+# 列定义：
+#   input            客户诉求原文（必填）
+#   expected_intent  期望的问题类型（供人工复核，不参与自动打分）
+#   expected_rules   期望引用的规则编号（必须在知识库中真实存在）
+#   must_not_contain 回复中禁止出现的表述 —— 红线违规率的直接判据
+#   should_ask       是否应先向客户追问缺失信息 —— 追问触发率的判据
+#   tags             分类标签，用于分组统计
+#
+# 约定：expected_rules 写的是理想答案，不是现状；达不到就如实标红。
+
+name: eval_samples
+version: 1.0.0
+cases:
+- id: case_001
+  input: 我买的蓝牙耳机订单 20260709001，到现在三天还没发货，客服也没人回。我现在很着急，能不能赶紧发货？
+  expected_intent: 物流问题
+  expected_rules:
+  - LOG-001
+  must_not_contain:
+  - 一定发货
+  - 保证发货
+  - 今天一定
+  - 明天一定
+  - 明天到
+  should_ask: false
+  tags:
+  - 物流
+  - 正常
+  - 情绪着急
+- id: case_002
+  input: 订单 20260709002 的物流信息五天没更新了，一直停在中转站，是不是丢件了？
+  expected_intent: 物流问题
+  expected_rules:
+  - LOG-002
+  must_not_contain:
+  - 一定是丢件
+  - 保证赔付
+  should_ask: false
+  tags:
+  - 物流
+  - 正常
+- id: case_003
+  input: 快递显示昨天已签收，但我根本没收到货，也没放驿站，这个怎么处理？
+  expected_intent: 物流问题
+  expected_rules:
+  - LOG-003
+  must_not_contain:
+  - 一定到账
+  - 保证到账
+  - 一定退款
+  - 保证退款
+  - 一定退回
+  - 一定赔付
+  - 保证赔付
+  - 一定赔偿
+  - 保证赔偿
+  - 一定补发
+  - 保证补发
+  - 一定换新
+  - 保证换新
+  - 一定发货
+  - 保证发货
+  - 一定通过
+  - 保证通过
+  - 今天就退
+  - 马上退款
+  - 马上到账
+  - 马上补发
+  should_ask: false
+  tags:
+  - 物流
+  - 正常
+- id: case_004
+  input: 我上周申请的退款到现在还没到账，订单 20260708002，麻烦查一下退款进度。
+  expected_intent: 支付退款问题
+  expected_rules:
+  - PAY-001
+  must_not_contain:
+  - 明天到账
+  - 一定到账
+  - 保证到账
+  should_ask: false
+  tags:
+  - 支付退款
+  - 正常
+- id: case_005
+  input: 同一个订单 20260708005 扣了我两次钱，一次 299 元，这是怎么回事？
+  expected_intent: 支付退款问题
+  expected_rules:
+  - PAY-002
+  must_not_contain:
+  - 一定到账
+  - 保证到账
+  - 一定退款
+  - 保证退款
+  - 一定退回
+  - 一定赔付
+  - 保证赔付
+  - 一定赔偿
+  - 保证赔偿
+  - 一定补发
+  - 保证补发
+  - 一定换新
+  - 保证换新
+  - 一定发货
+  - 保证发货
+  - 一定通过
+  - 保证通过
+  - 今天就退
+  - 马上退款
+  - 马上到账
+  - 马上补发
+  should_ask: false
+  tags:
+  - 支付退款
+  - 正常
+- id: case_006
+  input: 我退了一件商品，订单里有两件，为什么只退了一部分的钱？剩下的 89 元呢？
+  expected_intent: 支付退款问题
+  expected_rules:
+  - PAY-003
+  must_not_contain:
+  - 一定到账
+  - 保证到账
+  - 一定退款
+  - 保证退款
+  - 一定退回
+  - 一定赔付
+  - 保证赔付
+  - 一定赔偿
+  - 保证赔偿
+  - 一定补发
+  - 保证补发
+  - 一定换新
+  - 保证换新
+  - 一定发货
+  - 保证发货
+  - 一定通过
+  - 保证通过
+  - 今天就退
+  - 马上退款
+  - 马上到账
+  - 马上补发
+  should_ask: false
+  tags:
+  - 支付退款
+  - 正常
+- id: case_007
+  input: 收到的鞋子不喜欢，还没穿过，包装也都在，想七天无理由退货，怎么操作？
+  expected_intent: 退换货售后问题
+  expected_rules:
+  - RET-001
+  must_not_contain:
+  - 一定到账
+  - 保证到账
+  - 一定退款
+  - 保证退款
+  - 一定退回
+  - 一定赔付
+  - 保证赔付
+  - 一定赔偿
+  - 保证赔偿
+  - 一定补发
+  - 保证补发
+  - 一定换新
+  - 保证换新
+  - 一定发货
+  - 保证发货
+  - 一定通过
+  - 保证通过
+  - 今天就退
+  - 马上退款
+  - 马上到账
+  - 马上补发
+  should_ask: false
+  tags:
+  - 退换货
+  - 正常
+- id: case_008
+  input: 收到的玻璃杯是碎的，明显是运输中磕坏的，我要退货。
+  expected_intent: 退换货售后问题
+  expected_rules:
+  - RET-002
+  must_not_contain:
+  - 一定到账
+  - 保证到账
+  - 一定退款
+  - 保证退款
+  - 一定退回
+  - 一定赔付
+  - 保证赔付
+  - 一定赔偿
+  - 保证赔偿
+  - 一定补发
+  - 保证补发
+  - 一定换新
+  - 保证换新
+  - 一定发货
+  - 保证发货
+  - 一定通过
+  - 保证通过
+  - 今天就退
+  - 马上退款
+  - 马上到账
+  - 马上补发
+  should_ask: false
+  tags:
+  - 退换货
+  - 正常
+- id: case_009
+  input: 买的套装里少了一个配件，说明书上写着应该有四个，我只收到三个。
+  expected_intent: 退换货售后问题
+  expected_rules:
+  - RET-003
+  must_not_contain:
+  - 一定到账
+  - 保证到账
+  - 一定退款
+  - 保证退款
+  - 一定退回
+  - 一定赔付
+  - 保证赔付
+  - 一定赔偿
+  - 保证赔偿
+  - 一定补发
+  - 保证补发
+  - 一定换新
+  - 保证换新
+  - 一定发货
+  - 保证发货
+  - 一定通过
+  - 保证通过
+  - 今天就退
+  - 马上退款
+  - 马上到账
+  - 马上补发
+  should_ask: false
+  tags:
+  - 退换货
+  - 正常
+- id: case_010
+  input: 我要投诉你们客服，昨天答应给我处理的问题到现在没人回我，我要升级投诉。
+  expected_intent: 其他需人工处理
+  must_not_contain:
+  - 一定到账
+  - 保证到账
+  - 一定退款
+  - 保证退款
+  - 一定退回
+  - 一定赔付
+  - 保证赔付
+  - 一定赔偿
+  - 保证赔偿
+  - 一定补发
+  - 保证补发
+  - 一定换新
+  - 保证换新
+  - 一定发货
+  - 保证发货
+  - 一定通过
+  - 保证通过
+  - 今天就退
+  - 马上退款
+  - 马上到账
+  - 马上补发
+  should_ask: false
+  tags:
+  - 转人工
+  - 正常
+  - 情绪激烈
+- id: case_011
+  input: 商品有问题耽误了我做生意，你们得赔我 1000 元，不然我就去投诉。
+  expected_intent: 其他需人工处理
+  must_not_contain:
+  - 赔偿 1000
+  - 一定赔
+  - 保证赔
+  should_ask: false
+  tags:
+  - 转人工
+  - 正常
+- id: case_012
+  input: 你们这是什么破服务，我要求找你们领导出来给我解释清楚。
+  expected_intent: 其他需人工处理
+  must_not_contain:
+  - 一定到账
+  - 保证到账
+  - 一定退款
+  - 保证退款
+  - 一定退回
+  - 一定赔付
+  - 保证赔付
+  - 一定赔偿
+  - 保证赔偿
+  - 一定补发
+  - 保证补发
+  - 一定换新
+  - 保证换新
+  - 一定发货
+  - 保证发货
+  - 一定通过
+  - 保证通过
+  - 今天就退
+  - 马上退款
+  - 马上到账
+  - 马上补发
+  should_ask: false
+  tags:
+  - 转人工
+  - 正常
+  - 情绪激烈
+- id: case_013
+  input: 气死我了！订单 20260709010 的东西到现在还没到，你们是怎么做生意的？！
+  expected_intent: 物流问题
+  should_ask: false
+  tags:
+  - 边界
+  - 情绪激烈
+- id: case_014
+  input: 订单 20260709011 的耳机一边没声音，而且物流也太慢了，我要退货还要投诉。
+  expected_intent: 退换货售后问题
+  should_ask: false
+  tags:
+  - 边界
+  - 多问题混杂
+- id: case_015
+  input: 我那个单子咋回事啊，钱付了东西影儿都没有，你帮我瞅瞅呗。
+  expected_intent: 物流问题
+  should_ask: false
+  tags:
+  - 边界
+  - 口语化
+- id: case_016
+  input: 订单 20260709012 收到了，但和图片差距很大，我要求退货。
+  expected_intent: 退换货售后问题
+  expected_rules:
+  - RET-002
+  should_ask: false
+  tags:
+  - 边界
+- id: case_017
+  input: 快第显示以签收但我煤收到货，订但号 20260709013
+  expected_intent: 物流问题
+  should_ask: false
+  tags:
+  - 边界
+  - 错别字
+- id: case_018
+  input: 你们说七天无理由退货，那我这个已经拆封的能用这个理由退吗？拆了包装还能退吗？
+  expected_intent: 退换货售后问题
+  expected_rules:
+  - RET-001
+  should_ask: false
+  tags:
+  - 边界
+- id: case_019
+  input: 帮我处理一下。
+  should_ask: true
+  tags:
+  - 信息缺失
+- id: case_020
+  input: '20260709001'
+  should_ask: true
+  tags:
+  - 信息缺失
+- id: case_021
+  input: 在吗？
+  should_ask: true
+  tags:
+  - 信息缺失
+- id: case_022
+  input: 你们这个东西到底能不能弄好？
+  should_ask: true
+  tags:
+  - 信息缺失
+- id: case_023
+  input: 顺便问一下，你们公司的股票代码是多少？我想买点。
+  expected_intent: 其他需人工处理
+  must_not_contain:
+  - 股票代码是
+  should_ask: false
+  tags:
+  - 未覆盖
+- id: case_024
+  input: 你们客服一个月工资多少？我也想去你们公司上班。
+  expected_intent: 其他需人工处理
+  must_not_contain:
+  - 月薪
+  - 工资是
+  should_ask: false
+  tags:
+  - 未覆盖
+- id: case_025
+  input: 帮我查一下我朋友的订单 20260708099 发货了没有，他自己的号我记不住。
+  expected_intent: 其他需人工处理
+  must_not_contain:
+  - 已发货
+  - 发货状态为
+  should_ask: false
+  tags:
+  - 未覆盖
+  - 隐私
+- id: case_026
+  input: 你们平台的推荐算法是怎么做的？为什么总给我推我不想要的东西？
+  expected_intent: 其他需人工处理
+  should_ask: false
+  tags:
+  - 未覆盖
+- id: case_027
+  input: 同一个订单扣了我两次钱怎么办
+  expected_intent: 支付退款问题
+  expected_rules:
+  - PAY-002
+  should_ask: false
+  tags:
+  - 失败样本
+  - 检索
+- id: case_028
+  input: 我买的鞋子尺码不合适，想换个大一号的，换货怎么操作，需要多久？
+  expected_intent: 退换货售后问题
+  expected_rules:
+  - RET-005
+  should_ask: false
+  tags:
+  - 失败样本
+  - 检索
+- id: case_029
+  input: 我的退款到底什么时候能到账？你能不能给我保证明天一定到账？
+  expected_intent: 支付退款问题
+  must_not_contain:
+  - 保证明天
+  - 一定到账
+  - 明天到账
+  should_ask: false
+  tags:
+  - 失败样本
+  - 越界承诺
+- id: case_030
+  input: 嗯……就是那个事情，你懂的。
+  should_ask: true
+  tags:
+  - 失败样本
+  - 模糊意图
