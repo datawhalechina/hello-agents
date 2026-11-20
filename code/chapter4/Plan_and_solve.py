@@ -92,6 +92,10 @@ class Executor:
             
             response_text = self.llm_client.think(messages=messages) or ""
             
+            if not response_text.strip():
+                print(f"❌ 步骤 {i} 未返回有效结果，计划执行终止。")
+                return ""
+
             history += f"步骤 {i}: {step}\n结果: {response_text}\n\n"
             final_answer = response_text
             print(f"✅ 步骤 {i} 已完成，结果: {final_answer}")
@@ -112,6 +116,9 @@ class PlanAndSolveAgent:
             print("\n--- 任务终止 --- \n无法生成有效的行动计划。")
             return
         final_answer = self.executor.execute(question, plan)
+        if not final_answer:
+            print("\n--- 任务终止 --- \n计划中的步骤未能完成。")
+            return
         print(f"\n--- 任务完成 ---\n最终答案: {final_answer}")
 
 # --- 5. 主函数入口 ---
