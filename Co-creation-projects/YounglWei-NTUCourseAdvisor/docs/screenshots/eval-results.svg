@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="460" viewBox="0 0 1000 460" font-family="Segoe UI, Microsoft YaHei, PingFang SC, sans-serif">
+  <rect width="1000" height="460" fill="#f8fafc"/>
+  <text x="40" y="46" font-size="26" font-weight="700" fill="#0f172a">20 条端到端真实跑分</text>
+  <text x="40" y="74" font-size="14" fill="#475569">glm-4-flash + 智谱 embedding-3 + 201 张课程卡片；数字来自 eval/e2e_results*.json</text>
+
+  <!-- 左：准确率 -->
+  <rect x="40" y="100" width="440" height="280" rx="14" fill="#ffffff" stroke="#dbe4f0"/>
+  <text x="60" y="132" font-size="16" font-weight="700" fill="#2f6fed">准确率（通过 / 20）</text>
+
+  <g font-size="13" fill="#475569">
+    <text x="60" y="176">D4 基线</text>
+    <text x="60" y="236">D4.1（v1）</text>
+    <text x="60" y="296">D4.2（v2）</text>
+  </g>
+  <g>
+    <rect x="150" y="160" width="224" height="22" rx="6" fill="#94a3b8"/>
+    <text x="384" y="176" font-size="13" fill="#475569">12/20 = 60.0%</text>
+    <rect x="150" y="220" width="306" height="22" rx="6" fill="#2f6fed"/>
+    <text x="466" y="236" font-size="13" fill="#1d4ed8">17/20 = 85.0%</text>
+    <rect x="150" y="280" width="342" height="22" rx="6" fill="#1f9d55"/>
+    <text x="502" y="296" font-size="13" fill="#15803d">19/20 = 95.0%</text>
+  </g>
+  <line x1="150" y1="320" x2="450" y2="320" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="150" y="340" font-size="11" fill="#94a3b8">0%</text>
+  <text x="430" y="340" font-size="11" fill="#94a3b8">100%</text>
+
+  <!-- 右：耗时 -->
+  <rect x="520" y="100" width="440" height="280" rx="14" fill="#ffffff" stroke="#dbe4f0"/>
+  <text x="540" y="132" font-size="16" font-weight="700" fill="#2f6fed">单轮中位耗时（秒）</text>
+
+  <g font-size="13" fill="#475569">
+    <text x="540" y="176">D4 基线</text>
+    <text x="540" y="236">D4.1（v1）</text>
+    <text x="540" y="296">D4.2（v2）</text>
+  </g>
+  <g>
+    <rect x="630" y="160" width="224" height="22" rx="6" fill="#94a3b8"/>
+    <text x="862" y="176" font-size="13" fill="#475569">28.01s</text>
+    <rect x="630" y="220" width="204" height="22" rx="6" fill="#2f6fed"/>
+    <text x="842" y="236" font-size="13" fill="#1d4ed8">25.44s</text>
+    <rect x="630" y="280" width="267" height="22" rx="6" fill="#1f9d55"/>
+    <text x="905" y="296" font-size="13" fill="#15803d">33.41s</text>
+  </g>
+  <line x1="630" y1="320" x2="930" y2="320" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="630" y="340" font-size="11" fill="#94a3b8">0s</text>
+  <text x="910" y="340" font-size="11" fill="#94a3b8">40s</text>
+
+  <text x="40" y="420" font-size="12" fill="#64748b">v1 与 v2 判据不可直接比较；Q16 定向修复 PASS 未计入 v2 全量。逐条失败归因见 04-评估报告.md。</text>
+</svg>

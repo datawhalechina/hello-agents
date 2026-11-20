@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 环境与密钥
+.env
+*.key
+
+# IDE
+.idea/
+.vscode/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# 系统
+Thumbs.db
+
+# 本地 PR 打包产物
+dist/
+
+# 派生检索产物（可用 scripts/build_index.py + 智谱 key 重建）
+data/rag.db
+data/vector_index_*.json
+

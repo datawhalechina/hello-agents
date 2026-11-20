@@ -1,0 +1,9 @@
+# 运行主流程（Planner / Retrieval / Reviewer）
+hello-agents==1.0.1
+python-dotenv>=1.2.4
+
+# MCP 能力外放演示（scripts/mcp_server.py / mcp_demo.py）
+mcp==2.3.0
+
+# 运行 main.ipynb（Jupyter）
+jupyterlab>=4.0

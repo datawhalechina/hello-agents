@@ -1,0 +1,1016 @@
+{
+  "meta": {
+    "timestamp": "2026-10-24T17:59:02+08:00",
+    "model": "glm-4-flash",
+    "git_commit": "eb0efa0",
+    "eval_set": "eval/e2e_queries_v2.json",
+    "script": "scripts/eval_e2e.py",
+    "note": "判据跑分前固定；本文件为真实执行记录，answer 全文保留供归因。"
+  },
+  "summary": {
+    "total": 20,
+    "passed": 19,
+    "failed": 1,
+    "accuracy": 0.95,
+    "by_category": {
+      "①课程属性查询": {
+        "passed": 5,
+        "total": 5,
+        "accuracy": 1.0
+      },
+      "②项目课程列表": {
+        "passed": 3,
+        "total": 3,
+        "accuracy": 1.0
+      },
+      "③学位规则校验": {
+        "passed": 4,
+        "total": 4,
+        "accuracy": 1.0
+      },
+      "④边界场景": {
+        "passed": 3,
+        "total": 4,
+        "accuracy": 0.75
+      },
+      "⑤身份反问与切换": {
+        "passed": 4,
+        "total": 4,
+        "accuracy": 1.0
+      }
+    },
+    "turn_time": {
+      "n": 22,
+      "median_s": 33.41,
+      "p90_s": 105.95,
+      "max_s": 122.17,
+      "mean_s": 44.85
+    },
+    "case_time": {
+      "n": 20,
+      "median_s": 33.41,
+      "p90_s": 106.9,
+      "max_s": 174.34,
+      "mean_s": 49.34
+    },
+    "errors": 0
+  },
+  "cases": [
+    {
+      "id": "Q01",
+      "category": "①课程属性查询",
+      "turns": [
+        "SC2001 是几 AU？哪些学期开课？"
+      ],
+      "answers": [
+        "（课程信息全部来自 NTU 官方课程库，未使用模型自身知识，来源见文末）\n\nSC2001 是 3.0 AU，在 2026 学年第一学期和第二学期开课。\n\n来源：\n- [SC2001 课程详情](https://wis.ntu.edu.sg/webexe/owa/aus_subj_cont.main)"
+      ],
+      "turn_times_s": [
+        28.69
+      ],
+      "case_elapsed_s": 28.69,
+      "checks": [
+        {
+          "name": "expected_codes",
+          "ok": true,
+          "detail": "命中 ['SC2001'] / 需要 1 / 期望池 ['SC2001']"
+        },
+        {
+          "name": "keyword:AU",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "any_keywords#1",
+          "ok": true,
+          "detail": "命中 ['3.0'] / 候选 ['3.0', '3 AU', '3AU', '3 个 AU', '3 学分']"
+        },
+        {
+          "name": "any_keywords#2",
+          "ok": true,
+          "detail": "命中 ['第一学期'] / 候选 ['两学期', '两个学期', '2026_1', 'Semester 1', '第 1 学期', '第一学期', 'Sem 1', '第 1、2 学期', '1、2 学期', '1、2学期', 'Sem 1 and 2']"
+        },
+        {
+          "name": "expected_level",
+          "ok": true,
+          "detail": "层次不符课程 无（期望 undergraduate）"
+        },
+        {
+          "name": "must_have_source",
+          "ok": true,
+          "detail": "发现 1 个 URL"
+        },
+        {
+          "name": "source_whitelist",
+          "ok": true,
+          "detail": "库外/编造 URL 无"
+        }
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "Q02",
+      "category": "①课程属性查询",
+      "turns": [
+        "EE6407 是什么课？几 AU？属于哪个项目？"
+      ],
+      "answers": [
+        "（课程信息全部来自 NTU 官方课程库，未使用模型自身知识，来源见文末）\n\nEE6407 是一门研究生课程，属于 MSc Computer Control & Automation (CCA) 项目，课程代码为 EE6407。该课程共 3 个学分（AU），属于专选课程类别。课程内容涵盖组合数学与概率论回顾、遗传算法介绍、微分进化、粒子群优化、进化算法高级主题、机器学习介绍、监督学习范式与学习算法、无监督学习范式与学习算法以及机器学习理论与应用的高级主题。\n\n来源：\n- [EE6407 课程详情](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)"
+      ],
+      "turn_times_s": [
+        38.14
+      ],
+      "case_elapsed_s": 38.14,
+      "checks": [
+        {
+          "name": "expected_codes",
+          "ok": true,
+          "detail": "命中 ['EE6407'] / 需要 1 / 期望池 ['EE6407']"
+        },
+        {
+          "name": "keyword:AU",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "any_keywords#1",
+          "ok": true,
+          "detail": "命中 ['3 学分'] / 候选 ['3 AU', '3.0', '3个AU', '3 个 AU', '3 学分']"
+        },
+        {
+          "name": "any_keywords#2",
+          "ok": true,
+          "detail": "命中 ['遗传算法', '机器学习', '优化'] / 候选 ['遗传算法', 'genetic algorithm', '机器学习', 'machine learning', '优化', 'optimization']"
+        },
+        {
+          "name": "must_contain_programme",
+          "ok": true,
+          "detail": "命中 ['CCA', 'Computer Control']"
+        },
+        {
+          "name": "expected_level",
+          "ok": true,
+          "detail": "层次不符课程 无（期望 graduate）"
+        },
+        {
+          "name": "must_have_source",
+          "ok": true,
+          "detail": "发现 1 个 URL"
+        },
+        {
+          "name": "source_whitelist",
+          "ok": true,
+          "detail": "库外/编造 URL 无"
+        }
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "Q03",
+      "category": "①课程属性查询",
+      "turns": [
+        "SC1007 的先修要求是什么？和哪些课程互斥？"
+      ],
+      "answers": [
+        "（课程信息全部来自 NTU 官方课程库，未使用模型自身知识，来源见文末）\n\nSC1007 的先修要求是 SC1003。与以下课程互斥：CE1007、CE1107、CT2001、CZ1007、CZ1107、SC1303。\n\n来源：\n- [SC1007 课程信息](https://wis.ntu.edu.sg/webexe/owa/aus_subj_cont.main)\n\n---\n[审查标注] 经 3 轮审查仍未完全通过，遗留问题：\n【代码机械审查】\n1. 来源覆盖：以下课程在草稿中被提及但既不在来源清单、邻近也无来源链接——CZ1107, SC1303（补充来源或删除相关断言）"
+      ],
+      "turn_times_s": [
+        43.71
+      ],
+      "case_elapsed_s": 43.71,
+      "checks": [
+        {
+          "name": "expected_codes",
+          "ok": true,
+          "detail": "命中 ['SC1007', 'SC1003'] / 需要 2 / 期望池 ['SC1007', 'SC1003']"
+        },
+        {
+          "name": "keyword:互斥",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "any_keywords#1",
+          "ok": true,
+          "detail": "命中 ['CE1007', 'CE1107', 'CZ1007', 'CT2001', 'SC1303'] / 候选 ['CE1007', 'CE1107', 'CZ1007', 'CT2001', 'SC1303']"
+        },
+        {
+          "name": "expected_level",
+          "ok": true,
+          "detail": "层次不符课程 无（期望 undergraduate）"
+        },
+        {
+          "name": "must_have_source",
+          "ok": true,
+          "detail": "发现 1 个 URL"
+        },
+        {
+          "name": "source_whitelist",
+          "ok": true,
+          "detail": "库外/编造 URL 无"
+        }
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "Q04",
+      "category": "①课程属性查询",
+      "turns": [
+        "EE6203 讲什么？有先修要求吗？"
+      ],
+      "answers": [
+        "EE6203 计算机控制系统是一门研究生课程，属于 MSc Computer Control & Automation (CCA) 专业，课程代码为 EE6203，学分 3 个。该课程的内容包括离散时间系统建模和分析、级联补偿、状态空间设计方法、最优控制以及数字控制器的设计和实现。\n\nEE6203 计算机控制系统没有列出具体的先修课程要求。\n\n来源：\n- [EE6203 课程信息](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)\n\n---\n[审查标注] 经 3 轮审查仍未完全通过，遗留问题：\n【代码机械审查】\n1. 先修字段为空：EE6203 的卡片没有先修字段，草稿却给出先修结论——删除或明说未列出"
+      ],
+      "turn_times_s": [
+        64.89
+      ],
+      "case_elapsed_s": 64.89,
+      "checks": [
+        {
+          "name": "expected_codes",
+          "ok": true,
+          "detail": "命中 ['EE6203'] / 需要 1 / 期望池 ['EE6203']"
+        },
+        {
+          "name": "any_keywords#1",
+          "ok": true,
+          "detail": "命中 ['状态空间', '数字控制器', '离散时间', '建模'] / 候选 ['状态空间', 'state-space', '数字控制器', 'digital controller', '离散时间', 'discrete-time', '建模']"
+        },
+        {
+          "name": "any_keywords#2",
+          "ok": true,
+          "detail": "命中 ['未列出', '没有先修', '未列'] / 候选 ['未标注', '未列出', '无先修', '没有先修', '未提供', '未列', 'not listed', 'no prerequisite', '不需要先修']"
+        },
+        {
+          "name": "expected_level",
+          "ok": true,
+          "detail": "层次不符课程 无（期望 graduate）"
+        },
+        {
+          "name": "must_have_source",
+          "ok": true,
+          "detail": "发现 1 个 URL"
+        },
+        {
+          "name": "source_whitelist",
+          "ok": true,
+          "detail": "库外/编造 URL 无"
+        }
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "Q05",
+      "category": "①课程属性查询",
+      "turns": [
+        "CC0001 是几 AU？两个学期都开吗？"
+      ],
+      "answers": [
+        "（课程信息全部来自 NTU 官方课程库，未使用模型自身知识，来源见文末）\n\nCC0001 课程是 2.0 AU。该课程在 2026 学年的第一学期和第二学期都开设。\n\n来源：\n- [CC0001 课程信息](https://wis.ntu.edu.sg/webexe/owa/aus_subj_cont.main)"
+      ],
+      "turn_times_s": [
+        25.96
+      ],
+      "case_elapsed_s": 25.96,
+      "checks": [
+        {
+          "name": "expected_codes",
+          "ok": true,
+          "detail": "命中 ['CC0001'] / 需要 1 / 期望池 ['CC0001']"
+        },
+        {
+          "name": "any_keywords#1",
+          "ok": true,
+          "detail": "命中 ['2.0'] / 候选 ['2.0', '2 AU', '2AU', '2 个 AU', '2 学分']"
+        },
+        {
+          "name": "any_keywords#2",
+          "ok": true,
+          "detail": "命中 ['第一学期'] / 候选 ['两学期', '两个学期', '2026_1', 'Semester 1', '第 1 学期', '第一学期', 'Sem 1', '第 1、2 学期', '1、2 学期', '1、2学期', 'Sem 1 and 2']"
+        },
+        {
+          "name": "expected_level",
+          "ok": true,
+          "detail": "层次不符课程 无（期望 undergraduate）"
+        },
+        {
+          "name": "must_have_source",
+          "ok": true,
+          "detail": "发现 1 个 URL"
+        },
+        {
+          "name": "source_whitelist",
+          "ok": true,
+          "detail": "库外/编造 URL 无"
+        }
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "Q06",
+      "category": "②项目课程列表",
+      "turns": [
+        "我是 CSC 本科生，有哪些课程？"
+      ],
+      "answers": [
+        "已理解身份：本科生 · CSC（本次按此检索）\n\n（课程信息全部来自 NTU 官方课程库，未使用模型自身知识，来源见文末）\n\n以下是 CSC 本科生可选的课程：\n\n1. SC1013 PHYSICS FOR COMPUTING\n   - 学分：2.0\n   - 开课学期：2026 Sem 1\n   - 来源：[链接](https://wis.ntu.edu.sg/webexe/owa/aus_subj_cont.main)\n\n2. SC1305 LINEAR ALGEBRA\n   - 学分：3.0\n   - 开课学期：2026 Sem 2\n   - 先修课程：MH1812\n   - 来源：[链接](https://wis.ntu.edu.sg/webexe/owa/aus_subj_cont.main)\n\n3. SC3102 SIGNALS, SYSTEMS & TRANSFORMS\n   - 学分：3.0\n   - 开课学期：2026 Sem 1, 2026 Sem 2\n   - 先修课程：SC1004\n   - 来源：[链接](https://wis.ntu.edu.sg/webexe/owa/aus_subj_cont.main)\n\n4. SC1007 DATA STRUCTURES & ALGORITHMS\n   - 学分：3.0\n   - 开课学期：2026 Sem 1, 2026 Sem 2\n   - 先修课程：SC1003\n   - 来源：[链接](https://wis.ntu.edu.sg/webexe/owa/aus_subj_cont.main)\n\n5. SC3030 ADVANCED COMPUTER NETWORKS\n   - 学分：3.0\n   - 开课学期：2026 Sem 1\n   - 先修课程：SC2008\n   - 来源：[链接](https://wis.ntu.edu.sg/webexe/owa/aus_subj_cont.main)\n\n来源：\n- [链接](https://wis.ntu.edu.sg/webexe/owa/aus_subj_cont.main)"
+      ],
+      "turn_times_s": [
+        82.2
+      ],
+      "case_elapsed_s": 82.2,
+      "checks": [
+        {
+          "name": "must_contain_programme",
+          "ok": true,
+          "detail": "命中 ['CSC']"
+        },
+        {
+          "name": "min_course_codes",
+          "ok": true,
+          "detail": "回答课程码 9 个，下限 3"
+        },
+        {
+          "name": "expected_level",
+          "ok": true,
+          "detail": "层次不符课程 无（期望 undergraduate）"
+        },
+        {
+          "name": "all_codes_in_curricula",
+          "ok": true,
+          "detail": "不属于 CSC 的课程 无"
+        },
+        {
+          "name": "must_have_source",
+          "ok": true,
+          "detail": "发现 6 个 URL"
+        },
+        {
+          "name": "source_whitelist",
+          "ok": true,
+          "detail": "库外/编造 URL 无"
+        }
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "Q07",
+      "category": "②项目课程列表",
+      "turns": [
+        "我是 CCA 研究生，课程列表有哪些？"
+      ],
+      "answers": [
+        "已理解身份：研究生 · CCA（本次按此检索）\n\n（课程信息全部来自 NTU 官方课程库，未使用模型自身知识，来源见文末）\n\n以下是 CCA 研究生课程列表：\n\n1. 课程代码：EE6009，课程名称：EE6009 GRADUATE PROFESSIONAL INTERNSHIP，学分：3，类别：通选，学期：未列出，[课程详情](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)\n2. 课程代码：EE6228，课程名称：EE6228 PROCESS MODELING & SCHEDULING，学分：3，类别：通选，学期：未列出，[课程详情](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)\n3. 课程代码：EE6406，课程名称：EE6406 ANALYTIC & ENSEMBLE MACHINE LEARNING，学分：3，类别：通选，学期：未列出，[课程详情](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)\n4. 课程代码：EE6111，课程名称：EE6111 5G COMMUNICATION & BEYOND，学分：未列出，类别：通选，学期：未列出，[课程详情](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)\n5. 课程代码：EE7204，课程名称：EE7204 LINEAR SYSTEMS，学分：3，类别：通选，学期：未列出，[课程详情](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)\n\n来源：\n- [NTU 官方课程库](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)"
+      ],
+      "turn_times_s": [
+        84.97
+      ],
+      "case_elapsed_s": 84.97,
+      "checks": [
+        {
+          "name": "must_contain_programme",
+          "ok": true,
+          "detail": "命中 ['CCA']"
+        },
+        {
+          "name": "min_course_codes",
+          "ok": true,
+          "detail": "回答课程码 5 个，下限 3"
+        },
+        {
+          "name": "expected_level",
+          "ok": true,
+          "detail": "层次不符课程 无（期望 graduate）"
+        },
+        {
+          "name": "all_codes_in_programme",
+          "ok": true,
+          "detail": "不属于「MSc Computer Control & Automation (CCA)」的课程 无"
+        },
+        {
+          "name": "must_have_source",
+          "ok": true,
+          "detail": "发现 6 个 URL"
+        },
+        {
+          "name": "source_whitelist",
+          "ok": true,
+          "detail": "库外/编造 URL 无"
+        }
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "Q08",
+      "category": "②项目课程列表",
+      "turns": [
+        "我是 Robotics and Intelligent Systems 研究生，有哪些课程？"
+      ],
+      "answers": [
+        "已理解身份：研究生 · Robotics and Intelligent Systems（本次按此检索）\n\n（课程信息全部来自 NTU 官方课程库，未使用模型自身知识，来源见文末）\n\n以下是 Robotics and Intelligent Systems 研究生课程列表：\n\n1. MA6215 Robotics Projects\n   - 学分：3\n   - 类别：其他\n   - 开课学期：未列出（见专业页面）\n   - [课程详情](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-(robotics-and-intelligent-systems))\n\n2. MA6210 Introduction to Advanced Robotics and Autonomous Systems\n   - 学分：3\n   - 类别：核心\n   - 开课学期：未列出（见专业页面）\n   - [课程详情](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-(robotics-and-intelligent-systems))\n\n3. MA6212 Robotics Manipulation and Advanced Control\n   - 学分：3\n   - 类别：其他\n   - 开课学期：未列出（见专业页面）\n   - [课程详情](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-(robotics-and-intelligent-systems))\n\n4. MA6788 Independent Study\n   - 学分：3\n   - 类别：其他\n   - 开课学期：未列出（见专业页面）\n   - [课程详情](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-(robotics-and-intelligent-systems))\n\n5. MA6216 Vision\n   - 学分：3\n   - 类别：其他\n   - 开课学期：未列出（见专业页面）\n   - [课程详情](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-(robotics-and-intelligent-systems))\n\n来源：\n- [MA6215 Robotics Projects](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-(robotics-and-intelligent-systems))\n- [MA6210 Introduction to Advanced Robotics and Autonomous Systems](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-(robotics-and-intelligent-systems))\n- [MA6212 Robotics Manipulation and Advanced Control](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-(robotics-and-intelligent-systems))\n- [MA6788 Independent Study](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-(robotics-and-intelligent-systems))\n- [MA6216 Vision](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-(robotics-and-intelligent-systems))"
+      ],
+      "turn_times_s": [
+        122.17
+      ],
+      "case_elapsed_s": 122.17,
+      "checks": [
+        {
+          "name": "must_contain_programme",
+          "ok": true,
+          "detail": "命中 ['Robotics', 'Intelligent Systems']"
+        },
+        {
+          "name": "min_course_codes",
+          "ok": true,
+          "detail": "回答课程码 5 个，下限 3"
+        },
+        {
+          "name": "expected_level",
+          "ok": true,
+          "detail": "层次不符课程 无（期望 graduate）"
+        },
+        {
+          "name": "all_codes_in_programme",
+          "ok": true,
+          "detail": "不属于「MSc Robotics and Intelligent Systems」的课程 无"
+        },
+        {
+          "name": "must_have_source",
+          "ok": true,
+          "detail": "发现 10 个 URL"
+        },
+        {
+          "name": "source_whitelist",
+          "ok": true,
+          "detail": "库外/编造 URL 无"
+        }
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "Q09",
+      "category": "③学位规则校验",
+      "turns": [
+        "我是 CCA 研究生，已经选了 EE6203、EE6204、EE6221 三门专选，满足 Option 1 专选至少 4 门的要求吗？"
+      ],
+      "answers": [
+        "已理解身份：研究生 · CCA（本次按此检索）\n\n（课程信息全部来自 NTU 官方课程库，未使用模型自身知识，来源见文末）\n\n您已选的 EE6203、EE6204、EE6221 三门课程均为专选，但目前专选门数为 3 门，未满足 CCA 对专选至少 4 门的要求。根据 CCA 规则，您还需要再选 1 门专选课程才能满足 Option 1 的要求。具体规则详情请参考[NTU CCA 规则](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)。\n\n来源：\n- EE6203\n- EE6204\n- EE6221"
+      ],
+      "turn_times_s": [
+        19.92
+      ],
+      "case_elapsed_s": 19.92,
+      "checks": [
+        {
+          "name": "expected_codes",
+          "ok": true,
+          "detail": "命中 ['EE6203', 'EE6204', 'EE6221'] / 需要 1 / 期望池 ['EE6203', 'EE6204', 'EE6221']"
+        },
+        {
+          "name": "keyword:专选",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "any_keywords#1",
+          "ok": true,
+          "detail": "命中 ['未满足', '还需'] / 候选 ['未满足', '不足', '不满足', '还需']"
+        },
+        {
+          "name": "any_keywords#2",
+          "ok": true,
+          "detail": "命中 ['4 门', '4门'] / 候选 ['4 门', '4门', '≥4', '四门']"
+        },
+        {
+          "name": "any_keywords#3",
+          "ok": true,
+          "detail": "命中 ['3 门', '3门', '三门'] / 候选 ['3 门', '3门', '三门']"
+        },
+        {
+          "name": "must_contain_programme",
+          "ok": true,
+          "detail": "命中 ['CCA']"
+        },
+        {
+          "name": "expected_level",
+          "ok": true,
+          "detail": "层次不符课程 无（期望 graduate）"
+        },
+        {
+          "name": "must_have_source",
+          "ok": true,
+          "detail": "发现 1 个 URL"
+        },
+        {
+          "name": "source_whitelist",
+          "ok": true,
+          "detail": "库外/编造 URL 无"
+        }
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "Q10",
+      "category": "③学位规则校验",
+      "turns": [
+        "我是 CCA 研究生，按 Option 1，我选了 EE6406、EE6483、EE6497、EE7207 四门通选，AU 会超过 18 的上限吗？"
+      ],
+      "answers": [
+        "已理解身份：研究生 · CCA（本次按此检索）\n\n（课程信息全部来自 NTU 官方课程库，未使用模型自身知识，来源见文末）\n\n按 Option 1（10 门课 30 AU，无论文）校验：通选 4 门 12 AU（上限 18 AU）——符合，专选 0 门 0 AU（下限 12 AU）——不足，专选门数 0 门（要求 ≥4 门）——不足。总体结论：存在不满足项。\n\n来源：\n- EE6406\n- EE6483\n- EE6497\n- EE7207\n\n规则来源：[NTU 研究生课程选项 1 规则](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)"
+      ],
+      "turn_times_s": [
+        24.56
+      ],
+      "case_elapsed_s": 24.56,
+      "checks": [
+        {
+          "name": "expected_codes",
+          "ok": true,
+          "detail": "命中 ['EE6406', 'EE6483', 'EE6497', 'EE7207'] / 需要 1 / 期望池 ['EE6406', 'EE6483', 'EE6497', 'EE7207']"
+        },
+        {
+          "name": "keyword:AU",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "any_keywords#1",
+          "ok": true,
+          "detail": "命中 ['符合'] / 候选 ['符合', '未超', '没有超', '不超过', '未超过', '在上限内']"
+        },
+        {
+          "name": "any_keywords#2",
+          "ok": true,
+          "detail": "命中 ['18 AU', '18AU', '18 个 AU', '上限 18'] / 候选 ['18 AU', '18AU', '18 个 AU', '上限 18', '上限为 18']"
+        },
+        {
+          "name": "any_keywords#3",
+          "ok": true,
+          "detail": "命中 ['12 AU', '12AU', '12 个 AU'] / 候选 ['12 AU', '12AU', '12 个 AU', '12 学分']"
+        },
+        {
+          "name": "must_contain_programme",
+          "ok": true,
+          "detail": "命中 ['CCA']"
+        },
+        {
+          "name": "expected_level",
+          "ok": true,
+          "detail": "层次不符课程 无（期望 graduate）"
+        },
+        {
+          "name": "must_have_source",
+          "ok": true,
+          "detail": "发现 1 个 URL"
+        },
+        {
+          "name": "source_whitelist",
+          "ok": true,
+          "detail": "库外/编造 URL 无"
+        }
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "Q11",
+      "category": "③学位规则校验",
+      "turns": [
+        "SC2001 和 SC2301 可以同时选吗？它们是不是互斥课程？"
+      ],
+      "answers": [
+        "（课程信息全部来自 NTU 官方课程库，未使用模型自身知识，来源见文末）\n\nSC2001 和 SC2301 是互斥课程，不能同时选修。SC2001 的互斥课程包括 CE2001、CE2101、CZ2001、CZ2101 和 SC2301；SC2301 的互斥课程包括 CT2006 和 SC2001。\n\n来源：\n- SC2001: [NTU 课程库链接](https://wis.ntu.edu.sg/webexe/owa/aus_subj_cont.main)\n- SC2301: [NTU 课程库链接](https://wis.ntu.edu.sg/webexe/owa/aus_subj_cont.main)"
+      ],
+      "turn_times_s": [
+        20.82
+      ],
+      "case_elapsed_s": 20.82,
+      "checks": [
+        {
+          "name": "expected_codes",
+          "ok": true,
+          "detail": "命中 ['SC2001', 'SC2301'] / 需要 2 / 期望池 ['SC2001', 'SC2301']"
+        },
+        {
+          "name": "keyword:互斥",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "any_keywords#1",
+          "ok": true,
+          "detail": "命中 ['不能同时选'] / 候选 ['不可同选', '不能同时选', '不可同时', '不应同选', '冲突']"
+        },
+        {
+          "name": "expected_level",
+          "ok": true,
+          "detail": "层次不符课程 无（期望 undergraduate）"
+        },
+        {
+          "name": "must_have_source",
+          "ok": true,
+          "detail": "发现 2 个 URL"
+        },
+        {
+          "name": "source_whitelist",
+          "ok": true,
+          "detail": "库外/编造 URL 无"
+        }
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "Q12",
+      "category": "③学位规则校验",
+      "turns": [
+        "我是 CSC 本科生，这学期想选 SC1301 和 SC2301，帮我查一下时间冲突"
+      ],
+      "answers": [
+        "已理解身份：本科生 · CSC（本次按此检索）\n\n（课程信息全部来自 NTU 官方课程库，未使用模型自身知识，来源见文末）\n\n经检测，SC1301 与 SC2301 存在时间冲突，具体为 1 个班次组合重叠（示例时段 WED 1230-1520）。请注意，每门课的多个 index 为平行班，实际是否冲突取决于注册的 index，请选课时错开时段。\n\nSC1301 的先修要求为“必须是图灵人工智能学者”，而 SC2301 的先修要求为 SC1303，您所选的课程列表中未见先修课，因此无法满足 SC2301 的先修要求。\n\n来源：\n- SC1301：[NTU 课程库链接](https://wis.ntu.edu.sg/webexe/owa/aus_subj_cont.main)\n- SC2301：[NTU 课程库链接](https://wis.ntu.edu.sg/webexe/owa/aus_subj_cont.main)\n\n---\n[审查标注] 经 3 轮审查仍未完全通过，遗留问题：\n【代码机械审查】\n1. 学位规则：草稿含学位规则/冲突结论，但未见校验工具返回（check_* 输出/规则来源 URL）——调用校验工具并引用其返回\n2. 先修字段不符：SC1301 卡片未包含 SC2301, SC1303, SC2301——只可转述卡片原文\n3. 字段遗漏：用户问到的 学期 未在草稿中回答——逐项补全（卡片没有就写未列出）"
+      ],
+      "turn_times_s": [
+        106.9
+      ],
+      "case_elapsed_s": 106.9,
+      "checks": [
+        {
+          "name": "expected_codes",
+          "ok": true,
+          "detail": "命中 ['SC1301', 'SC2301'] / 需要 2 / 期望池 ['SC1301', 'SC2301']"
+        },
+        {
+          "name": "any_keywords#1",
+          "ok": true,
+          "detail": "命中 ['重叠', '冲突'] / 候选 ['重叠', '冲突']"
+        },
+        {
+          "name": "expected_level",
+          "ok": true,
+          "detail": "层次不符课程 无（期望 undergraduate）"
+        },
+        {
+          "name": "source_whitelist",
+          "ok": true,
+          "detail": "库外/编造 URL 无"
+        }
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "Q13",
+      "category": "④边界场景",
+      "turns": [
+        "我是 AAI 研究生，有哪些课程？"
+      ],
+      "answers": [
+        "「AAI」目前不在课程库覆盖范围内。\n当前覆盖：\n· 本科：CCDS 学院 5 个专业（CSC 计算机科学、CE 计算机工程、DSAI 数据科学与人工智能、AISC 人工智能与社会、COMP 计算）\n· 研究生：MSc Computer Control & Automation（CCA）、MSc Robotics and Intelligent Systems\n其他学院的专业暂未收录。可以直接问具体课程代码，或换成本库覆盖的专业。"
+      ],
+      "turn_times_s": [
+        4.49
+      ],
+      "case_elapsed_s": 4.49,
+      "checks": [
+        {
+          "name": "keyword:AAI",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "must_say_unknown",
+          "ok": true,
+          "detail": "命中 ['未收录', '不在课程库']"
+        },
+        {
+          "name": "must_contain_programme",
+          "ok": true,
+          "detail": "命中 ['CCA', 'Robotics', 'CCDS', 'CSC']"
+        },
+        {
+          "name": "max_codes",
+          "ok": true,
+          "detail": "回答课程码 []（0 个，上限 0）"
+        }
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "Q14",
+      "category": "④边界场景",
+      "turns": [
+        "我是机械工程专业的研究生，推荐几门课"
+      ],
+      "answers": [
+        "「机械工程」目前不在课程库覆盖范围内。\n当前覆盖：\n· 本科：CCDS 学院 5 个专业（CSC 计算机科学、CE 计算机工程、DSAI 数据科学与人工智能、AISC 人工智能与社会、COMP 计算）\n· 研究生：MSc Computer Control & Automation（CCA）、MSc Robotics and Intelligent Systems\n其他学院的专业暂未收录。可以直接问具体课程代码，或换成本库覆盖的专业。"
+      ],
+      "turn_times_s": [
+        5.28
+      ],
+      "case_elapsed_s": 5.28,
+      "checks": [
+        {
+          "name": "keyword:机械工程",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "must_say_unknown",
+          "ok": true,
+          "detail": "命中 ['未收录', '不在课程库']"
+        },
+        {
+          "name": "must_contain_programme",
+          "ok": true,
+          "detail": "命中 ['CCA', 'Robotics', 'CCDS', 'CSC']"
+        },
+        {
+          "name": "max_codes",
+          "ok": true,
+          "detail": "回答课程码 []（0 个，上限 0）"
+        }
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "Q15",
+      "category": "④边界场景",
+      "turns": [
+        "CS1010S 这门课讲什么内容？"
+      ],
+      "answers": [
+        "（课程信息全部来自 NTU 官方课程库，未使用模型自身知识，来源见文末）\n\n在当前课程库中未查到 CS1010S 课程的详细内容描述。如果您需要更多信息，请访问 NTU 官方课程库进行查询。\n\n来源：\n- "
+      ],
+      "turn_times_s": [
+        16.14
+      ],
+      "case_elapsed_s": 16.14,
+      "checks": [
+        {
+          "name": "expected_codes",
+          "ok": true,
+          "detail": "命中 ['CS1010S'] / 需要 1 / 期望池 ['CS1010S']"
+        },
+        {
+          "name": "must_say_unknown",
+          "ok": true,
+          "detail": "命中 ['未查到']"
+        },
+        {
+          "name": "max_codes",
+          "ok": true,
+          "detail": "回答课程码 ['CS1010S']（1 个，上限 1）"
+        }
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "Q16",
+      "category": "④边界场景",
+      "turns": [
+        "MA6210 讲什么内容？"
+      ],
+      "answers": [
+        "（课程信息全部来自 NTU 官方课程库，未使用模型自身知识，来源见文末）\n\nMA6210 Introduction to Advanced Robotics and Autonomous Systems\n\n来源：[NTU 官方课程库](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-(robotics-and-intelligent-systems)）"
+      ],
+      "turn_times_s": [
+        39.48
+      ],
+      "case_elapsed_s": 39.48,
+      "checks": [
+        {
+          "name": "expected_codes",
+          "ok": true,
+          "detail": "命中 ['MA6210'] / 需要 1 / 期望池 ['MA6210']"
+        },
+        {
+          "name": "any_keywords#1",
+          "ok": false,
+          "detail": "命中 [] / 候选 ['未提供', '未收录', '未标注', '没有描述', '无描述', '未列出', '暂无', 'not provided', 'not available', 'no description']"
+        },
+        {
+          "name": "must_say_unknown",
+          "ok": false,
+          "detail": "命中 无"
+        },
+        {
+          "name": "max_codes",
+          "ok": true,
+          "detail": "回答课程码 ['MA6210']（1 个，上限 1）"
+        },
+        {
+          "name": "expected_level",
+          "ok": true,
+          "detail": "层次不符课程 无（期望 graduate）"
+        },
+        {
+          "name": "must_have_source",
+          "ok": true,
+          "detail": "发现 1 个 URL"
+        },
+        {
+          "name": "source_whitelist",
+          "ok": true,
+          "detail": "库外/编造 URL 无"
+        }
+      ],
+      "passed": false,
+      "error": null
+    },
+    {
+      "id": "Q17",
+      "category": "⑤身份反问与切换",
+      "turns": [
+        "推荐几门好课"
+      ],
+      "answers": [
+        "要推荐或列出课程，我需要先知道你的身份。\n当前课程库覆盖：研究生侧 MSc Computer Control & Automation（CCA）、MSc Robotics and Intelligent Systems；本科侧 CCDS 学院 5 个专业（CSC / CE / DSAI / AISC / COMP）。\n请回复「本科」或「研究生」；如果是 CCA 学生，回复「我是 CCA 研究生」更准确。"
+      ],
+      "turn_times_s": [
+        4.52
+      ],
+      "case_elapsed_s": 4.52,
+      "checks": [
+        {
+          "name": "keyword:本科",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "keyword:研究生",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "max_codes",
+          "ok": true,
+          "detail": "回答课程码 []（0 个，上限 0）"
+        },
+        {
+          "name": "must_ask_identity",
+          "ok": true,
+          "detail": "回答须包含本科/研究生两个选项且明确询问"
+        }
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "Q18",
+      "category": "⑤身份反问与切换",
+      "turns": [
+        "推荐几门好课",
+        "研究生"
+      ],
+      "answers": [
+        "要推荐或列出课程，我需要先知道你的身份。\n当前课程库覆盖：研究生侧 MSc Computer Control & Automation（CCA）、MSc Robotics and Intelligent Systems；本科侧 CCDS 学院 5 个专业（CSC / CE / DSAI / AISC / COMP）。\n请回复「本科」或「研究生」；如果是 CCA 学生，回复「我是 CCA 研究生」更准确。",
+        "已理解身份：研究生（本次按此检索）\n\n（课程信息全部来自 NTU 官方课程库，未使用模型自身知识，来源见文末）\n\n推荐以下研究生课程：\n- EE6204 SYSTEMS ANALYSIS：3 AU，专业选修课，内容涉及线性、动态和整数规划、优化技术、随机过程、排队模型、马尔可夫决策过程。[来源](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)\n- EE6010 PROJECT MANAGEMENT & TECHNOPRENEURSHIP：3 AU，通选课，涵盖项目启动和规划、项目调度和实施、项目监控、控制和评估、创新和创业。[来源](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)\n- EE6203 COMPUTER CONTROL SYSTEMS：3 AU，专业选修课，包括离散时间系统建模和分析、级联补偿、状态空间设计方法、最优控制、数字控制器的设计和实现。[来源](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)\n- EE6534 MODERN DISTRIBUTION SYSTEMS WITH RENEWABLE RESOURCES：3 AU，通选课，涉及配电系统的运行、电能质量、太阳能系统、风能系统。[来源](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)\n- EE6511 POWER SYSTEM MODELLING & CONTROL：3 AU，通选课，包括稳态电力系统网络、网络组件、稳定性分析、电力系统控制。[来源](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)\n\n来源：\n- EE6204 SYSTEMS ANALYSIS：[来源](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)\n- EE6010 PROJECT MANAGEMENT & TECHNOPRENEURSHIP：[来源](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)\n- EE6203 COMPUTER CONTROL SYSTEMS：[来源](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)\n- EE6534 MODERN DISTRIBUTION SYSTEMS WITH RENEWABLE RESOURCES：[来源](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)\n- EE6511 POWER SYSTEM MODELLING & CONTROL：[来源](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)"
+      ],
+      "turn_times_s": [
+        2.58,
+        71.2
+      ],
+      "case_elapsed_s": 73.78,
+      "checks": [
+        {
+          "name": "expected_codes",
+          "ok": true,
+          "detail": "命中 ['EE6204', 'EE6534', 'EE6511', 'EE6203'] / 需要 1 / 期望池 ['EE6204', 'EE6503', 'EE6534', 'EE6509', 'EE6511', 'EE6407', 'EE6406', 'EE6203']"
+        },
+        {
+          "name": "keyword:研究生",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "min_course_codes",
+          "ok": true,
+          "detail": "回答课程码 5 个，下限 3"
+        },
+        {
+          "name": "expected_level",
+          "ok": true,
+          "detail": "层次不符课程 无（期望 graduate）"
+        },
+        {
+          "name": "must_have_source",
+          "ok": true,
+          "detail": "发现 10 个 URL"
+        },
+        {
+          "name": "source_whitelist",
+          "ok": true,
+          "detail": "库外/编造 URL 无"
+        }
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "Q19",
+      "category": "⑤身份反问与切换",
+      "turns": [
+        "我是 CCA 研究生，推荐机器学习方向的课",
+        "我是 CSC 本科生，推荐机器学习方向的课"
+      ],
+      "answers": [
+        "已理解身份：研究生 · CCA（本次按此检索）\n\n（课程信息全部来自 NTU 官方课程库，未使用模型自身知识，来源见文末）\n\n推荐 EE6406、EE6407、EE6497、EE6488、EE6483 五门课程。EE6406 ANALYTIC & ENSEMBLE MACHINE LEARNING 是一门通选课程，为机器学习打下基础；EE6407 GENETIC ALGORITHMS & MACHINE LEARNING 是一门专选课程，从进化计算的角度深入探讨机器学习；EE6497 PATTERN RECOGNITION & DEEP LEARNING 和 EE6488 QUANTUM ALGORITHM & QUANTUM MACHINE LEARNING 都是通选课程，分别补充深度学习和量子算法的知识；EE6483 ARTIFICIAL INTELLIGENCE & DATA MINING 也是一门通选课程，涉及人工智能和数据挖掘。这些课程在内容上互补不重叠，能够全面覆盖机器学习领域的多个方向。\n\n来源：\n- EE6406: [ANALYTIC & ENSEMBLE MACHINE LEARNING](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)\n- EE6407: [GENETIC ALGORITHMS & MACHINE LEARNING](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)\n- EE6497: [PATTERN RECOGNITION & DEEP LEARNING](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)\n- EE6488: [QUANTUM ALGORITHM & QUANTUM MACHINE LEARNING](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)\n- EE6483: [ARTIFICIAL INTELLIGENCE & DATA MINING](https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-computer-control-automation)",
+        "已理解身份：本科生 · CSC（本次按此检索）\n\n（课程信息全部来自 NTU 官方课程库，未使用模型自身知识，来源见文末）\n\n推荐 SC4000、SC2300、SC4172、SC4001、SC4017 五门课程，这些课程都是针对 CSC 本科生开设的机器学习方向课程。以下是各门课程的定位与搭配：\n\n- SC4000 MACHINE LEARNING 是一门基础课程，适合初学者，它为后续深入学习提供了必要的背景知识。\n- SC2300 MACHINE LEARNING 是在 SC4000 基础上的进阶课程，它进一步扩展了机器学习的概念和应用。\n- SC4172 INTERNET OF THINGS: TINY MACHINE LEARNING 是一门结合物联网和机器学习的课程，适合对这两个领域都感兴趣的学生。\n- SC4001 NEURAL NETWORK & DEEP LEARNING 是一门专注于神经网络和深度学习的课程，适合对深度学习有深入兴趣的学生。\n- SC4017 DATA PRIVACY & SECURITY 则是关注数据隐私和安全的课程，对于希望在机器学习领域从事相关工作的学生来说非常有用。\n\n这些课程在内容上互补不重叠，可以满足不同学生的需求。SC4000、SC2300、SC4001 和 SC4017 都计入专选课程，而 SC4172 则可以作为通选课程选择。\n\n来源：\n- SC4000: [MACHINE LEARNING](https://wis.ntu.edu.sg/webexe/owa/aus_subj_cont.main)\n- SC2300: [MACHINE LEARNING](https://wis.ntu.edu.sg/webexe/owa/aus_subj_cont.main)\n- SC4172: [INTERNET OF THINGS: TINY MACHINE LEARNING](https://wis.ntu.edu.sg/webexe/owa/aus_subj_cont.main)\n- SC4001: [NEURAL NETWORK & DEEP LEARNING](https://wis.ntu.edu.sg/webexe/owa/aus_subj_cont.main)\n- SC4017: [DATA PRIVACY & SECURITY](https://wis.ntu.edu.sg/webexe/owa/aus_subj_cont.main)"
+      ],
+      "turn_times_s": [
+        68.39,
+        105.95
+      ],
+      "case_elapsed_s": 174.34,
+      "checks": [
+        {
+          "name": "expected_codes",
+          "ok": true,
+          "detail": "命中 ['SC2300', 'SC4000', 'SC4001', 'SC4172'] / 需要 2 / 期望池 ['SC2300', 'SC4000', 'SC4001', 'SC4172', 'SC1315', 'SC3010']"
+        },
+        {
+          "name": "must_contain_programme",
+          "ok": true,
+          "detail": "命中 ['CSC']"
+        },
+        {
+          "name": "min_course_codes",
+          "ok": true,
+          "detail": "回答课程码 5 个，下限 3"
+        },
+        {
+          "name": "expected_level",
+          "ok": true,
+          "detail": "层次不符课程 无（期望 undergraduate）"
+        },
+        {
+          "name": "all_codes_in_curricula",
+          "ok": true,
+          "detail": "不属于 CSC 的课程 无"
+        },
+        {
+          "name": "must_have_source",
+          "ok": true,
+          "detail": "发现 5 个 URL"
+        },
+        {
+          "name": "source_whitelist",
+          "ok": true,
+          "detail": "库外/编造 URL 无"
+        }
+      ],
+      "passed": true,
+      "error": null
+    },
+    {
+      "id": "Q20",
+      "category": "⑤身份反问与切换",
+      "turns": [
+        "我是 AAI 专业的新生，有哪些课程？"
+      ],
+      "answers": [
+        "「AAI」目前不在课程库覆盖范围内。\n当前覆盖：\n· 本科：CCDS 学院 5 个专业（CSC 计算机科学、CE 计算机工程、DSAI 数据科学与人工智能、AISC 人工智能与社会、COMP 计算）\n· 研究生：MSc Computer Control & Automation（CCA）、MSc Robotics and Intelligent Systems\n其他学院的专业暂未收录。可以直接问具体课程代码，或换成本库覆盖的专业。"
+      ],
+      "turn_times_s": [
+        5.79
+      ],
+      "case_elapsed_s": 5.79,
+      "checks": [
+        {
+          "name": "keyword:AAI",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "must_say_unknown",
+          "ok": true,
+          "detail": "命中 ['未收录', '不在课程库']"
+        },
+        {
+          "name": "must_contain_programme",
+          "ok": true,
+          "detail": "命中 ['CCA', 'Robotics', 'CCDS', 'CSC']"
+        },
+        {
+          "name": "max_codes",
+          "ok": true,
+          "detail": "回答课程码 []（0 个，上限 0）"
+        }
+      ],
+      "passed": true,
+      "error": null
+    }
+  ]
+}

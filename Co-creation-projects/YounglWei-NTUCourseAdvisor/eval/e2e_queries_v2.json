@@ -1,0 +1,740 @@
+{
+  "说明": "D4 端到端评估集（20 条，判据先定死，跑分后不得修改）。覆盖五类：①课程属性查询 ②项目课程列表 ③学位规则校验 ④边界场景 ⑤身份反问与切换。边界场景的正确回答 = 如实说明未收录，不是答出内容。字段语义：expected_codes=回答中必须出现的课程码（至少 min_expected_codes 个）；expected_keywords=必须全部出现的子串（不区分大小写）；any_keywords=每组至少出现一个；must_say_unknown=回答须明说未收录/查不到/未提供；must_contain_programme=回答须出现 programme_terms 中任一项；max_codes=回答中不同课程码数量上限；min_course_codes=回答中不同课程码数量下限；expected_level=回答中出现的库内课程码必须全部为该层次；all_codes_in_curricula=回答中出现的本科课程码必须属于该专业（按卡片 source_categories）；all_codes_in_programme=回答中出现的课程码必须属于该项目（按卡片 programme 字段）；must_ask_identity=回答须反问本科/研究生身份；must_have_source=回答须含至少一个来源 URL。 【D4.2 判据修订】Q06/Q07/Q08 列表类去掉固定锚点，保留结构判据（层次/项目/最少课程数/来源）；其余 17 条未改。",
+  "cases": [
+    {
+      "id": "Q01",
+      "category": "①课程属性查询",
+      "turns": [
+        "SC2001 是几 AU？哪些学期开课？"
+      ],
+      "criteria": {
+        "expected_codes": [
+          "SC2001"
+        ],
+        "min_expected_codes": 1,
+        "expected_keywords": [
+          "AU"
+        ],
+        "any_keywords": [
+          [
+            "3.0",
+            "3 AU",
+            "3AU",
+            "3 个 AU",
+            "3 学分"
+          ],
+          [
+            "两学期",
+            "两个学期",
+            "2026_1",
+            "Semester 1",
+            "第 1 学期",
+            "第一学期",
+            "Sem 1",
+            "第 1、2 学期",
+            "1、2 学期",
+            "1、2学期",
+            "Sem 1 and 2"
+          ]
+        ],
+        "must_say_unknown": false,
+        "must_contain_programme": false,
+        "programme_terms": [],
+        "max_codes": null,
+        "min_course_codes": null,
+        "expected_level": "undergraduate",
+        "all_codes_in_curricula": null,
+        "all_codes_in_programme": null,
+        "must_ask_identity": false,
+        "must_have_source": true
+      }
+    },
+    {
+      "id": "Q02",
+      "category": "①课程属性查询",
+      "turns": [
+        "EE6407 是什么课？几 AU？属于哪个项目？"
+      ],
+      "criteria": {
+        "expected_codes": [
+          "EE6407"
+        ],
+        "min_expected_codes": 1,
+        "expected_keywords": [
+          "AU"
+        ],
+        "any_keywords": [
+          [
+            "3 AU",
+            "3.0",
+            "3个AU",
+            "3 个 AU",
+            "3 学分"
+          ],
+          [
+            "遗传算法",
+            "genetic algorithm",
+            "机器学习",
+            "machine learning",
+            "优化",
+            "optimization"
+          ]
+        ],
+        "must_say_unknown": false,
+        "must_contain_programme": true,
+        "programme_terms": [
+          "CCA",
+          "Computer Control",
+          "计算机控制",
+          "自动化"
+        ],
+        "max_codes": null,
+        "min_course_codes": null,
+        "expected_level": "graduate",
+        "all_codes_in_curricula": null,
+        "all_codes_in_programme": null,
+        "must_ask_identity": false,
+        "must_have_source": true
+      }
+    },
+    {
+      "id": "Q03",
+      "category": "①课程属性查询",
+      "turns": [
+        "SC1007 的先修要求是什么？和哪些课程互斥？"
+      ],
+      "criteria": {
+        "expected_codes": [
+          "SC1007",
+          "SC1003"
+        ],
+        "min_expected_codes": 2,
+        "expected_keywords": [
+          "互斥"
+        ],
+        "any_keywords": [
+          [
+            "CE1007",
+            "CE1107",
+            "CZ1007",
+            "CT2001",
+            "SC1303"
+          ]
+        ],
+        "must_say_unknown": false,
+        "must_contain_programme": false,
+        "programme_terms": [],
+        "max_codes": null,
+        "min_course_codes": null,
+        "expected_level": "undergraduate",
+        "all_codes_in_curricula": null,
+        "all_codes_in_programme": null,
+        "must_ask_identity": false,
+        "must_have_source": true
+      }
+    },
+    {
+      "id": "Q04",
+      "category": "①课程属性查询",
+      "turns": [
+        "EE6203 讲什么？有先修要求吗？"
+      ],
+      "criteria": {
+        "expected_codes": [
+          "EE6203"
+        ],
+        "min_expected_codes": 1,
+        "expected_keywords": [],
+        "any_keywords": [
+          [
+            "状态空间",
+            "state-space",
+            "数字控制器",
+            "digital controller",
+            "离散时间",
+            "discrete-time",
+            "建模"
+          ],
+          [
+            "未标注",
+            "未列出",
+            "无先修",
+            "没有先修",
+            "未提供",
+            "未列",
+            "not listed",
+            "no prerequisite",
+            "不需要先修"
+          ]
+        ],
+        "must_say_unknown": false,
+        "must_contain_programme": false,
+        "programme_terms": [],
+        "max_codes": null,
+        "min_course_codes": null,
+        "expected_level": "graduate",
+        "all_codes_in_curricula": null,
+        "all_codes_in_programme": null,
+        "must_ask_identity": false,
+        "must_have_source": true
+      }
+    },
+    {
+      "id": "Q05",
+      "category": "①课程属性查询",
+      "turns": [
+        "CC0001 是几 AU？两个学期都开吗？"
+      ],
+      "criteria": {
+        "expected_codes": [
+          "CC0001"
+        ],
+        "min_expected_codes": 1,
+        "expected_keywords": [],
+        "any_keywords": [
+          [
+            "2.0",
+            "2 AU",
+            "2AU",
+            "2 个 AU",
+            "2 学分"
+          ],
+          [
+            "两学期",
+            "两个学期",
+            "2026_1",
+            "Semester 1",
+            "第 1 学期",
+            "第一学期",
+            "Sem 1",
+            "第 1、2 学期",
+            "1、2 学期",
+            "1、2学期",
+            "Sem 1 and 2"
+          ]
+        ],
+        "must_say_unknown": false,
+        "must_contain_programme": false,
+        "programme_terms": [],
+        "max_codes": null,
+        "min_course_codes": null,
+        "expected_level": "undergraduate",
+        "all_codes_in_curricula": null,
+        "all_codes_in_programme": null,
+        "must_ask_identity": false,
+        "must_have_source": true
+      }
+    },
+    {
+      "id": "Q06",
+      "category": "②项目课程列表",
+      "turns": [
+        "我是 CSC 本科生，有哪些课程？"
+      ],
+      "criteria": {
+        "expected_codes": [],
+        "min_expected_codes": 0,
+        "expected_keywords": [],
+        "any_keywords": [],
+        "must_say_unknown": false,
+        "must_contain_programme": true,
+        "programme_terms": [
+          "CSC",
+          "Computer Science",
+          "计算机科学"
+        ],
+        "max_codes": null,
+        "min_course_codes": 3,
+        "expected_level": "undergraduate",
+        "all_codes_in_curricula": "CSC",
+        "all_codes_in_programme": null,
+        "must_ask_identity": false,
+        "must_have_source": true,
+        "revision_note": "D4.2 列表类改为结构判据，不绑固定锚点"
+      }
+    },
+    {
+      "id": "Q07",
+      "category": "②项目课程列表",
+      "turns": [
+        "我是 CCA 研究生，课程列表有哪些？"
+      ],
+      "criteria": {
+        "expected_codes": [],
+        "min_expected_codes": 0,
+        "expected_keywords": [],
+        "any_keywords": [],
+        "must_say_unknown": false,
+        "must_contain_programme": true,
+        "programme_terms": [
+          "CCA",
+          "Computer Control",
+          "计算机控制",
+          "自动化"
+        ],
+        "max_codes": null,
+        "min_course_codes": 3,
+        "expected_level": "graduate",
+        "all_codes_in_curricula": null,
+        "all_codes_in_programme": "MSc Computer Control & Automation (CCA)",
+        "must_ask_identity": false,
+        "must_have_source": true,
+        "revision_note": "D4.2 列表类改为结构判据，不绑固定锚点"
+      }
+    },
+    {
+      "id": "Q08",
+      "category": "②项目课程列表",
+      "turns": [
+        "我是 Robotics and Intelligent Systems 研究生，有哪些课程？"
+      ],
+      "criteria": {
+        "expected_codes": [],
+        "min_expected_codes": 0,
+        "expected_keywords": [],
+        "any_keywords": [],
+        "must_say_unknown": false,
+        "must_contain_programme": true,
+        "programme_terms": [
+          "Robotics",
+          "机器人",
+          "Intelligent Systems"
+        ],
+        "max_codes": null,
+        "min_course_codes": 3,
+        "expected_level": "graduate",
+        "all_codes_in_curricula": null,
+        "all_codes_in_programme": "MSc Robotics and Intelligent Systems",
+        "must_ask_identity": false,
+        "must_have_source": true,
+        "revision_note": "D4.2 列表类改为结构判据，不绑固定锚点"
+      }
+    },
+    {
+      "id": "Q09",
+      "category": "③学位规则校验",
+      "turns": [
+        "我是 CCA 研究生，已经选了 EE6203、EE6204、EE6221 三门专选，满足 Option 1 专选至少 4 门的要求吗？"
+      ],
+      "criteria": {
+        "expected_codes": [
+          "EE6203",
+          "EE6204",
+          "EE6221"
+        ],
+        "min_expected_codes": 1,
+        "expected_keywords": [
+          "专选"
+        ],
+        "any_keywords": [
+          [
+            "未满足",
+            "不足",
+            "不满足",
+            "还需"
+          ],
+          [
+            "4 门",
+            "4门",
+            "≥4",
+            "四门"
+          ],
+          [
+            "3 门",
+            "3门",
+            "三门"
+          ]
+        ],
+        "must_say_unknown": false,
+        "must_contain_programme": true,
+        "programme_terms": [
+          "CCA",
+          "Computer Control",
+          "计算机控制",
+          "自动化"
+        ],
+        "max_codes": null,
+        "min_course_codes": null,
+        "expected_level": "graduate",
+        "all_codes_in_curricula": null,
+        "all_codes_in_programme": null,
+        "must_ask_identity": false,
+        "must_have_source": true
+      }
+    },
+    {
+      "id": "Q10",
+      "category": "③学位规则校验",
+      "turns": [
+        "我是 CCA 研究生，按 Option 1，我选了 EE6406、EE6483、EE6497、EE7207 四门通选，AU 会超过 18 的上限吗？"
+      ],
+      "criteria": {
+        "expected_codes": [
+          "EE6406",
+          "EE6483",
+          "EE6497",
+          "EE7207"
+        ],
+        "min_expected_codes": 1,
+        "expected_keywords": [
+          "AU"
+        ],
+        "any_keywords": [
+          [
+            "符合",
+            "未超",
+            "没有超",
+            "不超过",
+            "未超过",
+            "在上限内"
+          ],
+          [
+            "18 AU",
+            "18AU",
+            "18 个 AU",
+            "上限 18",
+            "上限为 18"
+          ],
+          [
+            "12 AU",
+            "12AU",
+            "12 个 AU",
+            "12 学分"
+          ]
+        ],
+        "must_say_unknown": false,
+        "must_contain_programme": true,
+        "programme_terms": [
+          "CCA",
+          "Computer Control",
+          "计算机控制",
+          "自动化"
+        ],
+        "max_codes": null,
+        "min_course_codes": null,
+        "expected_level": "graduate",
+        "all_codes_in_curricula": null,
+        "all_codes_in_programme": null,
+        "must_ask_identity": false,
+        "must_have_source": true
+      }
+    },
+    {
+      "id": "Q11",
+      "category": "③学位规则校验",
+      "turns": [
+        "SC2001 和 SC2301 可以同时选吗？它们是不是互斥课程？"
+      ],
+      "criteria": {
+        "expected_codes": [
+          "SC2001",
+          "SC2301"
+        ],
+        "min_expected_codes": 2,
+        "expected_keywords": [
+          "互斥"
+        ],
+        "any_keywords": [
+          [
+            "不可同选",
+            "不能同时选",
+            "不可同时",
+            "不应同选",
+            "冲突"
+          ]
+        ],
+        "must_say_unknown": false,
+        "must_contain_programme": false,
+        "programme_terms": [],
+        "max_codes": null,
+        "min_course_codes": null,
+        "expected_level": "undergraduate",
+        "all_codes_in_curricula": null,
+        "all_codes_in_programme": null,
+        "must_ask_identity": false,
+        "must_have_source": true
+      }
+    },
+    {
+      "id": "Q12",
+      "category": "③学位规则校验",
+      "turns": [
+        "我是 CSC 本科生，这学期想选 SC1301 和 SC2301，帮我查一下时间冲突"
+      ],
+      "criteria": {
+        "expected_codes": [
+          "SC1301",
+          "SC2301"
+        ],
+        "min_expected_codes": 2,
+        "expected_keywords": [],
+        "any_keywords": [
+          [
+            "重叠",
+            "冲突"
+          ]
+        ],
+        "must_say_unknown": false,
+        "must_contain_programme": false,
+        "programme_terms": [],
+        "max_codes": null,
+        "min_course_codes": null,
+        "expected_level": "undergraduate",
+        "all_codes_in_curricula": null,
+        "all_codes_in_programme": null,
+        "must_ask_identity": false,
+        "must_have_source": false
+      }
+    },
+    {
+      "id": "Q13",
+      "category": "④边界场景",
+      "turns": [
+        "我是 AAI 研究生，有哪些课程？"
+      ],
+      "criteria": {
+        "expected_codes": [],
+        "min_expected_codes": 0,
+        "expected_keywords": [
+          "AAI"
+        ],
+        "any_keywords": [],
+        "must_say_unknown": true,
+        "must_contain_programme": true,
+        "programme_terms": [
+          "CCA",
+          "Robotics",
+          "CCDS",
+          "CSC"
+        ],
+        "max_codes": 0,
+        "min_course_codes": null,
+        "expected_level": null,
+        "all_codes_in_curricula": null,
+        "all_codes_in_programme": null,
+        "must_ask_identity": false,
+        "must_have_source": false
+      }
+    },
+    {
+      "id": "Q14",
+      "category": "④边界场景",
+      "turns": [
+        "我是机械工程专业的研究生，推荐几门课"
+      ],
+      "criteria": {
+        "expected_codes": [],
+        "min_expected_codes": 0,
+        "expected_keywords": [
+          "机械工程"
+        ],
+        "any_keywords": [],
+        "must_say_unknown": true,
+        "must_contain_programme": true,
+        "programme_terms": [
+          "CCA",
+          "Robotics",
+          "CCDS",
+          "CSC"
+        ],
+        "max_codes": 0,
+        "min_course_codes": null,
+        "expected_level": null,
+        "all_codes_in_curricula": null,
+        "all_codes_in_programme": null,
+        "must_ask_identity": false,
+        "must_have_source": false
+      }
+    },
+    {
+      "id": "Q15",
+      "category": "④边界场景",
+      "turns": [
+        "CS1010S 这门课讲什么内容？"
+      ],
+      "criteria": {
+        "expected_codes": [
+          "CS1010S"
+        ],
+        "min_expected_codes": 1,
+        "expected_keywords": [],
+        "any_keywords": [],
+        "must_say_unknown": true,
+        "must_contain_programme": false,
+        "programme_terms": [],
+        "max_codes": 1,
+        "min_course_codes": null,
+        "expected_level": null,
+        "all_codes_in_curricula": null,
+        "all_codes_in_programme": null,
+        "must_ask_identity": false,
+        "must_have_source": false
+      }
+    },
+    {
+      "id": "Q16",
+      "category": "④边界场景",
+      "turns": [
+        "MA6210 讲什么内容？"
+      ],
+      "criteria": {
+        "expected_codes": [
+          "MA6210"
+        ],
+        "min_expected_codes": 1,
+        "expected_keywords": [],
+        "any_keywords": [
+          [
+            "未提供",
+            "未收录",
+            "未标注",
+            "没有描述",
+            "无描述",
+            "未列出",
+            "暂无",
+            "not provided",
+            "not available",
+            "no description"
+          ]
+        ],
+        "must_say_unknown": true,
+        "must_contain_programme": false,
+        "programme_terms": [],
+        "max_codes": 1,
+        "min_course_codes": null,
+        "expected_level": "graduate",
+        "all_codes_in_curricula": null,
+        "all_codes_in_programme": null,
+        "must_ask_identity": false,
+        "must_have_source": true
+      }
+    },
+    {
+      "id": "Q17",
+      "category": "⑤身份反问与切换",
+      "turns": [
+        "推荐几门好课"
+      ],
+      "criteria": {
+        "expected_codes": [],
+        "min_expected_codes": 0,
+        "expected_keywords": [
+          "本科",
+          "研究生"
+        ],
+        "any_keywords": [],
+        "must_say_unknown": false,
+        "must_contain_programme": false,
+        "programme_terms": [],
+        "max_codes": 0,
+        "min_course_codes": null,
+        "expected_level": null,
+        "all_codes_in_curricula": null,
+        "all_codes_in_programme": null,
+        "must_ask_identity": true,
+        "must_have_source": false
+      }
+    },
+    {
+      "id": "Q18",
+      "category": "⑤身份反问与切换",
+      "turns": [
+        "推荐几门好课",
+        "研究生"
+      ],
+      "criteria": {
+        "expected_codes": [
+          "EE6204",
+          "EE6503",
+          "EE6534",
+          "EE6509",
+          "EE6511",
+          "EE6407",
+          "EE6406",
+          "EE6203"
+        ],
+        "min_expected_codes": 1,
+        "expected_keywords": [
+          "研究生"
+        ],
+        "any_keywords": [],
+        "must_say_unknown": false,
+        "must_contain_programme": false,
+        "programme_terms": [],
+        "max_codes": null,
+        "min_course_codes": 3,
+        "expected_level": "graduate",
+        "all_codes_in_curricula": null,
+        "all_codes_in_programme": null,
+        "must_ask_identity": false,
+        "must_have_source": true
+      }
+    },
+    {
+      "id": "Q19",
+      "category": "⑤身份反问与切换",
+      "turns": [
+        "我是 CCA 研究生，推荐机器学习方向的课",
+        "我是 CSC 本科生，推荐机器学习方向的课"
+      ],
+      "criteria": {
+        "expected_codes": [
+          "SC2300",
+          "SC4000",
+          "SC4001",
+          "SC4172",
+          "SC1315",
+          "SC3010"
+        ],
+        "min_expected_codes": 2,
+        "expected_keywords": [],
+        "any_keywords": [],
+        "must_say_unknown": false,
+        "must_contain_programme": true,
+        "programme_terms": [
+          "CSC",
+          "Computer Science",
+          "计算机科学"
+        ],
+        "max_codes": null,
+        "min_course_codes": 3,
+        "expected_level": "undergraduate",
+        "all_codes_in_curricula": "CSC",
+        "all_codes_in_programme": null,
+        "must_ask_identity": false,
+        "must_have_source": true
+      }
+    },
+    {
+      "id": "Q20",
+      "category": "⑤身份反问与切换",
+      "turns": [
+        "我是 AAI 专业的新生，有哪些课程？"
+      ],
+      "criteria": {
+        "expected_codes": [],
+        "min_expected_codes": 0,
+        "expected_keywords": [
+          "AAI"
+        ],
+        "any_keywords": [],
+        "must_say_unknown": true,
+        "must_contain_programme": true,
+        "programme_terms": [
+          "CCA",
+          "Robotics",
+          "CCDS",
+          "CSC"
+        ],
+        "max_codes": 0,
+        "min_course_codes": null,
+        "expected_level": null,
+        "all_codes_in_curricula": null,
+        "all_codes_in_programme": null,
+        "must_ask_identity": false,
+        "must_have_source": false
+      }
+    }
+  ],
+  "revision": "D4.2 判据修订（用户 2026-10-24 允许）：仅 Q06/Q07/Q08 三个列表类 case 改为结构判据（层次/项目/数量/来源），去掉固定锚点 expected_codes；其余 17 条与 v1 完全相同。v1 保留在 eval/e2e_queries.json，D4 基线 60% / D4.1 85% 仍以 v1 为准。"
+}

@@ -1,0 +1,21 @@
+{
+  "说明": "D1 检索层金标查询集：中英混合、课程码/主题/先修三类问法。relevance 课程码分级：10=必须命中，5=次级相关。课程码均取自 data/course_cards.jsonl 真实数据。",
+  "k": 5,
+  "cases": [
+    {"query": "What is EE7207 about?", "relevance": {"EE7207": 10}},
+    {"query": "SC1003 这门课讲什么", "relevance": {"SC1003": 10}},
+    {"query": "which graduate course covers state-space design methods", "relevance": {"EE6203": 10}},
+    {"query": "我想选一门机器学习方向的研究生课", "relevance": {"EE6407": 10, "EE6406": 10, "EE6483": 5}},
+    {"query": "机器人相关的课程", "relevance": {"EE6221": 10}},
+    {"query": "natural language processing courses", "relevance": {"EE6405": 10, "SC4002": 10, "CT3204": 5}},
+    {"query": "SC2001 的先修课要求是什么", "relevance": {"SC2001": 10}},
+    {"query": "哪门课讲深度学习", "relevance": {"SC4001": 10, "EE7207": 10, "EE6497": 5}},
+    {"query": "cyber security and blockchain", "relevance": {"EE6102": 10, "SC3010": 5}},
+    {"query": "数据库入门课程", "relevance": {"SC2207": 10}},
+    {"query": "operating systems", "relevance": {"SC2005": 10}},
+    {"query": "量子计算相关的课", "relevance": {"SC4055": 10, "EE6488": 10}},
+    {"query": "image analysis and pattern recognition", "relevance": {"EE7403": 10, "EE6497": 5}},
+    {"query": "可再生能源与智能电网", "relevance": {"EE6509": 10, "EE6516": 5, "EE6534": 5}},
+    {"query": "数据结构与算法的基础课", "relevance": {"SC1007": 10, "SC2001": 5}}
+  ]
+}

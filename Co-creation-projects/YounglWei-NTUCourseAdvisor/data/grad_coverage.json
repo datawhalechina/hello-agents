@@ -1,0 +1,99 @@
+[
+  {
+    "programme": "MSc in Enterprise Artificial Intelligence",
+    "url": "https://www.ntu.edu.sg/education/graduate-programme/Master-of-Science-In-Enterprise-Artificial-Intelligence-Programme",
+    "kind": "failed",
+    "courses": 0,
+    "pdfs": []
+  },
+  {
+    "programme": "MSc in Sustainability and Environmental Engineering",
+    "url": "https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-sustainability-and-environmental-engineering",
+    "kind": "empty",
+    "courses": 0,
+    "pdfs": []
+  },
+  {
+    "programme": "MA in Museum Studies and Curatorial Practices",
+    "url": "https://www.ntu.edu.sg/education/graduate-programme/master-in-museums-studies-and-curatorial-practices",
+    "kind": "empty",
+    "courses": 0,
+    "pdfs": []
+  },
+  {
+    "programme": "MSc in Nanotechnology and Nanoscience",
+    "url": "https://www.ntu.edu.sg/education/graduate-programme/Master-of-Science-in-Nanotechnology-and-Nanoscience",
+    "kind": "failed",
+    "courses": 0,
+    "pdfs": []
+  },
+  {
+    "programme": "MSc in Engineering Management",
+    "url": "https://www.ntu.edu.sg/education/graduate-programme/Master-of-Science-in-Engineering-Management-Programme",
+    "kind": "failed",
+    "courses": 0,
+    "pdfs": []
+  },
+  {
+    "programme": "MSc in Applied Materials Analytics",
+    "url": "https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-applied-materials-analytics",
+    "kind": "pdf",
+    "courses": 0,
+    "pdfs": [
+      "https://www.ntu.edu.sg/media/docs/librariesprovider121/mse-postgraduates/mse-pg-masterofscience/mse-master-of-science-brochure.pdf?sfvrsn=c72ac663_1",
+      "https://www.ntu.edu.sg/media/docs/librariesprovider121/mse-postgraduates/mse-pg-cw_applied-materials-analytics_tuition-fees-aa-oct-2026.pdf?sfvrsn=5025689f_1"
+    ]
+  },
+  {
+    "programme": "MSc (Robotics and Intelligent Systems",
+    "url": "https://www.ntu.edu.sg/education/graduate-programme/master-of-science-(robotics-and-intelligent-systems)",
+    "kind": "table",
+    "courses": 13,
+    "pdfs": [
+      "https://www.ntu.edu.sg/media/docs/librariesprovider122/curriculum/mae-graduate-scholarship-application-form.pdf?sfvrsn=898ca002_1"
+    ]
+  },
+  {
+    "programme": "MSc (AI in Medicine)",
+    "url": "https://www.ntu.edu.sg/education/graduate-programme/master-of-science-(ai-in-medicine)",
+    "kind": "empty",
+    "courses": 0,
+    "pdfs": []
+  },
+  {
+    "programme": "MA (Applied Psychology)",
+    "url": "https://www.ntu.edu.sg/education/graduate-programme/master-of-arts-(applied-psychology)",
+    "kind": "pdf",
+    "courses": 0,
+    "pdfs": [
+      "https://www.ntu.edu.sg/media/docs/nielibraries/gpl-documents/maap/maap-study-plans-for-2027.pdf?sfvrsn=90073c7c_5",
+      "https://www.ntu.edu.sg/media/docs/nielibraries/gpl-documents/maap/maap-study-plans-for-2027.pdf?sfvrsn=90073c7c_5"
+    ]
+  },
+  {
+    "programme": "Master of Media and Communication",
+    "url": "https://www.ntu.edu.sg/education/graduate-programme/master-of-media-and-communication",
+    "kind": "pdf",
+    "courses": 0,
+    "pdfs": [
+      "https://www.ntu.edu.sg/media/docs/librariesprovider143/pg/mmc-excellence-scholarship96ada1416fb5492481eea130bc871657.pdf?sfvrsn=5818e832_1",
+      "https://www.ntu.edu.sg/media/docs/librariesprovider143/pg/referee-letter-reference-guide_v2-9-nov-2022.pdf?sfvrsn=49f4ffca_3",
+      "https://www.ntu.edu.sg/media/docs/librariesprovider143/pg/mmc---ay2425-fees.pdf?sfvrsn=e763037a_1",
+      "https://www.ntu.edu.sg/media/docs/librariesprovider143/pg/mmc-tuition-fees-for-academic-year-2023-24.pdf?sfvrsn=fff280d2_3",
+      "https://www.ntu.edu.sg/media/docs/librariesprovider143/pg/tuition-fees-for-academic-year-2022-23.pdf?sfvrsn=7003e201_3",
+      "https://www.ntu.edu.sg/media/docs/librariesprovider143/pg/mmc-tuition-fees-for-academic-year-20212738a1a7-5a5e-418e-87f9-7f7ce55f29db.pdf?sfvrsn=75474fcc_3",
+      "https://www.ntu.edu.sg/media/docs/librariesprovider143/pg/mmc-tuition-fees-for-academic-year-2020a7e369c1-1aef-484c-a945-b531652d3266.pdf?sfvrsn=73a44ad2_3",
+      "https://www.ntu.edu.sg/media/docs/librariesprovider143/default-document-library/mmc-faq.pdf?sfvrsn=e576be05_2&Status=Master"
+    ]
+  },
+  {
+    "programme": "MSc in BioBusiness and BioEntrepreneurship",
+    "url": "https://www.ntu.edu.sg/education/graduate-programme/master-of-science-in-biobusiness-and-bioentrepreneurship-msbbb",
+    "kind": "pdf",
+    "courses": 0,
+    "pdfs": [
+      "https://www.ntu.edu.sg/media/docs/librariesprovider115/default-document-library/graduate/msbbb/programme-and-curriculum/ay25t2-programme-structure-and-curriculum---revised-(25-feb).pdf?sfvrsn=7478cf9d_1",
+      "https://www.ntu.edu.sg/media/docs/librariesprovider115/default-document-library/graduate/msbbb/programme-and-curriculum/ay26t1-programme-structure-and-curriculum---revised-aa-12aug.pdf?sfvrsn=1eb23cf8_1"
+    ]
+  }
+]
