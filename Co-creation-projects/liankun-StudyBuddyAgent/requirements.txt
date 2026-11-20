@@ -1,0 +1,12 @@
+# 核心依赖
+hello-agents[all]>=0.2.7
+
+# LLM相关
+openai>=1.0.0
+
+# 其他工具
+python-dotenv>=1.0.0
+requests>=2.31.0
+
+# Notebook
+jupyterlab>=4.0.0
