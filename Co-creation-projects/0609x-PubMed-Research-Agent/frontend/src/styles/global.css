@@ -1,0 +1,34 @@
+:root {
+  --aside-bg: #0f172a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', Arial, sans-serif;
+  background: #f5f7fa;
+}
+
+code {
+  background: var(--el-fill-color-light);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.markdown-body p {
+  margin: 0 0 8px;
+}
+.markdown-body ul,
+.markdown-body ol {
+  margin: 0 0 8px;
+  padding-left: 20px;
+}
