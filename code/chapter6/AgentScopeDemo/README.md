@@ -24,33 +24,61 @@
 ### 1. 安装依赖
 
 ```bash
-pip install agentscope
-pip install dashscope
-pip install pydantic
+pip install -r requirements.txt
 ```
 
-### 2. 配置环境变量
+本案例通过 **OpenAI 兼容接口**调用模型，不直接使用 dashscope SDK，
+所以不需要单独安装 `dashscope`（它已经作为 agentscope 的依赖被自动装上了）。
 
-设置阿里云 DashScope API Key：
+### 2. 配置 API Key
+
+复制 `.env.example` 为 `.env` 并填写：
 
 ```bash
-# Linux/Mac
-export DASHSCOPE_API_KEY="your-api-key-here"
-
-# Windows PowerShell
-$env:DASHSCOPE_API_KEY="your-api-key-here"
-
-# Windows CMD
-set DASHSCOPE_API_KEY=your-api-key-here
+cp .env.example .env      # Windows: copy .env.example .env
 ```
 
-获取 API Key：https://dashscope.console.aliyun.com/apiKey
+`.env` 里按你用的服务商选一组配置：
+
+**方案 A：阿里云百炼（默认，原 qwen-max 同样可用）**
+
+```ini
+LLM_API_KEY=sk-your-api-key-here
+LLM_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+LLM_MODEL=qwen-max
+```
+
+API Key 获取：https://bailian.console.aliyun.com/
+
+**方案 B：DeepSeek**
+
+```ini
+LLM_API_KEY=sk-your-api-key-here
+LLM_BASE_URL=https://api.deepseek.com/v1
+LLM_MODEL=deepseek-chat
+```
+
+API Key 获取：https://platform.deepseek.com/api_keys
+
+> 不想用 `.env` 也可以直接设环境变量（`LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL`）：
+>
+> ```bash
+> # Linux/Mac
+> export LLM_API_KEY="sk-your-api-key-here"
+> # Windows PowerShell
+> $env:LLM_API_KEY="sk-your-api-key-here"
+> ```
+
+其他兼容 OpenAI 协议的服务商（Kimi、智谱、硅基流动等）同样只需要改
+`LLM_BASE_URL` 和 `LLM_MODEL` 两行。
 
 ### 3. 运行游戏
 
 ```bash
 python main_cn.py
 ```
+
+启动后会先打印当前使用的模型和端点，方便确认配置是否生效。
 
 ## 🎭 游戏角色说明
 
@@ -163,9 +191,15 @@ def get_role_prompt(role: str, character: str) -> str:
 
 ### Q: 游戏无法启动？
 A: 检查以下几点：
-- 确认 DASHSCOPE_API_KEY 环境变量已设置
+- 确认 `LLM_API_KEY` 已设置（写在 `.env` 里，或设为环境变量）
 - 验证 API Key 是否有效
+- 确认 `LLM_BASE_URL` 和 `LLM_MODEL` 与服务商匹配（启动时打印的那一行可以直接看到）
 - 检查网络连接是否正常
+
+### Q: 报 `enable_thinking` 相关错误？
+A: `enable_thinking` 是通义千问/百炼特有的扩展参数，其他服务商不认。
+它默认是关闭的，只有把 `.env` 里的 `LLM_ENABLE_THINKING` 打开时才会发送。
+用 DeepSeek 等非千问模型时保持注释即可。
 
 ### Q: 智能体输出格式错误？
 A: 可能原因：
