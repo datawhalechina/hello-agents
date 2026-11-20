@@ -18,10 +18,10 @@ from game_roles import GameRoles
 from structured_output_cn import (
     DiscussionModelCN,
     get_vote_model_cn,
-    WitchActionModelCN,
+    get_witch_model_cn,
     get_seer_model_cn,
     get_hunter_model_cn,
-    WerewolfKillModelCN
+    get_werewolf_kill_model_cn
 )
 from utils_cn import (
     check_winning_cn,
@@ -107,12 +107,43 @@ class ThreeKingdomsWerewolfGame:
             else:
                 self.villagers.append(agent)
         
+        # 私发狼队友名单，狼人之间必须互相知晓身份
+        await self.reveal_werewolf_teammates()
+        
         # 游戏开始公告
         await self.moderator.announce(
             f"三国狼人杀游戏开始！参与者：{format_player_list(self.alive_players)}"
         )
         
         print(f"✅ 游戏设置完成，共{len(self.alive_players)}名玩家")
+    
+    async def reveal_werewolf_teammates(self):
+        """把狼队友名单私发给每一个狼人
+
+        角色公告只告知自己的身份，狼人之间彼此不知，会在夜晚讨论时互相提议
+        击杀队友、甚至被迫自证身份。这里给每头狼单独下发一份队友名单。
+        """
+        if len(self.werewolves) < 2:
+            return
+        
+        for wolf in self.werewolves:
+            teammates = [w.name for w in self.werewolves if w.name != wolf.name]
+            await wolf.observe(
+                await self.moderator.announce(
+                    f"【{wolf.name}】狼人阵营共{len(self.werewolves)}人，"
+                    f"你的狼队友是：{'、'.join(teammates)}。"
+                    f"夜晚与队友协商击杀目标，切勿对队友下刀；"
+                    f"白天务必隐藏彼此关系，不可暴露队友身份。"
+                )
+            )
+    
+    async def broadcast(self, msg):
+        """把公告写入所有存活玩家的记忆
+
+        moderator.announce() 只负责打印，不会进入 agent 的上下文。出局与投票
+        结果必须显式广播，否则玩家不知道谁已经死了，会继续对死人下手。
+        """
+        await asyncio.gather(*[p.observe(msg) for p in self.alive_players])
     
     async def werewolf_phase(self, round_num: int):
         """狼人阶段"""
@@ -126,7 +157,10 @@ class ThreeKingdomsWerewolfGame:
             self.werewolves,
             enable_auto_broadcast=True,
             announcement=await self.moderator.announce(
-                f"狼人们，请讨论今晚的击杀目标。存活玩家：{format_player_list(self.alive_players)}"
+                f"狼人们，请讨论今晚的击杀目标。"
+                f"在场狼队友：{format_player_list(self.werewolves)}。"
+                f"可选目标（存活的非狼玩家）："
+                f"{format_player_list([p for p in self.alive_players if p not in self.werewolves])}"
             ),
         ) as werewolves_hub:
             # 讨论阶段
@@ -134,12 +168,14 @@ class ThreeKingdomsWerewolfGame:
                 for wolf in self.werewolves:
                     await wolf(structured_model=DiscussionModelCN)
             
-            # 投票击杀
+            # 投票击杀，候选人限定为存活的非狼玩家
             werewolves_hub.set_auto_broadcast(False)
+            wolf_names = [w.name for w in self.werewolves]
+            kill_candidates = [p for p in self.alive_players if p.name not in wolf_names]
             kill_votes = await fanout_pipeline(
                 self.werewolves,
                 msg=await self.moderator.announce("请选择击杀目标"),
-                structured_model=WerewolfKillModelCN,
+                structured_model=get_werewolf_kill_model_cn(kill_candidates),
                 enable_gather=False,
             )
             
@@ -152,8 +188,7 @@ class ThreeKingdomsWerewolfGame:
                 else:
                     # 如果返回无效,随机选择一个目标
                     print(f"⚠️ {self.werewolves[i].name} 的击杀投票无效,随机选择目标")
-                    import random
-                    valid_targets = [p.name for p in self.alive_players if p.name not in [w.name for w in self.werewolves]]
+                    valid_targets = [p.name for p in kill_candidates]
                     votes[self.werewolves[i].name] = random.choice(valid_targets) if valid_targets else None
             
             killed_player, _ = majority_vote_cn(votes)
@@ -165,7 +200,12 @@ class ThreeKingdomsWerewolfGame:
             return
             
         seer_agent = self.seer[0]
-        await self.moderator.announce("🔮 预言家请睁眼，选择要查验的玩家...")
+        await seer_agent.observe(
+            await self.moderator.announce(
+                f"🔮 预言家请睁眼，请从存活玩家中选择查验对象。"
+                f"存活玩家：{format_player_list(self.alive_players)}"
+            )
+        )
         
         check_result = await seer_agent(
             structured_model=get_seer_model_cn(self.alive_players)
@@ -200,7 +240,9 @@ class ThreeKingdomsWerewolfGame:
         await witch_agent.observe(await self.moderator.announce(death_info))
         
         # 女巫行动
-        witch_action = await witch_agent(structured_model=WitchActionModelCN)
+        witch_action = await witch_agent(
+            structured_model=get_witch_model_cn(self.alive_players)
+        )
 
         saved_player = None
         poisoned_player = None
@@ -233,7 +275,12 @@ class ThreeKingdomsWerewolfGame:
             
         hunter_agent = self.hunter[0]
         if hunter_agent.name == shot_by_hunter:
-            await self.moderator.announce("🏹 猎人发动技能，可以带走一名玩家...")
+            await hunter_agent.observe(
+                await self.moderator.announce(
+                    f"🏹 猎人发动技能，可以带走一名玩家。"
+                    f"存活玩家：{format_player_list(self.alive_players)}"
+                )
+            )
             
             hunter_action = await hunter_agent(
                 structured_model=get_hunter_model_cn(self.alive_players)
@@ -304,7 +351,9 @@ class ThreeKingdomsWerewolfGame:
                     votes[self.alive_players[i].name] = None
             
             voted_out, vote_count = majority_vote_cn(votes)
-            await self.moderator.vote_result_announcement(voted_out, vote_count)
+            await self.broadcast(
+                await self.moderator.vote_result_announcement(voted_out, vote_count)
+            )
             
             return voted_out
     
@@ -333,7 +382,9 @@ class ThreeKingdomsWerewolfGame:
                 self.update_alive_players(night_deaths)
                 
                 # 死亡公告
-                await self.moderator.death_announcement(night_deaths)
+                await self.broadcast(
+                    await self.moderator.death_announcement(night_deaths)
+                )
                 
                 # 检查胜利条件
                 winner = check_winning_cn(self.alive_players, self.roles)

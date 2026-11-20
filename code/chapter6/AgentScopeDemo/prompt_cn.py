@@ -9,12 +9,8 @@ class ChinesePrompts:
         """获取角色提示词"""
         base_prompt = f"""你是{character}，在这场三国狼人杀游戏中扮演{role}。
 
-请严格按照以下JSON格式回复，不要添加任何其他文字：
-{{
-    "reach_agreement": true/false,
-    "confidence_level": 1-10的数字,
-    "key_evidence": "你的证据或观点"
-}}
+请始终使用中文，以{character}的口吻直接说出要对其他玩家讲的话。
+不要输出JSON、字段名或任何格式化标记，结构化信息由工具参数单独提交。
 
 角色特点：
 """
