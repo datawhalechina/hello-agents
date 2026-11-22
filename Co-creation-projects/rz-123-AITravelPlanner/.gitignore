@@ -1,0 +1,9 @@
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# Notebook 检查点
+.ipynb_checkpoints/
+
+# 本地密钥（只提交 .env.example）
+.env
