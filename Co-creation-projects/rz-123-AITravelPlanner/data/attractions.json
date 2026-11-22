@@ -1,0 +1,26 @@
+{
+  "杭州": [
+    {"name": "西湖", "type": "景点", "duration": 3.0, "cost": 0, "area": "西湖区", "desc": "步行环湖，断桥、苏堤、白堤串联"},
+    {"name": "灵隐寺", "type": "景点", "duration": 2.5, "cost": 75, "area": "西湖区", "desc": "飞来峰造像与古寺，建议上午人少时去"},
+    {"name": "浙江省博物馆", "type": "博物馆", "duration": 2.0, "cost": 0, "area": "上城区", "desc": "免费预约，适合雨天或午后"},
+    {"name": "河坊街", "type": "美食", "duration": 2.0, "cost": 100, "area": "上城区", "desc": "小吃集中，适合晚间逛吃"},
+    {"name": "西溪湿地", "type": "景点", "duration": 3.0, "cost": 80, "area": "西湖区", "desc": "摇橹船与芦苇荡，适合慢逛"},
+    {"name": "中国茶叶博物馆", "type": "博物馆", "duration": 1.5, "cost": 0, "area": "西湖区", "desc": "龙井茶文化，周边茶园可散步"}
+  ],
+  "成都": [
+    {"name": "成都大熊猫繁育研究基地", "type": "景点", "duration": 3.0, "cost": 55, "area": "成华区", "desc": "建议早上 8 点前入园，熊猫更活跃"},
+    {"name": "宽窄巷子", "type": "美食", "duration": 2.0, "cost": 120, "area": "青羊区", "desc": "小吃与茶馆，适合傍晚"},
+    {"name": "武侯祠", "type": "景点", "duration": 1.5, "cost": 50, "area": "武侯区", "desc": "三国文化，与锦里相邻"},
+    {"name": "锦里", "type": "美食", "duration": 2.0, "cost": 100, "area": "武侯区", "desc": "夜景与川味小吃"},
+    {"name": "杜甫草堂", "type": "景点", "duration": 2.0, "cost": 50, "area": "青羊区", "desc": "园林清幽，适合上午"},
+    {"name": "四川博物院", "type": "博物馆", "duration": 2.0, "cost": 0, "area": "青羊区", "desc": "免费预约，文物系统完整"}
+  ],
+  "西安": [
+    {"name": "秦始皇兵马俑博物馆", "type": "博物馆", "duration": 3.5, "cost": 120, "area": "临潼区", "desc": "距市区约 1 小时车程，建议早出发"},
+    {"name": "西安城墙", "type": "景点", "duration": 2.0, "cost": 54, "area": "碑林区", "desc": "可骑行环城，傍晚光线好"},
+    {"name": "大雁塔", "type": "景点", "duration": 1.5, "cost": 40, "area": "雁塔区", "desc": "北广场夜间有音乐喷泉"},
+    {"name": "回民街", "type": "美食", "duration": 2.0, "cost": 100, "area": "莲湖区", "desc": "泡馍、肉夹馍、镜糕集中"},
+    {"name": "陕西历史博物馆", "type": "博物馆", "duration": 2.5, "cost": 0, "area": "雁塔区", "desc": "需提前预约，周一闭馆"},
+    {"name": "大唐不夜城", "type": "景点", "duration": 2.0, "cost": 0, "area": "雁塔区", "desc": "夜间步行街，适合晚间"}
+  ]
+}

@@ -1,0 +1,10 @@
+# HelloAgents 框架（含 SimpleAgent / Tool / ToolResponse）
+# 1.0.1 为实际验证过的版本：Tool.run() 需返回 ToolResponse
+hello-agents>=1.0.1
+
+# 环境变量加载
+python-dotenv>=1.0.0
+
+# Notebook 运行环境
+jupyter>=1.0.0
+notebook>=7.0.0
