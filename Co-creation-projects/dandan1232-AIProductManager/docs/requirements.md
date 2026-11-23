@@ -51,4 +51,3 @@
 - [README 模板](../../EXAMPLE-ProjectTemplate/README.md)：简介、功能、技术栈、快速开始、示例、作者。
 
 第十六章允许 Notebook 或 Python 脚本，共创说明要求 main.ipynb；本项目同时提供二者。
-
