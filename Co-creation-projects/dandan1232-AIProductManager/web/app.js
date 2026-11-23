@@ -13,6 +13,64 @@ let pollTimer = null;
 let dirty = false;
 let requestBusy = false;
 const welcome = $("conversation").firstElementChild.cloneNode(true);
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const activeMotions = new Set();
+const tabIndicator = node("span", "", "tab-indicator");
+tabIndicator.id = "tab-indicator";
+tabIndicator.setAttribute("aria-hidden", "true");
+document.querySelector(".tabs").prepend(tabIndicator);
+
+function playMotion(element, frames, options) {
+  element.getAnimations().forEach((animation) => animation.cancel());
+  if (reducedMotion.matches) return;
+  const animation = element.animate(frames, options);
+  activeMotions.add(animation);
+  animation.onfinish = animation.oncancel = () => activeMotions.delete(animation);
+}
+
+function revealContent(elements, direction = 1) {
+  // Content is already complete and editable; only its presentation eases in.
+  Array.from(elements).filter((element) => element.getClientRects().length).forEach((element, index) => {
+    playMotion(element, [
+      { opacity: 0, transform: `translateY(${8 * direction}px)` },
+      { opacity: 1, transform: "translateY(0)" },
+    ], { duration: 420, delay: Math.min(index * 45, 180), easing: "cubic-bezier(.22,1,.36,1)", fill: "backwards" });
+  });
+}
+
+function moveTabIndicator(animate = true) {
+  const indicator = $("tab-indicator");
+  const tab = document.querySelector(`[data-tab="${activeTab}"]`);
+  const track = tab.parentElement.getBoundingClientRect();
+  const target = tab.getBoundingClientRect();
+  const current = indicator.getBoundingClientRect();
+  const x = target.left - track.left;
+  const fromX = current.left - track.left;
+  const width = target.width;
+  if (!width) return;
+  const bridgeX = Math.min(fromX, x);
+  const bridgeWidth = Math.max(fromX + current.width, x + width) - bridgeX;
+  const transform = (left, scale) => `translate(${left}px, -50%) scaleX(${scale})`;
+  indicator.getAnimations().forEach((animation) => animation.cancel());
+  indicator.style.width = width + "px";
+  indicator.style.transform = transform(x, 1);
+  if (animate && indicator.dataset.ready) {
+    playMotion(indicator, [
+      { transform: transform(fromX, current.width / width), offset: 0 },
+      { transform: transform(bridgeX, bridgeWidth / width), offset: .42 },
+      { transform: transform(x, 1), offset: 1 },
+    ], { duration: 460, easing: "cubic-bezier(.22,1,.36,1)" });
+  }
+  indicator.dataset.ready = "true";
+}
+
+function refreshDocument(container, content) {
+  const revision = JSON.stringify([project?.id, content]);
+  if (container.dataset.revision === revision) return false;
+  container.dataset.revision = revision;
+  container.replaceChildren();
+  return true;
+}
 
 function node(tag, text = "", className = "") {
   const element = document.createElement(tag);
@@ -39,6 +97,8 @@ async function api(path, body) {
 }
 
 function setTab(name, focus = false) {
+  const previous = activeTab;
+  if (previous !== name) $("panel-" + previous).getAnimations({ subtree: true }).forEach((animation) => animation.cancel());
   activeTab = name;
   document.querySelectorAll("[data-tab]").forEach((button) => {
     const selected = button.dataset.tab === name;
@@ -48,6 +108,13 @@ function setTab(name, focus = false) {
     $("panel-" + button.dataset.tab).hidden = !selected;
     if (selected && focus) button.focus();
   });
+  moveTabIndicator();
+  if (previous !== name) {
+    const order = ["brief", "research", "report"];
+    const panel = $("panel-" + name);
+    const elements = name === "brief" ? panel.children : panel.firstElementChild.children;
+    revealContent(elements, order.indexOf(name) > order.indexOf(previous) ? 1 : -1);
+  }
 }
 
 function updateConnection() {
@@ -76,7 +143,16 @@ function renderBrief() {
   $("brief-help").textContent = confirmed ? "这份需求是后续分析的依据。修改后需要重新生成分析和文档。"
     : "聊过的内容会整理在这里。你可以随时检查，确认前也可以直接修改。";
   if (!dirty) {
-    fields.forEach(([key]) => { $("brief-" + key).value = project?.brief?.[key] || ""; });
+    const changed = [];
+    fields.forEach(([key]) => {
+      const input = $("brief-" + key);
+      const value = project?.brief?.[key] || "";
+      if (input.value !== value) {
+        input.value = value;
+        if (value) changed.push(input.parentElement);
+      }
+    });
+    revealContent(changed);
   }
   fields.forEach(([key]) => { $("brief-" + key).disabled = !project || project.busy || confirmed || requestBusy; });
   $("confirm").hidden = confirmed;
@@ -119,9 +195,10 @@ function sourceLink(source) {
 
 function renderResearch() {
   const container = $("research-content");
-  container.replaceChildren();
+  if (!refreshDocument(container, [project?.sources, project?.notices, project?.competitors, project?.research_summary])) return;
   if (!project?.sources?.length && !project?.notices?.length) {
     container.append(emptyDocument("先确定问题，再看竞品", "确认需求后，系统会查询相关产品。每条竞品结论都会附上搜索资料的来源。"));
+    revealContent(container.children);
     return;
   }
   container.append(node("p", "公开资料 / 查询记录", "eyebrow"), node("h2", "竞品与参考资料"));
@@ -144,13 +221,15 @@ function renderResearch() {
     item.append(details);
     container.append(item);
   }
+  revealContent(container.children);
 }
 
 function renderReport() {
   const container = $("report-content");
-  container.replaceChildren();
+  if (!refreshDocument(container, [project?.report, project?.conflicts])) return;
   if (!project?.report) {
     container.append(emptyDocument("从想法到一份产品文档", "访谈与分析完成后，这里会出现 PRD 草稿，包含功能范围、实现条件和可检查的验收标准。"));
+    revealContent(container.children);
     return;
   }
   if (project.conflicts.length) container.append(node("p", "一致性检查发现问题：请先检查报告中的冲突，修改需求或重新生成。", "notice error"));
@@ -166,6 +245,7 @@ function renderReport() {
     else article.append(node("p", line.replace(/^\*\*(.*)\*\*$/, "$1")));
   }
   container.append(article);
+  revealContent(article.children);
 }
 
 function render() {
@@ -387,4 +467,11 @@ async function init() {
     await refreshProjects(); render(); schedulePoll();
   } catch (error) { showError(error); }
 }
+reducedMotion.addEventListener("change", () => {
+  activeMotions.forEach((animation) => animation.cancel());
+  moveTabIndicator(false);
+});
+new ResizeObserver(() => moveTabIndicator(false)).observe(document.querySelector(".tabs"));
+document.fonts.ready.then(() => moveTabIndicator(false));
+moveTabIndicator(false);
 init();

@@ -21,4 +21,9 @@
 .option-send svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
 .option-choice button:not(:disabled):hover{background:#e8efff;transform:none}
 .option-choice button:not(:disabled):active{background:#dce7ff;transform:none}
+.tabs{position:relative;isolation:isolate;gap:4px}
+.tabs .tab{position:relative;z-index:1;padding:0 10px;border-bottom-color:transparent;transition:color .25s ease}
+.tabs .tab:not(:disabled):hover,.tabs .tab:not(:disabled):active{transform:none}
+.tab-indicator{position:absolute;left:0;top:50%;height:36px;border-radius:10px;background:#eaf0ff;transform-origin:left center;pointer-events:none;z-index:0}
+@media(max-width:760px){.tabs{gap:2px}.tabs .tab{padding:0 7px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
