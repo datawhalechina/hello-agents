@@ -1,2 +1,2 @@
 -r requirements.txt
-jupyterlab>=4,<5
+# Compatibility entry point; requirements.txt now includes Notebook dependencies.

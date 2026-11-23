@@ -2,3 +2,6 @@
 hello-agents==0.2.9
 # 0.2.9 eagerly imports an evaluation module that needs this package.
 huggingface-hub>=0.20,<1
+# Required Notebook entry point and its display API.
+jupyterlab>=4,<5
+ipython>=8,<10

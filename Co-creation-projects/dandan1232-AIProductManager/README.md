@@ -40,7 +40,7 @@
 dandan1232-AIProductManager/
 ├── README.md
 ├── requirements.txt
-├── requirements-notebook.txt
+├── requirements-notebook.txt # 兼容入口，引用完整依赖清单
 ├── main.ipynb                 # 调用真实工作流的交互演示
 ├── main.py                    # 本地网页入口
 ├── .env.example               # 空密钥配置示例
@@ -121,11 +121,13 @@ LLM_TIMEOUT=90
 ### Notebook 演示
 
 ```bash
-python -m pip install -r requirements-notebook.txt
+python -m pip install -r requirements.txt
 python -m jupyter lab main.ipynb
 ```
 
 请用安装了依赖的同一个 Python 运行。Notebook 逐格执行，使用隐藏输入读取密钥；需要本人输入真实 Idea、回答问题并确认需求。它复用网页的工作流，没有预置竞品或伪造报告。
+
+`requirements.txt` 包含网页和 Notebook 的运行依赖；原 `requirements-notebook.txt` 保留为兼容入口。Notebook 展示项目介绍、环境配置、工具定义说明、智能体构建、功能演示、验证限制及总结展望，具体实现复用 `src/`，避免两份代码行为不一致。
 
 ## 使用示例
 
@@ -172,18 +174,29 @@ python -m unittest discover -s tests -t . -v
 - [需求分析](docs/requirements.md)
 - [架构设计](docs/architecture.md)
 - [实施计划](docs/plan.md)
-- 后续可评估：带版本差异的需求修改、分阶段继续生成、更多搜索提供商；不属于首版交付范围。
+
+## 未来计划
+
+- [ ] 完成真实模型与联网搜索的全流程验证，记录实际结果与耗时。
+- [ ] 评估带版本差异的需求修改。
+- [ ] 评估分阶段继续生成和更多搜索提供商。
 
 ## 贡献与提交
+
+欢迎通过 Issue 提出问题，或通过 Pull Request 改进实现与文档。
 
 目录采用 `{GitHub用户名}-{项目名称}`，保留 `main.ipynb`、README 和完整依赖清单。提交前运行测试、清空 Notebook 输出、检查忽略项和体积，提交文件合计不超过 5 MB。
 
 开发分支为 `feature/ai-product-manager`，与教程的 `feature/` 命名约定保持一致。如向教程上游提交，PR 标题使用：`[毕业设计] AIProductManager - 从想法澄清到产品需求文档`。当前项目的分阶段推送不自动意味着创建上游 PR。
 
-## 许可证与致谢
+## 许可证
 
 代码与文档按仓库的 [CC BY-NC-SA 4.0](../../LICENSE.txt) 共享。Funnel Sans 字体单独遵循 [SIL Open Font License](web/FONT-LICENSE.txt)，来源为 Google Fonts。
 
-感谢 [Datawhale Hello-Agents](https://github.com/datawhalechina/hello-agents)、[HelloAgents 框架](https://github.com/jjyaoao/HelloAgents)；工作流参考教程中的多智能体、工具调用和上下文管理思想。Tavily 接口依据其官方文档实现。
+## 作者
 
-作者：[dandan1232](https://github.com/dandan1232)。
+GitHub：[dandan1232](https://github.com/dandan1232)。
+
+## 致谢
+
+感谢 [Datawhale Hello-Agents](https://github.com/datawhalechina/hello-agents)、[HelloAgents 框架](https://github.com/jjyaoao/HelloAgents)；工作流参考教程中的多智能体、工具调用和上下文管理思想。Tavily 接口依据其官方文档实现。
