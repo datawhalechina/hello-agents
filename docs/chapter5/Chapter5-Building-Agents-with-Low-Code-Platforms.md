@@ -203,6 +203,26 @@ We set the agent as a <strong>senior and authoritative technology media editor</
 
 Prompts are the instruction manual for the agent to execute tasks. We divide them into **System Prompt and User Prompt** to ensure instructions are clear, complete, and controllable.
 
+Before we walk through the two prompts, let us first make clear the **two syntaxes** they use, which determine how a prompt should be written and how the model will interpret it:
+
+- **Markdown syntax**: Coze's prompt editor supports Markdown, using structured headings, lists, and bold text to divide a prompt into layers. The model treats these markers as **structural cues** rather than outputting them verbatim. For example, `#` denotes a top-level heading used to divide major sections such as "Role / Workflow / Attention"; `##` and `###` denote subordinate headings for further subdivision; `-` denotes an unordered list for parallel constraints; `1.`, `2.` denote an ordered list for numbered steps; and `**text**` denotes bold, used to emphasize requirements that must be followed (such as the number of output items).
+- **Jinja variable syntax**: `{{variable_name}}` refers to a variable placeholder. When the workflow runs, the platform replaces each placeholder with the actual content from the corresponding data source and then hands the final prompt to the large model. This is why `{{articles}}` does not appear out of thin air — it is a **reference to the output of an upstream plugin node**.
+
+The table below maps each variable in this example to the information-source plugin configured in Step 2 (you can verify each one on the workflow canvas via the "LLM" node → input variables):
+
+| Variable | Source Plugin | Data Type | Available Fields |
+|----------|---------------|-----------|-------------------|
+| `{{articles}}` | RSS Plugin · 36Kr | List | `title` (title), `article_link` (link), `date_published` (publish date) |
+| `{{articles1}}` | RSS Plugin · Huxiu | List | Same as above |
+| `{{articles2}}` | RSS Plugin · IT Home | List | Same as above |
+| `{{articles3}}` | RSS Plugin · InfoQ | List | Same as above |
+| `{{arxiv}}` | arXiv Plugin · paper search | List | `title` (paper title), `link` (PDF link), `summary` (paper abstract), `published` (publish time), `author` (author) |
+| `{{GitHub}}` | GitHub Plugin · repository search | List | `full_name` (full repository name), `html_url` (web URL), `description` (repository description), `stargazers_count` (star count), `language` (primary language) |
+
+> **Note:** The prompt example refers to the arXiv title and link as `arxiv_title` / `arxiv_link`, whereas the arXiv plugin actually returns the fields `title` / `link`. When writing prompts, always use the field names the plugin actually returns, otherwise the model may fail to retrieve the values.
+
+In addition, the `<!!!important!!!>` that appears in the example is neither standard Markdown syntax nor something defined in Coze's official documentation — it is a hand-written inline emphasis marker that the author of this prompt uses to signal that the constraint immediately following it should be given priority.
+
 **System Prompt**
 
 The system prompt is used to define the agent's long-term behavioral guidelines and output format specifications.
