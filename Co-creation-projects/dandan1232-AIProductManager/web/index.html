@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN" data-type="software" data-radius="soft">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="page-type" content="software">
+  <meta name="site-kind" content="software">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="从一个产品想法开始，通过逐步问答明确需求，研究竞品并生成 PRD 草稿。">
+  <title>AI 产品经理 · 从想法到需求</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/tokens.css">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+<!-- taste-skill: software; white-link-blue / funnel. A working application, not a marketing landing page.
+     Equal edges, document-led hierarchy, subtle entrance and control feedback. No invented demo results. -->
+<a class="skip-link" href="#workspace">跳到工作台</a>
+<header class="topbar">
+  <a class="brand" href="/" aria-label="AI 产品经理首页"><span class="brand-mark" aria-hidden="true">p.</span><span>AI 产品经理<span class="brand-sub">Idea to PRD</span></span></a>
+  <div class="header-actions"><span class="local-note">本地工作台</span><button id="settings-open" class="button secondary" type="button"><span id="connection-dot" class="connection-dot" aria-hidden="true"></span><span id="connection-label">连接设置</span></button></div>
+</header>
+<main id="workspace" class="workspace">
+  <div class="workspace-heading">
+    <div><p class="eyebrow">想法的下一步</p><h1>你的 AI 产品经理</h1><p class="subtitle">一起把问题问清楚，把需求写下来。</p></div>
+    <div class="project-actions"><label class="sr-only" for="project-select">打开已保存的项目</label><select id="project-select"><option value="">当前：新想法</option></select><button id="new-project" class="button secondary" type="button">新建想法</button></div>
+  </div>
+  <ol class="steps" aria-label="项目进度">
+    <li data-step="interview" class="current"><span class="step-number">1</span><span>聊清想法</span></li>
+    <li data-step="confirmed"><span class="step-number">2</span><span>确认需求</span></li>
+    <li data-step="research"><span class="step-number">3</span><span>研究评估</span></li>
+    <li data-step="done"><span class="step-number">4</span><span>生成 PRD</span></li>
+  </ol>
+  <div id="global-error" class="notice error" role="alert" hidden></div>
+  <div id="setup-notice" class="setup-notice" hidden><span id="setup-text"></span><button id="setup-open" class="text-button" type="button">配置连接</button></div>
+  <div class="workbench app-frame">
+    <section class="conversation-pane" aria-labelledby="conversation-heading">
+      <div class="pane-heading"><h2 id="conversation-heading">需求访谈</h2><span id="round-label" class="meta">由你的想法开始</span></div>
+      <div id="conversation" class="conversation" aria-live="polite">
+        <div class="welcome" data-enter>
+          <div class="welcome-symbol" aria-hidden="true"><span></span><span></span><span></span></div>
+          <h3>你想做一个什么产品？</h3>
+          <p>说说你的想法、遇到的问题，或想帮助的人。<br>还没想完整也没关系，我们逐步聊清楚。</p>
+          <div class="interview-guide"><span>从问题出发</span><span>由你确认方向</span><span>整理成需求文档</span></div>
+        </div>
+      </div>
+      <div id="activity" class="activity" role="status" hidden><span class="activity-mark" aria-hidden="true"></span><span id="activity-text"></span></div>
+      <div id="task-error" class="task-error" hidden><p id="task-error-text"></p><button id="retry" class="text-button" type="button">重试任务</button></div>
+      <div id="options" class="answer-options"></div>
+      <form id="message-form" class="composer">
+        <label for="message" id="message-label">描述你的产品想法</label>
+        <textarea id="message" rows="3" maxlength="12000" placeholder="我想做一个……主要帮助……解决……" required></textarea>
+        <div class="composer-footer"><span id="composer-hint">你的回答会成为需求的依据</span><button id="send" class="button primary" type="submit">开始梳理</button></div>
+      </form>
+    </section>
+    <section class="document-pane" aria-label="需求与分析工作区">
+      <div class="document-toolbar"><div class="tabs" role="tablist" aria-label="查看内容"><button class="tab active" id="tab-brief" type="button" role="tab" aria-selected="true" aria-controls="panel-brief" data-tab="brief">需求草稿</button><button class="tab" id="tab-research" type="button" role="tab" aria-selected="false" aria-controls="panel-research" tabindex="-1" data-tab="research">竞品资料</button><button class="tab" id="tab-report" type="button" role="tab" aria-selected="false" aria-controls="panel-report" tabindex="-1" data-tab="report">PRD 文档</button></div><button id="export" class="button compact secondary" type="button" disabled>导出文档</button></div>
+      <div id="panel-brief" class="tab-panel" role="tabpanel" aria-labelledby="tab-brief">
+        <div class="document-title"><div><p class="eyebrow">产品需求 / 草稿</p><h2 id="document-title">还没命名的想法</h2></div><span id="brief-status" class="badge">等待输入</span></div>
+        <p id="brief-help" class="document-help">聊过的内容会整理在这里。你可以随时检查，确认前也可以直接修改。</p>
+        <form id="brief-form" class="brief-form"><div id="brief-fields"></div><div id="assumptions" class="assumptions" hidden></div><div class="brief-actions"><span id="save-hint" class="meta">确认后，后续分析会以这份需求为准。</span><button id="confirm" class="button primary" type="submit" disabled>确认这份需求</button><button id="reopen" class="button secondary" type="button" hidden>修改已确认需求</button></div></form>
+        <div id="generation-controls" class="generation-controls" hidden><div><h3>开始研究，整理成文档</h3><p>竞品资料、实现条件和功能建议会一起收进 PRD。</p><label class="checkbox-label"><input id="online" type="checkbox" checked>联网研究相关竞品</label><span id="search-hint" class="meta"></span></div><button id="generate" class="button primary" type="button">生成分析与 PRD</button></div>
+      </div>
+      <div id="panel-research" class="tab-panel" role="tabpanel" aria-labelledby="tab-research" hidden><div id="research-content"></div></div>
+      <div id="panel-report" class="tab-panel" role="tabpanel" aria-labelledby="tab-report" hidden><div id="report-content"></div></div>
+    </section>
+  </div>
+  <footer class="workspace-footer"><span>AI Product Manager <span class="footer-divider">/</span> dandan1232</span><span>你的决定是依据，AI 的补充是建议。</span></footer>
+</main>
+<dialog id="settings-dialog" aria-labelledby="settings-title">
+  <form id="settings-form"><div class="dialog-heading"><div><p class="eyebrow">模型与搜索</p><h2 id="settings-title">连接设置</h2></div><button id="settings-close" class="button secondary" type="button">关闭</button></div><p class="document-help">连接支持 OpenAI 兼容接口的模型。此处填写的密钥只保存在当前服务进程中，重启后需重新填写。</p>
+    <label for="model">模型名称</label><input id="model" name="model" type="text" maxlength="150" required autocomplete="off">
+    <label for="base-url">接口基础地址</label><input id="base-url" name="base_url" type="url" required autocomplete="off" placeholder="https://api.openai.com/v1">
+    <label for="api-key">模型 API Key</label><input id="api-key" name="api_key" type="password" autocomplete="new-password" placeholder="填写服务商提供的密钥">
+    <label for="search-key">Tavily 搜索密钥 <span class="meta">可选</span></label><input id="search-key" name="search_key" type="password" autocomplete="new-password" placeholder="联网竞品研究时使用">
+    <p id="framework-note" class="notice" hidden></p><p id="settings-error" class="notice error" role="alert" hidden></p><button class="button primary save-settings" type="submit">保存连接设置</button>
+  </form>
+</dialog>
+<noscript><p class="notice">此工作台需要 JavaScript 来提交回答和展示分析，请启用 JavaScript。</p></noscript>
+</body>
+</html>
