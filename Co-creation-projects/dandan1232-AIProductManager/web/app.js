@@ -192,10 +192,30 @@ function render() {
   $("options").replaceChildren();
   if (project && !busy && !confirmed && !project.ready && !project.error) {
     project.options.forEach((text) => {
+      const choice = node("div", "", "option-choice");
       const button = node("button", text, "option");
       button.type = "button";
+      button.title = "填入输入框，可修改后发送";
       button.addEventListener("click", () => { $("message").value = text; $("message").focus(); });
-      $("options").append(button);
+      const send = node("button", "", "option-send");
+      send.type = "button";
+      send.title = "直接发送";
+      send.setAttribute("aria-label", "直接发送：" + text);
+      const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      icon.setAttribute("viewBox", "0 0 24 24");
+      icon.setAttribute("aria-hidden", "true");
+      icon.setAttribute("focusable", "false");
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", "m22 2-7 20-4-9-9-4 20-7ZM22 2 11 13");
+      icon.append(path);
+      send.append(icon);
+      send.addEventListener("click", () => {
+        if ($("message").disabled || requestBusy) return;
+        $("message").value = text;
+        $("message-form").requestSubmit();
+      });
+      choice.append(button, send);
+      $("options").append(choice);
     });
   }
   $("message-label").textContent = project ? "补充你的回答" : "描述你的产品想法";

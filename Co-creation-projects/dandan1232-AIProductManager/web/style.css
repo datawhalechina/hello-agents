@@ -15,4 +15,10 @@
 @media(max-width:1050px){.topbar,.workspace{padding-left:24px;padding-right:24px}.workbench{min-height:550px}}
 @media(max-width:760px){.topbar{height:68px;padding-left:18px;padding-right:18px}.workspace{padding-left:16px;padding-right:16px;padding-top:23px}.workbench{height:auto;min-height:0}.brand-sub{display:block;margin-left:0}.workspace-heading{margin-bottom:22px}.welcome h3{font-size:1rem}}
 @media(max-width:760px){.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.steps li{flex-direction:column;gap:6px;text-align:center}.steps li:not(:last-child):after{display:none}.interview-guide{display:none}.welcome{padding-bottom:18px}.conversation-pane{min-height:440px}}
+.option-choice{display:inline-flex;max-width:100%;border:1px solid #dce4f4;border-radius:6px;background:#f5f8ff}
+.option-choice .option{min-width:0;border:0;border-radius:5px 0 0 5px;background:transparent;overflow-wrap:anywhere}
+.option-send{display:inline-flex;align-items:center;justify-content:center;flex:0 0 44px;min-height:44px;padding:0;border:0;border-left:1px solid #dce4f4;border-radius:0 5px 5px 0;color:#34568f;background:transparent}
+.option-send svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.option-choice button:not(:disabled):hover{background:#e8efff;transform:none}
+.option-choice button:not(:disabled):active{background:#dce7ff;transform:none}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
