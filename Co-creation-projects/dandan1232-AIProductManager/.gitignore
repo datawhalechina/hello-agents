@@ -8,3 +8,4 @@ runtime/
 outputs/
 .taste-skill/
 shots/
+!tests/test_*.py
