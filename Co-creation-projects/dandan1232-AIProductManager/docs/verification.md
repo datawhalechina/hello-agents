@@ -40,7 +40,7 @@ node --check web/app.js
 
 Notebook 的代码单元通过 Python 语法解析；执行计数为空，没有运行输出或密钥。README 与需求文档的相对文件链接已检查。源码、字体与许可证全部计入提交大小，合计小于 5 MB；环境、数据库、截图和真实 .env 不提交。
 
-开发分支为 codex/ai-product-manager。教程中的 feature/ 是示例命名，本项目遵循当前 Codex 的分支前缀约定。仅向用户自己的 origin 推送；不合并 main，不改写历史，不自动创建上游 PR。
+开发分支为 feature/ai-product-manager，按用户要求与教程的 feature/ 命名约定保持一致。仅向用户自己的 origin 推送；不合并 main，不改写历史，不自动创建上游 PR。
 
 ## 仍需真实服务验证的部分
 

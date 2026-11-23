@@ -1,6 +1,6 @@
 # 实施与验收计划
 
-分支：`codex/ai-product-manager`。远程：用户的 `dandan1232/hello-agents`。
+分支：`feature/ai-product-manager`。远程：用户的 `dandan1232/hello-agents`。
 
 用户已授权由代理完成验收，并在每个独立验收阶段 commit、push，无需人工验收后再提交。提交仅包含本项目路径，使用 Conventional Commits 英文类型和中文单行标题。该授权不包含强推、改写历史、合并主分支或代为提交上游 PR。
 

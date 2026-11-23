@@ -178,7 +178,7 @@ python -m unittest discover -s tests -t . -v
 
 目录采用 `{GitHub用户名}-{项目名称}`，保留 `main.ipynb`、README 和完整依赖清单。提交前运行测试、清空 Notebook 输出、检查忽略项和体积，提交文件合计不超过 5 MB。
 
-开发分支为 `codex/ai-product-manager`。如向教程上游提交，PR 标题使用：`[毕业设计] AIProductManager - 从想法澄清到产品需求文档`。当前项目的分阶段推送不自动意味着创建上游 PR。
+开发分支为 `feature/ai-product-manager`，与教程的 `feature/` 命名约定保持一致。如向教程上游提交，PR 标题使用：`[毕业设计] AIProductManager - 从想法澄清到产品需求文档`。当前项目的分阶段推送不自动意味着创建上游 PR。
 
 ## 许可证与致谢
 
