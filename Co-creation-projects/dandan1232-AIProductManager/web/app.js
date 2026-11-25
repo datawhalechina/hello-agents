@@ -297,8 +297,14 @@ function renderReport() {
 function renderReviews() {
   const requirements = project?.report ? project.prd?.requirements ?? [] : [];
   const reviews = project?.prd_reviews ?? {};
+  const firstRelease = requirements.filter((_, index) => reviews[index]?.decision === "first_release").length;
+  const busy = requestBusy || Boolean(project?.busy);
   $("reviews").hidden = !requirements.length;
   if (!requirements.length) $("reviews").open = false;
+  $("export-checklist").disabled = !firstRelease || busy;
+  $("release-checklist-hint").textContent = firstRelease
+    ? `${firstRelease} 项功能标为「首版做」`
+    : "将功能标为「首版做」后可导出。";
   const items = $("review-items");
   if (refreshDocument(items, [project?.report_id, requirements, reviews])) {
     let decided = 0;
@@ -321,7 +327,7 @@ function renderReviews() {
     $("review-progress").textContent = `${decided} / ${requirements.length} 项已决定`;
   }
   for (const button of items.querySelectorAll("[data-review-index]")) {
-    button.disabled = requestBusy || Boolean(project?.busy);
+    button.disabled = busy;
   }
 }
 
@@ -557,6 +563,9 @@ $("generate").addEventListener("click", async () => {
 $("retry").addEventListener("click", () => mutate("retry"));
 $("export").addEventListener("click", () => {
   if (project?.report && !project.busy) window.location.assign(`/api/projects/${project.id}/export`);
+});
+$("export-checklist").addEventListener("click", () => {
+  if (project && !$("export-checklist").disabled) window.location.assign(`/api/projects/${project.id}/release-checklist`);
 });
 
 $("review-close").addEventListener("click", () => $("review-dialog").close());

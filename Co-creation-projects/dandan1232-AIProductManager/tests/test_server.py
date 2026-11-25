@@ -138,6 +138,9 @@ class ServerTests(unittest.TestCase):
                       "pending_questions", "manual_brief", "draft_suggestions"):
             legacy.pop(field, None)
         self.app.store.save(legacy)
+        status, error, _ = self.request(path + "/release-checklist")
+        self.assertEqual(status, 409)
+        self.assertIn("首版做", error["error"])
 
         acceptance = "交接人打开自己的任务列表后可以看到刚保存的任务。"
         review = {"index": 0, "decision": "first_release", "acceptance": acceptance, "report_id": None}
@@ -148,6 +151,58 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertIn(acceptance, data.decode())
         self.assertIn("评审决定：首版做", data.decode())
+        status, data, _ = self.request(path + "/release-checklist")
+        self.assertEqual(status, 200)
+        self.assertIn(acceptance, data.decode())
+
+    def test_release_checklist_exports_only_saved_first_release_items_in_prd_order(self):
+        original = self.model.run
+
+        def writer_with_multiple_requirements(role, context):
+            result = original(role, context)
+            if role == "writer":
+                result["requirements"].extend([
+                    {"name": "查看任务", "description": "打开列表查看任务", "acceptance": "展示原有的列表"},
+                    {"name": "提醒任务", "description": "显示提醒弹窗", "acceptance": "弹出提醒"},
+                    {"name": "搜索任务", "description": "用关键词定位任务", "acceptance": "展示搜索结果"},
+                    {"name": "归档任务", "description": "保存到归档列表", "acceptance": "查看归档列表"},
+                ])
+            return result
+
+        self.model.run = writer_with_multiple_requirements
+        state = self.create()
+        path = "/api/projects/" + state["id"]
+        self.assertEqual(self.request(path + "/confirm", {"brief": BRIEF})[0], 200)
+        self.assertEqual(self.request(path + "/generate", {"online": False})[0], 200)
+        done = self.wait(state["id"])
+        self.assertEqual(done["stage"], "done")
+
+        acceptance_list = "打开任务页面后按时间倒序排列。\n空列表有明确提示。"
+        acceptance_search = "搜索关键词后只展示名称匹配的任务。"
+        for index, decision, acceptance in (
+            (3, "first_release", acceptance_search),
+            (0, "later", "后续支持新增任务。"),
+            (2, "pending", "待决定是否展示提醒。"),
+            (1, "first_release", acceptance_list),
+        ):
+            self.assertEqual(self.request(path + "/review", {
+                "index": index, "decision": decision, "acceptance": acceptance, "report_id": done["report_id"],
+            })[0], 200)
+
+        status, data, headers = self.request(path + "/release-checklist")
+        self.assertEqual(status, 200)
+        self.assertEqual(headers["Content-Type"], "text/markdown; charset=utf-8")
+        self.assertEqual(headers["Content-Disposition"], 'attachment; filename="first-release-checklist.md"')
+        checklist = data.decode()
+        self.assertEqual([line for line in checklist.splitlines() if line.startswith("- [ ]")],
+                         ["- [ ] **F02 查看任务**", "- [ ] **F04 搜索任务**"])
+        self.assertIn("打开列表查看任务", checklist)
+        self.assertIn("用关键词定位任务", checklist)
+        self.assertIn(acceptance_list.replace("\n", "\n    "), checklist)
+        self.assertIn(acceptance_search, checklist)
+        for excluded in ("展示原有的列表", "展示搜索结果", "新增任务", "提醒任务", "归档任务"):
+            self.assertNotIn(excluded, checklist)
+        self.assertIn("F02 查看任务", self.request(path + "/export")[1].decode())
 
     def test_invalid_and_stale_reviews_leave_export_and_review_intact(self):
         state = self.create()
@@ -184,11 +239,16 @@ class ServerTests(unittest.TestCase):
         state = self.create()
         path = "/api/projects/" + state["id"]
         self.assertEqual(self.request(path + "/export")[0], 409)
+        status, error, _ = self.request(path + "/release-checklist")
+        self.assertEqual(status, 409)
+        self.assertIn("文档生成完成", error["error"])
         self.request(path + "/confirm", {"brief": BRIEF})
         self.request(path + "/generate", {"online": False})
         self.wait(state["id"])
+        self.assertEqual(self.request(path + "/release-checklist")[0], 409)
         self.request(path + "/reopen", {})
         self.assertEqual(self.request(path + "/export")[0], 409)
+        self.assertEqual(self.request(path + "/release-checklist")[0], 409)
 
     def test_cross_origin_mutation_rejected(self):
         status, _, _ = self.request("/api/projects", {"idea": "跨站提交测试"}, {"Origin": "https://example.com"})

@@ -42,6 +42,7 @@
 #review-progress{float:right}
 .review-items{margin:0;padding:0;list-style:none}
 .review-items li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #e1e6ee}
+.release-checklist{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;padding:12px 0;border-top:1px solid #e1e6ee}
 .review-summary{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 8px;min-width:0;font-size:.875rem}
 .review-summary strong{font-weight:500}
 .review-status{flex:none}

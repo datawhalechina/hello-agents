@@ -14,6 +14,24 @@ from .services import HelloAgentsBackend, TavilySearch
 from .workflow import Store, Workflow, string
 
 
+def render_release_checklist(state: dict) -> str:
+    requirements = (state.get("prd") or {}).get("requirements", [])
+    reviews = state.get("prd_reviews") or {}
+    lines = [f"# {state['title']} · 首版开发清单", ""]
+    for index, requirement in enumerate(requirements):
+        review = reviews.get(str(index), {})
+        if review.get("decision") != "first_release":
+            continue
+        name = " ".join(requirement["name"].splitlines())
+        description = "\n    ".join(requirement["description"].splitlines())
+        acceptance = "\n    ".join(review["acceptance"].splitlines())
+        lines.extend([f"- [ ] **F{index + 1:02d} {name}**",
+                      f"  - **功能说明** {description}", f"  - **验收条件** {acceptance}", ""])
+    if len(lines) == 2:
+        raise AppError("请先在功能评审中将至少一项标为「首版做」。", 409)
+    return "\n".join(lines)
+
+
 class Application:
     def __init__(self, settings: Settings, db_path: Path, backend_factory=HelloAgentsBackend, search_factory=None):
         self.settings = settings
@@ -139,10 +157,14 @@ def make_server(app: Application, port: int = 8765) -> ThreadingHTTPServer:
                     state = app.store.get(parts[2])
                     if len(parts) == 3:
                         self.respond(200, state)
-                    elif len(parts) == 4 and parts[3] == "export":
+                    elif len(parts) == 4 and parts[3] in ("export", "release-checklist"):
                         if not state["report"] or state["busy"]:
                             raise AppError("请等待文档生成完成后再导出。", 409)
-                        self.respond(200, state["report"].encode("utf-8"), "text/markdown; charset=utf-8", "product-requirements.md")
+                        if parts[3] == "export":
+                            content, filename = state["report"], "product-requirements.md"
+                        else:
+                            content, filename = render_release_checklist(state), "first-release-checklist.md"
+                        self.respond(200, content.encode("utf-8"), "text/markdown; charset=utf-8", filename)
                     else:
                         raise AppError("接口不存在。", 404)
                 elif path in ("/", "/index.html", "/app.js", "/style.css", "/favicon.svg", "/tokens.css", "/font.woff2"):
