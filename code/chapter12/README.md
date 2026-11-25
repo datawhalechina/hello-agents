@@ -34,10 +34,9 @@
    export HF_TOKEN="your_huggingface_token"
    ```
 
-3. **下载BFCL数据集**（可选，首次运行会自动下载）：
+3. **为示例 3 和 4 准备 BFCL 数据集**。从本教程的仓库根目录执行一次：
    ```bash
-   cd ../HelloAgents
-   git clone https://github.com/ShishirPatil/gorilla.git temp_gorilla
+   git clone --depth 1 https://github.com/ShishirPatil/gorilla.git code/temp_gorilla
    ```
 
 ### 运行示例
@@ -66,16 +65,20 @@ python 02_bfcl_quick_start.py
 
 #### 3. BFCL自定义评估
 
+从仓库的 `code` 目录运行，示例会从当前目录下的 `temp_gorilla` 加载数据：
+
 ```bash
-python 03_bfcl_custom_evaluation.py
+python chapter12/03_bfcl_custom_evaluation.py
 ```
 
 展示如何使用底层组件进行自定义评估流程。
 
 #### 4. BFCL最佳实践
 
+同样从 `code` 目录运行：
+
 ```bash
-python 04_run_bfcl_evaluation.py
+python chapter12/04_run_bfcl_evaluation.py
 ```
 
 展示BFCL评估的最佳实践，包括：
@@ -215,11 +218,7 @@ pip install -e .
 
 ### Q2: BFCL评估提示找不到数据集？
 
-A: 首次运行会自动下载数据集，请确保网络连接正常。如果下载失败，可以手动下载：
-```bash
-cd ../HelloAgents
-git clone https://github.com/ShishirPatil/gorilla.git temp_gorilla
-```
+A: 示例 3 和 4 需要本地数据。按上面的“环境准备”第 3 步克隆仓库，然后在 `code` 目录下确认 `temp_gorilla/berkeley-function-call-leaderboard/bfcl_eval/data` 存在。
 
 ### Q3: GAIA评估提示没有访问权限？
 

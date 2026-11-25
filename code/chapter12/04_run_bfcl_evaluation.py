@@ -8,8 +8,8 @@
 4. 调用BFCL官方评估工具
 5. 展示评估结果
 
-使用方法：
-    python examples/04_run_bfcl_evaluation.py
+使用方法（从本教程的 code 目录运行）：
+    python chapter12/04_run_bfcl_evaluation.py
 
 可选参数：
     --category: 评估类别（默认：simple_python）
@@ -58,8 +58,8 @@ def check_bfcl_data(bfcl_data_dir: Path) -> bool:
     """检查BFCL数据是否存在"""
     if not bfcl_data_dir.exists():
         print(f"\n❌ BFCL数据目录不存在: {bfcl_data_dir}")
-        print(f"\n请先克隆BFCL仓库：")
-        print(f"   git clone --depth 1 https://github.com/ShishirPatil/gorilla.git temp_gorilla")
+        print("\n请在本教程的仓库根目录运行：")
+        print("   git clone --depth 1 https://github.com/ShishirPatil/gorilla.git code/temp_gorilla")
         return False
     return True
 
