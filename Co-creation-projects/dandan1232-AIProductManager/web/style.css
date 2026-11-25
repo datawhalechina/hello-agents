@@ -26,4 +26,35 @@
 .tabs .tab:not(:disabled):hover,.tabs .tab:not(:disabled):active{transform:none}
 .tab-indicator{position:absolute;left:0;top:50%;height:36px;border-radius:10px;background:#eaf0ff;transform-origin:left center;pointer-events:none;z-index:0}
 @media(max-width:760px){.tabs{gap:2px}.tabs .tab{padding:0 7px}}
+
+.brief-buttons{display:flex;flex-wrap:wrap;gap:8px}
+.draft-suggestion{margin:8px 0 4px;padding:12px;background:#f0f4fc;border-radius:6px;font-size:.8125rem;color:#354464}
+.draft-suggestion p{margin-top:4px;white-space:pre-wrap;overflow-wrap:anywhere}
+.draft-suggestion .text-button{margin-bottom:-6px}
+#question-editor label,#review-form>label{display:block;font-size:.875rem;font-weight:600}
+#question-help{margin:4px 0 8px;color:#685938}
+#pending-questions,#review-decision,#review-acceptance{display:block;width:100%;padding:8px 10px;border:1px solid #dbe1eb;border-radius:6px;background:var(--p-bg);color:var(--p-ink);font-size:.875rem}
+#review-decision{min-height:44px}
+#confirmed-question-list,#review-description,.review-summary strong,#review-title{overflow-wrap:anywhere}
+.reviews{margin-bottom:24px;padding:0 12px;border:1px solid #dfe5f0;border-radius:6px}
+.reviews>summary{min-height:44px;padding:10px 0;color:#364766;cursor:pointer}
+.reviews>summary:focus-visible{outline:3px solid #7495f5;outline-offset:2px}
+#review-progress{float:right}
+.review-items{margin:0;padding:0;list-style:none}
+.review-items li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #e1e6ee}
+.review-summary{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 8px;min-width:0;font-size:.875rem}
+.review-summary strong{font-weight:500}
+.review-status{flex:none}
+.review-status[data-decision=first_release]{background:#e9f6ee;color:#235941}
+.review-status[data-decision=later]{background:#f8f1e4;color:#68562d}
+#review-description{white-space:pre-wrap}
+#review-form>label{margin:14px 0 6px}
+#review-error{margin:12px 0 0}
+#review-save{margin-top:16px;width:100%}
+@media(max-width:760px){
+  .brief-buttons{width:100%}
+  .brief-buttons .button{flex:1;width:auto}
+  .review-dialog{padding:18px}
+}
+
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}

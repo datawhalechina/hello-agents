@@ -14,6 +14,7 @@ from .config import AppError
 from .prompts import BRIEF_KEYS, BRIEF_LABELS
 
 MAX_ROUNDS = 6
+REVIEW_DECISIONS = {"pending": "待确认", "first_release": "首版做", "later": "以后做"}
 
 
 def now() -> str:
@@ -36,6 +37,14 @@ def brief(value) -> dict:
     if not isinstance(value, dict):
         raise AppError("需求内容应为对象。")
     return {key: string(value.get(key, "")) for key in BRIEF_KEYS}
+
+
+def pending_questions(state: dict, value=None) -> list[str]:
+    if value is None:
+        return list(state.get("pending_questions", state.get("assumptions", [])))
+    if not isinstance(value, list) or len(value) > 12:
+        raise AppError("待确认事项最多填写 12 条，每行一条。")
+    return [question for question in map(string, value) if question]
 
 
 class Store:
@@ -104,13 +113,33 @@ class Workflow:
         state.update(stage=stage, activity=activity)
         self.store.save(state)
 
+    def update_draft(self, state: dict, edits: dict, questions=None) -> None:
+        if state["confirmed_brief"] is not None:
+            raise AppError("请先选择修改已确认需求。", 409)
+        if not isinstance(edits, dict) or any(key not in BRIEF_KEYS for key in edits):
+            raise AppError("草稿修改包含未知的需求字段。")
+        changes = {key: string(value) for key, value in edits.items()}
+        if questions is not None:
+            state["pending_questions"] = pending_questions(state, questions)
+        state.setdefault("manual_brief", {}).update(changes)
+        state["brief"].update(changes)
+        for key in changes:
+            state.get("draft_suggestions", {}).pop(key, None)
+        state["title"] = state["brief"]["title"] or state["idea"][:28]
+
+    def save_draft(self, state: dict, edits: dict, questions=None) -> None:
+        self.update_draft(state, edits, questions)
+        self.store.save(state)
+
     def interview(self, state: dict) -> None:
         if state["confirmed_brief"] is not None:
             raise AppError("这份需求已经确认，请先选择修改需求。", 409)
         if state["round"] >= MAX_ROUNDS:
             raise AppError("已达到六轮访谈上限，请检查并确认右侧需求。", 409)
         self.checkpoint(state, "interview", "正在整理回答并选择下一个问题")
+        manual = state.get("manual_brief", {})
         result = self.backend.run("interview", {"conversation": state["messages"], "draft": state["brief"],
+                                               "manual_brief": manual,
                                                "round": state["round"] + 1, "max_rounds": MAX_ROUNDS})
         new_brief = brief(result.get("brief"))
         assumptions = strings(result.get("assumptions", []))
@@ -123,15 +152,19 @@ class Workflow:
         ready = bool(result.get("ready")) or not question or state["round"] >= MAX_ROUNDS
         if ready:
             question, options = "", []
+        suggestions = {key: new_brief[key] for key, value in manual.items()
+                       if new_brief[key] and new_brief[key] != value}
+        new_brief.update(manual)
         state.update(brief=new_brief, assumptions=assumptions, ready=ready,
-                     question=question, options=options, title=new_brief["title"] or state["title"])
+                     draft_suggestions=suggestions, question=question, options=options,
+                     title=new_brief["title"] or state["title"])
         content = "\n\n".join(x for x in (reply, question) if x)
         if ready:
             content += "\n\n请检查右侧草稿，补充或修改后确认。未确定的信息可以保留为空。"
         state["messages"].append({"role": "assistant", "content": content})
         self.checkpoint(state, "confirm" if ready else "interview", "等待确认需求" if ready else "等待你的回答")
 
-    def add_answer(self, state: dict, answer: str) -> None:
+    def add_answer(self, state: dict, answer: str, edits=None, questions=None) -> None:
         if state["confirmed_brief"] is not None or state["ready"] or state["round"] >= MAX_ROUNDS:
             raise AppError("访谈已结束，请在需求草稿中修改内容。", 409)
         answer = string(answer, 8000)
@@ -139,21 +172,27 @@ class Workflow:
             raise AppError("请先填写你的回答。")
         if state["messages"][-1]["role"] == "user":
             raise AppError("上一条回答还未处理成功，请使用重试。", 409)
+        if edits is not None or questions is not None:
+            self.update_draft(state, {} if edits is None else edits, questions)
         state["messages"].append({"role": "user", "content": answer})
         self.store.save(state)
 
-    def confirm(self, state: dict, value: dict) -> None:
+    def confirm(self, state: dict, value: dict, questions=None) -> None:
         confirmed = brief(value)
         if not confirmed["title"] or not confirmed["problem"]:
             raise AppError("至少填写产品名称和要解决的问题，再确认需求。")
+        confirmed_questions = pending_questions(state, questions)
         state.update(brief=confirmed, confirmed_brief=copy.deepcopy(confirmed), title=confirmed["title"],
-                     ready=True, question="", options=[], report="", prd=None, assessment=None,
+                     confirmed_questions=confirmed_questions, draft_suggestions={},
+                     ready=True, question="", options=[], report="", report_id=None, prd=None, prd_reviews={}, assessment=None,
                      sources=[], competitors=[], research_summary="", notices=[], conflicts=[], error="")
         self.checkpoint(state, "confirmed", "需求已确认，可以开始分析")
 
     def reopen(self, state: dict) -> None:
         # Remove stale deliverables after changing the decision baseline.
-        state.update(confirmed_brief=None, report="", prd=None, assessment=None, sources=[], competitors=[],
+        questions = state.get("confirmed_questions", pending_questions(state))
+        state.update(confirmed_brief=None, pending_questions=questions, report="", report_id=None,
+                     prd=None, prd_reviews={}, assessment=None, sources=[], competitors=[],
                      notices=[], conflicts=[], research_summary="", error="", ready=True)
         self.checkpoint(state, "confirm", "请修改并重新确认需求；旧分析结果已失效")
 
@@ -162,7 +201,7 @@ class Workflow:
             raise AppError("请先检查并确认需求，再生成分析。", 409)
         confirmed = copy.deepcopy(state["confirmed_brief"])
         state.update(sources=[], competitors=[], notices=[], conflicts=[], research_summary="",
-                     assessment=None, prd=None, report="", online=online)
+                     assessment=None, prd=None, prd_reviews={}, report="", report_id=None, online=online)
         self.checkpoint(state, "research", "正在查询相关产品" if online else "已跳过联网竞品研究")
         if online:
             query = f"{confirmed['title']} {confirmed['target_users']} {confirmed['problem'][:200]} 同类产品 功能 官网"
@@ -190,7 +229,8 @@ class Workflow:
                 state["notices"].append("未获得竞品资料；文档中会明确标记，本次不生成竞品事实。")
         else:
             state["notices"].append("本次未进行联网竞品研究。")
-        context = {"confirmed_brief": confirmed, "competitors": state["competitors"], "evidence": state["sources"],
+        context = {"confirmed_brief": confirmed, "confirmed_questions": state.get("confirmed_questions", pending_questions(state)),
+                   "competitors": state["competitors"], "evidence": state["sources"],
                    "research_limitations": state["notices"]}
         self.checkpoint(state, "assess", "正在评估实现条件和首版范围")
         assessment = self.backend.run("assess", context)
@@ -217,14 +257,31 @@ class Workflow:
         self.checkpoint(state, "audit", "正在核对 PRD 是否遵守已确认的需求")
         audit = self.backend.run("audit", {"confirmed_brief": confirmed, "draft": state["prd"]})
         state["conflicts"] = strings(audit.get("conflicts", []))
+        state.update(report_id=uuid.uuid4().hex, report_generated_at=now())
         state["report"] = render_report(state)
         self.checkpoint(state, "done", "草稿存在待修正的冲突，请检查" if state["conflicts"] else "PRD 草稿已生成，请检查建议内容")
+
+    def review_requirement(self, state: dict, index, decision, acceptance, report_id) -> None:
+        if not state["report"] or not state.get("prd") or state.get("report_id") != report_id:
+            raise AppError("文档已更新，请重新打开当前版本再评审。", 409)
+        requirements = state["prd"]["requirements"]
+        if type(index) is not int or not 0 <= index < len(requirements):
+            raise AppError("未找到要评审的功能条目。")
+        if not isinstance(decision, str) or decision not in REVIEW_DECISIONS:
+            raise AppError("请选择首版做、以后做或待确认。")
+        acceptance = string(acceptance)
+        if not acceptance:
+            raise AppError("请填写这项功能的验收条件。")
+        state.setdefault("prd_reviews", {})[str(index)] = {"decision": decision, "acceptance": acceptance}
+        state.setdefault("report_generated_at", state["updated_at"])
+        state["report"] = render_report(state)
+        self.store.save(state)
 
 
 def render_report(state: dict) -> str:
     b, a, p = state["confirmed_brief"], state["assessment"], state["prd"]
-    lines = [f"# {b['title']} · 产品需求文档", "", f"生成时间：{now()}", "",
-             "> 文档状态：待评审草稿。第一节来自用户确认，其余分析和新增细节为 AI 建议。", "",
+    lines = [f"# {b['title']} · 产品需求文档", "", f"生成时间：{state['report_generated_at']}", "",
+             "> 待评审草稿。第一节记录用户确认的需求。分析与未评审的功能为 AI 建议。", "",
              "## 1. 已确认需求", ""]
     for key, label in zip(BRIEF_KEYS, BRIEF_LABELS):
         lines.extend([f"### {label}", b[key] or "尚未确定", ""])
@@ -240,11 +297,27 @@ def render_report(state: dict) -> str:
         lines.extend([f"### {label}", *["- " + x for x in a[key]], ""])
     lines.extend(["## 4. 功能设计建议", "", "以下为待评审建议，需由用户确认后再进入开发。", "",
                   "### 用户故事", *["- " + x for x in p["user_stories"]], ""])
-    for index, item in enumerate(p["requirements"], 1):
-        lines.extend([f"### F{index:02d} {item['name']}", item["description"], "", "验收条件：" + item["acceptance"], ""])
+    reviews = state.get("prd_reviews", {})
+    for index, item in enumerate(p["requirements"]):
+        lines.extend([f"### F{index + 1:02d} {item['name']}", item["description"], ""])
+        review = reviews.get(str(index))
+        if review:
+            lines.extend(["评审决定：" + REVIEW_DECISIONS[review["decision"]], "",
+                          "验收条件（用户评审）：" + review["acceptance"], ""])
+        else:
+            lines.extend(["验收条件：" + item["acceptance"], ""])
     for label, key in (("5. 非功能需求建议", "nonfunctional"), ("6. 实施顺序建议", "milestones"),
                        ("7. 待确认问题", "open_questions")):
-        lines.extend(["## " + label, "", *["- " + x for x in p[key]], ""])
+        lines.extend(["## " + label, ""])
+        if key == "open_questions":
+            questions = state.get("confirmed_questions", pending_questions(state))
+            if questions:
+                lines.extend(["### 需求确认时保留的事项", "", *["- " + x for x in questions], ""])
+            suggestions = [q for q in p[key] if q not in questions]
+            if suggestions:
+                lines.extend(["### AI 补充的问题", "", *["- " + x for x in suggestions], ""])
+        else:
+            lines.extend([*["- " + x for x in p[key]], ""])
     lines.extend(["## 8. 资料来源", ""])
     for source in state["sources"]:
         lines.extend([f"- [{source['id']}] {source['title']}", f"  {source['url']}", f"  查询时间：{source['retrieved_at']}"])

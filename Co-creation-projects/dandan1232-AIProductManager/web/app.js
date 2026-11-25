@@ -6,12 +6,15 @@ const fields = [
   ["scenario", "使用场景"], ["core_features", "核心功能"], ["exclusions", "本次不做"],
   ["constraints", "资源与限制"], ["success_criteria", "成功标准"],
 ];
+const reviewDecisions = { pending: "待确认", first_release: "首版做", later: "以后做" };
 let project = null;
 let health = {};
 let activeTab = "brief";
 let pollTimer = null;
-let dirty = false;
+const editedFields = new Set();
+let questionsEdited = false;
 let requestBusy = false;
+let reviewTarget = null;
 const welcome = $("conversation").firstElementChild.cloneNode(true);
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const activeMotions = new Set();
@@ -79,9 +82,9 @@ function node(tag, text = "", className = "") {
   return element;
 }
 
-function showError(error) {
-  $("global-error").textContent = error.message || String(error);
-  $("global-error").hidden = false;
+function showError(error, target = "global-error") {
+  $(target).textContent = error.message || String(error);
+  $(target).hidden = false;
 }
 
 async function api(path, body) {
@@ -135,39 +138,75 @@ async function refreshProjects() {
   select.value = project?.id || "";
 }
 
+function hasDraftEdits() {
+  return editedFields.size > 0 || questionsEdited;
+}
+
+function clearDraftEdits() {
+  editedFields.clear();
+  questionsEdited = false;
+}
+
+function editedQuestions() {
+  const value = $("pending-questions").value;
+  return value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+}
+
+function draftPayload() {
+  const edits = Object.fromEntries([...editedFields].map((key) => [key, $("brief-" + key).value]));
+  return { edits, ...(questionsEdited ? { pending_questions: editedQuestions() } : {}) };
+}
+
+function updateDraftFeedback() {
+  const hasEdits = hasDraftEdits();
+  const hint = hasEdits ? "草稿有未保存的修改。" : "确认后，后续分析会以这份需求为准。";
+  if ($("save-hint").textContent !== hint) $("save-hint").textContent = hint;
+  $("save-draft").disabled = !hasEdits || Boolean(project?.busy || requestBusy);
+}
+
+function renderSuggestion(key, disabled) {
+  const suggestion = project?.draft_suggestions?.[key];
+  const visible = Boolean(suggestion && !project?.confirmed_brief && suggestion !== $("brief-" + key).value.trim());
+  $("suggestion-" + key).hidden = !visible;
+  $("suggestion-text-" + key).textContent = visible ? suggestion : "";
+  $("adopt-" + key).disabled = disabled;
+}
+
 function renderBrief() {
   const confirmed = Boolean(project?.confirmed_brief);
+  const disabled = !project || project.busy || confirmed || requestBusy;
   $("document-title").textContent = project?.brief?.title || "还没命名的想法";
   $("brief-status").textContent = confirmed ? "已确认" : project ? "待你确认" : "等待输入";
   $("brief-status").classList.toggle("confirmed", confirmed);
   $("brief-help").textContent = confirmed ? "这份需求是后续分析的依据。修改后需要重新生成分析和文档。"
     : "聊过的内容会整理在这里。你可以随时检查，确认前也可以直接修改。";
-  if (!dirty) {
-    const changed = [];
-    fields.forEach(([key]) => {
-      const input = $("brief-" + key);
+  const changed = [];
+  fields.forEach(([key]) => {
+    const input = $("brief-" + key);
+    if (!editedFields.has(key)) {
       const value = project?.brief?.[key] || "";
       if (input.value !== value) {
         input.value = value;
         if (value) changed.push(input.parentElement);
       }
-    });
-    revealContent(changed);
-  }
-  fields.forEach(([key]) => { $("brief-" + key).disabled = !project || project.busy || confirmed || requestBusy; });
+    }
+    input.disabled = disabled;
+    renderSuggestion(key, disabled);
+  });
+  revealContent(changed);
   $("confirm").hidden = confirmed;
   $("confirm").disabled = !project || project.busy || project.round < 1 || requestBusy;
   $("reopen").hidden = !confirmed;
   $("reopen").disabled = Boolean(project?.busy || requestBusy);
-  $("save-hint").textContent = dirty ? "有尚未确认的修改。确认后会保存这份需求。" : "确认后，后续分析会以这份需求为准。";
-  $("assumptions").replaceChildren();
-  $("assumptions").hidden = !project?.assumptions?.length || confirmed;
-  if (!$("assumptions").hidden) {
-    $("assumptions").append(node("strong", "仍需你判断"));
-    const list = node("ul");
-    project.assumptions.forEach((item) => list.append(node("li", item)));
-    $("assumptions").append(list);
-  }
+  $("save-draft").hidden = !project || confirmed;
+  updateDraftFeedback();
+  const pending = project?.pending_questions ?? project?.assumptions ?? [];
+  const questions = project?.confirmed_questions ?? project?.assumptions ?? [];
+  $("question-editor").hidden = !project || confirmed;
+  $("pending-questions").disabled = disabled;
+  if (!questionsEdited) $("pending-questions").value = pending.join("\n");
+  $("confirmed-questions").hidden = !confirmed || !questions.length;
+  $("confirmed-question-list").replaceChildren(...(confirmed ? questions.map((item) => node("li", item)) : []));
   $("generation-controls").hidden = !confirmed;
   $("generate").disabled = Boolean(project?.busy || requestBusy);
   $("generate").textContent = project?.report ? "重新生成分析与 PRD" : "生成分析与 PRD";
@@ -225,6 +264,7 @@ function renderResearch() {
 }
 
 function renderReport() {
+  renderReviews();
   const container = $("report-content");
   if (!refreshDocument(container, [project?.report, project?.conflicts])) return;
   if (!project?.report) {
@@ -246,6 +286,49 @@ function renderReport() {
   }
   container.append(article);
   revealContent(article.children);
+}
+
+function renderReviews() {
+  const requirements = project?.report ? project.prd?.requirements ?? [] : [];
+  const reviews = project?.prd_reviews ?? {};
+  $("reviews").hidden = !requirements.length;
+  if (!requirements.length) $("reviews").open = false;
+  const items = $("review-items");
+  if (refreshDocument(items, [project?.report_id, requirements, reviews])) {
+    let decided = 0;
+    requirements.forEach((requirement, index) => {
+      const decision = reviews[index]?.decision ?? "pending";
+      if (decision !== "pending") decided++;
+      const status = node("span", reviewDecisions[decision] ?? reviewDecisions.pending, "badge review-status");
+      status.dataset.decision = decision;
+      const summary = node("div", "", "review-summary");
+      summary.append(node("strong", requirement.name), status);
+      const button = node("button", "评审", "button secondary compact");
+      button.type = "button";
+      button.dataset.reviewIndex = String(index);
+      button.setAttribute("aria-label", "评审 " + requirement.name);
+      button.addEventListener("click", () => openReview(index));
+      const item = node("li");
+      item.append(summary, button);
+      items.append(item);
+    });
+    $("review-progress").textContent = `${decided} / ${requirements.length} 项已决定`;
+  }
+  for (const button of items.querySelectorAll("[data-review-index]")) {
+    button.disabled = requestBusy || Boolean(project?.busy);
+  }
+}
+
+function openReview(index) {
+  const requirement = project.prd.requirements[index];
+  const review = project.prd_reviews?.[index];
+  reviewTarget = { index, report_id: project.report_id ?? null };
+  $("review-title").textContent = requirement.name;
+  $("review-description").textContent = requirement.description;
+  $("review-decision").value = review?.decision ?? "pending";
+  $("review-acceptance").value = review?.acceptance ?? requirement.acceptance;
+  $("review-error").hidden = true;
+  $("review-dialog").showModal();
 }
 
 function render() {
@@ -340,18 +423,26 @@ function schedulePoll() {
   }, 1200);
 }
 
-async function mutate(action, data = {}) {
-  if (!project || requestBusy) return;
+async function mutate(action, data = {}, errorTarget = "global-error") {
+  if (!project || requestBusy) return false;
   requestBusy = true;
+  $("draft-error").hidden = true;
   $("global-error").hidden = true;
+  $(errorTarget).hidden = true;
   render();
   try {
     project = await api(`/api/projects/${project.id}/${action}`, data);
-    dirty = false;
-    rememberProject();
-    await refreshProjects();
-  } catch (error) { showError(error); }
-  finally { requestBusy = false; render(); schedulePoll(); }
+    if (["draft", "answer", "confirm"].includes(action)) clearDraftEdits();
+    await refreshProjects().catch(showError);
+    return true;
+  } catch (error) {
+    showError(error, errorTarget);
+    return false;
+  } finally {
+    requestBusy = false;
+    render();
+    schedulePoll();
+  }
 }
 
 fields.forEach(([key, label], index) => {
@@ -360,8 +451,32 @@ fields.forEach(([key, label], index) => {
   caption.append(node("span", String(index + 1).padStart(2, "0"), "field-index"), document.createTextNode(label));
   const input = node("textarea"); input.id = "brief-" + key; input.rows = key === "title" ? 1 : 2;
   input.maxLength = 6000; input.placeholder = "等待访谈补充"; input.disabled = true;
-  input.addEventListener("input", () => { dirty = true; $("save-hint").textContent = "有尚未确认的修改。确认后会保存这份需求。"; });
-  wrapper.append(caption, input); $("brief-fields").append(wrapper);
+  function trackFieldEdit() {
+    if (input.value === (project?.brief?.[key] || "")) editedFields.delete(key);
+    else editedFields.add(key);
+    renderSuggestion(key, input.disabled);
+    updateDraftFeedback();
+  }
+  input.addEventListener("input", trackFieldEdit);
+  const suggestion = node("div", "", "draft-suggestion"); suggestion.id = "suggestion-" + key;
+  suggestion.hidden = true;
+  const preview = node("p"); preview.id = "suggestion-text-" + key;
+  const adopt = node("button", "采用建议", "text-button"); adopt.id = "adopt-" + key;
+  adopt.type = "button";
+  adopt.setAttribute("aria-label", "采用关于" + label + "的建议");
+  adopt.addEventListener("click", () => {
+    input.value = project.draft_suggestions[key];
+    trackFieldEdit();
+    input.focus();
+  });
+  suggestion.append(node("strong", "AI 建议"), preview, adopt);
+  wrapper.append(caption, input, suggestion); $("brief-fields").append(wrapper);
+});
+
+$("pending-questions").addEventListener("input", () => {
+  const pending = project?.pending_questions ?? project?.assumptions ?? [];
+  questionsEdited = JSON.stringify(editedQuestions()) !== JSON.stringify(pending);
+  updateDraftFeedback();
 });
 
 $("message-form").addEventListener("submit", async (event) => {
@@ -370,11 +485,8 @@ $("message-form").addEventListener("submit", async (event) => {
   if (!health.ready) { openSettings(); return; }
   const value = $("message").value.trim();
   if (!value) return;
-  if (dirty && !window.confirm("继续访谈会根据回答更新草稿。要放弃尚未确认的手动修改吗？")) return;
-  dirty = false;
   if (project) {
-    await mutate("answer", { answer: value });
-    if (project?.messages.at(-1)?.content === value || project?.busy) $("message").value = "";
+    if (await mutate("answer", { answer: value, ...draftPayload() })) $("message").value = "";
     return;
   }
   requestBusy = true; render(); $("global-error").hidden = true;
@@ -385,10 +497,15 @@ $("message-form").addEventListener("submit", async (event) => {
   finally { requestBusy = false; render(); schedulePoll(); }
 });
 
+$("save-draft").addEventListener("click", async () => {
+  if (await mutate("draft", draftPayload(), "draft-error")) {
+    $("save-hint").textContent = "草稿已保存。你可以继续访谈或确认需求。";
+  }
+});
 $("brief-form").addEventListener("submit", (event) => {
   event.preventDefault();
   const values = Object.fromEntries(fields.map(([key]) => [key, $("brief-" + key).value]));
-  mutate("confirm", { brief: values });
+  mutate("confirm", { brief: values, ...(questionsEdited ? { pending_questions: editedQuestions() } : {}) }, "draft-error");
 });
 $("reopen").addEventListener("click", () => {
   if (window.confirm("修改需求会使已有的竞品分析和 PRD 失效，之后需要重新生成。继续修改吗？")) mutate("reopen");
@@ -399,21 +516,42 @@ $("export").addEventListener("click", () => {
   if (project?.report && !project.busy) window.location.assign(`/api/projects/${project.id}/export`);
 });
 
-function allowSwitch() { return !dirty || window.confirm("有尚未确认的修改。要放弃这些修改并切换项目吗？"); }
+$("review-close").addEventListener("click", () => $("review-dialog").close());
+$("review-dialog").addEventListener("cancel", (event) => { if (requestBusy) event.preventDefault(); });
+$("review-dialog").addEventListener("close", () => {
+  document.querySelector(`[data-review-index="${reviewTarget?.index}"]`)?.focus();
+  reviewTarget = null;
+});
+$("review-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!reviewTarget || requestBusy) return;
+  const data = { ...reviewTarget, decision: $("review-decision").value, acceptance: $("review-acceptance").value };
+  const controls = [$("review-close"), $("review-save"), $("review-decision"), $("review-acceptance")];
+  controls.forEach((control) => { control.disabled = true; });
+  try {
+    if (await mutate("review", data, "review-error")) $("review-dialog").close();
+  } finally {
+    controls.forEach((control) => { control.disabled = false; });
+  }
+});
+
+function allowSwitch() { return !hasDraftEdits() || window.confirm("草稿有未保存的修改。要放弃修改并切换项目吗？"); }
 function newProject() {
   if (!allowSwitch()) return;
-  clearTimeout(pollTimer); project = null; dirty = false; $("message").value = "";
-  $("global-error").hidden = true; rememberProject(); setTab("brief"); render();
+  clearTimeout(pollTimer); project = null; clearDraftEdits(); $("message").value = "";
+  $("global-error").hidden = true; $("draft-error").hidden = true;
+  rememberProject(); setTab("brief"); render();
   $("project-select").value = ""; $("message").focus();
 }
 $("new-project").addEventListener("click", newProject);
 $("project-select").addEventListener("change", async () => {
   const id = $("project-select").value;
   if (!allowSwitch()) { $("project-select").value = project?.id || ""; return; }
-  if (!id) { dirty = false; newProject(); return; }
+  if (!id) { clearDraftEdits(); newProject(); return; }
   try {
     const next = await api("/api/projects/" + id);
-    clearTimeout(pollTimer); project = next; dirty = false; $("message").value = "";
+    clearTimeout(pollTimer); project = next; clearDraftEdits(); $("message").value = "";
+    $("draft-error").hidden = true;
     rememberProject(); setTab(project.report ? "report" : "brief"); render(); schedulePoll();
   } catch (error) { showError(error); }
 });
@@ -452,7 +590,9 @@ $("settings-form").addEventListener("submit", async (event) => {
   } catch (error) { $("settings-error").textContent = error.message; $("settings-error").hidden = false; }
   finally { button.disabled = false; }
 });
-window.addEventListener("beforeunload", (event) => { if (dirty) { event.preventDefault(); event.returnValue = ""; } });
+window.addEventListener("beforeunload", (event) => {
+  if (hasDraftEdits()) { event.preventDefault(); event.returnValue = ""; }
+});
 
 async function init() {
   render();

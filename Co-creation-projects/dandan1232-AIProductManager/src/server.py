@@ -71,14 +71,20 @@ class Application:
             state, action = self.store.get(parts[2]), parts[3]
             if state["busy"]:
                 raise AppError("这个项目正在处理中，请稍候。", 409)
+            questions = body.get("pending_questions")
             if action == "answer":
                 self.settings.validate()
-                workflow.add_answer(state, body.get("answer", ""))
+                workflow.add_answer(state, body.get("answer", ""), body.get("edits"), questions)
                 return self.launch(state, workflow, "interview")
-            if action == "confirm":
-                workflow.confirm(state, body.get("brief", {}))
+            if action == "draft":
+                workflow.save_draft(state, body.get("edits", {}), questions)
+            elif action == "confirm":
+                workflow.confirm(state, body.get("brief", {}), questions)
             elif action == "reopen":
                 workflow.reopen(state)
+            elif action == "review":
+                workflow.review_requirement(state, body.get("index"), body.get("decision"),
+                                            body.get("acceptance"), body.get("report_id"))
             elif action == "generate":
                 self.settings.validate()
                 if state["confirmed_brief"] is None:
@@ -154,6 +160,7 @@ def make_server(app: Application, port: int = 8765) -> ThreadingHTTPServer:
 
         def do_POST(self):
             try:
+                path = urlparse(self.path).path
                 origin = self.headers.get("Origin")
                 if origin and urlparse(origin).netloc != self.headers.get("Host"):
                     raise AppError("不接受来自其他网站的操作请求。", 403)
@@ -165,7 +172,10 @@ def make_server(app: Application, port: int = 8765) -> ThreadingHTTPServer:
                     length = int(self.headers.get("Content-Length", "0"))
                 except ValueError:
                     raise AppError("请求长度无效。") from None
-                if not 0 < length <= 100_000:
+                # A full brief plus its pending questions can exceed the regular request limit.
+                edits_project = path.startswith("/api/projects/") and path.rsplit("/", 1)[-1] in ("draft", "answer", "confirm")
+                limit = 1_600_000 if edits_project else 100_000
+                if not 0 < length <= limit:
                     raise AppError("请求内容过大或为空。", 413)
                 try:
                     body = json.loads(self.rfile.read(length))
@@ -173,7 +183,7 @@ def make_server(app: Application, port: int = 8765) -> ThreadingHTTPServer:
                     raise AppError("请求不是有效的 JSON。") from None
                 if not isinstance(body, dict):
                     raise AppError("请求内容应为对象。")
-                self.respond(200, app.dispatch(urlparse(self.path).path, body))
+                self.respond(200, app.dispatch(path, body))
             except AppError as exc:
                 self.respond(exc.status, {"error": str(exc)})
             except (BrokenPipeError, ConnectionResetError):

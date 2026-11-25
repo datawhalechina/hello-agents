@@ -59,11 +59,37 @@
       <div id="panel-brief" class="tab-panel" role="tabpanel" aria-labelledby="tab-brief">
         <div class="document-title"><div><p class="eyebrow">产品需求 / 草稿</p><h2 id="document-title">还没命名的想法</h2></div><span id="brief-status" class="badge">等待输入</span></div>
         <p id="brief-help" class="document-help">聊过的内容会整理在这里。你可以随时检查，确认前也可以直接修改。</p>
-        <form id="brief-form" class="brief-form"><div id="brief-fields"></div><div id="assumptions" class="assumptions" hidden></div><div class="brief-actions"><span id="save-hint" class="meta">确认后，后续分析会以这份需求为准。</span><button id="confirm" class="button primary" type="submit" disabled>确认这份需求</button><button id="reopen" class="button secondary" type="button" hidden>修改已确认需求</button></div></form>
+        <form id="brief-form" class="brief-form">
+          <div id="brief-fields"></div>
+          <div id="question-editor" class="assumptions" hidden>
+            <label for="pending-questions">待确认问题</label>
+            <p id="question-help" class="meta">每行一条，最多 12 条。确认后也会保留在文档中。</p>
+            <textarea id="pending-questions" rows="3" aria-describedby="question-help" placeholder="记录还没有决定的问题"></textarea>
+          </div>
+          <div id="confirmed-questions" class="assumptions" hidden>
+            <strong>已记录的待确认问题</strong>
+            <ul id="confirmed-question-list"></ul>
+          </div>
+          <p id="draft-error" class="notice error" role="alert" hidden></p>
+          <div class="brief-actions">
+            <span id="save-hint" class="meta" role="status">确认后，后续分析会以这份需求为准。</span>
+            <div class="brief-buttons">
+              <button id="save-draft" class="button secondary" type="button" hidden>保存草稿</button>
+              <button id="confirm" class="button primary" type="submit" disabled>确认这份需求</button>
+              <button id="reopen" class="button secondary" type="button" hidden>修改已确认需求</button>
+            </div>
+          </div>
+        </form>
         <div id="generation-controls" class="generation-controls" hidden><div><h3>开始研究，整理成文档</h3><p>竞品资料、实现条件和功能建议会一起收进 PRD。</p><label class="checkbox-label"><input id="online" type="checkbox" checked>联网研究相关竞品</label><span id="search-hint" class="meta"></span></div><button id="generate" class="button primary" type="button">生成分析与 PRD</button></div>
       </div>
       <div id="panel-research" class="tab-panel" role="tabpanel" aria-labelledby="tab-research" hidden><div id="research-content"></div></div>
-      <div id="panel-report" class="tab-panel" role="tabpanel" aria-labelledby="tab-report" hidden><div id="report-content"></div></div>
+      <div id="panel-report" class="tab-panel" role="tabpanel" aria-labelledby="tab-report" hidden>
+        <details id="reviews" class="reviews" hidden>
+          <summary><span>功能评审</span><span id="review-progress" class="meta"></span></summary>
+          <ul id="review-items" class="review-items"></ul>
+        </details>
+        <div id="report-content"></div>
+      </div>
     </section>
   </div>
   <footer class="workspace-footer"><span>AI Product Manager <span class="footer-divider">/</span> dandan1232</span><span>你的决定是依据，AI 的补充是建议。</span></footer>
@@ -75,6 +101,25 @@
     <label for="api-key">模型 API Key</label><input id="api-key" name="api_key" type="password" autocomplete="new-password" placeholder="填写服务商提供的密钥">
     <label for="search-key">Tavily 搜索密钥 <span class="meta">可选</span></label><input id="search-key" name="search_key" type="password" autocomplete="new-password" placeholder="联网竞品研究时使用">
     <p id="framework-note" class="notice" hidden></p><p id="settings-error" class="notice error" role="alert" hidden></p><button class="button primary save-settings" type="submit">保存连接设置</button>
+  </form>
+</dialog>
+<dialog id="review-dialog" class="review-dialog" aria-labelledby="review-title">
+  <form id="review-form">
+    <div class="dialog-heading">
+      <h2 id="review-title">评审功能</h2>
+      <button id="review-close" class="button secondary" type="button">关闭</button>
+    </div>
+    <p id="review-description" class="document-help"></p>
+    <label for="review-decision">评审决定</label>
+    <select id="review-decision" autofocus>
+      <option value="pending">待确认</option>
+      <option value="first_release">首版做</option>
+      <option value="later">以后做</option>
+    </select>
+    <label for="review-acceptance">验收条件</label>
+    <textarea id="review-acceptance" rows="5" maxlength="6000" required></textarea>
+    <p id="review-error" class="notice error" role="alert" hidden></p>
+    <button id="review-save" class="button primary" type="submit">保存评审</button>
   </form>
 </dialog>
 <noscript><p class="notice">此工作台需要 JavaScript 来提交回答和展示分析，请启用 JavaScript。</p></noscript>
