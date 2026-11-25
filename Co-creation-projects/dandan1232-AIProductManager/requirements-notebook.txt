@@ -1,0 +1,2 @@
+-r requirements.txt
+# Compatibility entry point; requirements.txt now includes Notebook dependencies.

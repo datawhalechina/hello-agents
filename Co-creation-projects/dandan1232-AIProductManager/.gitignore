@@ -1,0 +1,11 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+runtime/
+outputs/
+.taste-skill/
+shots/
+!tests/test_*.py
