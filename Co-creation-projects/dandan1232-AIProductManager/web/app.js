@@ -11,6 +11,9 @@ let project = null;
 let health = {};
 let activeTab = "brief";
 let pollTimer = null;
+let pollVersion = 0;
+const pollInterval = 1200;
+const pollTimeout = 8000;
 const editedFields = new Set();
 let questionsEdited = false;
 let requestBusy = false;
@@ -87,8 +90,8 @@ function showError(error, target = "global-error") {
   $(target).hidden = false;
 }
 
-async function api(path, body) {
-  const response = await fetch(path, body === undefined ? {} : {
+async function api(path, body, signal) {
+  const response = await fetch(path, body === undefined ? { signal } : {
     method: "POST", headers: { "Content-Type": "application/json", "X-Requested-With": "AIProductManager" },
     body: JSON.stringify(body),
   });
@@ -405,22 +408,42 @@ function rememberProject() {
 
 function schedulePoll() {
   clearTimeout(pollTimer);
+  const version = ++pollVersion;
   if (!project?.busy) return;
   const id = project.id;
-  pollTimer = setTimeout(async () => {
-    try {
-      const next = await api("/api/projects/" + id);
-      if (project?.id !== id) return;
+  const isCurrent = () => version === pollVersion && project?.id === id;
+
+  function schedule(delay) {
+    pollTimer = setTimeout(async () => {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), pollTimeout);
+      let next;
+      try {
+        next = await api("/api/projects/" + id, undefined, controller.signal);
+      } catch {
+        if (!isCurrent()) return;
+        $("activity-text").textContent = "暂时无法读取进度，正在重新连接…";
+        schedule(Math.min(delay * 2, pollTimeout));
+        return;
+      } finally {
+        clearTimeout(timeout);
+      }
+
+      if (!isCurrent()) return;
       const changed = next.updated_at !== project.updated_at || next.busy !== project.busy;
       project = next;
       if (changed) {
-        if (project.stage === "done") setTab("report");
+        if (!next.busy && next.stage === "done" && !next.error) setTab("report");
         render();
+      } else if (delay > pollInterval) {
+        $("activity-text").textContent = next.activity;
       }
-      if (!project.busy) await refreshProjects();
-      schedulePoll();
-    } catch (error) { showError(error); }
-  }, 1200);
+      if (next.busy) schedule(pollInterval);
+      else refreshProjects().catch(showError);
+    }, delay);
+  }
+
+  schedule(pollInterval);
 }
 
 async function mutate(action, data = {}, errorTarget = "global-error") {
@@ -433,6 +456,9 @@ async function mutate(action, data = {}, errorTarget = "global-error") {
   try {
     project = await api(`/api/projects/${project.id}/${action}`, data);
     if (["draft", "answer", "confirm"].includes(action)) clearDraftEdits();
+    if (["generate", "retry"].includes(action) && !project.busy && project.stage === "done" && !project.error) {
+      setTab("report");
+    }
     await refreshProjects().catch(showError);
     return true;
   } catch (error) {
@@ -510,7 +536,9 @@ $("brief-form").addEventListener("submit", (event) => {
 $("reopen").addEventListener("click", () => {
   if (window.confirm("修改需求会使已有的竞品分析和 PRD 失效，之后需要重新生成。继续修改吗？")) mutate("reopen");
 });
-$("generate").addEventListener("click", () => { setTab("research"); mutate("generate", { online: $("online").checked }); });
+$("generate").addEventListener("click", async () => {
+  if (await mutate("generate", { online: $("online").checked }) && project?.busy) setTab("research");
+});
 $("retry").addEventListener("click", () => mutate("retry"));
 $("export").addEventListener("click", () => {
   if (project?.report && !project.busy) window.location.assign(`/api/projects/${project.id}/export`);
@@ -538,7 +566,7 @@ $("review-form").addEventListener("submit", async (event) => {
 function allowSwitch() { return !hasDraftEdits() || window.confirm("草稿有未保存的修改。要放弃修改并切换项目吗？"); }
 function newProject() {
   if (!allowSwitch()) return;
-  clearTimeout(pollTimer); project = null; clearDraftEdits(); $("message").value = "";
+  project = null; schedulePoll(); clearDraftEdits(); $("message").value = "";
   $("global-error").hidden = true; $("draft-error").hidden = true;
   rememberProject(); setTab("brief"); render();
   $("project-select").value = ""; $("message").focus();
@@ -550,7 +578,7 @@ $("project-select").addEventListener("change", async () => {
   if (!id) { clearDraftEdits(); newProject(); return; }
   try {
     const next = await api("/api/projects/" + id);
-    clearTimeout(pollTimer); project = next; clearDraftEdits(); $("message").value = "";
+    project = next; clearDraftEdits(); $("message").value = "";
     $("draft-error").hidden = true;
     rememberProject(); setTab(project.report ? "report" : "brief"); render(); schedulePoll();
   } catch (error) { showError(error); }
