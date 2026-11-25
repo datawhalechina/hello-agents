@@ -200,47 +200,48 @@ class Workflow:
         if state["confirmed_brief"] is None:
             raise AppError("请先检查并确认需求，再生成分析。", 409)
         confirmed = copy.deepcopy(state["confirmed_brief"])
-        state.update(sources=[], competitors=[], notices=[], conflicts=[], research_summary="",
-                     assessment=None, prd=None, prd_reviews={}, report="", report_id=None, online=online)
+        # Keep the last complete report readable while this run collects its results.
+        generated = {"sources": [], "competitors": [], "notices": [], "research_summary": "", "prd_reviews": {}}
+        state["online"] = online
         self.checkpoint(state, "research", "正在查询相关产品" if online else "已跳过联网竞品研究")
         if online:
             query = f"{confirmed['title']} {confirmed['target_users']} {confirmed['problem'][:200]} 同类产品 功能 官网"
             try:
-                state["sources"] = self.search.search(query)
+                generated["sources"] = self.search.search(query)
             except AppError as exc:
-                state["notices"].append(str(exc))
-            if state["sources"]:
-                result = self.backend.run("research", {"confirmed_brief": confirmed, "evidence": state["sources"]})
+                generated["notices"].append(str(exc))
+            if generated["sources"]:
+                result = self.backend.run("research", {"confirmed_brief": confirmed, "evidence": generated["sources"]})
                 competitors = result.get("competitors", [])
                 if not isinstance(competitors, list) or len(competitors) > 3:
                     raise AppError("竞品结果格式异常，请重新生成。", 502)
-                valid_ids = {s["id"] for s in state["sources"]}
+                valid_ids = {s["id"] for s in generated["sources"]}
                 for item in competitors:
                     if not isinstance(item, dict):
                         raise AppError("竞品条目格式异常，请重新生成。", 502)
                     ids = strings(item.get("source_ids", []), 6)
                     if not ids or not set(ids).issubset(valid_ids):
-                        state["notices"].append("已移除一条缺少有效来源的竞品结论。")
+                        generated["notices"].append("已移除一条缺少有效来源的竞品结论。")
                         continue
-                    state["competitors"].append({**{k: string(item.get(k, "")) for k in
-                                                     ("name", "positioning", "features", "difference")}, "source_ids": ids})
-                state["research_summary"] = string(result.get("summary", ""))
+                    generated["competitors"].append({**{k: string(item.get(k, "")) for k in
+                                                         ("name", "positioning", "features", "difference")}, "source_ids": ids})
+                generated["research_summary"] = string(result.get("summary", ""))
             else:
-                state["notices"].append("未获得竞品资料；文档中会明确标记，本次不生成竞品事实。")
+                generated["notices"].append("未获得竞品资料；文档中会明确标记，本次不生成竞品事实。")
         else:
-            state["notices"].append("本次未进行联网竞品研究。")
+            generated["notices"].append("本次未进行联网竞品研究。")
         context = {"confirmed_brief": confirmed, "confirmed_questions": state.get("confirmed_questions", pending_questions(state)),
-                   "competitors": state["competitors"], "evidence": state["sources"],
-                   "research_limitations": state["notices"]}
+                   "competitors": generated["competitors"], "evidence": generated["sources"],
+                   "research_limitations": generated["notices"]}
         self.checkpoint(state, "assess", "正在评估实现条件和首版范围")
         assessment = self.backend.run("assess", context)
         if assessment.get("verdict") not in ("可先做原型", "需先解决依赖", "信息不足"):
             raise AppError("可行性结论格式异常，请重新生成。", 502)
-        state["assessment"] = {"verdict": assessment["verdict"], "reason": string(assessment.get("reason", "")),
-                               **{k: strings(assessment.get(k, [])) for k in
-                                  ("technical_path", "dependencies", "risks", "validation_steps")}}
+        generated["assessment"] = {"verdict": assessment["verdict"], "reason": string(assessment.get("reason", "")),
+                                   **{k: strings(assessment.get(k, [])) for k in
+                                      ("technical_path", "dependencies", "risks", "validation_steps")}}
         self.checkpoint(state, "writing", "正在编写 PRD 草稿和验收条件")
-        result = self.backend.run("writer", {**context, "assessment": state["assessment"]})
+        result = self.backend.run("writer", {**context, "assessment": generated["assessment"]})
         requirements = result.get("requirements", [])
         if not isinstance(requirements, list) or not requirements or len(requirements) > 20:
             raise AppError("PRD 缺少有效功能条目，请重新生成。", 502)
@@ -252,14 +253,17 @@ class Workflow:
             if not all(row.values()):
                 raise AppError("PRD 功能条目缺少描述或验收条件，请重新生成。", 502)
             cleaned.append(row)
-        state["prd"] = {"requirements": cleaned, **{k: strings(result.get(k, [])) for k in
-                        ("user_stories", "nonfunctional", "milestones", "open_questions")}}
+        generated["prd"] = {"requirements": cleaned, **{k: strings(result.get(k, [])) for k in
+                            ("user_stories", "nonfunctional", "milestones", "open_questions")}}
         self.checkpoint(state, "audit", "正在核对 PRD 是否遵守已确认的需求")
-        audit = self.backend.run("audit", {"confirmed_brief": confirmed, "draft": state["prd"]})
-        state["conflicts"] = strings(audit.get("conflicts", []))
-        state.update(report_id=uuid.uuid4().hex, report_generated_at=now())
-        state["report"] = render_report(state)
-        self.checkpoint(state, "done", "草稿存在待修正的冲突，请检查" if state["conflicts"] else "PRD 草稿已生成，请检查建议内容")
+        audit = self.backend.run("audit", {"confirmed_brief": confirmed, "draft": generated["prd"]})
+        generated["conflicts"] = strings(audit.get("conflicts", []))
+        generated.update(report_id=uuid.uuid4().hex, report_generated_at=now())
+        completed = {**state, **generated}
+        completed["report"] = render_report(completed)
+        activity = "草稿存在待修正的冲突，请检查" if completed["conflicts"] else "PRD 草稿已生成，请检查建议内容"
+        self.checkpoint(completed, "done", activity)
+        state.update(completed)
 
     def review_requirement(self, state: dict, index, decision, acceptance, report_id) -> None:
         if not state["report"] or not state.get("prd") or state.get("report_id") != report_id:

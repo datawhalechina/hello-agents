@@ -82,8 +82,12 @@
         </form>
         <div id="generation-controls" class="generation-controls" hidden><div><h3>开始研究，整理成文档</h3><p>竞品资料、实现条件和功能建议会一起收进 PRD。</p><label class="checkbox-label"><input id="online" type="checkbox" checked>联网研究相关竞品</label><span id="search-hint" class="meta"></span></div><button id="generate" class="button primary" type="button">生成分析与 PRD</button></div>
       </div>
-      <div id="panel-research" class="tab-panel" role="tabpanel" aria-labelledby="tab-research" hidden><div id="research-content"></div></div>
+      <div id="panel-research" class="tab-panel" role="tabpanel" aria-labelledby="tab-research" hidden>
+        <p id="research-version" class="notice" role="status" hidden></p>
+        <div id="research-content"></div>
+      </div>
       <div id="panel-report" class="tab-panel" role="tabpanel" aria-labelledby="tab-report" hidden>
+        <p id="report-version" class="notice" role="status" hidden></p>
         <details id="reviews" class="reviews" hidden>
           <summary><span>功能评审</span><span id="review-progress" class="meta"></span></summary>
           <ul id="review-items" class="review-items"></ul>

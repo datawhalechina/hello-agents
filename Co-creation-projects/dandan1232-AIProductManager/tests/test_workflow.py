@@ -101,6 +101,84 @@ class WorkflowTests(unittest.TestCase):
             self.assertFalse(self.state[key])
         self.assertIsNone(self.state["prd"])
 
+    def test_regeneration_failures_keep_saved_report_until_retry_succeeds(self):
+        self.confirmed()
+        self.model.conflicts = ["上一版的待解决冲突"]
+        self.flow.generate(self.state, True)
+        old_id = self.state["report_id"]
+        self.flow.review_requirement(self.state, 0, "first_release", "上一版的用户验收条件", old_id)
+        result_fields = ("report", "report_id", "report_generated_at", "prd", "prd_reviews", "assessment",
+                         "sources", "competitors", "research_summary", "conflicts", "notices")
+        previous = self.store.get(self.state["id"])
+        self.model.conflicts = []
+
+        for stage, role in (("research", "research"), ("assess", "assess"), ("writing", "writer"), ("audit", "audit")):
+            with self.subTest(stage=stage):
+                self.model.fail = role
+                with self.assertRaises(AppError):
+                    self.flow.generate(self.state, True)
+                saved = self.store.get(self.state["id"])
+                self.assertEqual(saved["stage"], stage)
+                for key in result_fields:
+                    self.assertEqual(saved[key], previous[key], key)
+                    self.assertEqual(self.state[key], previous[key], key)
+
+        self.model.fail = None
+        with patch.object(self.search, "search", return_value=[]):
+            self.flow.generate(self.state, True)
+        current = self.store.get(self.state["id"])
+        self.assertEqual(current["stage"], "done")
+        self.assertNotEqual(current["report_id"], old_id)
+        self.assertNotEqual(current["report_generated_at"], previous["report_generated_at"])
+        self.assertEqual(current["prd_reviews"], {})
+        self.assertEqual(current["conflicts"], [])
+        self.assertEqual(current["sources"], [])
+        self.assertIn("未获得竞品资料", current["report"])
+        self.assertNotIn("上一版的用户验收条件", current["report"])
+
+    def test_interrupted_regeneration_keeps_report_readable_during_run_and_restart(self):
+        self.confirmed()
+        self.flow.generate(self.state, True)
+        old_report = self.state["report"]
+        old_prd = copy.deepcopy(self.state["prd"])
+        self.state["busy"] = True
+        original = self.model.run
+
+        def interrupt_at_audit(role, context):
+            if role == "audit":
+                running = self.store.get(self.state["id"])
+                self.assertTrue(running["busy"])
+                self.assertEqual(running["stage"], "audit")
+                self.assertFalse(running["online"])
+                self.assertEqual(running["report"], old_report)
+                self.assertEqual(running["prd"], old_prd)
+                self.assertTrue(running["sources"])
+                raise KeyboardInterrupt()
+            return original(role, context)
+
+        with patch.object(self.model, "run", side_effect=interrupt_at_audit), self.assertRaises(KeyboardInterrupt):
+            self.flow.generate(self.state, False)
+
+        restored = Store(self.path).get(self.state["id"])
+        self.assertFalse(restored["busy"])
+        self.assertIn("中断", restored["error"])
+        self.assertEqual(restored["report"], old_report)
+        self.assertEqual(restored["prd"], old_prd)
+        self.assertTrue(restored["sources"])
+
+    def test_initial_generation_failure_does_not_publish_partial_results(self):
+        self.confirmed()
+        self.model.fail = "audit"
+        with self.assertRaises(AppError):
+            self.flow.generate(self.state, True)
+        saved = self.store.get(self.state["id"])
+        self.assertEqual(saved["stage"], "audit")
+        self.assertFalse(saved["report"])
+        for key in ("report_id", "prd", "assessment"):
+            self.assertIsNone(saved[key])
+        self.assertEqual(saved["sources"], [])
+        self.assertEqual(saved["competitors"], [])
+
     def test_model_failure_keeps_answer_for_retry(self):
         original = copy.deepcopy(self.state["messages"])
         self.model.fail = "interview"

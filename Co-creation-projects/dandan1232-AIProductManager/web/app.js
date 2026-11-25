@@ -118,7 +118,7 @@ function setTab(name, focus = false) {
   if (previous !== name) {
     const order = ["brief", "research", "report"];
     const panel = $("panel-" + name);
-    const elements = name === "brief" ? panel.children : panel.firstElementChild.children;
+    const elements = name === "brief" ? panel.children : $(`${name}-content`).children;
     revealContent(elements, order.indexOf(name) > order.indexOf(previous) ? 1 : -1);
   }
 }
@@ -237,9 +237,12 @@ function sourceLink(source) {
 
 function renderResearch() {
   const container = $("research-content");
-  if (!refreshDocument(container, [project?.sources, project?.notices, project?.competitors, project?.research_summary])) return;
+  const researching = project?.busy && project.retry_action === "generate" && !project.report;
+  if (!refreshDocument(container, [project?.sources, project?.notices, project?.competitors, project?.research_summary, researching])) return;
   if (!project?.sources?.length && !project?.notices?.length) {
-    container.append(emptyDocument("先确定问题，再看竞品", "确认需求后，系统会查询相关产品。每条竞品结论都会附上搜索资料的来源。"));
+    container.append(researching
+      ? emptyDocument("正在生成分析", "分析和文档完成后，资料会显示在这里。")
+      : emptyDocument("先确定问题，再看竞品", "确认需求后，系统会查询相关产品。每条竞品结论都会附上搜索资料的来源。"));
     revealContent(container.children);
     return;
   }
@@ -334,6 +337,18 @@ function openReview(index) {
   $("review-dialog").showModal();
 }
 
+function renderGenerationNotice() {
+  const showingPrevious = project?.report && project.retry_action === "generate";
+  const message = showingPrevious && project.busy && project.stage !== "done"
+    ? "正在生成新版，当前显示上次生成的内容。"
+    : showingPrevious && project.error ? "新版生成失败，仍可查看和导出上次生成的报告。" : "";
+  for (const id of ["research-version", "report-version"]) {
+    const notice = $(id);
+    notice.hidden = !message;
+    if (notice.textContent !== message) notice.textContent = message;
+  }
+}
+
 function render() {
   const busy = Boolean(project?.busy || requestBusy);
   $("new-project").disabled = requestBusy;
@@ -398,7 +413,7 @@ function render() {
     li.classList.toggle("complete", index < step);
     if (index === step) li.setAttribute("aria-current", "step"); else li.removeAttribute("aria-current");
   });
-  renderBrief(); renderResearch(); renderReport(); updateConnection();
+  renderBrief(); renderResearch(); renderReport(); renderGenerationNotice(); updateConnection();
 }
 
 function rememberProject() {
