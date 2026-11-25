@@ -96,6 +96,16 @@
             <button id="export-checklist" class="button secondary compact" type="button" aria-describedby="release-checklist-hint" disabled>导出首版开发清单</button>
           </div>
         </details>
+        <details id="acceptance-workspace" class="reviews acceptance-workspace" hidden>
+          <summary><span>验收用例</span><span id="acceptance-progress" class="meta"></span></summary>
+          <div class="acceptance-tools">
+            <p id="acceptance-hint" class="meta" role="status"></p>
+            <button id="generate-acceptance" class="button secondary compact" type="button" aria-describedby="acceptance-hint" disabled>生成验收用例</button>
+            <button id="export-acceptance" class="button secondary compact" type="button" hidden disabled>导出验收文档</button>
+          </div>
+          <p id="acceptance-error" class="notice error" role="alert" hidden></p>
+          <ul id="acceptance-cases" class="acceptance-cases"></ul>
+        </details>
         <div id="report-content"></div>
       </div>
     </section>

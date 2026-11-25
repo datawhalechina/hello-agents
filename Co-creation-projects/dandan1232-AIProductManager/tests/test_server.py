@@ -204,6 +204,71 @@ class ServerTests(unittest.TestCase):
             self.assertNotIn(excluded, checklist)
         self.assertIn("F02 查看任务", self.request(path + "/export")[1].decode())
 
+    def test_acceptance_cases_record_status_export_and_expire_on_scope_change(self):
+        state = self.create()
+        path = "/api/projects/" + state["id"]
+        self.assertEqual(self.request(path + "/generate-acceptance", {})[0], 409)
+        self.assertEqual(self.request(path + "/confirm", {"brief": BRIEF})[0], 200)
+        self.assertEqual(self.request(path + "/generate", {"online": False})[0], 200)
+        report = self.wait(state["id"])
+        self.assertEqual(self.request(path + "/generate-acceptance", {})[0], 409)
+
+        acceptance = "新建任务后刷新，列表仍显示任务名称。"
+        review = {"index": 0, "decision": "first_release", "acceptance": acceptance, "report_id": report["report_id"]}
+        self.assertEqual(self.request(path + "/review", review)[0], 200)
+        self.assertEqual(self.request(path + "/generate-acceptance", {})[0], 200)
+        generated = self.wait(state["id"])
+        suite = generated["acceptance_suite"]
+        self.assertEqual(suite["report_id"], report["report_id"])
+        self.assertEqual(suite["cases"][0]["status"], "pending")
+        self.assertEqual(suite["cases"][0]["acceptance"], acceptance)
+        self.assertEqual(self.request(path + "/generate-acceptance", {})[0], 409)
+
+        mark = {"suite_id": suite["id"], "requirement_id": "F01", "status": "needs_fix"}
+        self.assertEqual(self.request(path + "/mark-acceptance", {**mark, "status": "typo"})[0], 400)
+        self.assertEqual(self.request(path + "/mark-acceptance", mark)[0], 200)
+        restored = self.request(path)[1]
+        self.assertEqual(restored["acceptance_suite"]["cases"][0]["status"], "needs_fix")
+        self.assertEqual(restored["report"], generated["report"])
+
+        status, data, headers = self.request(path + "/acceptance-export")
+        self.assertEqual(status, 200)
+        self.assertEqual(headers["Content-Disposition"], 'attachment; filename="first-release-acceptance.md"')
+        markdown = data.decode()
+        for text in ("F01 新增任务", "待修复", acceptance, "1. 填写测试数据", "预期结果"):
+            self.assertIn(text, markdown)
+
+        self.assertEqual(self.request(path + "/review", review)[0], 200)
+        self.assertEqual(self.request(path + "/acceptance-export")[0], 200)
+        self.assertEqual(self.request(path + "/review", {**review, "acceptance": "重新确认的新验收条件"})[0], 200)
+        self.assertEqual(self.request(path + "/mark-acceptance", mark)[0], 409)
+        self.assertEqual(self.request(path + "/acceptance-export")[0], 409)
+
+    def test_failed_acceptance_generation_retries_without_rewriting_prd(self):
+        state = self.create()
+        path = "/api/projects/" + state["id"]
+        self.assertEqual(self.request(path + "/confirm", {"brief": BRIEF})[0], 200)
+        self.assertEqual(self.request(path + "/generate", {"online": False})[0], 200)
+        report = self.wait(state["id"])
+        review = {"index": 0, "decision": "first_release", "acceptance": "确认可以新建任务", "report_id": report["report_id"]}
+        status, reviewed, _ = self.request(path + "/review", review)
+        self.assertEqual(status, 200)
+
+        self.model.fail = "acceptance"
+        self.assertEqual(self.request(path + "/generate-acceptance", {})[0], 200)
+        failed = self.wait(state["id"])
+        self.assertTrue(failed["error"])
+        self.assertEqual(failed["report"], reviewed["report"])
+        self.assertEqual(self.request(path + "/acceptance-export")[0], 409)
+
+        self.model.fail = None
+        self.assertEqual(self.request(path + "/retry", {})[0], 200)
+        retried = self.wait(state["id"])
+        self.assertFalse(retried["error"])
+        self.assertEqual(retried["report_id"], report["report_id"])
+        self.assertEqual(retried["acceptance_suite"]["cases"][0]["status"], "pending")
+        self.assertEqual(sum(role == "writer" for role, _ in self.model.calls), 1)
+
     def test_invalid_and_stale_reviews_leave_export_and_review_intact(self):
         state = self.create()
         path = "/api/projects/" + state["id"]

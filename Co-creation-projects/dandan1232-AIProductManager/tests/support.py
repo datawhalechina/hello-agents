@@ -33,6 +33,9 @@ class ModelDouble:
                     "nonfunctional": [], "milestones": ["先完成添加与列表"], "open_questions": ["是否需要截止时间？"]}
         if role == "audit":
             return {"conflicts": self.conflicts}
+        if role == "acceptance":
+            return {"cases": [{"requirement_id": item["id"], "steps": ["填写测试数据", "刷新后再次打开功能"],
+                               "expected": item["acceptance"]} for item in context["requirements"]]}
         raise AssertionError(role)
 
 

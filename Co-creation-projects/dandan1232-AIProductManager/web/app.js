@@ -7,6 +7,7 @@ const fields = [
   ["constraints", "资源与限制"], ["success_criteria", "成功标准"],
 ];
 const reviewDecisions = { pending: "待确认", first_release: "首版做", later: "以后做" };
+const acceptanceStatuses = { pending: "待验收", passed: "通过", needs_fix: "待修复" };
 let project = null;
 let health = {};
 let activeTab = "brief";
@@ -270,7 +271,12 @@ function renderResearch() {
 }
 
 function renderReport() {
-  renderReviews();
+  const requirements = project?.report ? project.prd?.requirements ?? [] : [];
+  const reviews = project?.prd_reviews ?? {};
+  const firstRelease = requirements.filter((_, index) => reviews[index]?.decision === "first_release").length;
+  const busy = requestBusy || Boolean(project?.busy);
+  renderReviews(requirements, reviews, firstRelease, busy);
+  renderAcceptance(firstRelease, busy);
   const container = $("report-content");
   if (!refreshDocument(container, [project?.report, project?.conflicts])) return;
   if (!project?.report) {
@@ -294,11 +300,7 @@ function renderReport() {
   revealContent(article.children);
 }
 
-function renderReviews() {
-  const requirements = project?.report ? project.prd?.requirements ?? [] : [];
-  const reviews = project?.prd_reviews ?? {};
-  const firstRelease = requirements.filter((_, index) => reviews[index]?.decision === "first_release").length;
-  const busy = requestBusy || Boolean(project?.busy);
+function renderReviews(requirements, reviews, firstRelease, busy) {
   $("reviews").hidden = !requirements.length;
   if (!requirements.length) $("reviews").open = false;
   $("export-checklist").disabled = !firstRelease || busy;
@@ -329,6 +331,64 @@ function renderReviews() {
   for (const button of items.querySelectorAll("[data-review-index]")) {
     button.disabled = busy;
   }
+}
+
+function renderAcceptance(firstRelease, busy) {
+  const workspace = $("acceptance-workspace");
+  const items = $("acceptance-cases");
+  const hasReport = Boolean(project?.report);
+  const suite = hasReport ? project.acceptance_suite : null;
+  const cases = suite?.cases ?? [];
+  const acceptanceTask = project?.retry_action === "generate_acceptance";
+  const generating = acceptanceTask && project.busy;
+  workspace.hidden = !hasReport;
+  if (!hasReport) workspace.open = false;
+  $("generate-acceptance").hidden = Boolean(suite);
+  $("generate-acceptance").disabled = !hasReport || !firstRelease || busy;
+  $("export-acceptance").hidden = !suite;
+  $("export-acceptance").disabled = !suite || busy;
+
+  let hint = "将功能标为「首版做」后可生成验收用例。";
+  if (generating) hint = "正在生成用例。生成完成后，请按步骤手动验收。";
+  else if (suite) hint = "请按步骤手动检查，并记录实际验收结果。";
+  else if (acceptanceTask && project.error) hint = project.error;
+  else if (firstRelease) hint = "根据首版功能的验收条件生成检查步骤和预期结果。";
+  if ($("acceptance-hint").textContent !== hint) $("acceptance-hint").textContent = hint;
+
+  const passed = cases.filter((testCase) => testCase.status === "passed").length;
+  $("acceptance-progress").textContent = generating ? "生成中" : cases.length ? `${passed} / ${cases.length} 项通过` : "";
+  if (refreshDocument(items, suite?.id)) {
+    $("acceptance-error").hidden = true;
+    cases.forEach((testCase, index) => items.append(acceptanceCase(suite.id, testCase, index)));
+  }
+  items.querySelectorAll("select").forEach((select, index) => {
+    select.value = cases[index].status;
+    select.disabled = busy;
+  });
+}
+
+function acceptanceCase(suiteId, testCase, index) {
+  const item = node("li", "", "acceptance-case");
+  const header = node("div", "", "acceptance-case-heading");
+  const title = `${testCase.requirement_id} ${testCase.name}`;
+  const status = node("select", "", "acceptance-status");
+  status.id = `acceptance-status-${index}`;
+  const caption = node("label", `${title}的验收状态`, "sr-only");
+  caption.htmlFor = status.id;
+  for (const [value, label] of Object.entries(acceptanceStatuses)) status.add(new Option(label, value));
+  status.addEventListener("change", async () => {
+    const hadFocus = document.activeElement === status;
+    await mutate("mark-acceptance", {
+      suite_id: suiteId, requirement_id: testCase.requirement_id, status: status.value,
+    }, "acceptance-error");
+    if (hadFocus && document.activeElement === document.body) status.focus();
+  });
+  header.append(node("h3", title), caption, status);
+  const steps = node("ol", "", "acceptance-steps");
+  testCase.steps.forEach((step) => steps.append(node("li", step)));
+  item.append(header, node("h4", "原验收条件"), node("p", testCase.acceptance),
+              node("h4", "检查步骤"), steps, node("h4", "预期结果"), node("p", testCase.expected));
+  return item;
 }
 
 function openReview(index) {
@@ -472,6 +532,7 @@ async function mutate(action, data = {}, errorTarget = "global-error") {
   requestBusy = true;
   $("draft-error").hidden = true;
   $("global-error").hidden = true;
+  $("acceptance-error").hidden = true;
   $(errorTarget).hidden = true;
   render();
   try {
@@ -566,6 +627,10 @@ $("export").addEventListener("click", () => {
 });
 $("export-checklist").addEventListener("click", () => {
   if (project && !$("export-checklist").disabled) window.location.assign(`/api/projects/${project.id}/release-checklist`);
+});
+$("generate-acceptance").addEventListener("click", () => mutate("generate-acceptance", {}, "acceptance-error"));
+$("export-acceptance").addEventListener("click", () => {
+  if (project && !$("export-acceptance").disabled) window.location.assign(`/api/projects/${project.id}/acceptance-export`);
 });
 
 $("review-close").addEventListener("click", () => $("review-dialog").close());

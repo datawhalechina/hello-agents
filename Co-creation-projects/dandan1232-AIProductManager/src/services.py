@@ -8,10 +8,11 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 from .config import AppError, Settings
-from .prompts import INTERVIEW, RESEARCH, ASSESS, WRITER, AUDIT
+from .prompts import ACCEPTANCE, ASSESS, AUDIT, INTERVIEW, RESEARCH, WRITER
 
 PROMPTS = {"interview": ("需求澄清", INTERVIEW), "research": ("竞品研究", RESEARCH),
-           "assess": ("可行性评估", ASSESS), "writer": ("PRD 编写", WRITER), "audit": ("需求一致性复核", AUDIT)}
+           "assess": ("可行性评估", ASSESS), "writer": ("PRD 编写", WRITER), "audit": ("需求一致性复核", AUDIT),
+           "acceptance": ("首版验收用例", ACCEPTANCE)}
 
 
 def parse_object(text: str) -> dict:

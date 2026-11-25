@@ -11,24 +11,38 @@ from urllib.parse import urlparse
 
 from .config import AppError, ROOT, Settings
 from .services import HelloAgentsBackend, TavilySearch
-from .workflow import Store, Workflow, string
+from .workflow import ACCEPTANCE_STATUSES, Store, Workflow, first_release_requirements, string
 
 
 def render_release_checklist(state: dict) -> str:
-    requirements = (state.get("prd") or {}).get("requirements", [])
-    reviews = state.get("prd_reviews") or {}
+    requirements = first_release_requirements(state)
+    if not requirements:
+        raise AppError("请先在功能评审中将至少一项标为「首版做」。", 409)
     lines = [f"# {state['title']} · 首版开发清单", ""]
-    for index, requirement in enumerate(requirements):
-        review = reviews.get(str(index), {})
-        if review.get("decision") != "first_release":
-            continue
+    for requirement in requirements:
         name = " ".join(requirement["name"].splitlines())
         description = "\n    ".join(requirement["description"].splitlines())
-        acceptance = "\n    ".join(review["acceptance"].splitlines())
-        lines.extend([f"- [ ] **F{index + 1:02d} {name}**",
+        acceptance = "\n    ".join(requirement["acceptance"].splitlines())
+        lines.extend([f"- [ ] **{requirement['id']} {name}**",
                       f"  - **功能说明** {description}", f"  - **验收条件** {acceptance}", ""])
-    if len(lines) == 2:
-        raise AppError("请先在功能评审中将至少一项标为「首版做」。", 409)
+    return "\n".join(lines)
+
+
+def render_acceptance_suite(state: dict) -> str:
+    suite = state.get("acceptance_suite")
+    if not suite or suite["report_id"] != state.get("report_id"):
+        raise AppError("请先生成当前首版的验收用例。", 409)
+    lines = [f"# {state['title']} · 首版验收用例", "",
+             "> 验收状态由用户在执行用例后记录。", ""]
+    for case in suite["cases"]:
+        name = " ".join(case["name"].splitlines())
+        status = ACCEPTANCE_STATUSES[case["status"]]
+        lines.extend([f"## {case['requirement_id']} {name}", "", f"**验收状态** {status}", "",
+                      "### 原验收条件", "", case["acceptance"], "", "### 操作步骤", ""])
+        for index, step in enumerate(case["steps"], 1):
+            indented_step = "\n   ".join(step.splitlines())
+            lines.append(f"{index}. {indented_step}")
+        lines.extend(["", "### 预期结果", "", case["expected"], ""])
     return "\n".join(lines)
 
 
@@ -103,6 +117,15 @@ class Application:
             elif action == "review":
                 workflow.review_requirement(state, body.get("index"), body.get("decision"),
                                             body.get("acceptance"), body.get("report_id"))
+            elif action == "generate-acceptance":
+                if not state["report"] or not first_release_requirements(state):
+                    raise AppError("请先生成 PRD，然后在功能评审中将至少一项标为「首版做」。", 409)
+                if state.get("acceptance_suite"):
+                    raise AppError("当前首版已经生成验收用例。", 409)
+                self.settings.validate()
+                return self.launch(state, workflow, "generate_acceptance")
+            elif action == "mark-acceptance":
+                workflow.mark_acceptance(state, body.get("suite_id"), body.get("requirement_id"), body.get("status"))
             elif action == "generate":
                 self.settings.validate()
                 if state["confirmed_brief"] is None:
@@ -157,13 +180,15 @@ def make_server(app: Application, port: int = 8765) -> ThreadingHTTPServer:
                     state = app.store.get(parts[2])
                     if len(parts) == 3:
                         self.respond(200, state)
-                    elif len(parts) == 4 and parts[3] in ("export", "release-checklist"):
+                    elif len(parts) == 4 and parts[3] in ("export", "release-checklist", "acceptance-export"):
                         if not state["report"] or state["busy"]:
                             raise AppError("请等待文档生成完成后再导出。", 409)
                         if parts[3] == "export":
                             content, filename = state["report"], "product-requirements.md"
-                        else:
+                        elif parts[3] == "release-checklist":
                             content, filename = render_release_checklist(state), "first-release-checklist.md"
+                        else:
+                            content, filename = render_acceptance_suite(state), "first-release-acceptance.md"
                         self.respond(200, content.encode("utf-8"), "text/markdown; charset=utf-8", filename)
                     else:
                         raise AppError("接口不存在。", 404)

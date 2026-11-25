@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 from src.config import AppError, Settings
 from src.services import parse_object, TavilySearch
-from src.workflow import MAX_ROUNDS, Store, Workflow
+from src.workflow import MAX_ROUNDS, Store, Workflow, first_release_requirements
 from tests.support import BRIEF, ModelDouble, SearchDouble
 
 
@@ -178,6 +178,89 @@ class WorkflowTests(unittest.TestCase):
             self.assertIsNone(saved[key])
         self.assertEqual(saved["sources"], [])
         self.assertEqual(saved["competitors"], [])
+
+    def test_acceptance_uses_reviewed_requirements_in_prd_order_for_legacy_report(self):
+        self.confirmed()
+        original = self.model.run
+
+        def model_reply(role, context):
+            result = original(role, context)
+            if role == "writer":
+                item = result["requirements"][0]
+                result["requirements"].extend([{**item, "name": "检索任务"}, {**item, "name": "查看任务"}])
+            if role == "acceptance":
+                result["cases"].reverse()
+                result["cases"][0]["status"] = "passed"
+            return result
+
+        with patch.object(self.model, "run", side_effect=model_reply):
+            self.flow.generate(self.state, False)
+            self.state.pop("report_id")
+            self.state.pop("acceptance_suite")
+            self.flow.review_requirement(self.state, 2, "first_release", "列表显示同名任务", None)
+            self.flow.review_requirement(self.state, 0, "first_release", "保存后返回列表", None)
+            report = self.state["report"]
+            self.flow.generate_acceptance(self.state)
+
+        requirements = first_release_requirements(self.state)
+        self.assertEqual(self.model.calls[-1], ("acceptance", {"requirements": requirements}))
+        self.assertEqual([item["id"] for item in requirements], ["F01", "F03"])
+        self.assertEqual(self.state["report"], report)
+        self.assertEqual(self.state["stage"], "done")
+        suite = self.state["acceptance_suite"]
+        self.assertIsNone(suite["report_id"])
+        self.assertEqual([(case["requirement_id"], case["acceptance"], case["status"]) for case in suite["cases"]],
+                         [("F01", "保存后返回列表", "pending"), ("F03", "列表显示同名任务", "pending")])
+        self.flow.mark_acceptance(self.state, suite["id"], "F03", "needs_fix")
+        self.flow.review_requirement(self.state, 1, "later", "以后增加检索", None)
+        self.flow.review_requirement(self.state, 0, "first_release", " 保存后返回列表 ", None)
+        self.assertEqual(self.store.get(self.state["id"])["acceptance_suite"]["cases"][1]["status"], "needs_fix")
+        self.flow.review_requirement(self.state, 0, "first_release", "保存后可继续编辑", None)
+        self.assertIsNone(self.state["acceptance_suite"])
+        with self.assertRaises(AppError) as stale:
+            self.flow.mark_acceptance(self.state, suite["id"], "F03", "passed")
+        self.assertEqual(stale.exception.status, 409)
+
+    def test_acceptance_rejects_missing_wrong_duplicate_and_empty_case_fields(self):
+        self.confirmed()
+        self.flow.generate(self.state, False)
+        with self.assertRaises(AppError) as no_selection:
+            self.flow.generate_acceptance(self.state)
+        self.assertEqual(no_selection.exception.status, 409)
+        self.flow.review_requirement(self.state, 0, "first_release", "任务可见", self.state["report_id"])
+        report = self.state["report"]
+        case = {"requirement_id": "F01", "steps": ["打开任务列表"], "expected": "任务可见"}
+        for cases in ([], [{**case, "requirement_id": "F02"}], [case, case],
+                      [{**case, "steps": []}], [{**case, "steps": ["打开列表", " "]}], [{**case, "expected": " "}]):
+            with self.subTest(cases=cases), patch.object(self.model, "run", return_value={"cases": cases}):
+                with self.assertRaises(AppError) as invalid:
+                    self.flow.generate_acceptance(self.state)
+                self.assertEqual(invalid.exception.status, 502)
+                saved = self.store.get(self.state["id"])
+                self.assertEqual(saved["report"], report)
+                self.assertIsNone(saved["acceptance_suite"])
+        self.flow.generate_acceptance(self.state)
+        self.assertTrue(self.state["acceptance_suite"]["cases"])
+
+    def test_acceptance_survives_failed_prd_generation_and_clears_on_new_report(self):
+        self.confirmed()
+        self.flow.generate(self.state, False)
+        self.flow.review_requirement(self.state, 0, "first_release", "任务可见", self.state["report_id"])
+        self.flow.generate_acceptance(self.state)
+        suite = copy.deepcopy(self.state["acceptance_suite"])
+        self.model.fail = "writer"
+        with self.assertRaises(AppError):
+            self.flow.generate(self.state, False)
+        self.assertEqual(self.store.get(self.state["id"])["acceptance_suite"], suite)
+
+        self.model.fail = None
+        self.flow.generate(self.state, False)
+        self.assertNotEqual(self.state["report_id"], suite["report_id"])
+        self.assertIsNone(self.state["acceptance_suite"])
+        self.flow.review_requirement(self.state, 0, "first_release", "任务重新可见", self.state["report_id"])
+        self.flow.generate_acceptance(self.state)
+        self.flow.reopen(self.state)
+        self.assertIsNone(self.store.get(self.state["id"])["acceptance_suite"])
 
     def test_model_failure_keeps_answer_for_retry(self):
         original = copy.deepcopy(self.state["messages"])

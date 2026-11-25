@@ -52,6 +52,19 @@
 #review-form>label{margin:14px 0 6px}
 #review-error{margin:12px 0 0}
 #review-save{margin-top:16px;width:100%}
+#acceptance-progress{float:right}
+.acceptance-tools{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;flex-wrap:wrap;padding:10px 0}
+.acceptance-tools .meta{flex:1 1 14rem}
+#acceptance-error{margin:0 0 12px}
+.acceptance-cases{margin:0;padding:0;list-style:none}
+.acceptance-case{padding:14px 0;border-top:1px solid #e1e6ee;font-size:.875rem;color:#42516a;overflow-wrap:anywhere}
+.acceptance-case-heading{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px 12px}
+.acceptance-case-heading h3{flex:1 1 12rem;min-width:0;font-size:.9375rem;color:var(--p-ink)}
+.acceptance-case h4{margin:10px 0 4px;font-size:.8125rem;color:#364766}
+.acceptance-case p,.acceptance-steps li{white-space:pre-wrap}
+.acceptance-steps{margin:0;padding-left:22px}
+.acceptance-steps li+li{margin-top:4px}
+.acceptance-status{min-height:44px;min-width:104px;padding:7px 10px;border:1px solid #dbe1eb;border-radius:6px;background:var(--p-bg);color:var(--p-ink)}
 @media(max-width:760px){
   .brief-buttons{width:100%}
   .brief-buttons .button{flex:1;width:auto}

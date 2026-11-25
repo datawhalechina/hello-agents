@@ -15,6 +15,7 @@ from .prompts import BRIEF_KEYS, BRIEF_LABELS
 
 MAX_ROUNDS = 6
 REVIEW_DECISIONS = {"pending": "待确认", "first_release": "首版做", "later": "以后做"}
+ACCEPTANCE_STATUSES = {"pending": "待验收", "passed": "通过", "needs_fix": "待修复"}
 
 
 def now() -> str:
@@ -45,6 +46,19 @@ def pending_questions(state: dict, value=None) -> list[str]:
     if not isinstance(value, list) or len(value) > 12:
         raise AppError("待确认事项最多填写 12 条，每行一条。")
     return [question for question in map(string, value) if question]
+
+
+def first_release_requirements(state: dict) -> list[dict]:
+    if not state.get("report") or not state.get("prd"):
+        return []
+    reviews = state.get("prd_reviews") or {}
+    selected = []
+    for index, item in enumerate(state["prd"]["requirements"]):
+        review = reviews.get(str(index), {})
+        if review.get("decision") == "first_release":
+            selected.append({"id": f"F{index + 1:02d}", "name": item["name"],
+                             "description": item["description"], "acceptance": review["acceptance"]})
+    return selected
 
 
 class Store:
@@ -103,7 +117,7 @@ class Workflow:
                  "brief": dict.fromkeys(BRIEF_KEYS, ""), "assumptions": [],
                  "question": "", "options": [], "ready": False, "confirmed_brief": None,
                  "sources": [], "competitors": [], "research_summary": "", "notices": [],
-                 "assessment": None, "prd": None, "conflicts": [], "report": "",
+                 "assessment": None, "prd": None, "conflicts": [], "report": "", "acceptance_suite": None,
                  "stage": "interview", "activity": "正在理解你的想法", "busy": False, "error": "",
                  "created_at": now(), "updated_at": now()}
         self.store.save(state)
@@ -185,7 +199,7 @@ class Workflow:
         state.update(brief=confirmed, confirmed_brief=copy.deepcopy(confirmed), title=confirmed["title"],
                      confirmed_questions=confirmed_questions, draft_suggestions={},
                      ready=True, question="", options=[], report="", report_id=None, prd=None, prd_reviews={}, assessment=None,
-                     sources=[], competitors=[], research_summary="", notices=[], conflicts=[], error="")
+                     sources=[], competitors=[], research_summary="", notices=[], conflicts=[], acceptance_suite=None, error="")
         self.checkpoint(state, "confirmed", "需求已确认，可以开始分析")
 
     def reopen(self, state: dict) -> None:
@@ -193,7 +207,7 @@ class Workflow:
         questions = state.get("confirmed_questions", pending_questions(state))
         state.update(confirmed_brief=None, pending_questions=questions, report="", report_id=None,
                      prd=None, prd_reviews={}, assessment=None, sources=[], competitors=[],
-                     notices=[], conflicts=[], research_summary="", error="", ready=True)
+                     notices=[], conflicts=[], research_summary="", acceptance_suite=None, error="", ready=True)
         self.checkpoint(state, "confirm", "请修改并重新确认需求；旧分析结果已失效")
 
     def generate(self, state: dict, online: bool) -> None:
@@ -258,7 +272,7 @@ class Workflow:
         self.checkpoint(state, "audit", "正在核对 PRD 是否遵守已确认的需求")
         audit = self.backend.run("audit", {"confirmed_brief": confirmed, "draft": generated["prd"]})
         generated["conflicts"] = strings(audit.get("conflicts", []))
-        generated.update(report_id=uuid.uuid4().hex, report_generated_at=now())
+        generated.update(report_id=uuid.uuid4().hex, report_generated_at=now(), acceptance_suite=None)
         completed = {**state, **generated}
         completed["report"] = render_report(completed)
         activity = "草稿存在待修正的冲突，请检查" if completed["conflicts"] else "PRD 草稿已生成，请检查建议内容"
@@ -276,9 +290,65 @@ class Workflow:
         acceptance = string(acceptance)
         if not acceptance:
             raise AppError("请填写这项功能的验收条件。")
-        state.setdefault("prd_reviews", {})[str(index)] = {"decision": decision, "acceptance": acceptance}
+        reviews = state.setdefault("prd_reviews", {})
+        previous = reviews.get(str(index), {})
+        previous_acceptance = previous["acceptance"] if previous.get("decision") == "first_release" else None
+        current_acceptance = acceptance if decision == "first_release" else None
+        if previous_acceptance != current_acceptance:
+            state["acceptance_suite"] = None
+        reviews[str(index)] = {"decision": decision, "acceptance": acceptance}
         state.setdefault("report_generated_at", state["updated_at"])
         state["report"] = render_report(state)
+        self.store.save(state)
+
+    def generate_acceptance(self, state: dict) -> None:
+        requirements = first_release_requirements(state)
+        if not requirements:
+            raise AppError("请先将至少一项功能评审为首版做。", 409)
+        self.checkpoint(state, "done", "正在生成首版验收用例")
+        result = self.backend.run("acceptance", {"requirements": requirements})
+        raw_cases = result.get("cases")
+        invalid = "验收用例须与每项首版功能一一对应，并包含可执行步骤和预期结果，请重试。"
+        if not isinstance(raw_cases, list) or len(raw_cases) != len(requirements):
+            raise AppError(invalid, 502)
+
+        by_id = {item["id"]: item for item in requirements}
+        cases = {}
+        for case in raw_cases:
+            if not isinstance(case, dict):
+                raise AppError(invalid, 502)
+            requirement_id = case.get("requirement_id")
+            if not isinstance(requirement_id, str) or requirement_id not in by_id or requirement_id in cases:
+                raise AppError(invalid, 502)
+            raw_steps = case.get("steps")
+            try:
+                steps = strings(raw_steps)
+                expected = string(case.get("expected"))
+            except AppError:
+                raise AppError(invalid, 502) from None
+            if not steps or len(steps) != len(raw_steps) or not expected:
+                raise AppError(invalid, 502)
+            requirement = by_id[requirement_id]
+            cases[requirement_id] = {"requirement_id": requirement_id, "name": requirement["name"],
+                                     "acceptance": requirement["acceptance"], "steps": steps, "expected": expected,
+                                     "status": "pending"}
+
+        suite = {"id": uuid.uuid4().hex, "report_id": state.get("report_id"),
+                 "cases": [cases[item["id"]] for item in requirements]}
+        completed = {**state, "acceptance_suite": suite}
+        self.checkpoint(completed, "done", "首版验收用例已生成，等待实际验证")
+        state.update(completed)
+
+    def mark_acceptance(self, state: dict, suite_id, requirement_id, status) -> None:
+        suite = state.get("acceptance_suite")
+        if not suite or suite["id"] != suite_id or suite["report_id"] != state.get("report_id"):
+            raise AppError("验收用例已更新，请重新打开当前版本再记录结果。", 409)
+        if not isinstance(status, str) or status not in ACCEPTANCE_STATUSES:
+            raise AppError("请选择待验收、通过或待修复。")
+        case = next((item for item in suite["cases"] if item["requirement_id"] == requirement_id), None)
+        if case is None:
+            raise AppError("未找到要记录的验收用例。")
+        case["status"] = status
         self.store.save(state)
 
 
