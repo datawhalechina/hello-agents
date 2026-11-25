@@ -365,16 +365,16 @@ The BFCL dataset can be obtained through the following methods:
 This is the most reliable method, obtaining complete dataset and ground truth:
 
 ```bash
-# Clone BFCL repository
+# Start in the tutorial repository root
+cd code
 git clone https://github.com/ShishirPatil/gorilla.git temp_gorilla
-cd temp_gorilla/berkeley-function-call-leaderboard
 
 # View BFCL v4 dataset
-ls bfcl_eval/data/
+ls temp_gorilla/berkeley-function-call-leaderboard/bfcl_eval/data/
 # Output: BFCL_v4_simple_python.json  BFCL_v4_multiple.json  BFCL_v4_parallel.json  ...
 
 # View ground truth
-ls bfcl_eval/data/possible_answer/
+ls temp_gorilla/berkeley-function-call-leaderboard/bfcl_eval/data/possible_answer/
 # Output: BFCL_v4_simple_python.json  BFCL_v4_multiple.json  ...
 ```
 
@@ -557,11 +557,11 @@ Accuracy: ███████████████████████�
 Suitable for quick command-line evaluation. In this chapter's accompanying code examples, we provide `04_run_bfcl_evaluation.py`, supporting direct command-line evaluation:
 
 ```bash
-# Run evaluation script
+# Run from the tutorial's code directory
 python chapter12/04_run_bfcl_evaluation.py --category simple_python --samples 10
 
 # Specify model name (for BFCL official evaluation)
-python examples/04_run_bfcl_evaluation.py \
+python chapter12/04_run_bfcl_evaluation.py \
     --category simple_python \
     --samples 10 \
     --model-name "Qwen/Qwen3-8B"
