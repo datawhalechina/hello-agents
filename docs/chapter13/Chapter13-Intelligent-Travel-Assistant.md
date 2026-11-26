@@ -389,17 +389,17 @@ Now let's see how these data models are used in actual Web applications. In Fast
 
 ```python
 from fastapi import FastAPI
-from app.models.schemas import TripPlanRequest, TripPlan
+from app.models.schemas import TripRequest, TripPlan
 
 app = FastAPI()
 
 @app.post("/api/trip/plan", response_model=TripPlan)
-async def create_trip_plan(request: TripPlanRequest) -> TripPlan:
+async def create_trip_plan(request: TripRequest) -> TripPlan:
     """
     Create travel plan
 
     FastAPI automatically:
-    1. Validates request data (TripPlanRequest)
+    1. Validates request data (TripRequest)
     2. Validates response data (TripPlan)
     3. Generates OpenAPI documentation
     """
@@ -407,7 +407,7 @@ async def create_trip_plan(request: TripPlanRequest) -> TripPlan:
     return trip_plan
 ```
 
-When a user sends a POST request to `/api/trip/plan`, FastAPI will automatically convert the JSON data into a `TripPlanRequest` object. If the data format is incorrect (such as missing required fields or type mismatch), FastAPI will automatically return a 400 error and tell the user where the error is.
+When a user sends a POST request to `/api/trip/plan`, FastAPI will automatically convert the JSON data into a `TripRequest` object. If the data format is incorrect (such as missing required fields or type mismatch), FastAPI will automatically return a 400 error and tell the user where the error is.
 
 On the front-end, we also need to define corresponding TypeScript types. Although TypeScript and Python are different languages, the data structures are the same:
 
@@ -568,7 +568,7 @@ class TripPlannerAgent:
         self.hotel_agent = SimpleAgent(name="Hotel Recommendation", prompt=HOTEL_PROMPT)
         self.planner_agent = SimpleAgent(name="Itinerary Planning", prompt=PLANNER_PROMPT)
 
-    def plan_trip(self, request: TripPlanRequest) -> TripPlan:
+    def plan_trip(self, request: TripRequest) -> TripPlan:
         # Step 1: Attraction search
         attraction_response = self.attraction_agent.run(
             f"Please search for {request.preferences} attractions in {request.city}"
@@ -595,7 +595,7 @@ class TripPlannerAgent:
         return trip_plan
 ```
 
-This flow executes four steps sequentially, with the output of each step serving as input for the next step. Note that we use the `TripPlanRequest` and `TripPlan` Pydantic models defined in Section 13.2.
+This flow executes four steps sequentially, with the output of each step serving as input for the next step. Note that we use the `TripRequest` and `TripPlan` Pydantic models defined in Section 13.2.
 
 ### 13.3.4 Query Construction
 
@@ -604,7 +604,7 @@ PlannerAgent needs to integrate all information. This query needs to include all
 ```python
 def _build_planner_query(
     self,
-    request: TripPlanRequest,
+    request: TripRequest,
     attraction_response: str,
     weather_response: str,
     hotel_response: str
@@ -886,7 +886,7 @@ from app.services.unsplash_service import UnsplashService
 unsplash_service = UnsplashService(settings.unsplash_access_key)
 
 @router.post("/plan", response_model=TripPlan)
-async def create_trip_plan(request: TripPlanRequest) -> TripPlan:
+async def create_trip_plan(request: TripRequest) -> TripPlan:
     # Generate travel plan
     trip_plan = trip_planner_agent.plan_trip(request)
 

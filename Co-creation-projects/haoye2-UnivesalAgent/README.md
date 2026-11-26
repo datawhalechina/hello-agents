@@ -145,7 +145,7 @@ MIT License
 ## 👤 作者
 
 - GitHub: [@haoye2](https://github.com/haoye2)
-- 项目链接:[UniversalAgent](https://github.com/datawhalechina/Hello-Agents/tree/main/Co-creation-projects/haoye2-UniversalAgent)
+- 项目链接:[UniversalAgent](https://github.com/datawhalechina/Hello-Agents/tree/main/Co-creation-projects/haoye2-UnivesalAgent)
 
 ## 🙏 致谢
 

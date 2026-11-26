@@ -556,7 +556,7 @@ This case uses the Jimeng plugin to implement image and video generation. Config
 2. Configure parameters (such as image ratio 1:1, model selection seedream4.5/5.0 and seedance1.5/2.0)
 3. Output the generated file
 
-Here we use Jimeng's plugin to call the latest models, namely seedream5.0 and seedance2.0. The quality of both images and videos has been significantly improved. We also use loops for video task retrieval, and supplement the case demonstration with parameter retrieval and conditional judgment. For details, please refer to the [complete workflow](code/chapter5/HelloAgent_difyCase.yml).
+Here we use Jimeng's plugin to call the latest models, namely seedream5.0 and seedance2.0. The quality of both images and videos has been significantly improved. We also use loops for video task retrieval, and supplement the case demonstration with parameter retrieval and conditional judgment. For details, please refer to the [complete workflow](../../code/chapter5/HelloAgent_difyCase.yml).
 
 Image generation configuration and effects are shown in Figures 5.28 and 5.29.
 
