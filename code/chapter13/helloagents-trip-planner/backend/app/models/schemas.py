@@ -17,6 +17,14 @@ class TripRequest(BaseModel):
     accommodation: str = Field(..., description="住宿偏好", example="经济型酒店")
     preferences: List[str] = Field(default=[], description="旅行偏好标签", example=["历史文化", "美食"])
     free_text_input: Optional[str] = Field(default="", description="额外要求", example="希望多安排一些博物馆")
+
+    @field_validator("start_date", "end_date")
+    @classmethod
+    def validate_date(cls, value: str) -> str:
+        parsed = date.fromisoformat(value)
+        if parsed.isoformat() != value:
+            raise ValueError("日期必须使用 YYYY-MM-DD 格式")
+        return value
     
     class Config:
         json_schema_extra = {
