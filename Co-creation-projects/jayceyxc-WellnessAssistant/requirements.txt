@@ -1,0 +1,11 @@
+fastapi>=0.165.0
+fastmcp>=4.2.6
+hello-agents==1.0.0
+openai>=1.109.1
+pydantic>=2.13
+pytest>=8
+python-dotenv>=1.2.4
+requests>=2.34.2
+SQLAlchemy>=2.0,<3
+starlette>=1.10.0
+uvicorn>=0.54.0
